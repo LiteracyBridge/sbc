@@ -1,0 +1,25 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-sbc-dev-125652-authRole",
+      "UnauthRoleArn": "arn:aws:iam::856701711513:role/amplify-sbc-dev-125652-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::856701711513:role/amplify-sbc-dev-125652-authRole",
+      "Region": "us-west-2",
+      "DeploymentBucketName": "amplify-sbc-dev-125652-deployment",
+      "UnauthRoleName": "amplify-sbc-dev-125652-unauthRole",
+      "StackName": "amplify-sbc-dev-125652",
+      "StackId": "arn:aws:cloudformation:us-west-2:856701711513:stack/amplify-sbc-dev-125652/bf69da30-19af-11ed-9a74-06305ef04965",
+      "AmplifyAppId": "d2284wlg880lzo"
+    },
+    "categories": {
+      "auth": {
+        "sbc78a52b11": {
+          "userPoolId": "us-west-2_3evpQGyi5",
+          "userPoolName": "Amplio",
+          "webClientId": "115fkn7c7089gveb3f2n0rop4a",
+          "nativeClientId": "37do37bvi09bmma981peif426f"
+        }
+      }
+    }
+  }
+}
