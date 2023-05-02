@@ -1,228 +1,8 @@
 -- Database export via SQLPro (https://www.sqlprostudio.com/allapps.html)
--- Exported by cliff at 21-08-2022 07:36.
+-- Exported by cliff at 02-05-2023 07:35.
 -- WARNING: This file may contain descructive statements such as DROPs.
 -- Please ensure that you are running the script at the proper location.
 
-
--- BEGIN TABLE public.activities
-DROP TABLE IF EXISTS public.activities CASCADE;
-BEGIN;
-
-CREATE TABLE IF NOT EXISTS public.activities (
-	id integer DEFAULT nextval('activities_sampleid_seq'::regclass) NOT NULL,
-	parent_id integer,
-	prj_id integer NOT NULL,
-	user_id integer NOT NULL,
-	name text NOT NULL,
-	intervention_id integer,
-	owner_id integer,
-	status_id integer,
-	notes text,
-	url text,
-	driver_ids integer[],
-	PRIMARY KEY(id)
-);
-
-COMMIT;
-
--- Inserting 7 rows into public.activities
--- Insert batch #1
-INSERT INTO public.activities (id, parent_id, prj_id, user_id, name, intervention_id, owner_id, status_id, notes, url, driver_ids) VALUES
-(3, NULL, 1, 1, 'Psycho-Social Support', 11, NULL, NULL, NULL, NULL, '{4}'),
-(5, NULL, 1, 1, 'Direct Capacity Building', 13, NULL, NULL, NULL, NULL, '{4}'),
-(26, NULL, 1, 1, 'Reevaluation exercises', 9, NULL, NULL, NULL, NULL, '{3}'),
-(29, NULL, 1, 1, 'Gender-transformative programming', 39, NULL, NULL, NULL, NULL, '{10}'),
-(28, 26, 1, 1, 'Early Childhood Development123', 38, 1, 2, 'some bnte\nasdasda\n', 'sadsdsa', '{10}'),
-(27, NULL, 1, 1, 'Elaboration likelihood approach', 6, NULL, NULL, NULL, NULL, '{1,5,3,4,2,66,47}'),
-(30, 3, 1, 1, 'test one', 3, 2, 2, 'notes\nhere', 'url here', '{2,66}');
-
--- END TABLE public.activities
-
--- BEGIN TABLE public.driver_graph
-DROP TABLE IF EXISTS public.driver_graph CASCADE;
-BEGIN;
-
-CREATE TABLE IF NOT EXISTS public.driver_graph (
-	id integer DEFAULT nextval('driver_graph_sampleid_seq'::regclass) NOT NULL,
-	prj_id integer NOT NULL,
-	user_id integer NOT NULL,
-	driver_id integer NOT NULL,
-	driver_influenced_id integer NOT NULL,
-	importance_id integer,
-	PRIMARY KEY(id)
-);
-
-COMMIT;
-
--- Table public.driver_graph contains no data. No inserts have been genrated.
--- Inserting 0 rows into public.driver_graph
-
-
--- END TABLE public.driver_graph
-
--- BEGIN TABLE public.drivers_in_prj
-DROP TABLE IF EXISTS public.drivers_in_prj CASCADE;
-BEGIN;
-
-CREATE TABLE IF NOT EXISTS public.drivers_in_prj (
-	id integer DEFAULT nextval('prj_drivers_sampleid_seq'::regclass) NOT NULL,
-	prj_id integer NOT NULL,
-	user_id integer NOT NULL,
-	lu_driver_id integer NOT NULL,
-	importance_id integer,
-	notes_context text,
-	notes_gap text,
-	notes_goal text,
-	PRIMARY KEY(id)
-);
-
-COMMIT;
-
--- Inserting 8 rows into public.drivers_in_prj
--- Insert batch #1
-INSERT INTO public.drivers_in_prj (id, prj_id, user_id, lu_driver_id, importance_id, notes_context, notes_gap, notes_goal) VALUES
-(2, 2, 1, 31, 3, NULL, 'gap notes here', NULL),
-(4, 1, 3, 47, 1, NULL, NULL, NULL),
-(6, 1, 3, 66, 2, NULL, NULL, NULL),
-(7, 1, 3, 5, 1, NULL, NULL, NULL),
-(8, 1, 99, 2, 1, NULL, NULL, NULL),
-(3, 1, 1, 4, 2, NULL, NULL, NULL),
-(0, 1, 1, 1, 3, 'context', 'gap', 'goal'),
-(9, 1, 1, 3, 2, NULL, NULL, NULL);
-
--- END TABLE public.drivers_in_prj
-
--- BEGIN TABLE public.gaps
-DROP TABLE IF EXISTS public.gaps CASCADE;
-BEGIN;
-
-CREATE TABLE IF NOT EXISTS public.gaps (
-	id integer DEFAULT nextval('gaps_sampleid_seq'::regclass) NOT NULL,
-	prj_id integer NOT NULL,
-	created_time timestamp without time zone NOT NULL,
-	alert_text text NOT NULL,
-	assigned_user_id integer,
-	snoozed_by_user_id integer,
-	snoozed_time timestamp without time zone,
-	resolved_time timestamp without time zone,
-	audience_id integer,
-	toc_id integer,
-	activity_id integer,
-	driver_id integer,
-	snooze_until date,
-	PRIMARY KEY(id)
-);
-
-COMMIT;
-
--- Table public.gaps contains no data. No inserts have been genrated.
--- Inserting 0 rows into public.gaps
-
-
--- END TABLE public.gaps
-
--- BEGIN TABLE public.indicators
-DROP TABLE IF EXISTS public.indicators CASCADE;
-BEGIN;
-
-CREATE TABLE IF NOT EXISTS public.indicators (
-	id integer DEFAULT nextval('indicators_sampleid_seq'::regclass) NOT NULL,
-	prj_id integer NOT NULL,
-	user_id integer NOT NULL,
-	name text NOT NULL,
-	is_quant boolean NOT NULL,
-	units text,
-	target_value real,
-	target_text text,
-	toc_id integer,
-	source text,
-	activity_id integer,
-	description text,
-	url text,
-	PRIMARY KEY(id)
-);
-
-COMMIT;
-
--- Table public.indicators contains no data. No inserts have been genrated.
--- Inserting 0 rows into public.indicators
-
-
--- END TABLE public.indicators
-
--- BEGIN TABLE public.languages
-DROP TABLE IF EXISTS public.languages CASCADE;
-BEGIN;
-
-CREATE TABLE IF NOT EXISTS public.languages (
-	id integer DEFAULT nextval('languages_sampleid_seq'::regclass) NOT NULL,
-	name text NOT NULL,
-	prj_id integer NOT NULL,
-	user_id integer NOT NULL,
-	private boolean DEFAULT true NOT NULL,
-	PRIMARY KEY(id)
-);
-
-COMMIT;
-
--- Table public.languages contains no data. No inserts have been genrated.
--- Inserting 0 rows into public.languages
-
-
--- END TABLE public.languages
-
--- BEGIN TABLE public.library
-DROP TABLE IF EXISTS public.library CASCADE;
-BEGIN;
-
-CREATE TABLE IF NOT EXISTS public.library (
-	id integer DEFAULT nextval('library_sampleid_seq'::regclass) NOT NULL,
-	prj_id integer NOT NULL,
-	user_id integer NOT NULL,
-	library_type_id integer NOT NULL,
-	author text,
-	url text NOT NULL,
-	url_label text,
-	private boolean DEFAULT true NOT NULL,
-	notes text,
-	PRIMARY KEY(id)
-);
-
-COMMIT;
-
--- Table public.library contains no data. No inserts have been genrated.
--- Inserting 0 rows into public.library
-
-
--- END TABLE public.library
-
--- BEGIN TABLE public.locations
-DROP TABLE IF EXISTS public.locations CASCADE;
-BEGIN;
-
-CREATE TABLE IF NOT EXISTS public.locations (
-	id integer DEFAULT nextval('locations_sampleid_seq'::regclass) NOT NULL,
-	name text NOT NULL,
-	prj_id integer NOT NULL,
-	user_id integer NOT NULL,
-	latitude real,
-	longitude real,
-	private boolean DEFAULT true NOT NULL,
-	notes text,
-	country_id integer,
-	district text,
-	region text,
-	language_id integer,
-	PRIMARY KEY(id)
-);
-
-COMMIT;
-
--- Table public.locations contains no data. No inserts have been genrated.
--- Inserting 0 rows into public.locations
-
-
--- END TABLE public.locations
 
 -- BEGIN TABLE public.lu_access_types
 DROP TABLE IF EXISTS public.lu_access_types CASCADE;
@@ -240,9 +20,9 @@ COMMIT;
 -- Inserting 3 rows into public.lu_access_types
 -- Insert batch #1
 INSERT INTO public.lu_access_types (id, name, "sequence") VALUES
-(1, 'owner', 1),
-(3, 'editor', 2),
-(2, 'viewer', 3);
+(0, 'owner', 0),
+(10, 'viewer', 10),
+(5, 'editor', 5);
 
 -- END TABLE public.lu_access_types
 
@@ -569,13 +349,13 @@ BEGIN;
 CREATE TABLE IF NOT EXISTS public.lu_drivers (
 	id integer DEFAULT nextval('drivers_sampleid_seq'::regclass) NOT NULL,
 	name text NOT NULL,
-	"group" text,
+	dgroup text,
 	parent_id integer,
 	"sequence" integer,
 	sem_id integer,
 	text_short text,
 	text_long text,
-	url_description text,
+	url text,
 	category_id integer,
 	framework_id integer,
 	intervention_ids integer[],
@@ -586,7 +366,7 @@ COMMIT;
 
 -- Inserting 133 rows into public.lu_drivers
 -- Insert batch #1
-INSERT INTO public.lu_drivers (id, name, "group", parent_id, "sequence", sem_id, text_short, text_long, url_description, category_id, framework_id, intervention_ids) VALUES
+INSERT INTO public.lu_drivers (id, name, dgroup, parent_id, "sequence", sem_id, text_short, text_long, url, category_id, framework_id, intervention_ids) VALUES
 (9, 'Community dynamic', 'Social-Environment', 0, 10, 3, 'The group’s collective capacity to change.', 'Community dialogue and collective action are key processes to produce change within a community. Members of a community acting collectively to deal with a shared problem\nand improve their lives will be a critical condition of success when issues to be addressed\nare social (in particular driven by social norms). The success of such processes increases\nthe community’s collective capacity to solve future problems. The existence of such a dynamic (shared recognition of a problem with ongoing collective discussion or action), or\nin its absence, the collective capacity to engage in it, is a critical condition for social change. However, some groups or societies are more individualistic: there could be a social norm of staying out of other people’s business, and a low recognition of the existence and value of the ‘public good’.', '', 1, 0, '{26,27}'),
 (109, 'Living conditions', '', 15, 2, 0, '', 'The circumstances of a person’s life, such as geographic isolation, living in an active conflict zone, in areas with high criminality rates or even being incarcerated amongst other factors, are often strong barriers to adopting new practices. Lack of access to a job market, to food supplies or other basic needs plays a similar role.', '', 2, 0, NULL),
 (123, 'Household composition', '', 7, 6, 0, '', '', '', 3, 0, NULL),
@@ -757,13 +537,12 @@ CREATE TABLE IF NOT EXISTS public.lu_importance (
 
 COMMIT;
 
--- Inserting 4 rows into public.lu_importance
+-- Inserting 3 rows into public.lu_importance
 -- Insert batch #1
 INSERT INTO public.lu_importance (id, name, "sequence", color) VALUES
-(1, 'Low', 1, 'black'),
-(2, 'Medium', 2, 'blue'),
-(3, 'High', 3, 'red'),
-(0, 'Not relevant', 0, 'white');
+(0, 'Low', 1, 'black'),
+(1, 'Medium', 2, 'blue'),
+(2, 'High', 3, 'red');
 
 -- END TABLE public.lu_importance
 
@@ -870,7 +649,7 @@ CREATE TABLE IF NOT EXISTS public.lu_participant_types (
 
 COMMIT;
 
--- Inserting 33 rows into public.lu_participant_types
+-- Inserting 34 rows into public.lu_participant_types
 -- Insert batch #1
 INSERT INTO public.lu_participant_types (id, name, "sequence") VALUES
 (1, 'infant', 10),
@@ -905,7 +684,8 @@ INSERT INTO public.lu_participant_types (id, name, "sequence") VALUES
 (30, 'farmer', 300),
 (31, 'farmer-woman', 310),
 (32, 'farmer-man', 320),
-(33, 'entrepreneur', 330);
+(33, 'entrepreneur', 330),
+(34, 'family', 9);
 
 -- END TABLE public.lu_participant_types
 
@@ -959,303 +739,4 @@ INSERT INTO public.lu_toc_types (id, name, "sequence", text_short, text_long) VA
 (5, 'impact', 5, NULL, NULL);
 
 -- END TABLE public.lu_toc_types
-
--- BEGIN TABLE public.measurements
-DROP TABLE IF EXISTS public.measurements CASCADE;
-BEGIN;
-
-CREATE TABLE IF NOT EXISTS public.measurements (
-	id integer DEFAULT nextval('measurements_sampleid_seq'::regclass) NOT NULL,
-	indicator_id integer NOT NULL,
-	activ_sched_id integer NOT NULL,
-	user_id integer NOT NULL,
-	date date,
-	value_quant real,
-	value_text text,
-	PRIMARY KEY(id)
-);
-
-COMMIT;
-
--- Table public.measurements contains no data. No inserts have been genrated.
--- Inserting 0 rows into public.measurements
-
-
--- END TABLE public.measurements
-
--- BEGIN TABLE public.participants
-DROP TABLE IF EXISTS public.participants CASCADE;
-BEGIN;
-
-CREATE TABLE IF NOT EXISTS public.participants (
-	id integer DEFAULT nextval('audiences_sampleid_seq'::regclass) NOT NULL,
-	prj_id integer NOT NULL,
-	user_id integer NOT NULL,
-	parent_id integer,
-	name text NOT NULL,
-	type_id integer NOT NULL,
-	language_id integer,
-	location_id integer,
-	PRIMARY KEY(id)
-);
-
-COMMIT;
-
--- Table public.participants contains no data. No inserts have been genrated.
--- Inserting 0 rows into public.participants
-
-
--- END TABLE public.participants
-
--- BEGIN TABLE public.project_users
-DROP TABLE IF EXISTS public.project_users CASCADE;
-BEGIN;
-
-CREATE TABLE IF NOT EXISTS public.project_users (
-	id integer DEFAULT nextval('prj_users_sampleid_seq'::regclass) NOT NULL,
-	prj_id integer NOT NULL,
-	user_id integer NOT NULL,
-	access_id integer NOT NULL,
-	PRIMARY KEY(id)
-);
-
-COMMIT;
-
--- Inserting 3 rows into public.project_users
--- Insert batch #1
-INSERT INTO public.project_users (id, prj_id, user_id, access_id) VALUES
-(0, 1, 1, 1),
-(1, 1, 2, 2),
-(2, 2, 1, 2);
-
--- END TABLE public.project_users
-
--- BEGIN TABLE public.projects
-DROP TABLE IF EXISTS public.projects CASCADE;
-BEGIN;
-
-CREATE TABLE IF NOT EXISTS public.projects (
-	id integer DEFAULT nextval('projects_sampleid_seq1'::regclass) NOT NULL,
-	name text NOT NULL,
-	private boolean DEFAULT true NOT NULL,
-	country_id integer,
-	PRIMARY KEY(id)
-);
-
-COMMIT;
-
--- Inserting 2 rows into public.projects
--- Insert batch #1
-INSERT INTO public.projects (id, name, private, country_id) VALUES
-(1, 'Project 1', 'True', 89),
-(2, 'Project 2', 'False', 120);
-
--- END TABLE public.projects
-
--- BEGIN TABLE public.risk_activities
-DROP TABLE IF EXISTS public.risk_activities CASCADE;
-BEGIN;
-
-CREATE TABLE IF NOT EXISTS public.risk_activities (
-	id integer DEFAULT nextval('risk_activities_sampleid_seq'::regclass) NOT NULL,
-	risk_id integer NOT NULL,
-	activity_id integer NOT NULL,
-	user_id integer NOT NULL,
-	PRIMARY KEY(id)
-);
-
-COMMIT;
-
--- Table public.risk_activities contains no data. No inserts have been genrated.
--- Inserting 0 rows into public.risk_activities
-
-
--- END TABLE public.risk_activities
-
--- BEGIN TABLE public.risks
-DROP TABLE IF EXISTS public.risks CASCADE;
-BEGIN;
-
-CREATE TABLE IF NOT EXISTS public.risks (
-	id integer DEFAULT nextval('risks_sampleid_seq'::regclass) NOT NULL,
-	prj_id integer NOT NULL,
-	user_id integer NOT NULL,
-	name text NOT NULL,
-	toc_id integer,
-	driver_id integer,
-	audience_id integer,
-	mitigation_text text,
-	description text,
-	importance_id integer,
-	PRIMARY KEY(id)
-);
-
-COMMIT;
-
--- Table public.risks contains no data. No inserts have been genrated.
--- Inserting 0 rows into public.risks
-
-
--- END TABLE public.risks
-
--- BEGIN TABLE public.schedules
-DROP TABLE IF EXISTS public.schedules CASCADE;
-BEGIN;
-
-CREATE TABLE IF NOT EXISTS public.schedules (
-	id integer DEFAULT nextval('activity_schedules_sampleid_seq'::regclass) NOT NULL,
-	user_id integer NOT NULL,
-	activity_id integer NOT NULL,
-	planned_date_from date NOT NULL,
-	planned_date_to date,
-	actual_date_from date,
-	actual_date_to date,
-	owner_id integer,
-	audience_id integer,
-	status_id integer,
-	url text,
-	dependency_ids integer[],
-	prj_id integer NOT NULL,
-	notes text,
-	PRIMARY KEY(id)
-);
-
-COMMIT;
-
--- Table public.schedules contains no data. No inserts have been genrated.
--- Inserting 0 rows into public.schedules
-
-
--- END TABLE public.schedules
-
--- BEGIN TABLE public.test
-DROP TABLE IF EXISTS public.test CASCADE;
-BEGIN;
-
-CREATE TABLE IF NOT EXISTS public.test (
-	id integer DEFAULT nextval('test_sampleid_seq'::regclass) NOT NULL,
-	name text NOT NULL,
-	PRIMARY KEY(id)
-);
-
-COMMIT;
-
--- Inserting 2 rows into public.test
--- Insert batch #1
-INSERT INTO public.test (id, name) VALUES
-(1, 'test1'),
-(2, 'test2');
-
--- END TABLE public.test
-
--- BEGIN TABLE public.toc
-DROP TABLE IF EXISTS public.toc CASCADE;
-BEGIN;
-
-CREATE TABLE IF NOT EXISTS public.toc (
-	id integer DEFAULT nextval('theory_of_change_sampleid_seq'::regclass) NOT NULL,
-	prj_id integer NOT NULL,
-	user_id integer NOT NULL,
-	name text NOT NULL,
-	activity_id integer,
-	toc_type_id integer NOT NULL,
-	sem_id integer,
-	description text,
-	notes text,
-	PRIMARY KEY(id)
-);
-
-COMMIT;
-
--- Table public.toc contains no data. No inserts have been genrated.
--- Inserting 0 rows into public.toc
-
-
--- END TABLE public.toc
-
--- BEGIN TABLE public.toc_graph
-DROP TABLE IF EXISTS public.toc_graph CASCADE;
-BEGIN;
-
-CREATE TABLE IF NOT EXISTS public.toc_graph (
-	id integer DEFAULT nextval('toc_graph_sampleid_seq'::regclass) NOT NULL,
-	toc_from_id integer NOT NULL,
-	toc_to_id integer NOT NULL,
-	user_id integer NOT NULL,
-	PRIMARY KEY(id)
-);
-
-COMMIT;
-
--- Table public.toc_graph contains no data. No inserts have been genrated.
--- Inserting 0 rows into public.toc_graph
-
-
--- END TABLE public.toc_graph
-
--- BEGIN TABLE public.users
-DROP TABLE IF EXISTS public.users CASCADE;
-BEGIN;
-
-CREATE TABLE IF NOT EXISTS public.users (
-	id integer DEFAULT nextval('users_sampleid_seq'::regclass) NOT NULL,
-	email text NOT NULL,
-	name text NOT NULL,
-	last_project_id integer,
-	PRIMARY KEY(id)
-);
-
-COMMIT;
-
--- Inserting 2 rows into public.users
--- Insert batch #1
-INSERT INTO public.users (id, email, name, last_project_id) VALUES
-(2, 'lisa@amplio.org', 'Lisa Zook', NULL),
-(1, 'cliff@amplio.org', 'Cliff Schmidt', 1);
-
--- END TABLE public.users
-
-DROP VIEW public.drivers;
-
-CREATE OR REPLACE VIEW public.drivers AS
- SELECT ld.id AS lu_id,
-    ld.sequence,
-    ld.parent_id,
-    ld.category_id,
-    ld.text_short,
-    ld.text_long,
-    ld.name,
-    ld.intervention_ids,
-    dp.id AS dip_id,
-    dp.prj_id,
-    dp.user_id,
-    COALESCE(dp.importance_id, 0) AS importance_id,
-    dp.notes_context,
-    dp.notes_gap,
-    dp.notes_goal
-   FROM (public.lu_drivers ld
-     LEFT JOIN public.drivers_in_prj dp ON ((ld.id = dp.lu_driver_id)));
-
-DROP VIEW public.user_projects;
-
-CREATE OR REPLACE VIEW public.user_projects AS
- SELECT p.id AS prj_id,
-    p.name,
-    p.private,
-    p.country_id,
-    pu.access_id,
-    pu.user_id
-   FROM (public.projects p
-     JOIN public.project_users pu ON ((pu.prj_id = p.id)));
-
-DROP VIEW public.users_in_project;
-
-CREATE OR REPLACE VIEW public.users_in_project AS
- SELECT u.id,
-    u.email,
-    u.name,
-    pu.access_id,
-    pu.prj_id
-   FROM (public.users u
-     JOIN public.project_users pu ON ((u.id = pu.user_id)));
 

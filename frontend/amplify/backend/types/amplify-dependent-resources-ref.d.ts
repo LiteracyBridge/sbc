@@ -1,14 +1,14 @@
 export type AmplifyDependentResourcesAttributes = {
-    "hosting": {
-        "S3AndCloudFront": {
-            "Region": "string",
-            "HostingBucketName": "string",
-            "WebsiteURL": "string",
-            "S3BucketSecureURL": "string",
-            "CloudFrontDistributionID": "string",
-            "CloudFrontDomainName": "string",
-            "CloudFrontSecureURL": "string",
-            "CloudFrontOriginAccessIdentity": "string"
-        }
+  "hosting": {
+    "S3AndCloudFront": {
+      "CloudFrontDistributionID": "string",
+      "CloudFrontDomainName": "string",
+      "CloudFrontOriginAccessIdentity": "string",
+      "CloudFrontSecureURL": "string",
+      "HostingBucketName": "string",
+      "Region": "string",
+      "S3BucketSecureURL": "string",
+      "WebsiteURL": "string"
     }
+  }
 }

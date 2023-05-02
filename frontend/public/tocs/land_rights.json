@@ -1,0 +1,168 @@
+{
+"project": "Strengthening Women's Land Rights in Rural Communities",
+"nodes": [
+{
+"id": "A1",
+"label": "Legal awareness training",
+"description": "Providing training on legal frameworks and policies related to women's land rights for rural women and local leaders.",
+"logicModel": "activity"
+},
+{
+"id": "A2",
+"label": "Land registration assistance",
+"description": "Assisting rural women in the process of registering and securing their land rights.",
+"logicModel": "activity"
+},
+{
+"id": "A3",
+"label": "Advocacy and policy reform",
+"description": "Engaging with policymakers and stakeholders to promote policy reforms that strengthen women's land rights.",
+"logicModel": "activity"
+},
+{
+"id": "A4",
+"label": "Community engagement",
+"description": "Involving community leaders, men, and local organizations in supporting and promoting women's land rights.",
+"logicModel": "activity"
+},
+{
+"id": "O1",
+"label": "Increased legal knowledge",
+"description": "Improved understanding of legal frameworks and policies related to women's land rights among rural women and local leaders.",
+"logicModel": "output",
+"sem": "individual",
+"indicator": "Legal knowledge levels",
+"audience": "Rural women and local leaders"
+},
+{
+"id": "O2",
+"label": "Registered land rights",
+"description": "Increased number of rural women with registered and secure land rights.",
+"logicModel": "output",
+"sem": "individual",
+"indicator": "Number of registered land rights for women",
+"audience": "Rural women"
+},
+{
+"id": "O3",
+"label": "Policy improvements",
+"description": "Advancements in policy reforms that strengthen women's land rights.",
+"logicModel": "output",
+"sem": "institutional",
+"indicator": "Policy reform progress",
+"audience": "Policymakers and stakeholders"
+},
+{
+"id": "O4",
+"label": "Community support",
+"description": "Active involvement of the community in promoting and supporting women's land rights.",
+"logicModel": "output",
+"sem": "community",
+"indicator": "Community support levels",
+"audience": "Community leaders, men, and local organizations"
+},
+{
+"id": "IO1",
+"label": "Empowered rural women",
+"description": "Increased autonomy and decision-making power for rural women in relation to land and property.",
+"logicModel": "intermediate_outcome",
+"sem": "individual",
+"indicator": "Autonomy and decision-making power",
+"audience": "Rural women"
+},
+{
+"id": "IO2",
+"label": "Gender-equitable land governance",
+"description": "Establishment of more inclusive and gender-equitable land governance systems.",
+"logicModel": "intermediate_outcome",
+"sem": "institutional",
+"indicator": "Gender-equitable land governance indicators",
+"audience": "Policymakers, stakeholders, and rural communities"
+},
+{
+"id": "O5",
+"label": "Reduced gender inequality",
+"description": "Decreased gender disparities in land ownership and control.",
+"logicModel": "outcome",
+"sem": "community",
+"indicator": "Gender disparities in land ownership and control",
+"audience": "Rural communities"
+},
+{
+"id": "O6",
+"label": "Economic empowerment",
+"description": "Increased economic opportunities and security for rural women due to secure land rights.",
+"logicModel": "outcome",
+"sem": "individual",
+"indicator": "Economic opportunities and security",
+"audience": "Rural women"
+},
+{
+"id": "O7",
+"label": "Sustainable development",
+"description": "Enhanced social and economic well-being in rural communities through gender-equitable land rights and sustainable resource management.",
+"logicModel": "outcome",
+"sem": "community",
+"indicator": "Social and economic well-being indicators",
+"audience": "Rural communities"
+}
+],
+"edges": [
+{
+"fromId": "A1",
+"toId": "O1"
+},
+{
+"fromId": "A2",
+"toId": "O2"
+},
+{
+"fromId": "A3",
+"toId": "O3"
+},
+{
+"fromId": "A4",
+"toId": "O4"
+},
+{
+"fromId": "O1",
+"toId": "IO1"
+},
+{
+"fromId": "O2",
+"toId": "IO1"
+},
+{
+"fromId": "O3",
+"toId": "IO2"
+},
+{
+"fromId": "O4",
+"toId": "IO1"
+},
+{
+"fromId": "IO1",
+"toId": "O5"
+},
+{
+"fromId": "IO1",
+"toId": "O6"
+},
+{
+"fromId": "IO1",
+"toId": "O7"
+},
+{
+"fromId": "IO2",
+"toId": "O5"
+},
+{
+"fromId": "IO2",
+"toId": "O6"
+},
+{
+"fromId": "IO2",
+"toId": "O7"
+}
+]
+}

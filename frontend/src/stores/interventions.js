@@ -1,20 +1,33 @@
 import { defineStore } from 'pinia'
 import { useActivityStore } from './activities'
-import { downloadObjects } from '@/apis/axios.js'
+import { downloadObjects } from '@/apis/lambda.js'
+
+const init_objects = {
+  interventions: 
+    { id:0,
+      name: '',
+      text_short:'',
+      text_long:''
+    }
+};
 
 export const useInterventionStore = defineStore({
   id: 'interventions',
   state: () => ({
-    interventions: [
-      { id:1,
-        name: 'Multi-media campaigns',
-        text_short:'consist of using a combination of traditional and non-traditional methods of communication to reach a target audience, deliver messages, educate, entertain, induce specific emotions, increase visibility, amplify the voice of communities and young people, leverage local creativity, or project transitional characters and role models in edutainment.',
-        text_long:'When traditional financial education was not effective in South Africa, for example, a television soap opera was aired, in which financial messages were delivered through a central character. Following the show, there was a decrease in gambling and expensive instalment purchases (World Bank, 2015, p. 4). Communication channels are very diverse and can include localized options such as community radio, community cinema via mobile audio-visual vans, street theatre, puppet shows, etc. Trans-media approaches are used to reinforce ideas and messages across multiple media platforms, and 360-degree strategies link multimedia engagement with community engagement.'
-      }]
+    interventions: []
   }),
   getters: {
     interventionById:(state) => 
       (interventionId) => state.interventions.find((i)=>i.id==interventionId),
+    interventionNameById:(state) =>  
+      function (interventionId) {
+        let name = '';
+        const intervention = state.interventions.find((i)=>i.id==interventionId);
+        if (intervention) {
+          name = intervention.name;
+        }
+        return name;
+      },
     interventionsByDriver:(state) => 
       (driver) => driver.intervention_ids ? state.interventions.filter((i)=>driver.intervention_ids.some((id)=>id===i.id)) : null,
     activityIds:(state) =>
@@ -25,8 +38,13 @@ export const useInterventionStore = defineStore({
       }  
     },
   actions: {
+    clear() {
+      for (const property of Object.keys(this.$state)) {
+        this.$state[property] = [];
+      }
+    },
     download() {
-      downloadObjects(this.$state,this,'lu_');
+      downloadObjects(init_objects,this,'lu_');
      }
   }
 })

@@ -1,0 +1,137 @@
+{
+"project": "Preventing and Addressing Gender-Based Violence in Rural Communities",
+"nodes": [
+{
+"id": "A1",
+"label": "Awareness campaigns",
+"description": "Conducting awareness campaigns to educate communities about the prevalence, causes, and consequences of gender-based violence.",
+"logicModel": "activity"
+},
+{
+"id": "A2",
+"label": "Capacity building",
+"description": "Training local stakeholders, such as police, healthcare providers, and community leaders, on how to identify, prevent, and respond to gender-based violence.",
+"logicModel": "activity"
+},
+{
+"id": "A3",
+"label": "Support services",
+"description": "Providing comprehensive support services, such as shelters, counseling, and legal assistance, to survivors of gender-based violence.",
+"logicModel": "activity"
+},
+{
+"id": "A4",
+"label": "Policy advocacy",
+"description": "Advocating for policy reforms to strengthen legal frameworks and protections against gender-based violence.",
+"logicModel": "activity"
+},
+{
+"id": "O1",
+"label": "Increased awareness",
+"description": "Improved understanding of gender-based violence, its causes, and consequences among community members.",
+"logicModel": "output"
+},
+{
+"id": "O2",
+"label": "Enhanced capacity",
+"description": "Local stakeholders are better equipped to identify, prevent, and respond to cases of gender-based violence.",
+"logicModel": "output"
+},
+{
+"id": "O3",
+"label": "Accessible support",
+"description": "Survivors of gender-based violence have access to comprehensive support services.",
+"logicModel": "output"
+},
+{
+"id": "O4",
+"label": "Policy improvements",
+"description": "Advancements in policy reforms that strengthen legal frameworks and protections against gender-based violence.",
+"logicModel": "output"
+},
+{
+"id": "IO1",
+"label": "Reduced tolerance",
+"description": "Decreased social acceptance and tolerance of gender-based violence in rural communities.",
+"logicModel": "intermediate_outcome"
+},
+{
+"id": "IO2",
+"label": "Effective prevention and response",
+"description": "More effective prevention and response strategies to address gender-based violence at the community level.",
+"logicModel": "intermediate_outcome"
+},
+{
+"id": "O5",
+"label": "Decreased gender-based violence",
+"description": "Reduced incidence and prevalence of gender-based violence in rural communities.",
+"logicModel": "outcome"
+},
+{
+"id": "O6",
+"label": "Empowered survivors",
+"description": "Survivors of gender-based violence are empowered to overcome the impact of violence and rebuild their lives.",
+"logicModel": "outcome"
+},
+{
+"id": "O7",
+"label": "Gender equality",
+"description": "Improved gender equality and social cohesion in rural communities through the prevention and mitigation of gender-based violence.",
+"logicModel": "outcome"
+}
+],
+"edges": [
+{
+"fromId": "A1",
+"toId": "O1"
+},
+{
+"fromId": "A2",
+"toId": "O2"
+},
+{
+"fromId": "A3",
+"toId": "O3"
+},
+{
+  "fromId": "A4",
+  "toId": "O4"
+},
+{
+  "fromId": "O1",
+  "toId": "IO1"
+},
+{
+  "fromId": "O2",
+  "toId": "IO2"
+},
+{
+  "fromId": "O3",
+  "toId": "IO2"
+},
+{
+  "fromId": "O4",
+  "toId": "IO2"
+},
+{
+  "fromId": "IO1",
+  "toId": "O5"
+},
+{
+  "fromId": "IO1",
+  "toId": "O7"
+},
+{
+  "fromId": "IO2",
+  "toId": "O5"
+},
+{
+  "fromId": "IO2",
+  "toId": "O6"
+},
+{
+  "fromId": "IO2",
+  "toId": "O7"
+}
+]
+}

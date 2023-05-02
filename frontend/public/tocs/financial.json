@@ -1,0 +1,198 @@
+{
+"nodes": [
+{
+"id": "A1",
+"label": "Financial literacy training",
+"description": "Providing training to enhance the financial knowledge and skills of the youth in Kenya.",
+"logicModel": "activity",
+"sem": "individual",
+"indicator": "Number of youth trained",
+"audience": "Youth"
+},
+{
+"id": "A2",
+"label": "Entrepreneurship skills development",
+"description": "Delivering training and workshops to develop essential entrepreneurship skills among the youth.",
+"logicModel": "activity",
+"sem": "individual",
+"indicator": "Number of youth attending workshops",
+"audience": "Youth"
+},
+{
+"id": "A3",
+"label": "Access to microcredit and saving services",
+"description": "Facilitating access to financial services such as microcredit and saving opportunities for young entrepreneurs.",
+"logicModel": "activity",
+"sem": "community",
+"indicator": "Number of youth accessing services",
+"audience": "Youth"
+},
+{
+"id": "A4",
+"label": "Mentorship and networking opportunities",
+"description": "Creating platforms for mentorship and networking among youth entrepreneurs to foster professional growth and support.",
+"logicModel": "activity",
+"sem": "community",
+"indicator": "Number of networking events",
+"audience": "Youth"
+},
+{
+"id": "O1",
+"label": "Increased financial knowledge",
+"description": "Greater understanding of financial concepts and better money management skills among the youth.",
+"logicModel": "output",
+"sem": "individual",
+"indicator": "Improvement in financial knowledge scores",
+"audience": "Youth"
+},
+{
+"id": "O2",
+"label": "Improved business skills",
+"description": "Enhanced entrepreneurship skills, leading to better business planning and management capabilities.",
+"logicModel": "output",
+"sem": "individual",
+"indicator": "Improvement in entrepreneurship skills scores",
+"audience": "Youth"
+},
+{
+"id": "O3",
+"label": "Financial services utilized",
+"description": "Increased usage of microcredit and saving services by youth entrepreneurs.",
+"logicModel": "output",
+"sem": "community",
+"indicator": "Number of youth using financial services",
+"audience": "Youth"
+},
+{
+"id": "O4",
+"label": "Established professional networks",
+"description": "Stronger professional connections and support networks among youth entrepreneurs.",
+"logicModel": "output",
+"sem": "community",
+"indicator": "Number of connections made",
+"audience": "Youth"
+},
+{
+"id": "IO1",
+"label": "Better financial decision-making",
+"description": "Improved financial decision-making abilities among youth, leading to more responsible financial choices.",
+"logicModel": "intermediate_outcome",
+"sem": "individual",
+"indicator": "Change in financial decision-making behaviors",
+"audience": "Youth"
+},
+{
+"id": "IO2",
+"label": "Sustainable microenterprises",
+"description": "Increased number of sustainable microenterprises established and managed by youth entrepreneurs.",
+"logicModel": "intermediate_outcome",
+"sem": "community",
+"indicator": "Number of sustainable microenterprises",
+"audience": "Youth"
+},
+{
+"id": "IO3",
+"label": "Increased savings and access to credit",
+"description": "Greater savings and access to credit for youth entrepreneurs, enabling them to invest in their businesses.",
+"logicModel": "intermediate_outcome",
+"sem": "community",
+"indicator": "Change in savings and credit access",
+"audience": "Youth"
+},
+{
+"id": "IO4",
+"label": "Access to resources and support",
+"description": "Youth entrepreneurs have access to necessary resources and support, leading to better business growth.",
+"logicModel": "intermediate_outcome",
+"sem": "community",
+"indicator": "Availability of resources and support",
+"audience": "Youth"
+},
+{
+"id": "O5",
+"label": "Improved financial stability",
+"description": "Financial stability among youth entrepreneurs, enabling them to support themselves and their families.",
+"logicModel": "outcome",
+"sem": "individual",
+"indicator": "Change in financial stability",
+"audience": "Youth"
+},
+{
+"id": "O6",
+"label": "Increased youth employment",
+"description": "Higher youth employment rates due to successful entrepreneurial ventures.",
+"logicModel": "outcome",
+"sem": "community",
+"indicator": "Youth employment rate",
+"audience": "Youth"
+},
+{
+"id": "O7",
+"label": "Poverty reduction",
+"description": "Reduced poverty levels in Kenya as a result of successful youth entrepreneurship.",
+"logicModel": "outcome",
+"sem": "policy",
+"indicator": "Change in poverty levels",
+"audience": "General population"
+},
+{
+"id": "O8",
+"label": "Economic growth",
+"description": "Strengthened local economy as a result of increased business activity and job creation by youth entrepreneurs.",
+"logicModel": "outcome",
+"sem": "policy",
+"indicator": "Local economic growth rate",
+"audience": "General population"
+}
+],
+"edges": [
+{
+"fromId": "A1",
+"toId": "O1"
+},
+{
+"fromId": "A2",
+"toId": "O2"
+},
+{
+"fromId": "A3",
+"toId": "O3"
+},
+{
+"fromId": "A4",
+"toId": "O4"
+},
+{
+"fromId": "O1",
+"toId": "IO1"
+},
+{
+"fromId": "O2",
+"toId": "IO2"
+},
+{
+"fromId": "O3",
+"toId": "IO3"
+},
+{
+"fromId": "O4",
+"toId": "IO4"
+},
+{
+"fromId": "IO1",
+"toId": "O5"
+},
+{
+"fromId": "IO2",
+"toId": "O6"
+},
+{
+"fromId": "IO3",
+"toId": "O7"
+},
+{
+"fromId": "IO4",
+"toId": "O8"
+}
+]
+}

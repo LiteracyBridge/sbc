@@ -3,15 +3,17 @@ import { ref, reactive } from "vue";
 import { onClickOutside } from "@vueuse/core";
 import { useActivityStore } from "../stores/activities";
 import { useLookupStore } from "../stores/lookups";
-import { useProjectStore } from "../stores/project";
+import { useProjectStore } from "../stores/projects";
 import { useInterventionStore } from "../stores/interventions";
 import { useDriverStore } from "../stores/drivers"
 import Multiselect from '@vueform/multiselect'
+import { useParticipantStore } from "../stores/participants";
 
 const activityStore = useActivityStore();
 const lookupStore = useLookupStore();
 const projectStore = useProjectStore();
 const interventionStore = useInterventionStore();
+const participantStore = useParticipantStore();
 const driverStore = useDriverStore();
 const driverValues = ref(props.draftActivity.driver_ids);
 const driverOptions = ref(driverStore.driversInProject);
@@ -73,8 +75,8 @@ onClickOutside(modalRef, cancelButton);
                 <select v-model="draftActivity.owner_id">
                   <option 
                     v-for="user in projectStore.users_in_project" 
-                    :value="user.id" 
-                    :key="user.id">
+                    :value="user.user_id" 
+                    :key="user.user_id">
                     {{user.name}}
                   </option>
                 </select>
@@ -138,7 +140,7 @@ onClickOutside(modalRef, cancelButton);
               v-model="driverValues"
               :options="driverOptions"
               mode="tags"
-              valueProp="lu_id"
+              valueProp="id"
               nameProp="name"
               label="name"
               placeholder=""
@@ -158,8 +160,73 @@ onClickOutside(modalRef, cancelButton);
               <input v-model="draftActivity.url" class="input" type="text" placeholder="Text input">
             </div>
           </div>
-
-
+          <hr/>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>From</th>
+                <th>To</th>
+                <th>Owner</th>
+                <th>Status</th>
+                <th>Participant</th>
+              </tr>
+            </thead>
+            <tbody>
+              <template v-for="(schedule,i) in activityStore.schedulesByActivityId(draftActivity.id)">
+                <tr :class="(i % 2) ? 'has-background-white' : 'has-background-light'">
+                  <td>{{schedule.id}}</td>
+                  <td>{{schedule.planned_date_from}}</td>
+                  <td>{{schedule.planned_date_to}}</td>
+                  <td><!--{{schedule.owner_id}}-->
+                    <div class="control">
+                      <div class="select">
+                        <select v-model="schedule.owner_id">
+                          <option 
+                            v-for="user in projectStore.users_in_project" 
+                            :value="user.user_id" 
+                            :key="user.user_id">
+                            {{user.name}}
+                          </option>
+                        </select>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="control">
+                      <div class="select">
+                        <select v-model="schedule.status_id">
+                          <option 
+                            v-for="status in lookupStore.activity_status" 
+                            :value="status.id" 
+                            :key="status.id">
+                            {{status.name}}
+                          </option>
+                        </select>
+                      </div>
+                    </div>                    
+                  </td>
+                  <td>
+                    <div class="control">
+                      <div class="select">
+                        <select v-model="schedule.participant_id">
+                          <option 
+                            v-for="participant in participantStore.participants" 
+                            :value="participant.id" 
+                            :key="participant.id">
+                            {{participant.name}}
+                          </option>
+                        </select>
+                      </div>
+                    </div>                    
+                  </td>
+                </tr>
+                <tr :class="(i % 2) ? 'has-background-white' : 'has-background-light'">
+                  <td colspan="9"><input size="70" v-model="schedule.notes"/></td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
           <!-- <div class="field is-grouped">
             <div class="control">
               <button class="button is-link">Submit</button>

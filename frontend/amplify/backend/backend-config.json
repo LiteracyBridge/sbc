@@ -1,17 +1,51 @@
 {
   "auth": {
     "sbc78a52b11": {
-      "service": "Cognito",
-      "serviceType": "imported",
-      "providerPlugin": "awscloudformation",
+      "customAuth": false,
       "dependsOn": [],
-      "customAuth": false
+      "providerPlugin": "awscloudformation",
+      "service": "Cognito",
+      "serviceType": "imported"
     }
   },
   "hosting": {
     "S3AndCloudFront": {
-      "service": "S3AndCloudFront",
-      "providerPlugin": "awscloudformation"
+      "providerPlugin": "awscloudformation",
+      "service": "S3AndCloudFront"
+    }
+  },
+  "parameters": {
+    "AMPLIFY_auth_sbc78a52b11_nativeClientId": {
+      "usedBy": [
+        {
+          "category": "auth",
+          "resourceName": "sbc78a52b11"
+        }
+      ]
+    },
+    "AMPLIFY_auth_sbc78a52b11_userPoolId": {
+      "usedBy": [
+        {
+          "category": "auth",
+          "resourceName": "sbc78a52b11"
+        }
+      ]
+    },
+    "AMPLIFY_auth_sbc78a52b11_userPoolName": {
+      "usedBy": [
+        {
+          "category": "auth",
+          "resourceName": "sbc78a52b11"
+        }
+      ]
+    },
+    "AMPLIFY_auth_sbc78a52b11_webClientId": {
+      "usedBy": [
+        {
+          "category": "auth",
+          "resourceName": "sbc78a52b11"
+        }
+      ]
     }
   }
 }

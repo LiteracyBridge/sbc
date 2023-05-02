@@ -1,44 +1,74 @@
 import { defineStore } from 'pinia';
 import { useUserStore } from './user';
-import * as api from '../apis/axios';
+import * as api from '../apis/lambda';
+
+const init_objects = {
+  activities: {id:0, name:'', parent_id:0, intervention_id:0, driver_ids:[],
+              editing_user_id:0, owner_id:0, status_id:0, notes:'', url:''},
+  schedules:  {id:0, editing_user_id:0, activity_id:0, planned_date_from: new Date(2007,9,26), planned_date_to: new Date(2022,9,26),
+              actual_date_from: new Date(2007,9,26), actual_date_to: new Date(2022,9,26),
+              dependency_ids:[], owner_id:0, participant_id: 0, status_id: 0, notes:'', url: ''}
+}
+
 
 export const useActivityStore = defineStore({
   id: 'activities',
   state: () => ({
-    activities: [{id:0, name:'Activity 1', parent_id:null, intervention_id:null, driver_ids:[],
-                  user_id:1, owner_id:1, status_id:1, notes:'', url:''}],
-    schedules: [{id:0, user_id:-1, activity_id:-1, planned_date_from: new Date(2022,7,27), planned_date_to: new Date(2022,8,27),
-                  actual_date_from: new Date(2022,7,28), actual_date_to: new Date(2022,8,28),
-                  dependency_ids:[], owner_id:1, audience_id: 2, status_id: 2, notes:'', url: ''}]
+    activities: [],
+    schedules: []
   }),
-    getters: {
+  getters: {
+    driverInActivities:(state) =>
+      (driverId) => state.activities.filter((a)=>a.driver_ids.includes(driverId)).length > 0, 
     activityById:(state) => 
-      (activityId) => state.activities.find((a)=>a.id==activityId)
+      (activityId) => state.activities.find((a)=>a.id==activityId),
+    topLevelActivities:(state) => state.activities.filter((a)=>a.parent_id==null),
+    subActivitiesByActivityId:(state) => 
+      (activityId) => state.activities.filter((a)=>a.parent_id==activityId),
+    schedulesByActivityId:(state) =>
+      (activityId) => state.schedules.filter((s)=>s.activity_id==activityId),
+    fromDate:(state) =>
+      (activityId) => {
+        const schedules = state.schedules.filter((s)=>s.activity_id==activityId)
+        let date = ''
+        if (schedules.length > 0) {
+          date = schedules.reduce((prev,cur)=>(cur.planned_date_from < prev.planned_date_from) ? cur : prev).planned_date_from;
+        }
+        return date;
+      },
+    toDate:(state) =>
+      (activityId) => {
+        const schedules = state.schedules.filter((s)=>s.activity_id==activityId)
+        let date = ''
+        if (schedules.length > 0) {
+          date = schedules.reduce((prev,cur)=>(cur.planned_date_to > prev.planned_date_to) ? cur : prev).planned_date_to;
+        }
+        return date;
+      }
   },
   actions: {
-    // addActivity ({name,parent_id=null,driver_id=null,intervention_id=null,owner_id=null,status_id=1,notes='',url=''} = {}) {
+    clear() {
+      for (const property of Object.keys(this.$state)) {
+        this.$state[property] = [];
+      }
+    },
     download() {
-      api.downloadObjects(this.$state,this);
+      api.downloadObjects(init_objects,this,'',true);
     },
 
     async addActivity (activity) {
       delete activity.id;
-      console.log('add activity(activity)=');
-      console.log(activity);
       const table = 'activities';
-      const userId = useUserStore().id;
-      activity['user_id'] = userId;
-      const newId = await api.insert(table, {...activity}, userId);   //const newId = 99; // 
+      const newId = await api.insert(table, {...activity});   //const newId = 99; // 
       activity.id = newId;
       this.activities.push(activity);
     },
 
     updateActivity (activity) {
-      console.log(activity);
-      let idx = this.activities.findIndex((a)=>a.id==activity.id)
-      this.activities.splice(idx,1,activity)    
-      const userId = useUserStore().id;  
-      api.update('activities',activity.id, {...activity}, userId);
+      // console.log(activity);
+      let idx = this.activities.findIndex((a)=>a.id==activity.id);
+      this.activities.splice(idx,1,activity);    
+      api.update('activities',activity.id, {...activity});
     },
 
     async deleteActivity (activityId, deleteChildren = false) {
@@ -48,8 +78,8 @@ export const useActivityStore = defineStore({
       // handle children of the to-be-deleted activity
       const children = this.activities.filter((a)=>a.parent_id===activityId);
       const deleteIds = [].push(activity).push(children);
-      console.log('deleteIds:');
-      console.log(deleteIds);
+      // console.log('deleteIds:');
+      // console.log(deleteIds);
       const table = 'activities';
       api.remove(table,deleteIds);
       if (deleteChildren)
@@ -73,8 +103,8 @@ export const useActivityStore = defineStore({
           (!a.notes || a.notes=='') &&
           !arr.filter((b)=>b.parent_id==a.id).length);
       const deleteIds = removeActivities.map((a)=>a.id);
-      console.log('deleteIds:');
-      console.log(deleteIds);
+      // console.log('deleteIds:');
+      // console.log(deleteIds);
       const table = 'activities';
       api.remove(table,deleteIds);
     

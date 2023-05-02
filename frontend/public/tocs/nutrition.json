@@ -1,0 +1,172 @@
+{
+"project": "Maternal and Child Nutrition Improvement in Rural Communities",
+"nodes": [
+{
+"id": "A1",
+"label": "Nutrition education",
+"description": "Providing nutrition education to pregnant women, nursing mothers, and caregivers in rural communities.",
+"logicModel": "activity",
+"sem": "individual",
+"indicator": "Number of participants in education sessions",
+"audience": "Pregnant women, nursing mothers, caregivers"
+},
+{
+"id": "A2",
+"label": "Food fortification",
+"description": "Promoting and supporting the production and consumption of nutrient-fortified staple foods in rural communities.",
+"logicModel": "activity",
+"sem": "community",
+"indicator": "Proportion of fortified foods consumed",
+"audience": "Rural communities"
+},
+{
+"id": "A3",
+"label": "Supplementary feeding",
+"description": "Providing supplementary feeding to pregnant women, nursing mothers, and young children in rural communities.",
+"logicModel": "activity",
+"sem": "individual",
+"indicator": "Number of beneficiaries receiving supplementary feeding",
+"audience": "Pregnant women, nursing mothers, young children"
+},
+{
+"id": "A4",
+"label": "Community engagement",
+"description": "Involving community leaders, health workers, and local organizations to promote maternal and child nutrition.",
+"logicModel": "activity",
+"sem": "community",
+"indicator": "Level of community involvement",
+"audience": "Community leaders, health workers, local organizations"
+},
+{
+"id": "O1",
+"label": "Increased nutrition knowledge",
+"description": "Improved understanding of maternal and child nutrition among caregivers in rural communities.",
+"logicModel": "output",
+"sem": "individual",
+"indicator": "Change in nutrition knowledge",
+"audience": "Caregivers"
+},
+{
+"id": "O2",
+"label": "Accessible fortified foods",
+"description": "Availability and accessibility of nutrient-fortified staple foods in rural communities.",
+"logicModel": "output",
+"sem": "community",
+"indicator": "Availability of fortified foods",
+"audience": "Rural communities"
+},
+{
+"id": "O3",
+"label": "Supplementary feeding support",
+"description": "Pregnant women, nursing mothers, and young children receive supplementary feeding.",
+"logicModel": "output",
+"sem": "individual",
+"indicator": "Supplementary feeding coverage",
+"audience": "Pregnant women, nursing mothers, young children"
+},
+{
+"id": "O4",
+"label": "Community involvement",
+"description": "Active participation of community members in promoting and supporting maternal and child nutrition initiatives.",
+"logicModel": "output",
+"sem": "community",
+"indicator": "Community engagement level",
+"audience": "Community members"
+},
+{
+"id": "IO1",
+"label": "Improved nutrition practices",
+"description": "Adoption of healthier feeding practices for pregnant women, nursing mothers, and young children.",
+"logicModel": "intermediate_outcome",
+"sem": "individual",
+"indicator": "Change in nutrition practices",
+"audience": "Pregnant women, nursing mothers, young children"
+},
+{
+"id": "IO2",
+"label": "Sustained nutrition habits",
+  "description": "Long-term internalization and maintenance of healthy nutrition practices in rural communities.",
+  "logicModel": "intermediate_outcome",
+  "sem": "community",
+  "indicator": "Maintenance of healthy nutrition habits",
+  "audience": "Rural communities"
+},
+{
+  "id": "O5",
+  "label": "Reduced malnutrition",
+  "description": "Decreased rates of malnutrition among pregnant women, nursing mothers, and young children.",
+  "logicModel": "outcome",
+  "sem": "individual",
+  "indicator": "Change in malnutrition rates",
+  "audience": "Pregnant women, nursing mothers, young children"
+},
+{
+  "id": "O6",
+  "label": "Improved child development",
+  "description": "Enhanced cognitive, physical, and emotional development of children due to proper nutrition.",
+  "logicModel": "outcome",
+  "sem": "individual",
+  "indicator": "Child development indicators",
+  "audience": "Young children"
+},
+{
+  "id": "O7",
+  "label": "Healthier communities",
+  "description": "Healthier rural communities with reduced nutrition-related illnesses and improved overall well-being.",
+  "logicModel": "outcome",
+  "sem": "community",
+  "indicator": "Community health status",
+  "audience": "Rural communities"
+}
+],
+"edges": [
+{
+"fromId": "A1",
+"toId": "O1"
+},
+{
+"fromId": "A2",
+"toId": "O2"
+},
+{
+"fromId": "A3",
+"toId": "O3"
+},
+{
+"fromId": "A4",
+"toId": "O4"
+},
+{
+"fromId": "O1",
+"toId": "IO1"
+},
+{
+"fromId": "O2",
+"toId": "IO1"
+},
+{
+"fromId": "O3",
+"toId": "IO1"
+},
+{
+"fromId": "O4",
+"toId": "IO1"
+},
+{
+"fromId": "IO1",
+"toId": "IO2"
+},
+{
+"fromId": "IO2",
+"toId": "O5"
+},
+{
+"fromId": "IO2",
+"toId": "O6"
+},
+{
+"fromId": "IO2",
+"toId": "O7"
+}
+]
+}

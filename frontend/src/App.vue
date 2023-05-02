@@ -1,84 +1,83 @@
 <script setup>
-import { RouterLink, RouterView } from 'vue-router'
-import { useLookupStore } from './stores/lookups.js'
-import NavBar from '@/components/Layout/NavBar.vue'
-import { onMounted } from 'vue'
-import { Authenticator } from "@aws-amplify/ui-vue";
+// Importing required Vue and external libraries
+import { onMounted, computed } from "vue";
+import { RouterView } from "vue-router";
+import { useLookupStore } from "./stores/lookups.js";
+import NavBar from "@/components/Layout/NavBar.vue";
+import LeftSideNav from "@/components/Layout/LeftSideNav.vue";
 import "@aws-amplify/ui-vue/styles.css";
-import { Amplify, Auth } from 'aws-amplify';
-import awsconfig from './aws-exports';
-import { useUserStore } from '@/stores/user'
+import { Amplify } from "aws-amplify";
+import awsconfig from "./aws-exports";
+import { useSideNavStore } from "@/stores/sideNav";
 
-Amplify.configure(awsconfig);
+// Set ONLINE to true when connected to the internet or false when offline
+const ONLINE = true;
+
+// Initialize the lookup store and side navigation store
 const lookupStore = useLookupStore();
+const sideNavStore = useSideNavStore();
 
-// async function isUserSignedIn() {
-//     try {
-//         const userObj = await Auth.currentAuthenticatedUser();
-//         useUserStore().setUser(userObj['attributes']['email'],userObj['signInUserSession']['accessToken']['jwtToken']);
-//         // this.$router.push({ path: '/drivers'})
-//         }
-//     catch (err) {
-//         useUserStore().setUser();
-//         console.log(err);
-//     }
-// };
+// Computed property for determining if the side navigation should be visible
+const showSideNav = computed(() => sideNavStore.visible);
 
-// onMounted(() => isUserSignedIn());
+// Configure AWS Amplify with the provided configuration
+Amplify.configure(awsconfig);
 
-
+// On component mount, download the lookup data if online
 onMounted(() => {
-  lookupStore.download();
-  // isUserSignedIn();
-})
+  if (ONLINE) lookupStore.download();
+});
 </script>
 
-
-
-
-
 <template>
-  <NavBar />
-  <!-- <authenticator>
-    <template v-slot="{ user, signOut }">
-      <h1>Hello {{ user.attributes.email }} {{user.signInUserSession.accessToken.jwtToken}}</h1>
-      <button @click="signOut">Sign Out</button>
-    </template>
-  </authenticator> -->
-  <div class="container is-max-desktop px-2 py-4">
-    <RouterView />
+  <div class="app-wrapper">
+    <!-- Render the navigation bar -->
+    <NavBar />
+    <div class="left-side-nav-container">
+      <!-- Render the left side navigation if it should be visible -->
+      <LeftSideNav v-if="showSideNav" v-model="showSideNav" />
+      <div
+        class="container is-max-desktop px-2 py-4 custom-container mt-6"
+        :class="{ 'has-left-side-nav': showSideNav, 'main-content': !showSideNav }"
+      >
+        <!-- Render the router view using the current route's fullPath as a key -->
+        <router-view :key="$route.fullPath"></router-view>
+      </div>
+    </div>
   </div>
 </template>
 
-
-
-
-<!--
-
-
-  <authenticator>
-    <template v-slot="{ user, signOut }">
-      <h1>Hello {{ user.username }}!</h1>
-      <button @click="signOut">Sign Out</button>
-    </template>
-  </authenticator>
-
-
-
-
-
-<template>
-  <header>
-    <div class="wrapper">
-      <nav>
-        <RouterLink to="/">Home</RouterLink>
-      </nav>
-    </div>
-  </header>
-</template>
--->
-
 <style>
-@import 'bulma/css/bulma.min.css';
-@import 'bulma/css/bulma-tooltip.min.css'
+/* Importing required CSS libraries */
+@import "bulma/css/bulma.min.css";
+@import "@creativebulma/bulma-tooltip";
+
+/* Styling for the app wrapper */
+.app-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Styling for the left-side-nav container */
+.left-side-nav-container {
+  display: flex;
+  flex-grow: 1;
+}
+
+/* Styling for when left side navigation is visible */
+.has-left-side-nav {
+  margin-left: 240px;
+  flex-grow: 1;
+}
+
+/* Styling for the main content when left side navigation is not visible */
+.main-content {
+  margin-left: 0px;
+  flex-grow: 1;
+}
+
+/* Custom styling for the container */
+.custom-container {
+  max-width: 100%; /* Adjust this value to your desired width */
+}
 </style>

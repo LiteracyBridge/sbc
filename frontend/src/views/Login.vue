@@ -1,28 +1,18 @@
 <script setup>
+// Importing required AWS Amplify libraries and components
 import { Authenticator } from "@aws-amplify/ui-vue";
 import "@aws-amplify/ui-vue/styles.css";
 import { Amplify, Auth } from 'aws-amplify';
 import awsconfig from '../aws-exports';
-import { onMounted } from 'vue';
-import { useUserStore } from '@/stores/user'
+import { useUserStore } from '@/stores/user';
 
+// Configure AWS Amplify with the provided configuration
 Amplify.configure(awsconfig);
+
+// Initialize the user store
 const userStore = useUserStore();
   
-// async function isUserSignedIn() {
-//     try {
-//         const userObj = await Auth.currentAuthenticatedUser();
-//         userStore.setUser(userObj['attributes']['email'],userObj['signInUserSession']['accessToken']['jwtToken']);
-//         // this.$router.push({ path: '/drivers'})
-//         }
-//     catch (err) {
-//         userStore.setUser();
-//         console.log(err);
-//     }
-// };
-
-// onMounted(() => isUserSignedIn());
-
+// Logout function to clear user data from the store and sign out
 function logout (ampSignOut) {
     userStore.setUser();
     ampSignOut();
@@ -30,13 +20,12 @@ function logout (ampSignOut) {
 </script>
 
 <template>
-  <!-- <authenticator :social-providers="['amazon', 'apple', 'facebook', 'google']"> -->
+  <!-- Display the AWS Amplify Authenticator component -->
   <authenticator>
+    <!-- Slot for custom content inside the authenticator component -->
     <template v-slot="{ user, signOut }">
+      <!-- Display sign out button and bind the signOut function -->
       <button @click="signOut">Sign Out</button>
     </template>
   </authenticator>
 </template>
-<!--
-<h1>Hello {{ user.attributes.email }} {{user.signInUserSession.accessToken.jwtToken}}</h1>
--->

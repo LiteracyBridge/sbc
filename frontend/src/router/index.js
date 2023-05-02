@@ -3,20 +3,18 @@ import Drivers from '../views/Drivers.vue'
 import Activities from '../views/Activities.vue'
 import Login from '../views/Login.vue'
 import Home from '../views/Home.vue'
-import Test from '../views/Test.vue'
+import Projects from '../views/Projects.vue'
+import Forms from '../views/Forms.vue'
+import ToC from '../views/ToC.vue'
+import Interventions from '../views/Interventions.vue'
 import { useUserStore } from '../stores/user'
 import { Auth } from 'aws-amplify'
 import { Hub } from "@aws-amplify/core"
 
+const ONLINE = true; // just for coding without internet
 let user;
 
-getUser().then((user) => {
-    if (user) {
-        router.push({path: '/'});
-    }
-});
-
-function getUser() {
+async function getUser() {
   return Auth.currentAuthenticatedUser().then((data) => {
       if (data && data.signInUserSession) {
         useUserStore().setUser(data.attributes.email,data.signInUserSession.accessToken.jwtToken);
@@ -28,17 +26,25 @@ function getUser() {
   });
 }
 
-Hub.listen("auth", async (data) => {
-  if (data.payload.event === 'signOut'){
-      user = null;
-      useUserStore().setUser();
-      router.push({path: '/login'});
-  } else if (data.payload.event === 'signIn') {
-      user = await getUser();
-      router.push({path: '/'});
-  }
-});
+if (ONLINE) {
+  getUser().then((user) => {
+    if (user) {
+        router.push({path: '/'});
+    }
+  });
 
+  console.log("online");
+  Hub.listen("auth", async (data) => {
+    if (data.payload.event === 'signOut'){
+        user = null;
+        useUserStore().setUser();
+        router.push({path: '/login'});
+    } else if (data.payload.event === 'signIn') {
+        user = await getUser();
+        router.push({path: '/'});
+    }
+  });
+}
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -58,14 +64,29 @@ const router = createRouter({
     component: Drivers
   },
   {
+    path: '/interventions',
+    name: 'interventions',
+    component: Interventions
+  },
+  {
     path: '/activities',
     name: 'activities',
     component: Activities
   },
   {
-    path: '/test',
-    name: 'test',
-    component: Test
+    path: '/projects',
+    name: 'projects',
+    component: Projects
+  },
+  {
+    path: '/forms/:module',
+    name: 'forms',
+    component: Forms
+  },
+  {
+    path: '/toc',
+    name: 'toc',
+    component: ToC
   }
   ]
 })

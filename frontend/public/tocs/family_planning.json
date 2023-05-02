@@ -1,0 +1,180 @@
+{
+"project": "Family Planning and Reproductive Health Services in Rural Communities",
+"nodes": [
+{
+"id": "A1",
+"label": "Family planning education",
+"description": "Providing comprehensive family planning and reproductive health education to men and women in rural communities.",
+"logicModel": "activity",
+"sem": "activity",
+"indicator": "Number of educational sessions",
+"audience": "Men and women in rural communities"
+},
+{
+"id": "A2",
+"label": "Access to contraceptives",
+"description": "Ensuring the availability, accessibility, and affordability of a wide range of contraceptive methods in rural communities.",
+"logicModel": "activity",
+"sem": "activity",
+"indicator": "Contraceptive availability and accessibility",
+"audience": "Men and women in rural communities"
+},
+{
+"id": "A3",
+"label": "Health worker training",
+"description": "Training local health workers to provide family planning and reproductive health services to rural communities.",
+"logicModel": "activity",
+"sem": "activity",
+"indicator": "Number of health workers trained",
+"audience": "Local health workers"
+},
+{
+"id": "A4",
+"label": "Community engagement",
+"description": "Involving community leaders, religious institutions, and local organizations in promoting family planning initiatives.",
+"logicModel": "activity",
+"sem": "activity",
+"indicator": "Level of community engagement",
+"audience": "Community leaders, religious institutions, local organizations"
+},
+{
+"id": "O1",
+"label": "Increased knowledge",
+"description": "Improved understanding of family planning and reproductive health among men and women in rural communities.",
+"logicModel": "output",
+"sem": "individual",
+"indicator": "Change in knowledge levels",
+"audience": "Men and women in rural communities"
+},
+{
+"id": "O2",
+"label": "Contraceptive availability",
+"description": "Increased access to a variety of contraceptive methods for men and women in rural communities.",
+"logicModel": "output",
+"sem": "community",
+"indicator": "Access to contraceptives",
+"audience": "Men and women in rural communities"
+},
+{
+"id": "O3",
+"label": "Skilled health workers",
+"description": "Trained local health workers are equipped to provide quality family planning and reproductive health services.",
+"logicModel": "output",
+"sem": "individual",
+"indicator": "Health workers' skill levels",
+"audience": "Local health workers"
+},
+{
+"id": "O4",
+"label": "Community support",
+"description": "Active involvement of the community in promoting and supporting family planning initiatives.",
+"logicModel": "output",
+"sem": "community",
+"indicator": "Community support for family planning initiatives",
+"audience": "Community leaders, religious institutions, local organizations"
+},
+{
+"id": "IO1",
+"label": "Informed decision-making",
+"description": "Men and women in rural communities make informed decisions about family planning and reproductive health.",
+"logicModel": "intermediate_outcome",
+"sem": "individual",
+"indicator": "Decision-making quality",
+"audience": "Men and women in rural communities"
+},
+{
+"id": "IO2",
+"label": "Increased contraceptive use",
+  "description": "Increased adoption of contraceptives by men and women in rural communities.",
+  "logicModel": "intermediate_outcome",
+  "sem": "individual",
+  "indicator": "Contraceptive usage rates",
+  "audience": "Men and women in rural communities"
+},
+{
+  "id": "O5",
+  "label": "Reduced unintended pregnancies",
+  "description": "Decreased rates of unintended pregnancies in rural communities.",
+  "logicModel": "outcome",
+  "sem": "community",
+  "indicator": "Unintended pregnancy rates",
+  "audience": "Men and women in rural communities"
+},
+{
+  "id": "O6",
+  "label": "Improved maternal and child health",
+  "description": "Enhanced maternal and child health as a result of planned pregnancies and better reproductive health.",
+  "logicModel": "outcome",
+  "sem": "community",
+  "indicator": "Maternal and child health indicators",
+  "audience": "Men, women, and children in rural communities"
+},
+{
+  "id": "O7",
+  "label": "Empowered communities",
+  "description": "Rural communities with greater autonomy and control over reproductive health and family planning choices.",
+  "logicModel": "outcome",
+  "sem": "community",
+  "indicator": "Community empowerment levels",
+  "audience": "Men and women in rural communities"
+}
+],
+"edges": [
+{
+"fromId": "A1",
+"toId": "O1"
+},
+{
+"fromId": "A2",
+"toId": "O2"
+},
+{
+"fromId": "A3",
+"toId": "O3"
+},
+{
+"fromId": "A4",
+"toId": "O4"
+},
+{
+"fromId": "O1",
+"toId": "IO1"
+},
+{
+"fromId": "O2",
+"toId": "IO2"
+},
+{
+"fromId": "O3",
+"toId": "IO1"
+},
+{
+"fromId": "O4",
+"toId": "IO1"
+},
+{
+"fromId": "IO1",
+"toId": "O5"
+},
+{
+"fromId": "IO1",
+"toId": "O6"
+},
+{
+"fromId": "IO1",
+"toId": "O7"
+},
+{
+"fromId": "IO2",
+"toId": "O5"
+},
+{
+"fromId": "IO2",
+"toId": "O6"
+},
+{
+"fromId": "IO2",
+"toId": "O7"
+}
+]
+}

@@ -18,12 +18,14 @@ else
     exit 1
 fi
 
+args=( "$@" )
+pkgs=( "${args[@]:1}" )
 
 file=$1
 len=$((${#file}-3))
 lambda_fct=${file:0:len}
 rm -R package
-pip install --target ./package pg8000
+pip install --target ./package ${pkgs[@]} pg8000
 cd package
 rm ../package.zip
 zip -r ../package.zip .

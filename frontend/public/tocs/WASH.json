@@ -1,0 +1,103 @@
+{
+"project": "Hygiene Education and Handwashing Infrastructure in Rural Schools",
+"nodes": [
+{
+"id": "A1",
+"label": "School hygiene education",
+"description": "Implementing a hygiene education curriculum in rural schools to teach children the importance of handwashing with soap.",
+"logicModel": "activity"
+},
+{
+"id": "A2",
+"label": "Handwashing infrastructure",
+"description": "Constructing and maintaining handwashing facilities in rural schools to ensure easy access to soap and water.",
+"logicModel": "activity"
+},
+{
+"id": "A3",
+"label": "Community engagement",
+"description": "Involving parents, teachers, and community leaders in promoting and sustaining handwashing practices among school children.",
+"logicModel": "activity"
+},
+{
+"id": "O1",
+"label": "Increased hygiene knowledge",
+"description": "Children in rural schools develop a better understanding of the importance of handwashing with soap.",
+"logicModel": "output"
+},
+{
+"id": "O2",
+"label": "Accessible handwashing facilities",
+"description": "Functional handwashing stations are readily available for use in rural schools.",
+"logicModel": "output"
+},
+{
+"id": "O3",
+"label": "Community support",
+"description": "Active involvement of the community in promoting and sustaining handwashing practices among children.",
+"logicModel": "output"
+},
+{
+"id": "IO1",
+"label": "Adoption of handwashing practices",
+"description": "Increased adoption of proper handwashing practices by children in rural schools.",
+"logicModel": "intermediate_outcome"
+},
+{
+"id": "IO2",
+"label": "Sustained handwashing habits",
+"description": "Children in rural schools integrate handwashing with soap into their daily routines.",
+"logicModel": "intermediate_outcome"
+},
+{
+"id": "O4",
+"label": "Reduced illness",
+"description": "Decreased incidences of illness related to poor hygiene among children in rural schools.",
+"logicModel": "outcome"
+},
+{
+"id": "O5",
+"label": "Improved school attendance",
+"description": "Increased school attendance rates due to fewer illness-related absences.",
+"logicModel": "outcome"
+}
+],
+"edges": [
+{
+"fromId": "A1",
+"toId": "O1"
+},
+{
+"fromId": "A2",
+"toId": "O2"
+},
+{
+"fromId": "A3",
+"toId": "O3"
+},
+{
+"fromId": "O1",
+"toId": "IO1"
+},
+{
+"fromId": "O2",
+"toId": "IO1"
+},
+{
+"fromId": "O3",
+"toId": "IO1"
+},
+{
+"fromId": "IO1",
+"toId": "IO2"
+},
+{
+"fromId": "IO2",
+"toId": "O4"
+},
+{
+"fromId": "IO2",
+"toId": "O5"
+}
+]
+}
