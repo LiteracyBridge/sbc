@@ -21,7 +21,10 @@
   },
   "devDependencies": {
     "@creativebulma/bulma-tooltip": "^1.2.0",
+    "@tsconfig/node18": "^2.0.0",
+    "@types/node": "18",
     "@vitejs/plugin-vue": "^3.0.1",
+    "@vue/tsconfig": "^0.3.2",
     "vite": "^3.0.1"
   }
 }
