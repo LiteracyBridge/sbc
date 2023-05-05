@@ -1,4 +1,4 @@
-<script setup>
+<script lang="ts" setup>
 import { onMounted, ref, watch } from "vue";
 import { useLookupStore } from "@/stores/lookups";
 import { useProjectStore } from "@/stores/projects";
@@ -22,6 +22,7 @@ const newUserName = ref("");
 const newUserAddressAs = ref("");
 const newUserEmail = ref("");
 const newUserAccessId = ref(null);
+
 
 // GPT prompt
 const prompt = ref("");
@@ -159,7 +160,7 @@ function changeProject(prjId) {
   <br/>
   <br/>
   <!-- Display users with access to the selected project -->
-  <div v-if="projectStore.prj_id">    
+  <div v-if="projectStore.prj_id">
     Users with access to {{ projectStore.projectName }}:
     <table class="table">
       <thead>

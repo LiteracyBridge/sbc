@@ -2,6 +2,7 @@
 node_modules
 /frontend/dist
 /lambda/package
+venv/**
 
 # local env files
 .env.local

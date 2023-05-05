@@ -2,7 +2,7 @@
 // Importing required Vue and external libraries
 import { onMounted, computed } from "vue";
 import { RouterView } from "vue-router";
-import { useLookupStore } from "./stores/lookups.js";
+import { useLookupStore } from "./stores/lookups";
 import NavBar from "@/components/Layout/NavBar.vue";
 import LeftSideNav from "@/components/Layout/LeftSideNav.vue";
 import "@aws-amplify/ui-vue/styles.css";
