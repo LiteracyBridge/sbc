@@ -1,4 +1,4 @@
-<script lang="ts" setup>
+<script setup>
 import { onMounted, ref, watch } from "vue";
 import { useLookupStore } from "@/stores/lookups";
 import { useProjectStore } from "@/stores/projects";

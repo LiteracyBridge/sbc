@@ -16,17 +16,17 @@ export async function downloadObjects(objects, context, tablePrefix='', LOG=fals
         // objName must match a sql table name (with prefix, if needed)
         const attributes = Object.keys(objects[objName])
         const tableName = tablePrefix + objName;
-        const filterClause = tableName.startsWith('lu_') ? '' : 'prj_id=' + useProjectStore().prj_id  
+        const filterClause = tableName.startsWith('lu_') ? '' : 'prj_id=' + useProjectStore().prj_id
         context[objName] = await downloadObject(tableName,attributes,filterClause, LOG);
     }
 }
 
 async function downloadSetup(tableName, attributes, filterClause = '') {
     const objectClause = "?object=" + tableName;
-    // objName must match an object array; only the first element is used to get its attributes 
+    // objName must match an object array; only the first element is used to get its attributes
     const attributesClause = "&attributes=" + attributes.join(',');
-    // object / table names starting  with 'lu_' are lookup tables; all others require a prj_id 
-    const request = objectClause + attributesClause + (filterClause == '' ? '' : '&' + filterClause); 
+    // object / table names starting  with 'lu_' are lookup tables; all others require a prj_id
+    const request = objectClause + attributesClause + (filterClause == '' ? '' : '&' + filterClause);
     const response = await axios.get(SBC_DS_URL + request);
     return response.data;
 }
@@ -37,7 +37,7 @@ export async function downloadObject(tableName, attributes, filterClause = '', L
     for (let i=0;i<response.length;i++) {
         var tempObj = {};
         for (let j=0;j<attributes.length; j++) {
-            tempObj[attributes[j]] = response[i][j]; 
+            tempObj[attributes[j]] = response[i][j];
         }
         responseList[i] = tempObj;
     }
@@ -50,9 +50,9 @@ export async function downloadDictionary(tableName, attributes, filterClause = '
     for (let i=0;i<response.length;i++) {
         var tempObj = {};
         for (let j=0;j<attributes.length; j++) {
-            tempObj[attributes[j]] = response[i][j]; 
+            tempObj[attributes[j]] = response[i][j];
         }
-        responseDictionary[response[i][keyIndex]] = tempObj; 
+        responseDictionary[response[i][keyIndex]] = tempObj;
     }
     return responseDictionary;
 }
@@ -79,7 +79,7 @@ export async function insert(tableName, attributes, LOG = false) {
     }
     attributes['editing_user_id'] = useUserStore().id;
     payload['attributes'] = attributes;
-    if (LOG) console.log(payload);    
+    if (LOG) console.log(payload);
     const response = await axios.post(SBC_DS_URL,payload);
     const new_id = response.data[0][0];
     if (LOG) console.log(new_id);
@@ -90,9 +90,9 @@ export async function update(tableName, id, attributes, LOG = false) {
     const payload = {};
     payload['object'] = tableName;
     payload['id'] = id;
-    attributes['editing_user_id'] = useUserStore().id;  
+    attributes['editing_user_id'] = useUserStore().id;
     payload['attributes'] = attributes;
-    if (LOG) console.log(payload);    
+    if (LOG) console.log(payload);
     const response = await axios.put(SBC_DS_URL,payload);
 }
 
@@ -100,14 +100,14 @@ export async function remove(tableName, ids, LOG = false) {
     const payload = {};
     payload['object'] = tableName;
     payload['ids'] = ids;
-    if (LOG) console.log(payload);    
+    if (LOG) console.log(payload);
     const response = await axios.delete(SBC_DS_URL,{data:payload});
 }
 
 function countWords(str) {
     // Use a regular expression to match words, including words with apostrophes and hyphens
     const words = str.match(/\b[\w'-]+\b/g);
-  
+
     // Return the number of words
     return words ? words.length : 0;
 }
@@ -149,8 +149,8 @@ export async function getBucket(request_id) {
 export async function gptCompletion(prompt, context = null, format = null, start = null, stop = null) {
     // format can be "item","list","sentence", or "paragraph"
     const { prj_id } = useProjectStore();
-    const payload = { prj_id, prompt };
-  
+    const payload = { prj_id, prompt } as any;
+
     if (format) payload.format = format;
     if (start) payload.start = start;
     if (stop) payload.stop = stop;
@@ -189,8 +189,7 @@ export async function twilioBroadcast(message, topic) {
     if (LOG) {
       console.log("characters in message:", message.length);
       console.log(payload);
-    }    
+    }
     const response = await axios.post(SBC_TW_URL,payload);
     if (LOG) console.log(response);
 }
-

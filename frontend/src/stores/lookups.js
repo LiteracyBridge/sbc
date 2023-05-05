@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { downloadObjects } from '@/apis/lambda.js';
+import { downloadObjects } from '@/apis/lambda';
 
 // Initial objects for lookup data structure
 const init_objects = {

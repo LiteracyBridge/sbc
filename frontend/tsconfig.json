@@ -1,17 +1,23 @@
 {
     "extends": [
-        "@vue/tsconfig/tsconfig.web.json"
+        "@tsconfig/node18/tsconfig.json",
+        "@vue/tsconfig/tsconfig.json"
     ],
     "compilerOptions": {
         "target": "ESNext",
         "module": "esnext",
-        "strict": true,
+        "strict": false,
         "jsx": "preserve",
         "importHelpers": true,
+        "noImplicitAny": true,
         "moduleResolution": "node",
         "esModuleInterop": true,
         "sourceMap": true,
         "baseUrl": ".",
+        "allowJs": true,
+        "noEmit": true,
+        "allowSyntheticDefaultImports": true,
+        "composite": true,
         "types": [
             "node",
             "vite/client"
@@ -30,12 +36,15 @@
     },
     "include": [
         "src/**/*.ts",
+        "src/**/*.js",
         "src/**/*.tsx",
         "src/**/*.vue",
         "tests/**/*.ts",
-        "tests/**/*.tsx"
+        "tests/**/*.tsx",
+        "vite.config.js"
     ],
     "exclude": [
-        "node_modules"
+        "node_modules",
+        "dist"
     ]
 }
