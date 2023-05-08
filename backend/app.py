@@ -10,13 +10,28 @@ from middlewares.correlation_id_middleware import CorrelationIdMiddleware
 from middlewares.logging_middleware import LoggingMiddleware
 from handlers.exception_handler import exception_handler
 from handlers.http_exception_handler import http_exception_handler
+from fastapi.middleware.cors import CORSMiddleware
 
 import models
 # from database import SessionLocal, engine
 
 # models.Base.metadata.create_all(bind=engine)
 
+
 app = FastAPI()
+
+origins = [
+    "http://localhost.tiangolo.com",
+    "*"
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 # # Dependency
@@ -26,12 +41,6 @@ app = FastAPI()
 #         yield db
 #     finally:
 #         db.close()
-
-###############################################################################
-#   Application object                                                        #
-###############################################################################
-
-app = FastAPI()
 
 ###############################################################################
 #   Logging configuration                                                     #
