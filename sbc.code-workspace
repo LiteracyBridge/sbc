@@ -4,5 +4,9 @@
 			"path": "."
 		}
 	],
-	"settings": {}
+	"settings": {
+		"vue.autoInsert.dotValue": true,
+		"vue.inlayHints.missingProps": true,
+		"vue.server.petiteVue.supportHtmlFile": true
+	}
 }

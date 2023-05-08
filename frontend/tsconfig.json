@@ -12,6 +12,8 @@
         "noImplicitAny": true,
         "moduleResolution": "node",
         "esModuleInterop": true,
+        "skipLibCheck": true,
+        "useDefineForClassFields": true,
         "sourceMap": true,
         "baseUrl": ".",
         "allowJs": true,

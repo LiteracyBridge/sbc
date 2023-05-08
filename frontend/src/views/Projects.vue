@@ -1,4 +1,6 @@
-<script setup>
+<!-- ts-check -->
+<script  setup>
+
 import { onMounted, ref, watch, computed } from "vue";
 import { Multiselect } from 'vue-multiselect'
 import { useLookupStore } from "@/stores/lookups";
