@@ -101,39 +101,6 @@ const usersDropdownOptions = computed(() => {
         label: user.name != '' ? `${user.name} (${user.email})` : user.email,
       };
     });
-
-  return [
-    { value: "test", label: "Test 1" },
-    { value: "test1", label: "Test 2" },
-    { value: "test2", label: "Test 3" },
-    { value: "test3", label: "Test 4" }, { value: "test4", label: "Test 5" }, { value: "test5", label: "Test 6" }, { value: "test6", label: "Test 7" }, { value: "test7", label: "Test 8" }, { value: "test8", label: "Test 9" }, { value: "test9", label: "Test 10" }
-  ];
-
-  console.log(newUserEmail)
-  if (newUserEmail.value === '') {
-    return []
-  }
-
-  // let user_id = await api.getAll('users', 'email ILIKE ' + newUserEmail.value, true); // get from db if exists
-  console.log('checking user id');
-  // console.log(user_id)
-  // if (!user_id) {
-  //   // user doesn't exist, so insert user into db
-  //   user_id = await api.insert('users', { name, email, last_project_id, address_as }); // otherwise insert and get it
-  // }
-
-  return ["country 1", "country 2"]
-  let matches = 0
-
-  return countries.filter(country => {
-    if (
-      country.name.toLowerCase().includes(searchTerm.value.toLowerCase())
-      && matches < 10
-    ) {
-      matches++
-      return country
-    }
-  })
 });
 
 function onUserSelected(item, _){
@@ -142,19 +109,6 @@ function onUserSelected(item, _){
   // newUserEmail.value = user.email
   newUserName.value = user.name ?? 'N/A'
   newUserAddressAs.value = user.address_as
-}
-
-async function searchUser() {
-  // TODO: fetch users list
-  // let searchTerm = ref('')
-
-  return ["sdfsdf", "sdfsdf"]
-  console.log(newUserEmail);
-
-
-  return {
-    searchTerm
-  }
 }
 
 </script>
@@ -287,22 +241,6 @@ async function searchUser() {
             <Multiselect v-model="newUserEmail" :options="usersDropdownOptions" :close-on-select="true" :clear-on-select="false"
               placeholder="Select user" label="label" track-by="value"
               @select="onUserSelected" />
-            <!--
-            <div class="field">
-              <p class="control  has-icons-right">
-                <input v-model="newUserEmail" class="input is-primary" type="text" placeholder="Search email here..."
-                  list="user_emails" />
-
-                <span class="icon is-small is-right">
-                  <i class="fas fa-search"></i>
-                </span>
-              </p>
-
-              <datalist id="user_emails" class="list">
-                <option v-for="email in userEmails" :key="email" :value="email" class="list-item">
-                </option>
-              </datalist>
-            </div> -->
           </td>
 
           <td>

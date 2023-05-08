@@ -72,23 +72,6 @@ export async function getId(tableName, filterClause, LOG = false) {
   return id;
 }
 
-
-export async function getAll(tableName, filterClause, LOG = false) {
-  const objectClause = "?object=" + "users";
-  const attributesClause = "&attributes=&"
-  const request = objectClause + attributesClause + filterClause;
-  if (LOG) console.log(request);
-  const response = await axios.get(SBC_DS_URL + request);
-  let id = null;
-
-  console.log(response?.data)
-  if (response.data.length > 0) {
-    id = response.data[0][0];
-  }
-  if (LOG) console.log('id=' + id);
-  return id;
-}
-
 export async function insert(tableName, attributes, LOG = false) {
   const payload = {};
   payload['object'] = tableName;
