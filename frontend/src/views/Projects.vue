@@ -53,7 +53,7 @@ function draftNewUser() {
 // Save new user and reset draftingNewUser flag
 function saveNewUser() {
   draftingNewUser.value = false;
-  projectStore.addUser(newUserName.value, newUserEmail.value, newUserAccessId.value, newUserAddressAs.value);
+  projectStore.addUser(newUserName.value, newUserEmail.value?.value, newUserAccessId.value, newUserAddressAs.value);
 }
 
 // Save new project and reset draftingNewProject flag
