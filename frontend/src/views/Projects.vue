@@ -123,7 +123,7 @@ function onUserSelected(item, _){
   <!-- Display the user's projects -->
   <div class="is-size-5 is-bold">Your projects:</div>
 
-  <table class="table">
+  <table class="table is-fullwidth is-hoverable">
     <thead>
       <tr>
         <th></th>
@@ -177,12 +177,13 @@ function onUserSelected(item, _){
       <span>Archive Project</span>
     </button>
   </div>
+
   <!-- Show cancel and save buttons when drafting a new project -->
-  <div v-else>
-    <button class="button" @click.prevent="draftingNewProject = false">
+  <div v-else class="has-text-centered">
+    <button class="button is-danger mr-5" @click.prevent="draftingNewProject = false">
       <span>Cancel</span>
     </button>
-    <button class="button" @click.prevent="saveNewProject">
+    <button class="button is-primary" @click.prevent="saveNewProject">
       <span>Save</span>
     </button>
   </div>
@@ -194,7 +195,7 @@ function onUserSelected(item, _){
   <div v-if="projectStore.prj_id">
     Users with access to {{ projectStore.projectName }}:
 
-    <table class="table is-fullwidth is-hoverable">
+    <table class="table is-fullwidth is-hoverable is-stripped">
       <thead>
         <tr>
           <th>Name</th>
@@ -259,18 +260,20 @@ function onUserSelected(item, _){
     </table>
 
     <!-- Display buttons for adding users -->
-    <div v-if="!draftingNewUser">
+    <div v-if="!draftingNewUser" class="has-text-centered">
       <button class="button" @click.prevent="draftNewUser">
         <span>Add User</span>
       </button>
     </div>
+
     <!-- Show cancel and save buttons when drafting a new user -->
-    <div v-else>
-      <button class="button" @click.prevent="draftingNewUser = false">
-        <span>Cancel</span>
-      </button>
-      <button class="button" @click.prevent="saveNewUser">
+    <div v-else class="has-text-centered">
+      <button class="button is-primary mr-5" @click.prevent="saveNewUser">
         <span>Save</span>
+      </button>
+
+      <button class="button is-danger" @click.prevent="draftingNewUser = false">
+        <span>Cancel</span>
       </button>
     </div>
   </div>
