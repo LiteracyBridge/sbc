@@ -17,6 +17,7 @@
     "pinia": "^2.0.16",
     "vue": "^3.2.37",
     "vue-axios": "^3.4.1",
+    "vue-multiselect": "^3.0.0-beta.1",
     "vue-router": "^4.1.2"
   },
   "devDependencies": {

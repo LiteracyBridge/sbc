@@ -3,7 +3,8 @@ import { useProjectStore } from '../stores/projects';
 import { useUserStore } from '../stores/user';
 const LOG = true;
 
-const SBC_DS_URL = 'https://w75w7350kh.execute-api.us-west-2.amazonaws.com/production/sbcDataService';
+const SBC_DS_URL = 'http://localhost:9000/2015-03-31/functions/function/invocations';
+// const SBC_DS_URL = 'https://w75w7350kh.execute-api.us-west-2.amazonaws.com/production/sbcDataService';
 export const SBC_TW_URL = 'https://w75w7350kh.execute-api.us-west-2.amazonaws.com/production/sbcTwilio';
 const SBC_GET_BUCKET = 'https://w75w7350kh.execute-api.us-west-2.amazonaws.com/production/sbcGetBucket';
 const SBC_AI_URL = 'https://w75w7350kh.execute-api.us-west-2.amazonaws.com/production/sbcOpenAI';
@@ -69,6 +70,23 @@ export async function getId(tableName,filterClause, LOG = false) {
     }
     if (LOG) console.log('id='+id);
     return id;
+}
+
+
+export async function getAll(tableName,filterClause, LOG = false) {
+  const objectClause = "?object=" + "users";
+  const attributesClause = "&attributes=&"
+  const request = objectClause + attributesClause + filterClause;
+  if (LOG) console.log(request);
+  const response = await axios.get(SBC_DS_URL + request);
+  let id = null;
+
+  console.log(response?.data)
+  if (response.data.length > 0) {
+      id = response.data[0][0];
+  }
+  if (LOG) console.log('id='+id);
+  return id;
 }
 
 export async function insert(tableName, attributes, LOG = false) {
@@ -149,7 +167,7 @@ export async function getBucket(request_id) {
 export async function gptCompletion(prompt, context = null, format = null, start = null, stop = null) {
     // format can be "item","list","sentence", or "paragraph"
     const { prj_id } = useProjectStore();
-    const payload = { prj_id, prompt } as any;
+    const payload = { prj_id, prompt };
 
     if (format) payload.format = format;
     if (start) payload.start = start;

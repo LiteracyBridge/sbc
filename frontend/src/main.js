@@ -8,6 +8,7 @@ import router from './router';
 import { Amplify } from 'aws-amplify';
 import awsconfig from './aws-exports';
 import mermaidDirective from './directives/mermaid';
+import "vue-multiselect/dist/vue-multiselect.css"
 
 // Configure AWS Amplify with the provided configuration
 Amplify.configure(awsconfig);
