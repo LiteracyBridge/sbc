@@ -12,6 +12,6 @@ router = APIRouter()
 
 @router.get("/", response_model=ApiResponse)
 def get_users(db: Session = Depends(get_db)):
-    data = db.query(models.User).filter().all()
+    data = db.query(models.User).filter(models.User.email != None).all()
 
     return ApiResponse(data=data)

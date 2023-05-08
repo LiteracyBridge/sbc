@@ -1,4 +1,3 @@
-<!-- ts-check -->
 <script  setup>
 
 import { onMounted, ref, watch, computed } from "vue";
@@ -8,6 +7,8 @@ import { useProjectStore } from "@/stores/projects";
 import { useUserStore } from "@/stores/user";
 import { useRouter } from "vue-router";
 import * as api from "@/apis/lambda";
+import {UsersApi} from "@/apis/lambda";
+import axios from "axios";
 
 const router = useRouter();
 const userStore = useUserStore();
@@ -26,6 +27,7 @@ const newUserAddressAs = ref("");
 const newUserEmail = ref("");
 const newUserAccessId = ref(null);
 
+const allUsers = ref([]);
 
 // GPT prompt
 const prompt = ref("");
@@ -60,8 +62,29 @@ function saveNewProject() {
   projectStore.add(newPrjName.value, newPrjCountryId.value);
 }
 
-// Redirect to login if user is not logged in
-onMounted(() => (userStore.loggedIn ? null : useRouter().push({ path: "/login" })));
+function fetchUsers() {
+  UsersApi.getAll().then((resp) => {
+    console.log(resp);
+    allUsers.value = resp.data;
+  });
+
+  // axios.get("/api/users").then((response) => {
+  //   console.log(response.data);
+  // });
+}
+
+onMounted(() => {
+  console.log("sdfsdfsdf")
+
+  // Redirect to login if user is not logged in
+  if (userStore.loggedIn == false) {
+    useRouter().push({ path: "/login" })
+    return;
+  }
+
+  // Fetch the user's projects
+  fetchUsers();
+});
 
 // Change the current project and navigate to the basic forms page
 function changeProject(prjId) {
@@ -71,7 +94,14 @@ function changeProject(prjId) {
 
 // Users list dropdown
 
-const userEmails = computed(() => {
+const usersDropdownOptions = computed(() => {
+  return allUsers.value.map((user) => {
+      return {
+        value: user.email,
+        label: user.name != '' ? `${user.name} (${user.email})` : user.email,
+      };
+    });
+
   return [
     { value: "test", label: "Test 1" },
     { value: "test1", label: "Test 2" },
@@ -105,6 +135,14 @@ const userEmails = computed(() => {
     }
   })
 });
+
+function onUserSelected(item, _){
+  const user = allUsers.value.find(user => user.email == item.value)
+
+  // newUserEmail.value = user.email
+  newUserName.value = user.name ?? 'N/A'
+  newUserAddressAs.value = user.address_as
+}
 
 async function searchUser() {
   // TODO: fetch users list
@@ -201,7 +239,8 @@ async function searchUser() {
   <!-- Display users with access to the selected project -->
   <div v-if="projectStore.prj_id">
     Users with access to {{ projectStore.projectName }}:
-    <table class="table">
+
+    <table class="table is-fullwidth is-hoverable">
       <thead>
         <tr>
           <th>Name</th>
@@ -210,6 +249,7 @@ async function searchUser() {
           <th>Role</th>
         </tr>
       </thead>
+
       <tbody>
         <!-- List users and their access information -->
         <tr v-for="uip in projectStore.users_in_project" :key="uip.key">
@@ -233,13 +273,20 @@ async function searchUser() {
 
         <!-- Show new user input fields when draftingNewUser is true -->
         <tr v-if="draftingNewUser">
-          <td><input ref="newUserNameRef" v-model="newUserName" type="text" /></td>
-          <td><input ref="newUserAddressAsRef" v-model="newUserAddressAs" type="text" /></td>
+          <td>
+            <input ref="newUserNameRef" class="input" disabled v-model="newUserName" type="text" />
+          </td>
+
+          <td>
+            <input ref="newUserAddressAsRef" v-model="newUserAddressAs" type="text" class="input" disabled />
+          </td>
+
           <td>
             <!-- TODO: change this dropdown -->
 
-            <Multiselect v-model="newUserEmail" :options="userEmails" :close-on-select="true" :clear-on-select="false"
-              placeholder="Select one" label="label" track-by="label" />
+            <Multiselect v-model="newUserEmail" :options="usersDropdownOptions" :close-on-select="true" :clear-on-select="false"
+              placeholder="Select user" label="label" track-by="value"
+              @select="onUserSelected" />
             <!--
             <div class="field">
               <p class="control  has-icons-right">
@@ -256,7 +303,6 @@ async function searchUser() {
                 </option>
               </datalist>
             </div> -->
-
           </td>
 
           <td>
