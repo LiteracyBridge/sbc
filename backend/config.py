@@ -33,17 +33,19 @@ class SecretManagerConfig:
 
     @classmethod
     def _get_secret(cls, secret_name: str) -> str | dict[str, Any]:
-        secret_string = cls.client.get_secret_value(SecretId=secret_name)[
-            "SecretString"
-        ]
         try:
+            secret_string = cls.client.get_secret_value(SecretId=secret_name)[
+                "SecretString"
+            ]
             return json.loads(secret_string)
-        except json.decoder.JSONDecodeError:
+        except Exception as err:
+            print(err)
             return secret_string
+
 
     @classmethod
     def get_secrets(cls, settings: BaseSettings) -> dict[str, Any]:
-        secrets = cls._get_secret(cls.secret_name)
+        secrets = cls._get_secret("lb_stats_test")
         return Settings(
             {
                 "db_name": "impact",
