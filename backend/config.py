@@ -46,7 +46,7 @@ class SecretManagerConfig:
 
     @classmethod
     def get_secrets(cls, settings: BaseSettings) -> dict[str, Any]:
-        return {name: cls._get_secret(name) for name, _ in settings.__fields__.items()}
+        return {db_name: cls._get_secret(name) for name, _ in settings.__fields__.items()}
 
     @classmethod
     def customize_sources(
@@ -70,8 +70,12 @@ class DatabaseSettings(BaseModel):
 
 
 class Settings(BaseSettings):
-    example_secret: str
-    example_complex: DatabaseSettings
+    # example_secret: str
+    db_name: str
+    db_host: str
+    db_password: str
+    db_user: str
+    # db: DatabaseSettings
 
     class Config(SecretManagerConfig):
         if getenv("APP_ENV", "production") == "local":
@@ -79,4 +83,5 @@ class Settings(BaseSettings):
         # ...
 
 
+settings = Settings()
 print(Settings().dict())
