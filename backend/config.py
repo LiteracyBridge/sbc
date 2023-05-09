@@ -39,7 +39,7 @@ class SecretManagerConfig:
             ]
             return json.loads(secret_string)
         except Exception as err:
-            print(err)
+            raise err
             return secret_string
 
 
