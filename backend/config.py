@@ -59,6 +59,7 @@ class Settings:
 
             # secrets = self._get_secret("lb_stats_test")
             self.db_name = "impact"
+            self.db_user = secrets["username"]
             self.db_password = secrets["password"]
             self.db_host = secrets["host"]
             self.db_port = secrets["port"]
