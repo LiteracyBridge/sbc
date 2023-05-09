@@ -45,8 +45,8 @@ class SecretManagerConfig:
     def get_secrets(cls, settings: BaseSettings) -> dict[str, Any]:
         secrets = cls._get_secret(cls.secret_name)
         return Settings(
-            **{
-                "db_name": "image",
+            {
+                "db_name": "impact",
                 "db_password": secrets["password"],
                 "db_host": secrets["host"],
                 "db_port": secrets["port"],
@@ -66,12 +66,6 @@ class SecretManagerConfig:
             env_settings,
             file_secret_settings,
         )
-
-
-class DatabaseSettings(BaseModel):
-    user: str
-    password: str
-    db_name: str
 
 
 class Settings(BaseSettings):
