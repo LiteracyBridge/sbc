@@ -13,6 +13,7 @@ from handlers.http_exception_handler import http_exception_handler
 from fastapi.middleware.cors import CORSMiddleware
 
 import models
+
 # from database import SessionLocal, engine
 
 # models.Base.metadata.create_all(bind=engine)
@@ -21,7 +22,6 @@ import models
 app = FastAPI()
 
 origins = [
-    "http://localhost.tiangolo.com",
     "*"
 ]
 

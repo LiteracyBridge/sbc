@@ -1,5 +1,5 @@
 import json
-from typing import Any
+from typing import Any, Optional
 
 from boto3 import Session
 from pydantic import BaseSettings, BaseModel
@@ -23,16 +23,13 @@ AWS_REGION = "us-west-2"
 
 class SecretManagerConfig:
     def __init__(self) -> None:
-        self.session = Session(
-            aws_access_key_id="test",
-            aws_secret_access_key="test",
-            region_name="us-east-1",
-        )
+        self.session = Session()
         self.client = self.session.client(
-            endpoint_url="http://localhost:4566",
+            # endpoint_url="http://localhost:4566",
             service_name="secretsmanager",
-            region_name="us-east-1",
+            region_name=AWS_REGION,
         )
+        self.secret_name: str = "lb_stats_test"
 
     @classmethod
     def _get_secret(cls, secret_name: str) -> str | dict[str, Any]:
@@ -46,7 +43,15 @@ class SecretManagerConfig:
 
     @classmethod
     def get_secrets(cls, settings: BaseSettings) -> dict[str, Any]:
-        return {db_name: cls._get_secret(name) for name, _ in settings.__fields__.items()}
+        secrets = cls._get_secret(cls.secret_name)
+        return Settings(
+            **{
+                "db_name": "image",
+                "db_password": secrets["password"],
+                "db_host": secrets["host"],
+                "db_port": secrets["port"],
+            }
+        )
 
     @classmethod
     def customize_sources(
@@ -75,6 +80,7 @@ class Settings(BaseSettings):
     db_host: str
     db_password: str
     db_user: str
+    db_port: Optional[str] = "5432"
     # db: DatabaseSettings
 
     class Config(SecretManagerConfig):
@@ -84,4 +90,4 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
-print(Settings().dict())
+# print(Settings().dict())
