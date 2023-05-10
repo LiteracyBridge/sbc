@@ -41,8 +41,9 @@ const goHome = function () {
 
         <div class="navbar-item" @click="goHome">
           <!-- <a class="navbar-item"> -->
-          <img src="@/assets/logo.png"
-            alt="Bulma: Free, open source, and modern CSS framework based on Flexbox" class="mr-1">
+          <img src="@/assets/logo.png" alt="Bulma: Free, open source, and modern CSS framework based on Flexbox"
+            class="mr-1">
+            SBC Impact Designer
           <!-- </a> -->
         </div>
 
@@ -86,6 +87,9 @@ const goHome = function () {
 
           <div class="navbar-item has-dropdown is-hoverable">
             <a class="navbar-link">
+              <span class="icon mr-1">
+                <i class="fas fa-user-circle"></i>
+              </span>
               {{ userStore.address_as }}
             </a>
 
@@ -93,20 +97,32 @@ const goHome = function () {
 
 
               <RouterLink v-if="projectStore.prj_id" to="/drivers" class="navbar-item">
+                <span class="icon mr-1">
+                  <i class="fas fa-book"></i>
+                </span>
                 Resources
               </RouterLink>
 
               <RouterLink to="/projects" class="navbar-item">
+                <span class="icon mr-1">
+                  <i class="fas fa-briefcase"></i>
+                </span>
                 Projects
               </RouterLink>
 
               <RouterLink v-if="projectStore.prj_id" to="/activities" class="navbar-item">
+                <span class="icon mr-1">
+                  <i class="fas fa-question-circle"></i>
+                </span>
                 Help
               </RouterLink>
 
               <hr class="navbar-divider">
               <div v-if="userStore.loggedIn">
                 <RouterLink to="/login" class="navbar-item">
+                  <span class="icon mr-1">
+                    <i class="fas fa-sign-out"></i>
+                  </span>
                   Logout
                 </RouterLink>
               </div>
