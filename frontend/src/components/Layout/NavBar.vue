@@ -39,15 +39,19 @@ const goHome = function () {
     <div class="container is-fluid">
       <div class="navbar-brand">
 
-        <div class="container" @click="toggleSideNav">
+        <div class="navbar-item" @click="goHome">
+          <!-- <a class="navbar-item"> -->
+          <img src="@/assets/logo.png"
+            alt="Bulma: Free, open source, and modern CSS framework based on Flexbox" class="mr-1">
+          <!-- </a> -->
+        </div>
+
+        <!-- <div class="container" @click="toggleSideNav">
           <div class="bar1"></div>
           <div class="bar2"></div>
           <div class="bar3"></div>
-        </div>
+        </div> -->
 
-        <div class="navbar-item is-size-4" @click="goHome">
-          SBC Impact Designer
-        </div>
 
 
 
@@ -109,9 +113,9 @@ const goHome = function () {
             </div>
           </div>
 
-          <div class="navbar-item">
+          <!-- <div class="navbar-item">
             <img :src="LogoWhite" alt="Logo" />
-          </div>
+          </div> -->
 
 
         </div>
