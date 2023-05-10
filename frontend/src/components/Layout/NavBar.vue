@@ -1,5 +1,6 @@
 <script setup>
 import { ref } from 'vue'
+import { Auth } from 'aws-amplify';
 import { onClickOutside } from '@vueuse/core'
 import { useUserStore } from '@/stores/user'
 import { useProjectStore } from '@/stores/projects';
@@ -31,6 +32,26 @@ const goHome = function () {
   router.push('/');
 }
 
+
+async function signOut() {
+  try {
+    await Auth.signOut()
+      .then((resp) => {
+        userStore.setUser();
+        sideNavStore.hide()
+
+        router.push('/login');
+        window.location.reload()
+      })
+  } catch (error) {
+    userStore.setUser();
+    router.push('/login')
+
+    window.location.reload()
+    console.log('error signing out: ', error);
+  }
+}
+
 </script>
 
 <template>
@@ -43,7 +64,7 @@ const goHome = function () {
           <!-- <a class="navbar-item"> -->
           <img src="@/assets/logo.png" alt="Bulma: Free, open source, and modern CSS framework based on Flexbox"
             class="mr-1">
-            SBC Impact Designer
+          SBC Impact Designer
           <!-- </a> -->
         </div>
 
@@ -119,12 +140,13 @@ const goHome = function () {
 
               <hr class="navbar-divider">
               <div v-if="userStore.loggedIn">
-                <RouterLink to="/login" class="navbar-item">
+                <!-- FIX: fix user logout -->
+                <a @click="signOut" class="navbar-item">
                   <span class="icon mr-1">
                     <i class="fas fa-sign-out"></i>
                   </span>
                   Logout
-                </RouterLink>
+                </a>
               </div>
             </div>
           </div>

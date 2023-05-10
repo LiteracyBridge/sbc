@@ -9,6 +9,9 @@ import "@aws-amplify/ui-vue/styles.css";
 import { Amplify } from "aws-amplify";
 import awsconfig from "./aws-exports";
 import { useSideNavStore } from "@/stores/sideNav";
+import { useUserStore } from '@/stores/user';
+
+const userStore = useUserStore();
 
 // Set ONLINE to true when connected to the internet or false when offline
 const ONLINE = true;
@@ -21,7 +24,7 @@ const sideNavStore = useSideNavStore();
 const showSideNav = computed(() => sideNavStore.visible);
 
 // Configure AWS Amplify with the provided configuration
-Amplify.configure(awsconfig);
+// Amplify.configure(awsconfig);
 
 // On component mount, download the lookup data if online
 onMounted(() => {
@@ -32,7 +35,7 @@ onMounted(() => {
 <template>
   <div class="app-wrapper">
     <!-- Render the navigation bar -->
-    <NavBar />
+    <NavBar  v-if="userStore.loggedIn" />
     <div class="left-side-nav-container">
       <!-- Render the left side navigation if it should be visible -->
       <LeftSideNav v-if="showSideNav" v-model="showSideNav" />
@@ -40,6 +43,8 @@ onMounted(() => {
         class="container is-max-desktop px-2 py-4 custom-container mt-6"
         :class="{ 'has-left-side-nav': showSideNav, 'main-content': !showSideNav }"
       >
+
+
         <!-- Render the router view using the current route's fullPath as a key -->
         <router-view :key="$route.fullPath"></router-view>
       </div>
