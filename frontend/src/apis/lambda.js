@@ -195,7 +195,7 @@ export async function twilioBroadcast(message, topic) {
   if (LOG) console.log(response);
 }
 
-const API_URL = "http://localhost:5000"
+const API_URL = import.meta.env.VITE_SBC_API_URL
 export class UsersApi {
   static async getAll() {
     return axios.get(`${API_URL}/users`).then(resp => {

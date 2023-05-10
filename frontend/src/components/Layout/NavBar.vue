@@ -1,44 +1,40 @@
 <script setup>
-  import { ref } from 'vue'
-  import { onClickOutside } from '@vueuse/core'
-  import { useUserStore } from '@/stores/user'
-  import { useProjectStore } from '@/stores/projects';
-  import { useSideNavStore } from "@/stores/sideNav";
-  import { useRouter } from 'vue-router';
-  import LogoWhite from '@/assets/logo-white.png';
+import { ref } from 'vue'
+import { onClickOutside } from '@vueuse/core'
+import { useUserStore } from '@/stores/user'
+import { useProjectStore } from '@/stores/projects';
+import { useSideNavStore } from "@/stores/sideNav";
+import { useRouter } from 'vue-router';
+import LogoWhite from '@/assets/logo-white.png';
 
-  const router = useRouter();
-  const showMobileNav = ref(false)
-  const userStore = useUserStore();
-  const projectStore = useProjectStore();
-  const navbarMenuRef = ref(null)
-  const navbarBurgerRef = ref(null)
-  const sideNavStore = useSideNavStore();
+const router = useRouter();
+const showMobileNav = ref(false)
+const userStore = useUserStore();
+const projectStore = useProjectStore();
+const navbarMenuRef = ref(null)
+const navbarBurgerRef = ref(null)
+const sideNavStore = useSideNavStore();
 
-  onClickOutside(navbarMenuRef, () => {
-    showMobileNav.value = false
-  }, {
-    ignore: [navbarBurgerRef]
-  })
+onClickOutside(navbarMenuRef, () => {
+  showMobileNav.value = false
+}, {
+  ignore: [navbarBurgerRef]
+})
 
-  const toggleSideNav = function (event) {
-    const x = event.currentTarget;
-    x.classList.toggle("change");
-    sideNavStore.toggle();
-  };
+const toggleSideNav = function (event) {
+  const x = event.currentTarget;
+  x.classList.toggle("change");
+  sideNavStore.toggle();
+};
 
-  const goHome = function() {
-    router.push('/');
-  }
+const goHome = function () {
+  router.push('/');
+}
 
 </script>
 
 <template>
-  <nav
-    class="navbar is-success is-fixed-top"
-    aria-label="main navigation"
-    role="navigation"
-  >
+  <nav class="navbar is-success is-fixed-top" aria-label="main navigation" role="navigation">
     <!-- <div class="container is-max-desktop px-2"> -->
     <div class="container is-fluid">
       <div class="navbar-brand">
@@ -50,72 +46,68 @@
         </div>
 
         <div class="navbar-item is-size-4" @click="goHome">
-            SBC Impact Designer
-          </div>
+          SBC Impact Designer
+        </div>
 
 
 
-        <a
-          @click.prevent="showMobileNav = !showMobileNav"
-          class="navbar-burger"
-          :class="{ 'is-active' : showMobileNav }"
-          aria-expanded="false"
-          aria-label="menu"
-          data-target="navbarBasic"
-          role="button"
-          ref="navbarBurgerRef"
-        >
+        <a @click.prevent="showMobileNav = !showMobileNav" class="navbar-burger" :class="{ 'is-active': showMobileNav }"
+          aria-expanded="false" aria-label="menu" data-target="navbarBasic" role="button" ref="navbarBurgerRef">
           <span aria-hidden="true"></span>
           <span aria-hidden="true"></span>
           <span aria-hidden="true"></span>
         </a>
       </div>
 
-      <div
-        id="navbarBasic"
-        class="navbar-menu"
-        :class="[{ 'is-active': showMobileNav}]"
-        ref="navbarMenuRef"
-      >
+      <div id="navbarBasic" class="navbar-menu" :class="[{ 'is-active': showMobileNav }]" ref="navbarMenuRef">
         <div class="navbar-end" v-if="userStore.loggedIn">
-          <RouterLink
-            @click="showMobileNav = false"
-            to="/projects"
-            class="navbar-item"
-            active-class="is-active"
-          >
+          <!-- <RouterLink @click="showMobileNav = false" to="/projects" class="navbar-item" active-class="is-active">
             Projects
           </RouterLink>
 
-          <RouterLink
-            v-if="projectStore.prj_id"
-            @click="showMobileNav = false"
-            to="/drivers"
-            class="navbar-item"
-            active-class="is-active"
-          >
+          <RouterLink v-if="projectStore.prj_id" @click="showMobileNav = false" to="/drivers" class="navbar-item"
+            active-class="is-active">
             Resources
-          </RouterLink>
-          
-          <RouterLink
-            v-if="projectStore.prj_id"
-            @click="showMobileNav = false"
-            to="/activities"
-            class="navbar-item"
-            active-class="is-active"
-          >
+          </RouterLink> -->
+          <!--
+          <RouterLink v-if="projectStore.prj_id" @click="showMobileNav = false" to="/activities" class="navbar-item"
+            active-class="is-active">
             Help
           </RouterLink>
 
-          <RouterLink
-            @click="showMobileNav = false"
-            to="/login"
-            class="navbar-item"
-            active-class="is-active"
-          >
-          <span v-if="userStore.loggedIn" class="mr-2">Logout</span> 
-          {{ userStore.address_as }}
-          </RouterLink>
+          <RouterLink @click="showMobileNav = false" to="/login" class="navbar-item" active-class="is-active">
+            <span v-if="userStore.loggedIn" class="mr-2">Logout</span>
+            {{ userStore.address_as }}
+          </RouterLink> -->
+
+          <div class="navbar-item has-dropdown is-hoverable">
+            <a class="navbar-link">
+              {{ userStore.address_as }}
+            </a>
+
+            <div class="navbar-dropdown">
+
+
+              <RouterLink v-if="projectStore.prj_id" to="/drivers" class="navbar-item">
+                Resources
+              </RouterLink>
+
+              <RouterLink to="/projects" class="navbar-item">
+                Projects
+              </RouterLink>
+
+              <RouterLink v-if="projectStore.prj_id" to="/activities" class="navbar-item">
+                Help
+              </RouterLink>
+
+              <hr class="navbar-divider">
+              <div v-if="userStore.loggedIn">
+                <RouterLink to="/login" class="navbar-item">
+                  Logout
+                </RouterLink>
+              </div>
+            </div>
+          </div>
 
           <div class="navbar-item">
             <img :src="LogoWhite" alt="Logo" />
@@ -136,6 +128,7 @@
     width: 100%;
   }
 }
+
 .navbar {
   z-index: 102;
 }
@@ -148,6 +141,7 @@
   display: inline-block;
   cursor: pointer;
 }
+
 .bar1 {
   width: 35px;
   height: 4px;
@@ -189,12 +183,19 @@
 }
 
 .custom-link {
-  font-family: /* Your desired font-family */;
-  font-size: /* Your desired font-size */;
-  font-weight: /* Your desired font-weight */;
+  font-family:
+    /* Your desired font-family */
+  ;
+  font-size:
+    /* Your desired font-size */
+  ;
+  font-weight:
+    /* Your desired font-weight */
+  ;
   color: inherit;
   text-decoration: none;
 }
+
 .custom-link:hover,
 .custom-link:focus {
   color: inherit;
@@ -204,6 +205,4 @@
 .custom-link-text {
   color: white;
 }
-
-
 </style>
