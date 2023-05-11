@@ -92,7 +92,7 @@ export const useProjectDataStore = defineStore({
         f4ai: "item", label: "Key Stakeholders"
       },
     ],
-    project_data: {},
+    project_data: [],
     topics: [
       { id: 0, sequence: 0, value: "basic", label: "Project Info" },
       { id: 1, sequence: 1, value: "background", label: "Background and context" },
