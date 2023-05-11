@@ -1,4 +1,5 @@
 <script setup>
+
 import { onMounted, ref } from "vue";
 import { useUserStore } from "@/stores/user";
 import { useProjectDataStore } from '@/stores/projectData'
@@ -23,6 +24,8 @@ const BULB_ICON = "/images/lightbulb.png"
 const HOURGLASS_ICON = "/images/hourglass.svg"
 const bulbIcon = ref(BULB_ICON);
 const projectData = ref(projectDataStore.project_data);
+
+const gptResponses = ref({});
 
 const props = defineProps({
   topic: {
@@ -76,7 +79,11 @@ async function submitContextAndPrompt(id, topic) {
   // this.$refs[`icon-${id}`].src = HOURGLASS_ICON;
   const ai_answer = await lambda.gptCompletion(qToFill.q2ai, context, qToFill.f4ai);
   iconRefs.value[bulbCount - 1].src = BULB_ICON;
-  projectDataStore.setData(qToFill.id, ai_answer);
+
+  console.error("AI answer", ai_answer)
+  gptResponses.value[`${id}`] = ai_answer;
+  // gptResponses.value = gptResponses.value.concat({id: id, answer: ai_answer});
+  // projectDataStore.setData(qToFill.id, ai_answer);
 }
 
 async function submitPrompt() {
@@ -130,8 +137,8 @@ async function broadcastPage() {
           <label class="label" :for="`input-${count + 1}`">{{ count + 1 }}. {{ q.q2u }}</label>
 
           <div class="control">
-              <img v-if="q.bulb" :src="BULB_ICON" ref="iconRefs" @click="submitContextAndPrompt(q.id, topic)"
-                class="image is-32x32" />
+            <img v-if="q.bulb" :src="BULB_ICON" ref="iconRefs" @click="submitContextAndPrompt(q.id, topic)"
+              class="image is-32x32" />
           </div>
           <div class="control">
             <!-- <img v-if="q.bulb" :src="BULB_ICON" ref="iconRefs" @click="submitContextAndPrompt(q.id, topic)"
@@ -145,7 +152,26 @@ async function broadcastPage() {
       </div>
 
       <div class="column">
-        Suguestion here
+        <!-- <p>{{ gptResponses.find(i => i.id == q.id)?.answer || '' }}</p> -->
+        <p>{{ gptResponses[`${q.id}`] || '' }}</p>
+
+        <div class="field is-grouped" v-if="gptResponses[`${q.id}`] != undefined">
+          <p class="control">
+            <button class="button is-small" @click="projectDataStore.setData(q.id, gptResponses[`${q.id}`]);">
+              <!-- <span class="icon is-small mr-1">
+                <i class="fas fa-check"></i>
+              </span> -->
+
+              Accept
+            </button>
+          </p>
+
+          <p class="control">
+            <button class="button is-outlined is-small">
+              Cancel
+            </button>
+          </p>
+        </div>
       </div>
 
     </div>
