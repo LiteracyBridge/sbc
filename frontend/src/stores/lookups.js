@@ -44,7 +44,7 @@ export const useLookupStore = defineStore({
   actions: {
     // Downloads lookup data and sets it to the store state
     download() {
-      downloadObjects(init_objects, this, 'lu_');
+      return downloadObjects(init_objects, this, 'lu_');
     },
   },
 });

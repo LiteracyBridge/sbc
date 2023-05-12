@@ -10,8 +10,11 @@ import { Amplify } from "aws-amplify";
 import awsconfig from "./aws-exports";
 import { useSideNavStore } from "@/stores/sideNav";
 import { useUserStore } from '@/stores/user';
+import { AppStore } from "./stores/app.store";
+import GridLoader from "./components/spinners/GridLoader.vue";
 
 const userStore = useUserStore();
+const appStore = AppStore()
 
 // Set ONLINE to true when connected to the internet or false when offline
 const ONLINE = true;
@@ -28,21 +31,30 @@ const showSideNav = computed(() => sideNavStore.visible);
 
 // On component mount, download the lookup data if online
 onMounted(() => {
-  if (ONLINE) lookupStore.download();
+  if (ONLINE) {
+    lookupStore.download().then(() => appStore.setLoading(false))
+  } else {
+    appStore.setLoading(false)
+  }
 });
 </script>
 
 <template>
-  <div class="app-wrapper">
+  <div v-if="appStore.isLoading" id="app-loader" style="margin-top: auto">
+    <figure class="image is-128x128">
+      <img src="@/assets/logo-color.png" />
+    </figure>
+    <!-- <GridLoader :loading="appStore.isLoading"></GridLoader> -->
+  </div>
+
+  <div class="app-wrapper" v-else>
     <!-- Render the navigation bar -->
-    <NavBar  v-if="userStore.loggedIn" />
+    <NavBar v-if="userStore.loggedIn" />
     <div class="left-side-nav-container">
       <!-- Render the left side navigation if it should be visible -->
       <LeftSideNav v-if="showSideNav" v-model="showSideNav" />
-      <div
-        class="container is-max-desktop px-2 py-4 custom-container mt-6"
-        :class="{ 'has-left-side-nav': showSideNav, 'main-content': !showSideNav }"
-      >
+      <div class="container is-max-desktop px-2 py-4 custom-container mt-6"
+        :class="{ 'has-left-side-nav': showSideNav, 'main-content': !showSideNav }">
 
 
         <!-- Render the router view using the current route's fullPath as a key -->
@@ -83,6 +95,15 @@ onMounted(() => {
 
 /* Custom styling for the container */
 .custom-container {
-  max-width: 100%; /* Adjust this value to your desired width */
+  max-width: 100%;
+  /* Adjust this value to your desired width */
+}
+
+#app-loader {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  /* bring your own prefixes */
+  transform: translate(-50%, -50%);
 }
 </style>

@@ -5,7 +5,7 @@ import { useProjectDataStore } from '@/stores/projectData'
 import { useRouter } from "vue-router";
 import * as lambda from "@/apis/lambda";
 import MessageModal from '../components/MessageModal.vue';
-import PulseLoaderVue from "./PulseLoader.vue";
+import PulseLoaderVue from "./spinners/PulseLoader.vue";
 
 const showMessageModal = ref(false);
 const userStore = useUserStore();
