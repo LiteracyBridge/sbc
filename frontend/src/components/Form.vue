@@ -1,11 +1,11 @@
 <script setup>
-
 import { onMounted, ref } from "vue";
 import { useUserStore } from "@/stores/user";
 import { useProjectDataStore } from '@/stores/projectData'
 import { useRouter } from "vue-router";
 import * as lambda from "@/apis/lambda";
 import MessageModal from '../components/MessageModal.vue';
+import PulseLoaderVue from "./PulseLoader.vue";
 
 const showMessageModal = ref(false);
 const userStore = useUserStore();
@@ -25,6 +25,10 @@ const HOURGLASS_ICON = "/images/hourglass.svg"
 const bulbIcon = ref(BULB_ICON);
 const projectData = ref(projectDataStore.project_data);
 
+/**
+ * @type {Object.<string, {answer: string, isLoading: boolean}>}
+ *
+ */
 const gptResponses = ref({});
 
 const props = defineProps({
@@ -62,6 +66,12 @@ onMounted(() => {
 );
 
 async function submitContextAndPrompt(id, topic) {
+  const _gptResp = gptResponses.value[`${id}`] || { id: id, answer: "", isLoading: true };
+  _gptResp.isLoading = true;
+
+  gptResponses.value[`${id}`] = _gptResp;
+
+
   let context = "";
   let qToFill = null;
   for (var q of projectDataStore.questions) {
@@ -81,7 +91,9 @@ async function submitContextAndPrompt(id, topic) {
   iconRefs.value[bulbCount - 1].src = BULB_ICON;
 
   console.error("AI answer", ai_answer)
-  gptResponses.value[`${id}`] = ai_answer;
+
+  gptResponses.value[`${id}`].answer = ai_answer;
+  gptResponses.value[`${id}`].isLoading = false;
   // gptResponses.value = gptResponses.value.concat({id: id, answer: ai_answer});
   // projectDataStore.setData(qToFill.id, ai_answer);
 }
@@ -123,9 +135,9 @@ async function broadcastPage() {
     </Suspense>
     <br />
 
-    <div v-for="(q, count) in projectDataStore.questionsForTopic(topic)" :key="q.id" class="columns">
+    <div v-for="(q, count) in projectDataStore.questionsForTopic(topic)" :key="q.id" class="columns is-vcentered">
 
-      <div class="column is-two-thirds">
+      <div class="column is-three-fifths">
 
         <!-- <strong>{{ count + 1 }}. {{ q.q2u }} </strong><br />
         <img v-if="q.bulb" :src="BULB_ICON" ref="iconRefs" @click="submitContextAndPrompt(q.id, topic)"
@@ -153,14 +165,26 @@ async function broadcastPage() {
 
       <div class="column">
         <!-- <p>{{ gptResponses.find(i => i.id == q.id)?.answer || '' }}</p> -->
-        <p>{{ gptResponses[`${q.id}`] || '' }}</p>
 
-        <div class="field is-grouped" v-if="gptResponses[`${q.id}`] != undefined">
+        <!-- Display loading indicator -->
+        <div v-if="gptResponses[`${q.id}`]?.isLoading == true">
+          <PulseLoaderVue :loading="gptResponses[`${q.id}`]?.isLoading"></PulseLoaderVue>
+
+          <span>Getting AI suggestions, please wait...</span>
+        </div>
+
+        <p v-else>
+          {{ gptResponses[`${q.id}`]?.answer || 'No suggestions available. Click on the light bulb to see suggestions' }}
+        </p>
+
+        <div class="field is-grouped mt-3" v-if="gptResponses[`${q.id}`]?.answer != undefined && gptResponses[`${q.id}`]?.isLoading != true">
           <p class="control">
-            <button class="button is-small" @click="projectDataStore.setData(q.id, gptResponses[`${q.id}`]);">
-              <!-- <span class="icon is-small mr-1">
+            <button class="button is-small is-dark"
+              @click="projectDataStore.setData(q.id, projectDataStore.getData(q.id) + '\n\n' + gptResponses[`${q.id}`]?.answer);">
+
+              <span class="icon is-small mr-1">
                 <i class="fas fa-check"></i>
-              </span> -->
+              </span>
 
               Accept
             </button>
@@ -172,6 +196,7 @@ async function broadcastPage() {
             </button>
           </p>
         </div>
+
       </div>
 
     </div>
