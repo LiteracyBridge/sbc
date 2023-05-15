@@ -10,6 +10,7 @@ import { Amplify } from 'aws-amplify';
 import awsconfig from './aws-exports';
 import mermaidDirective from './directives/mermaid';
 
+import "vue3-rich-accordion/accordion-library-styles.css";
 import "vue-multiselect/dist/vue-multiselect.css"
 import 'vue3-side-panel/dist/vue3-side-panel.css'
 

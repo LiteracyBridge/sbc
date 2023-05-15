@@ -1,7 +1,7 @@
 <script setup>
 import { ref, reactive, onMounted, onBeforeUnmount, computed } from "vue";
 import { Multiselect } from 'vue-multiselect'
-
+import { AccordionList, AccordionItem } from "vue3-rich-accordion";
 
 import { onClickOutside } from "@vueuse/core";
 import { useLookupStore } from "../stores/lookups";
@@ -110,7 +110,7 @@ const closeButton = () => {
     transition-name="slide-right">
 
     <div class="columns">
-      <div class="column is-one-third mx-5 my-5">
+      <div class="column is-one-fifth mx-5 my-5">
 
         <!-- TODO: put in an input field -->
         <Multiselect v-model="selectedIndicatorType" :options="indicatorsList" :close-on-select="true"
@@ -120,7 +120,7 @@ const closeButton = () => {
 
         <aside class="menu">
           <p class="menu-label">
-            {{ selectedIndicatorType.label }}
+            {{ selectedIndicatorType?.label }}
           </p>
 
           <ul class="menu-list">
@@ -134,7 +134,67 @@ const closeButton = () => {
         </aside>
 
       </div>
-      <div class="column">Content here</div>
+
+      <div class="column mx-1 my-5">
+        <div class="level">
+
+
+          <div class="level-left">
+            <div class="level-item">
+
+              <!-- <div class="container mb-4"> -->
+                <p>Selected category title </p>
+              <!-- </div> -->
+            </div>
+          </div>
+
+          <div class="level-right">
+            <div class="level-item">
+              <button class="button is-primary">
+                Save
+              </button>
+            </div>
+          </div>
+
+
+
+        </div>
+        <hr>
+
+        <AccordionList>
+
+          <AccordionItem>
+            <template #summary>Item summary</template>
+            <!-- <template #icon>
+              <button class="button is-danger">Remove</button>
+              <button class="button is-primary">Add</button>
+            </template> -->
+
+            <!-- Main content -->
+            <div class="card is-shadowless is-small">
+              <div class="card-content">
+                <p>There are two hard things in computer science: cache invalidation, naming things, and off-by-one
+                  errors.
+                </p>
+              </div>
+
+              <footer class="card-footer">
+                <p class="card-footer-item">
+                  <button class="is-small button is-primary">
+                    Add Indicator
+                  </button>
+                </p>
+                <p class="card-footer-item">
+                  <span>
+                    Remove
+                  </span>
+                </p>
+              </footer>
+            </div>
+          </AccordionItem>
+        </AccordionList>
+
+      </div>
 
     </div>
 
