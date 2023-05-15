@@ -69,7 +69,7 @@ function editActivity(activity) {
         <td v-if="activityStore.subActivitiesByActivityId(activity.id).length==0"></td>
         <td v-else-if="!expandActivity.includes(activity.id)"><a @click="expandActivity.push(activity.id)">></a></td>
         <td v-else><a @click="expandActivity.splice(expandActivity.indexOf(activity.id),1)">V</a></td>
-        <td>{{activity.id}}</td> 
+        <td>{{activity.id}}</td>
         <td><a @click="editActivity(activity)">{{activity.name}}</a></td>
         <td>{{lookupStore.lookupNameById('activity_status',activity.status_id)}}</td>
         <td>{{projectStore.userName(activity.owner_id)}}</td>
@@ -95,7 +95,7 @@ function editActivity(activity) {
        </template>
       </template>
     </tbody>
-  </table>  
+  </table>
 
 
 </template>

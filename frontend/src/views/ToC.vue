@@ -4,6 +4,10 @@ import { onMounted, onUnmounted, reactive, ref, computed } from "vue";
 import { useSideNavStore } from "../stores/sideNav";
 import axios from "axios";
 import { onClickOutside } from "@vueuse/core";
+import IndicatorBrowserPanel from "@/components/IndicatorBrowserPanel.vue";
+
+const isIndicatorModalVisible = ref(false)
+
 const svgUrl = ref("");
 const svgImgSrcUrl = ref("");
 const diagramContainer = ref(null);
@@ -183,8 +187,8 @@ const diagram = reactive({
   edges: [],
   edgeSet: new Set(),
 
-  edgeLabel(edge,fromOrTo) {
-    if (fromOrTo=='from') {
+  edgeLabel(edge, fromOrTo) {
+    if (fromOrTo == 'from') {
       return this.nodes[edge.fromId].label;
     }
     return this.nodes[edge.toId].label
@@ -220,7 +224,7 @@ const diagram = reactive({
   },
 
   createEdge: function (fromNodeId, toNodeId, draw = true) {
-    console.log('createEdge:'+fromNodeId+toNodeId+draw);
+    console.log('createEdge:' + fromNodeId + toNodeId + draw);
     if (fromNodeId == toNodeId) return; // prevent double click from creating a useless self-edge
     const key = `${fromNodeId}|${toNodeId}`;
     if (!this.edgeSet.has(key)) {
@@ -266,15 +270,15 @@ onMounted(() => {
 
   window.addEventListener("keydown", escapeKeyHandler);
 
-  window.edgeDoubleClick = function (fromNodeId,toNodeId) {
-    console.log(fromNodeId,toNodeId); //selectedEdgeIds
-    const edgeIndex = diagram.edges.findIndex((e)=>e.fromId==fromNodeId && e.toId==toNodeId);
+  window.edgeDoubleClick = function (fromNodeId, toNodeId) {
+    console.log(fromNodeId, toNodeId); //selectedEdgeIds
+    const edgeIndex = diagram.edges.findIndex((e) => e.fromId == fromNodeId && e.toId == toNodeId);
     selectedEdge.value = diagram.edges[edgeIndex];
     if (useSideNavStore().visible) {
       useSideNavStore().hide();
       tempNavHidden = true;
     }
-};
+  };
   window.nodeDoubleClick = function (nodeId) {
     fromNodeId.value = null;
     selectedNodeId.value = nodeId;
@@ -483,14 +487,8 @@ async function loadExampleToc(filename) {
           <div class="field mr-4">
             <label class="label">Label of new item</label>
             <div class="control">
-              <input
-                class="input"
-                type="text"
-                name="addNodeLabel"
-                id="addNodeLabel"
-                v-model="addNodeLabel"
-                @keyup.enter="addNode"
-              />
+              <input class="input" type="text" name="addNodeLabel" id="addNodeLabel" v-model="addNodeLabel"
+                @keyup.enter="addNode" />
             </div>
           </div>
           <div class="field mr-4">
@@ -517,7 +515,7 @@ async function loadExampleToc(filename) {
             </div>
           </div>
         </div>
-      
+
         <div class="field is-grouped">
           <div class="field">
             <div class="control">
@@ -538,12 +536,14 @@ async function loadExampleToc(filename) {
           <div class="field">
             <label class="label">Logic Model View</label>
           </div>
-        </div>        
+        </div>
       </div>
     </section>
 
     <div class="diagram-container" ref="diagramContainer" style="display: flex; width: 100%;"></div>
 
+    <!-- <IndicatorBrowserModalVue :is-visible="isIndicatorModalVisible" v-if="isIndicatorModalVisible"></IndicatorBrowserModalVue> -->
+    <IndicatorBrowserPanel :is-visible="isIndicatorModalVisible"  @is-closed="isIndicatorModalVisible = false"></IndicatorBrowserPanel>
 
     <div v-if="selectedNodeId" class="modal is-active p-2">
       <div class="modal-background"></div>
@@ -566,21 +566,13 @@ async function loadExampleToc(filename) {
                     <div class="field-body">
                       <div class="field">
                         <div class="control">
-                          <input
-                            class="input"
-                            type="text"
-                            maxlength="80"
-                            v-model="selectedNode.label"
-                          />
+                          <input class="input" type="text" maxlength="80" v-model="selectedNode.label" />
                         </div>
                       </div>
                     </div>
                     <div class="level-right">
                       <div class="level-item">
-                        <button
-                          class="button is-danger ml-6"
-                          @click="deleteNode(selectedNodeId)"
-                        >
+                        <button class="button is-danger ml-6" @click="deleteNode(selectedNodeId)">
                           Delete
                         </button>
                       </div>
@@ -635,7 +627,7 @@ async function loadExampleToc(filename) {
                           <div class="field">
                             <div class="control">
                               <label class="label">
-                                Validated<br/>
+                                Validated<br />
                                 <input type="checkbox" v-model="selectedNode.validated" />
                               </label>
                             </div>
@@ -648,12 +640,15 @@ async function loadExampleToc(filename) {
                   <div class="field">
                     <label class="label">Indicator</label>
                     <div class="control">
-                      <input
-                        class="input"
-                        type="text"
-                        maxlength="80"
-                        v-model="selectedNode.indicator"
-                      />
+                      <input class="input" type="text" maxlength="80" v-model="selectedNode.indicator" />
+
+                      <!-- TODO: Implement adding of multiple indicators -->
+                      <button class="button is-small" role="button" @click.prevent="isIndicatorModalVisible = !isIndicatorModalVisible">
+                        <span class="icon is-small mr-1">
+                          <i class="fas fa-plus"></i>
+                        </span>
+                        Add Indicator
+                      </button>
                     </div>
                   </div>
 
@@ -661,13 +656,8 @@ async function loadExampleToc(filename) {
                   <div class="field">
                     <label class="label">Description</label>
                     <div class="control">
-                      <textarea
-                        class="textarea"
-                        rows="4"
-                        columns="80"
-                        maxlength="999"
-                        v-model="selectedNode.description"
-                      />
+                      <textarea class="textarea" rows="4" columns="80" maxlength="999"
+                        v-model="selectedNode.description" />
                     </div>
                   </div>
 
@@ -692,41 +682,26 @@ async function loadExampleToc(filename) {
             <div class="box">
               <div class="level-left is-normal">
                 <label class="label">
-                {{ diagram.edgeLabel(selectedEdge,'from') }} ===> 
-                {{ diagram.edgeLabel(selectedEdge,'to') }}</label>
+                  {{ diagram.edgeLabel(selectedEdge, 'from') }} ===>
+                  {{ diagram.edgeLabel(selectedEdge, 'to') }}</label>
               </div>
               <section class="modal-card-body">
                 <form>
                   <div class="field">
                     <label class="label">Assumptions</label>
                     <div class="control">
-                      <textarea
-                        class="textarea"
-                        rows="4"
-                        cols="80"
-                        type="text"
-                        maxlength="999"
-                        v-model="selectedEdge.assumptions"
-                      />
+                      <textarea class="textarea" rows="4" cols="80" type="text" maxlength="999"
+                        v-model="selectedEdge.assumptions" />
                     </div>
                   </div>
                   <div class="field">
                     <label class="label">Risks</label>
                     <div class="control">
-                      <textarea
-                        class="textarea"
-                        rows="4"
-                        type="text"
-                        maxlength="999"
-                        v-model="selectedEdge.risks"
-                      />
+                      <textarea class="textarea" rows="4" type="text" maxlength="999" v-model="selectedEdge.risks" />
                     </div>
                   </div>
-                  <button
-                      class="button is-danger ml-6"
-                      @click="deleteConnection(selectedEdge.fromId, selectedEdge.toId)"
-                    >
-                      Delete
+                  <button class="button is-danger ml-6" @click="deleteConnection(selectedEdge.fromId, selectedEdge.toId)">
+                    Delete
                   </button>
                 </form>
               </section>
@@ -738,7 +713,7 @@ async function loadExampleToc(filename) {
 
 
 
-<!--
+    <!--
                   <div class="field is-horizontal">
                     <div class="field-body">
                       <div class="columns">
@@ -768,7 +743,7 @@ async function loadExampleToc(filename) {
                   </div>
 -->
 
-<!--
+    <!--
                   <div class="field is-grouped">
                     <div class="control">
                       <label class="label">Connected from:</label>
@@ -824,7 +799,7 @@ async function loadExampleToc(filename) {
 
 
 
-<!--
+    <!--
     <section class="section">
       <div class="container">
         <h2 class="title is-4">Downloaded copy:</h2>
@@ -859,9 +834,7 @@ async function loadExampleToc(filename) {
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  padding-bottom: calc(
-    0.5em + 0.25rem
-  );
+  padding-bottom: calc(0.5em + 0.25rem);
 }
 
 .switch {
@@ -899,11 +872,11 @@ async function loadExampleToc(filename) {
   transition: 0.4s;
 }
 
-input:checked + .slider {
+input:checked+.slider {
   background-color: #3f51b5;
 }
 
-input:checked + .slider:before {
+input:checked+.slider:before {
   transform: translateX(26px);
 }
 
@@ -937,7 +910,7 @@ input:checked + .slider:before {
             </div>
           </div>
         </div>
--->   
+-->
 
 
 

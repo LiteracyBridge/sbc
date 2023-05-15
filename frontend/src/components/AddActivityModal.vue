@@ -73,9 +73,9 @@ onClickOutside(modalRef, cancelButton);
             <div class="control">
               <div class="select">
                 <select v-model="draftActivity.owner_id">
-                  <option 
-                    v-for="user in projectStore.users_in_project" 
-                    :value="user.user_id" 
+                  <option
+                    v-for="user in projectStore.users_in_project"
+                    :value="user.user_id"
                     :key="user.user_id">
                     {{user.name}}
                   </option>
@@ -83,15 +83,15 @@ onClickOutside(modalRef, cancelButton);
               </div>
             </div>
           </div>
-          
+
           <div class="field">
             <label class="label">Status</label>
             <div class="control">
               <div class="select">
                 <select v-model="draftActivity.status_id">
-                  <option 
-                    v-for="status in lookupStore.activity_status" 
-                    :value="status.id" 
+                  <option
+                    v-for="status in lookupStore.activity_status"
+                    :value="status.id"
                     :key="status.id">
                     {{status.name}}
                   </option>
@@ -106,9 +106,9 @@ onClickOutside(modalRef, cancelButton);
               <div class="select">
                 <select v-model="draftActivity.parent_id">
                   <option :value="null">Not part of a group</option>
-                  <option 
-                    v-for="activity in activityStore.activities.filter((a)=>a.id != draftActivity.id)" 
-                    :value="activity.id" 
+                  <option
+                    v-for="activity in activityStore.activities.filter((a)=>a.id != draftActivity.id)"
+                    :value="activity.id"
                     :key="activity.id">
                         {{activity.name}}
                   </option>
@@ -123,9 +123,9 @@ onClickOutside(modalRef, cancelButton);
               <div class="select">
                 <select v-model="draftActivity.intervention_id">
                   <option :value="null">None</option>
-                  <option 
-                    v-for="intervention in interventionStore.interventions" 
-                    :value="intervention.id" 
+                  <option
+                    v-for="intervention in interventionStore.interventions"
+                    :value="intervention.id"
                     :key="intervention.id">
                     {{intervention.name}}
                   </option>
@@ -182,9 +182,9 @@ onClickOutside(modalRef, cancelButton);
                     <div class="control">
                       <div class="select">
                         <select v-model="schedule.owner_id">
-                          <option 
-                            v-for="user in projectStore.users_in_project" 
-                            :value="user.user_id" 
+                          <option
+                            v-for="user in projectStore.users_in_project"
+                            :value="user.user_id"
                             :key="user.user_id">
                             {{user.name}}
                           </option>
@@ -196,29 +196,29 @@ onClickOutside(modalRef, cancelButton);
                     <div class="control">
                       <div class="select">
                         <select v-model="schedule.status_id">
-                          <option 
-                            v-for="status in lookupStore.activity_status" 
-                            :value="status.id" 
+                          <option
+                            v-for="status in lookupStore.activity_status"
+                            :value="status.id"
                             :key="status.id">
                             {{status.name}}
                           </option>
                         </select>
                       </div>
-                    </div>                    
+                    </div>
                   </td>
                   <td>
                     <div class="control">
                       <div class="select">
                         <select v-model="schedule.participant_id">
-                          <option 
-                            v-for="participant in participantStore.participants" 
-                            :value="participant.id" 
+                          <option
+                            v-for="participant in participantStore.participants"
+                            :value="participant.id"
                             :key="participant.id">
                             {{participant.name}}
                           </option>
                         </select>
                       </div>
-                    </div>                    
+                    </div>
                   </td>
                 </tr>
                 <tr :class="(i % 2) ? 'has-background-white' : 'has-background-light'">
