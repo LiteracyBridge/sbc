@@ -543,7 +543,8 @@ async function loadExampleToc(filename) {
     <div class="diagram-container" ref="diagramContainer" style="display: flex; width: 100%;"></div>
 
     <!-- <IndicatorBrowserModalVue :is-visible="isIndicatorModalVisible" v-if="isIndicatorModalVisible"></IndicatorBrowserModalVue> -->
-    <IndicatorBrowserPanel :is-visible="isIndicatorModalVisible"  @is-closed="isIndicatorModalVisible = false"></IndicatorBrowserPanel>
+    <IndicatorBrowserPanel :is-visible="isIndicatorModalVisible" @is-closed="isIndicatorModalVisible = false">
+    </IndicatorBrowserPanel>
 
     <div v-if="selectedNodeId" class="modal is-active p-2">
       <div class="modal-background"></div>
@@ -643,7 +644,8 @@ async function loadExampleToc(filename) {
                       <input class="input" type="text" maxlength="80" v-model="selectedNode.indicator" />
 
                       <!-- TODO: Implement adding of multiple indicators -->
-                      <button class="button is-small" role="button" @click.prevent="isIndicatorModalVisible = !isIndicatorModalVisible">
+                      <button class="button is-small" role="button"
+                        @click.prevent="isIndicatorModalVisible = !isIndicatorModalVisible">
                         <span class="icon is-small mr-1">
                           <i class="fas fa-plus"></i>
                         </span>
@@ -659,6 +661,53 @@ async function loadExampleToc(filename) {
                       <textarea class="textarea" rows="4" columns="80" maxlength="999"
                         v-model="selectedNode.description" />
                     </div>
+                  </div>
+
+                  <div class="field">
+                    <label class="label">Indicators</label>
+
+                    <hr>
+
+                    <div class="field is-grouped is-grouped-multiline">
+                      <div class="control">
+                        <div class="tags has-addons">
+                          <a class="tag is-link">Technology</a>
+                          <a class="tag is-delete"></a>
+                        </div>
+                      </div>
+
+                      <div class="control">
+                        <div class="tags has-addons">
+                          <a class="tag is-link">CSS</a>
+                          <a class="tag is-delete"></a>
+                        </div>
+                      </div>
+
+                      <div class="control">
+                        <div class="tags has-addons">
+                          <a class="tag is-link">Flexbox</a>
+                          <a class="tag is-delete"></a>
+                        </div>
+                      </div>
+
+                      <div class="control">
+                        <div class="tags has-addons">
+                          <a class="tag is-link">Web Design</a>
+                          <a class="tag is-delete"></a>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- <div class="control">
+                      <input class="input" type="text" placeholder="Text input">
+                    </div> -->
+                    <button class="button is-small" role="button"
+                      @click.prevent="isIndicatorModalVisible = !isIndicatorModalVisible">
+                      <span class="icon is-small mr-1">
+                        <i class="fas fa-plus"></i>
+                      </span>
+                      Add Indicator
+                    </button>
                   </div>
 
                 </form>

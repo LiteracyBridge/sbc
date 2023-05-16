@@ -150,8 +150,12 @@ const closeButton = () => {
 
           <div class="level-right">
             <div class="level-item">
-              <button class="button is-primary">
+              <!-- <button class="button is-primary">
                 Save
+              </button>
+            -->
+              <button class="button mr-2" @click.prevent="closeButton">
+                Close
               </button>
             </div>
           </div>
