@@ -1,4 +1,4 @@
-<script setup>
+<script lang="ts" setup>
 import { ref, reactive, onMounted, onBeforeUnmount, computed } from "vue";
 import { Multiselect } from 'vue-multiselect'
 import { AccordionList, AccordionItem } from "vue3-rich-accordion";
@@ -7,7 +7,10 @@ import { onClickOutside } from "@vueuse/core";
 import { useLookupStore } from "../stores/lookups";
 import { useProjectStore } from "../stores/projects";
 import { useMessageStore } from "../stores/messages";
+import { INDICATORS, INDICATOR_TYPES } from "../constants/indicators";
+import type { IIndicatorType } from '../constants/indicators'
 
+const indicators = INDICATORS
 const projectStore = useProjectStore();
 // const messages = reactive(useMessageStore().messages);
 const componentKey = ref(0);
@@ -49,18 +52,25 @@ const props = defineProps({
 
 // const emit = defineEmits(["update:modelValue", "save"]);
 
-const selectedIndicatorType = ref();
+const selectedIndicatorType = ref<{ id: number, name: string }>();
+const selectedGroup = ref<IIndicatorType>();
 
 const isOpened = computed(() => props.isVisible)
 
-const indicatorsList = computed(() => {
-  return [
-    { label: "Indicator 1", value: 1 },
-    { label: "Indicator 2", value: 2 },
-    { label: "Indicator 3", value: 3 },
-    { label: "Indicator 4", value: 4 },
-    { label: "Indicator 5", value: 5 },
-  ]
+const selectedIndicatorGroups = computed(() => {
+  if (selectedIndicatorType?.value == null) {
+    return [];
+  }
+
+  return INDICATOR_TYPES.filter(i => i.parentId == selectedIndicatorType.value.id);
+
+  // return [
+  //   { label: "Indicator 1", value: 1 },
+  //   { label: "Indicator 2", value: 2 },
+  //   { label: "Indicator 3", value: 3 },
+  //   { label: "Indicator 4", value: 4 },
+  //   { label: "Indicator 5", value: 5 },
+  // ]
   // return allUsers.value.map((user) => {
   //     return {
   //       value: user.email,
@@ -69,8 +79,19 @@ const indicatorsList = computed(() => {
   //   });
 });
 
+const getMainIndicators = computed(() => {
+  return INDICATOR_TYPES.filter(i => i.parentId == null);
+});
 
-function onIndicatorSelected(item, _) {
+const groupIndicators = computed(() => {
+  if (selectedGroup.value?.id == null) {
+    return [];
+  }
+
+  return INDICATORS.filter(i => i.groupId == selectedGroup.value?.id);
+})
+
+function onIndicatorSelected(item: any, _) {
   console.log(item)
   // const user = allUsers.value.find(user => user.email == item.value)
 
@@ -113,23 +134,20 @@ const closeButton = () => {
       <div class="column is-one-fifth mx-5 my-5">
 
         <!-- TODO: put in an input field -->
-        <Multiselect v-model="selectedIndicatorType" :options="indicatorsList" :close-on-select="true"
-          :clear-on-select="false" placeholder="Select user" label="label" track-by="value"
+        <Multiselect v-model="selectedIndicatorType" :options="getMainIndicators" :close-on-select="true"
+          :clear-on-select="false" placeholder="Select user" label="name" track-by="value"
           @select="onIndicatorSelected" />
         <hr>
 
         <aside class="menu">
           <p class="menu-label">
-            {{ selectedIndicatorType?.label }}
+            {{ selectedIndicatorType?.name || 'No indicatory type selected' }}
           </p>
 
           <ul class="menu-list">
-            <li><a>Dashboard</a></li>
-            <li><a>Customers</a></li>
-            <li><a>Customers</a></li>
-            <li><a>Customers</a></li>
-            <li><a>Customers</a></li>
-            <li><a>Customers</a></li>
+            <li v-for="indicator in selectedIndicatorGroups" :key="indicator.id">
+              <a @click.prevent="selectedGroup = indicator">{{ indicator.category }}</a>
+            </li>
           </ul>
         </aside>
 
@@ -143,7 +161,7 @@ const closeButton = () => {
             <div class="level-item">
 
               <!-- <div class="container mb-4"> -->
-                <p>Selected category title </p>
+              <p>{{ selectedGroup?.category || '' }}</p>
               <!-- </div> -->
             </div>
           </div>
@@ -167,8 +185,8 @@ const closeButton = () => {
 
         <AccordionList>
 
-          <AccordionItem>
-            <template #summary>Item summary</template>
+          <AccordionItem v-for="item in groupIndicators" :key="item.id">
+            <template #summary>{{ item.name }}</template>
             <!-- <template #icon>
               <button class="button is-danger">Remove</button>
               <button class="button is-primary">Add</button>
@@ -177,8 +195,7 @@ const closeButton = () => {
             <!-- Main content -->
             <div class="card is-shadowless is-small">
               <div class="card-content">
-                <p>There are two hard things in computer science: cache invalidation, naming things, and off-by-one
-                  errors.
+                <p>{{ item.notes }}
                 </p>
               </div>
 
