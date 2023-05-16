@@ -452,21 +452,89 @@ async function loadExampleToc(filename) {
 
 <template>
   <div>
-    <div class="field ml-6">
-      <label class="label">Theory of Change Examples</label>
-      <div class="control">
-        <div class="select">
-          <select v-model="selectedExampleToC" @change="loadExampleToc(selectedExampleToC)">
-            <option value="family_planning">Family Planning</option>
-            <option value="GBV">Gender-Based Violence</option>
-            <option value="land_rights">Land Rights</option>
-            <option value="nutrition">Nutrition</option>
-            <option value="financial">Poverty Reduction</option>
-            <option value="wash">WASH</option>
-          </select>
+
+    <div class="field is-horizontal ml-3">
+      <div class="field mr-6">
+        <label class="label">Theory of Change</label>
+        <div class="control">
+          <div class="select">
+            <select v-model="selectedExampleToC" @change="loadExampleToc(selectedExampleToC)">
+              <option value="family_planning">Family Planning</option>
+              <option value="GBV">Gender-Based Violence</option>
+              <option value="land_rights">Land Rights</option>
+              <option value="nutrition">Nutrition</option>
+              <option value="financial">Poverty Reduction</option>
+              <option value="wash">WASH</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- <hr style="width: 1px; height: 20px; display: inline-block;"> -->
+
+      <div class="field is-grouped ml-6">
+        <div class="field mr-4">
+          <label class="label">Label of new item</label>
+          <div class="control">
+            <input class="input" type="text" name="addNodeLabel" id="addNodeLabel" v-model="addNodeLabel"
+              @keyup.enter="addNode" />
+          </div>
+        </div>
+
+        <div class="field mr-4">
+          <label class="label">Logic Model Category</label>
+          <div class="control">
+            <div class="select">
+              <select v-model="addNodeLogicModel">
+                <option value="activity">Activity</option>
+                <option value="output">Output</option>
+                <option value="intermediate_outcome">Intermediate Outcome</option>
+                <option value="outcome">Outcome</option>
+                <option value="impact">Impact</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="field button-container">
+          <div class="control">
+            <div>
+              <button class="button is-primary" type="button" @click="addNode">
+                Add
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
+
+    <hr>
+    <div class="level">
+      <div class="level-item has-text-centered">
+        <div class="field is-grouped">
+          <div class="field">
+            <div class="control">
+              <button class="button is-outlined is-link" type="button" @click="rotateDiagram">
+                Rotate
+              </button>
+            </div>
+          </div>
+
+          <div class="field ml-6 mr-2">
+            <div class="control custom-control mt-1">
+              <label class="switch">
+                <input type="checkbox" v-model="logicModelView" @change="drawDiagram" />
+                <span class="slider"></span>
+              </label>
+              <!-- <label class="label">Logic Model View</label> -->
+            </div>
+          </div>
+          <div class="field">
+            <label class="label mt-2">Logic Model View</label>
+          </div>
+        </div>
+      </div>
+    </div>
+
 
     <div class="buttons-container">
       <div class="is-flex is-justify-content-flex-end mb-4 mr-6">
@@ -483,60 +551,9 @@ async function loadExampleToc(filename) {
 
     <section class="section">
       <div>
-        <div class="field is-grouped">
-          <div class="field mr-4">
-            <label class="label">Label of new item</label>
-            <div class="control">
-              <input class="input" type="text" name="addNodeLabel" id="addNodeLabel" v-model="addNodeLabel"
-                @keyup.enter="addNode" />
-            </div>
-          </div>
-          <div class="field mr-4">
-            <label class="label">Logic Model Category</label>
-            <div class="control">
-              <div class="select">
-                <select v-model="addNodeLogicModel">
-                  <option value="activity">Activity</option>
-                  <option value="output">Output</option>
-                  <option value="intermediate_outcome">Intermediate Outcome</option>
-                  <option value="outcome">Outcome</option>
-                  <option value="impact">Impact</option>
-                </select>
-              </div>
-            </div>
-          </div>
-          <div class="field button-container">
-            <div class="control">
-              <div>
-                <button class="button is-primary" type="button" @click="addNode">
-                  Add
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
 
-        <div class="field is-grouped">
-          <div class="field">
-            <div class="control">
-              <button class="button is-link" type="button" @click="rotateDiagram">
-                Rotate
-              </button>
-            </div>
-          </div>
 
-          <div class="field ml-6 mr-2">
-            <div class="control custom-control">
-              <label class="switch">
-                <input type="checkbox" v-model="logicModelView" @change="drawDiagram" />
-                <span class="slider"></span>
-              </label>
-            </div>
-          </div>
-          <div class="field">
-            <label class="label">Logic Model View</label>
-          </div>
-        </div>
+
       </div>
     </section>
 
