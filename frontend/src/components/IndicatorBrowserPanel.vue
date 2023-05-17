@@ -133,7 +133,7 @@ const closeButton = () => {
     <div class="columns">
       <div class="column is-one-fifth mx-5 my-5">
 
-        <!-- TODO: put in an input field -->
+        <!-- TODO: add label -->
         <Multiselect v-model="selectedIndicatorType" :options="getMainIndicators" :close-on-select="true"
           :clear-on-select="false" placeholder="Select user" label="name" track-by="value"
           @select="onIndicatorSelected" />

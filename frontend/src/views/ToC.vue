@@ -455,7 +455,7 @@ async function loadExampleToc(filename) {
 
     <div class="field is-horizontal ml-3">
       <div class="field mr-6">
-        <label class="label">Theory of Change</label>
+        <label class="label">Theory of Change Examples</label>
         <div class="control">
           <div class="select">
             <select v-model="selectedExampleToC" @change="loadExampleToc(selectedExampleToC)">
@@ -565,102 +565,98 @@ async function loadExampleToc(filename) {
 
     <div v-if="selectedNodeId" class="modal is-active p-2">
       <div class="modal-background"></div>
+
       <div ref="modalRef" class="modal-card">
-        <section class="section">
-          <div class="container">
-            <header class="modal-card-head">
-              <p class="modal-card-title">Theory of Change Item</p>
-              <button @click="closeModal" class="delete" aria-label="close"></button>
-            </header>
-            <div class="box">
+        <header class="modal-card-head">
+          <p class="modal-card-title">Theory of Change Item</p>
+          <button @click="closeModal" class="delete" aria-label="close"></button>
+        </header>
 
-              <section class="modal-card-body">
-                <form>
+        <section class="modal-card-body">
+          <form>
 
-                  <div class="level-left is-normal">
+            <!-- <div class="level-left is-normal">
+              <label class="label">Label</label>
+            </div> -->
+            <div class="field">
+              <div class="field-body">
+                <div class="field">
+                  <div class="control">
                     <label class="label">Label</label>
+                    <input class="input" type="text" maxlength="80" v-model="selectedNode.label" />
                   </div>
-                  <div class="field is-horizontal">
-                    <div class="field-body">
-                      <div class="field">
-                        <div class="control">
-                          <input class="input" type="text" maxlength="80" v-model="selectedNode.label" />
-                        </div>
-                      </div>
-                    </div>
-                    <div class="level-right">
-                      <div class="level-item">
-                        <button class="button is-danger ml-6" @click="deleteNode(selectedNodeId)">
-                          Delete
-                        </button>
-                      </div>
-                    </div>
-                  </div>
+                </div>
+              </div>
+              <!-- <div class="level-right">
+                <div class="level-item">
+                  <button class="button is-danger ml-6" @click="deleteNode(selectedNodeId)">
+                    Delete
+                  </button>
+                </div>
+              </div> -->
+            </div>
 
 
-                  <div class="field is-horizontal">
-                    <div class="field-body">
-                      <div class="columns">
-                        <!-- Column 1: SEM Level and Category -->
+            <div class="field is-horizontal">
+              <div class="field-body">
+                <div class="columns">
+                  <!-- Column 1: SEM Level and Category -->
 
-                        <div class="column">
-                          <div class="field">
-                            <label class="label">Logic Model Category</label>
-                            <div class="control">
-                              <div class="select">
-                                <select v-model="selectedNode.logicModel">
-                                  <option value="activity">Activity</option>
-                                  <option value="output">Output</option>
-                                  <option value="intermediate_outcome">
-                                    Intermediate Outcome
-                                  </option>
-                                  <option value="outcome">Outcome</option>
-                                  <option value="impact">Impact</option>
-                                </select>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-
-
-
-                        <!-- Column 2: Audience -->
-                        <div class="column">
-                          <div class="field">
-                            <label class="label">SEM Level</label>
-                            <div class="control">
-                              <div class="select">
-                                <select v-model="selectedNode.sem">
-                                  <option value="individual">Individual</option>
-                                  <option value="interpersonal">Interpersonal</option>
-                                  <option value="community">Community</option>
-                                  <option value="organizational">Organizational</option>
-                                  <option value="policy">Policy</option>
-                                </select>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div class="column">
-                          <div class="field">
-                            <div class="control">
-                              <label class="label">
-                                Validated<br />
-                                <input type="checkbox" v-model="selectedNode.validated" />
-                              </label>
-                            </div>
-                          </div>
+                  <div class="column">
+                    <div class="field">
+                      <label class="label">Logic Model Category</label>
+                      <div class="control">
+                        <div class="select">
+                          <select v-model="selectedNode.logicModel">
+                            <option value="activity">Activity</option>
+                            <option value="output">Output</option>
+                            <option value="intermediate_outcome">
+                              Intermediate Outcome
+                            </option>
+                            <option value="outcome">Outcome</option>
+                            <option value="impact">Impact</option>
+                          </select>
                         </div>
                       </div>
                     </div>
                   </div>
 
+                  <!-- Column 2: Audience -->
+                  <div class="column">
+                    <div class="field">
+                      <label class="label">SEM Level</label>
+                      <div class="control">
+                        <div class="select">
+                          <select v-model="selectedNode.sem">
+                            <option value="individual">Individual</option>
+                            <option value="interpersonal">Interpersonal</option>
+                            <option value="community">Community</option>
+                            <option value="organizational">Organizational</option>
+                            <option value="policy">Policy</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="column">
+                    <div class="field">
+                      <div class="control">
+                        <label class="label">
+                          Validated<br />
+                          <input type="checkbox" v-model="selectedNode.validated" />
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!--
                   <div class="field">
                     <label class="label">Indicator</label>
                     <div class="control">
                       <input class="input" type="text" maxlength="80" v-model="selectedNode.indicator" />
 
-                      <!-- TODO: Implement adding of multiple indicators -->
                       <button class="button is-small" role="button"
                         @click.prevent="isIndicatorModalVisible = !isIndicatorModalVisible">
                         <span class="icon is-small mr-1">
@@ -669,70 +665,88 @@ async function loadExampleToc(filename) {
                         Add Indicator
                       </button>
                     </div>
+                  </div> -->
+
+
+            <div class="field">
+              <label class="label">Description</label>
+              <div class="control">
+                <textarea class="textarea" rows="4" columns="80" maxlength="999" v-model="selectedNode.description" />
+              </div>
+            </div>
+
+            <div class="field">
+              <label class="label">Indicators</label>
+
+              <hr>
+
+              <div class="field is-grouped is-grouped-multiline">
+                <div class="control">
+                  <div class="tags has-addons">
+                    <a class="tag is-link">Technology</a>
+                    <a class="tag is-delete"></a>
                   </div>
+                </div>
 
-
-                  <div class="field">
-                    <label class="label">Description</label>
-                    <div class="control">
-                      <textarea class="textarea" rows="4" columns="80" maxlength="999"
-                        v-model="selectedNode.description" />
-                    </div>
+                <div class="control">
+                  <div class="tags has-addons">
+                    <a class="tag is-link">CSS</a>
+                    <a class="tag is-delete"></a>
                   </div>
+                </div>
 
-                  <div class="field">
-                    <label class="label">Indicators</label>
+                <div class="control">
+                  <div class="tags has-addons">
+                    <a class="tag is-link">Flexbox</a>
+                    <a class="tag is-delete"></a>
+                  </div>
+                </div>
 
-                    <hr>
+                <div class="control">
+                  <div class="tags has-addons">
+                    <a class="tag is-link">Web Design</a>
+                    <a class="tag is-delete"></a>
+                  </div>
+                </div>
+              </div>
 
-                    <div class="field is-grouped is-grouped-multiline">
-                      <div class="control">
-                        <div class="tags has-addons">
-                          <a class="tag is-link">Technology</a>
-                          <a class="tag is-delete"></a>
-                        </div>
-                      </div>
-
-                      <div class="control">
-                        <div class="tags has-addons">
-                          <a class="tag is-link">CSS</a>
-                          <a class="tag is-delete"></a>
-                        </div>
-                      </div>
-
-                      <div class="control">
-                        <div class="tags has-addons">
-                          <a class="tag is-link">Flexbox</a>
-                          <a class="tag is-delete"></a>
-                        </div>
-                      </div>
-
-                      <div class="control">
-                        <div class="tags has-addons">
-                          <a class="tag is-link">Web Design</a>
-                          <a class="tag is-delete"></a>
-                        </div>
-                      </div>
-                    </div>
-
-                    <!-- <div class="control">
+              <!-- <div class="control">
                       <input class="input" type="text" placeholder="Text input">
                     </div> -->
-                    <button class="button is-small" role="button"
-                      @click.prevent="isIndicatorModalVisible = !isIndicatorModalVisible">
-                      <span class="icon is-small mr-1">
-                        <i class="fas fa-plus"></i>
-                      </span>
-                      Add Indicator
-                    </button>
-                  </div>
+              <button class="button is-small" role="button"
+                @click.prevent="isIndicatorModalVisible = !isIndicatorModalVisible">
+                <span class="icon is-small mr-1">
+                  <i class="fas fa-plus"></i>
+                </span>
+                Add Indicator
+              </button>
+            </div>
 
-                </form>
-              </section>
+          </form>
+        </section>
+
+        <footer class="modal-card-foot" style="display: block;">
+          <div class="level">
+            <div class="level-left">
+              <div class="level-item">
+                <button role="button" class="button is-danger ml-2" @click="deleteNode(selectedNodeId)">
+                  Delete Item
+                </button>
+
+              </div>
+            </div>
+
+            <div class="level-right">
+              <div class="level-item">
+                <button class="button" role="button" @click="closeModal">Close</button>
+              </div>
             </div>
           </div>
-        </section>
+          <!-- <button class="button is-success">Save changes</button> -->
+          <!-- <button class="button" @click="closeModal">Cancel</button> -->
+        </footer>
       </div>
+
     </div>
 
 
