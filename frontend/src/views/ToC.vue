@@ -1,4 +1,4 @@
-<script setup>
+<script  setup>
 import mermaidAPI from "/node_modules/mermaid/dist/mermaid.esm.mjs";
 import { onMounted, onUnmounted, reactive, ref, computed } from "vue";
 import { useSideNavStore } from "../stores/sideNav";
@@ -433,7 +433,7 @@ const escapeKeyHandler = (event) => {
   }
 };
 
-async function loadExampleToc(filename) {
+const loadExampleToc = async (filename) => {
   try {
     const response = await fetch(`/tocs/${filename}.json`);
 
@@ -441,9 +441,9 @@ async function loadExampleToc(filename) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     const jsonText = await response.text();
-    console.log("jsonText");
+    console.log("here we go");
     console.log(jsonText);
-    this.diagram.parseJSON(jsonText);
+    diagram.parseJSON(jsonText);
   } catch (error) {
     console.error('Failed to fetch JSON data:', error);
   }
