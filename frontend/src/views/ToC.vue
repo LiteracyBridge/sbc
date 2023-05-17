@@ -6,7 +6,8 @@ import axios from "axios";
 import { onClickOutside } from "@vueuse/core";
 import IndicatorBrowserPanel from "@/components/IndicatorBrowserPanel.vue";
 
-const isIndicatorModalVisible = ref(false)
+const isPanelVisible = ref(false);
+const showIndicatorModal = ref(false);
 
 const svgUrl = ref("");
 const svgImgSrcUrl = ref("");
@@ -414,10 +415,13 @@ function rotateDiagram() {
 const closeModal = () => {
   selectedNodeId.value = null;
   selectedEdge.value = null;
-  if (tempNavHidden) {
-    useSideNavStore().show();
-    tempNavHidden = false;
-  }
+  showIndicatorModal.value = false;
+
+  // if (tempNavHidden) {
+  //   tempNavHidden = false;
+  // }
+
+  useSideNavStore().show();
   drawDiagram();
 };
 
@@ -560,10 +564,10 @@ const loadExampleToc = async (filename) => {
     <div class="diagram-container" ref="diagramContainer" style="display: flex; width: 100%;"></div>
 
     <!-- <IndicatorBrowserModalVue :is-visible="isIndicatorModalVisible" v-if="isIndicatorModalVisible"></IndicatorBrowserModalVue> -->
-    <IndicatorBrowserPanel :is-visible="isIndicatorModalVisible" @is-closed="isIndicatorModalVisible = false">
+    <IndicatorBrowserPanel :is-visible="isPanelVisible" @is-closed="isPanelVisible = false; showIndicatorModal = true; useSideNavStore().hide();">
     </IndicatorBrowserPanel>
 
-    <div v-if="selectedNodeId" class="modal is-active p-2">
+    <div v-if="selectedNodeId || showIndicatorModal == true" class="modal is-active p-2">
       <div class="modal-background"></div>
 
       <div ref="modalRef" class="modal-card">
@@ -714,7 +718,7 @@ const loadExampleToc = async (filename) => {
                       <input class="input" type="text" placeholder="Text input">
                     </div> -->
               <button class="button is-small" role="button"
-                @click.prevent="isIndicatorModalVisible = !isIndicatorModalVisible">
+                @click.prevent="isPanelVisible = !isPanelVisible; showIndicatorModal = true; useSideNavStore().hide();">
                 <span class="icon is-small mr-1">
                   <i class="fas fa-plus"></i>
                 </span>

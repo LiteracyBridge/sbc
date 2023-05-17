@@ -51,7 +51,7 @@ const groupIndicators = computed(() => {
   return INDICATORS.filter(i => i.groupId == selectedGroup.value?.id);
 })
 
-function onIndicatorSelected(item: any, _) {
+function onIndicatorSelected(item: any, _: any) {
   console.log(item)
 }
 
@@ -62,10 +62,13 @@ const closeButton = () => {
   emit("isClosed", true);
 };
 
+onMounted(() => {
+  selectedGroup.value = getMainIndicators.value[0];
+})
 </script>
 
 <template>
-  <VueSidePanel v-model="isOpened" :hide-close-btn="true" :no-close="true" lock-scroll width="80vw"
+  <VueSidePanel v-model="isOpened" overlay-opacity="0.2" :hide-close-btn="true" :no-close="true" lock-scroll width="80vw"
     transition-name="slide-right">
 
     <div class="columns">
@@ -75,7 +78,7 @@ const closeButton = () => {
         <label class="label">Select Indicator</label>
 
         <Multiselect v-model="selectedIndicatorType" :options="getMainIndicators" :close-on-select="true"
-          :clear-on-select="false" placeholder="Select user" label="name" track-by="value"
+          :clear-on-select="false" placeholder="Select indicator" label="name" track-by="value"
           @select="onIndicatorSelected" />
         <hr>
 
@@ -101,7 +104,7 @@ const closeButton = () => {
             <div class="level-item">
 
               <!-- <div class="container mb-4"> -->
-              <p>{{ selectedGroup?.category || '' }}</p>
+              <h3 class="has-text-weight-bold">{{ selectedGroup?.category || '' }}</h3>
               <!-- </div> -->
             </div>
           </div>
@@ -136,20 +139,43 @@ const closeButton = () => {
             <!-- Main content -->
             <div class="card is-shadowless is-small">
               <div class="card-content">
-                <p>{{ item.notes }}
-                </p>
+                <div class="columns">
+                  <div class="column is-2">
+                    <strong>Indicator Phrasing</strong>
+                  </div>
+                  <div class="column">
+                    <p>{{ item.summary }}</p>
+                  </div>
+                </div>
+                <hr>
+
+                <div class="columns">
+                  <div class="column is-2">
+                    <strong>What is its purpose?</strong>
+                  </div>
+                  <div class="column">
+                    <p>{{ item.purpose }}</p>
+                    <a :href="item.link" target="_blank">Click to learn more about learn more the indicatory</a>
+                  </div>
+                </div>
               </div>
 
               <footer class="card-footer">
                 <p class="card-footer-item">
-                  <button class="is-small button is-primary">
+                  <button class="button is-primary">
+                    <span class="icon mr-1">
+                      <i class="fas fa-plus"></i>
+                    </span>
                     Add Indicator
                   </button>
                 </p>
                 <p class="card-footer-item">
-                  <span>
-                    Remove
-                  </span>
+                  <button class="button is-danger">
+                    <span class="icon mr-1">
+                      <i class="fas fa-trash"></i>
+                    </span>
+                    Remove Indicator
+                  </button>
                 </p>
               </footer>
             </div>

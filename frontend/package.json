@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "scripts": {
     "dev": "tsc && vite",
+    "vite": "vite",
     "build": "yarn tsc && vite build",
     "preview": "vite preview --port 4173",
     "lint": "eslint 'src/**/*.{js,vue}'"
