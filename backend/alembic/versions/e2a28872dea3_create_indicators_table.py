@@ -27,7 +27,7 @@ def upgrade():
         sa.Column("group_id", sa.Integer(), nullable=True),
         sa.ForeignKeyConstraint(
             ["group_id"],
-            ["lu_indicatory_types.id"],
+            ["lu_indicator_types.id"],
         ),
         sa.PrimaryKeyConstraint("id"),
     )

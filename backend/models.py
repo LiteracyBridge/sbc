@@ -4,6 +4,7 @@ from sqlalchemy.orm import Mapped
 
 from database import Base, SessionLocal, engine
 
+
 class User(Base):
     __tablename__ = "users"
 
@@ -18,19 +19,15 @@ class User(Base):
     # items = relationship("Item", back_populates="owner")
 
 
-
-class IndicatoryType(Base):
-    __tablename__ = "lu_indicatory_types"
+class IndicatorType(Base):
+    __tablename__ = "lu_indicator_types"
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
     name: Mapped[str]
-    parent_id: Mapped[int] = mapped_column(ForeignKey("indicatory_types.id"))
+    parent_id: Mapped[int] = mapped_column(Integer, ForeignKey("lu_indicator_types.id"))
 
-    # parent_id = Column(Integer, ForeignKey("indicatory_types.id"))
-    # name = Column(String)
-    parent: Mapped["IndicatoryType"] = relationship(
-        back_populates="parent", load_on_pending=True
-    )
+    parent = relationship("IndicatorType", remote_side=[id], load_on_pending=True)
+    indicators = relationship("Indicator", back_populates="group")
 
 
 class Indicator(Base):
@@ -39,41 +36,33 @@ class Indicator(Base):
     # id = Column(Integer, primary_key=True, index=True)
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
     name: Mapped[str]
-    Phrasing: Mapped[str]
+    phrasing: Mapped[str]
     purpose: Mapped[str]
     link: Mapped[str]
     group_id: Mapped[int] = mapped_column(
-        ForeignKey("lu_indicatory_types.id", load_on_pending=True)
-    )
-    parent: Mapped["IndicatoryType"] = relationship(
-        back_populates="parent", load_on_pending=True
+        ForeignKey("lu_indicator_types.id")
     )
 
-# TODO: Generate alembic migration to create a table using the sqlalchemy model below
+    group: Mapped["IndicatorType"] = relationship(
+        "IndicatorType", back_populates="indicators",
+    )
+    theory_of_change: Mapped["TheoryOfChangeIndicator"] = relationship(
+        "TheoryOfChangeIndicator", back_populates="indicator",
+    )
 
-class TheoryOfChangeIndicators(Base):
+    # TODO: Generate alembic migration to create a table using the sqlalchemy model below
+
+
+class TheoryOfChangeIndicator(Base):
     __tablename__ = "theory_of_change_indicators"
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
     theory_of_change_id: Mapped[int] = mapped_column(ForeignKey("toc.id"))
     indicatory_id: Mapped[int] = mapped_column(ForeignKey("lu_indicators.id"))
 
-    # theory_of_change_id = Column(Integer, ForeignKey("toc.id"))
-    # indicatory_id = Column(Integer, ForeignKey("lu_indicators.id"))
     indicator = relationship(
-        "Indicator", back_populates="lu_indicators", load_on_pending=True
+        "Indicator", back_populates="theory_of_change", load_on_pending=True
     )
-
-
-# class Item(Base):
-#     __tablename__ = "items"
-
-#     id = Column(Integer, primary_key=True, index=True)
-#     title = Column(String, index=True)
-#     description = Column(String, index=True)
-#     owner_id = Column(Integer, ForeignKey("users.id"))
-
-#     owner = relationship("User", back_populates="items")
 
 Base.metadata.create_all(bind=engine)
 

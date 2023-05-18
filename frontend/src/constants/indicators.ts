@@ -24,7 +24,7 @@ export const INDICATOR_TYPES: IIndicatorType[] = [
   {
     id: 4,
     parentId: 3,
-    category: "ACCESS TO FOOD INDICATORS",
+    category: "Access to Food Indicators",
   },
 ];
 
@@ -45,7 +45,7 @@ export const INDICATORS: Array<{
     summary:
       "% of [specify the target group] with a favourable attitude towards [specify the practice]",
     purpose:
-      "People’s existing attitudes influence their willingness to adopt the practices promoted by development interventions. This indicator therefore measures the proportion of the target population with a favourable attitude towards following a given practice (this also includes usage of a certain product, such as solar lamps). The ‘target group’ can include many different stakeholders – farmers, businesses or the general public. ",
+      "People's existing attitudes influence their willingness to adopt the practices promoted by development interventions. This indicator therefore measures the proportion of the target population with a favourable attitude towards following a given practice (this also includes usage of a certain product, such as solar lamps). The 'target group' can include many different stakeholders - farmers, businesses or the general public. ",
     link: "https://www.indikit.net/indicator/1-nutrition/4432-ever-breastfed",
   },
   {

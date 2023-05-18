@@ -18,17 +18,17 @@ depends_on = None
 
 def upgrade():
     op.create_table(
-        "lu_indicatory_types",
-        sa.Column("id", sa.Integer(), primary_key=True, nullable=False),
+        "lu_indicator_types",
+        sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("name", sa.String(), nullable=True),
         sa.Column("parent_id", sa.Integer(), nullable=True),
         sa.ForeignKeyConstraint(
             ["parent_id"],
-            ["lu_indicatory_types.id"],
+            ["lu_indicator_types.id"],
         ),
         sa.PrimaryKeyConstraint("id"),
     )
 
 
 def downgrade():
-    op.drop_table("lu_indicatory_types")
+    op.drop_table("lu_indicator_types")

@@ -21,13 +21,13 @@ def upgrade():
         "theory_of_change_indicators",
         sa.Column("id", sa.Integer(), primary_key=True, nullable=False),
         sa.Column("theory_of_change_id", sa.Integer(), nullable=True),
-        sa.Column("indicatory_id", sa.Integer(), nullable=True),
+        sa.Column("indicator_id", sa.Integer(), nullable=True),
         sa.ForeignKeyConstraint(
             ["theory_of_change_id"],
             ["toc.id"],
         ),
         sa.ForeignKeyConstraint(
-            ["indicatory_id"],
+            ["indicator_id"],
             ["lu_indicators.id"],
         ),
         sa.PrimaryKeyConstraint("id"),
