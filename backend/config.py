@@ -68,6 +68,10 @@ class Settings:
             raise err
             return secret_string
 
+    def db_url(self):
+        return f"postgresql://{self.db_user}:{self.db_password}@{self.db_host}:{self.db_port}/{self.db_name}"
+
+
     # @classmethod
     # def get_secrets(self, settings: BaseSettings) -> dict[str, Any]:
 

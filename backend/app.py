@@ -68,6 +68,7 @@ app.add_middleware(CorrelationIdMiddleware)
 ###############################################################################
 
 app.include_router(users.router, prefix='/users', tags=['users'], dependencies=[Depends(models.get_db)])
+app.include_router(users.router, prefix='/indicators', tags=['indicators'], dependencies=[Depends(models.get_db)])
 
 ###############################################################################
 #   Handler for AWS Lambda                                                    #

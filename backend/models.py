@@ -4,7 +4,6 @@ from sqlalchemy.orm import Mapped
 
 from database import Base, SessionLocal, engine
 
-
 class User(Base):
     __tablename__ = "users"
 
@@ -19,6 +18,7 @@ class User(Base):
     # items = relationship("Item", back_populates="owner")
 
 
+
 class IndicatoryType(Base):
     __tablename__ = "lu_indicatory_types"
 
@@ -28,10 +28,12 @@ class IndicatoryType(Base):
 
     # parent_id = Column(Integer, ForeignKey("indicatory_types.id"))
     # name = Column(String)
-    parent: Mapped["IndicatoryType"] = relationship(back_populates="parent")
+    parent: Mapped["IndicatoryType"] = relationship(
+        back_populates="parent", load_on_pending=True
+    )
 
 
-class Indicators(Base):
+class Indicator(Base):
     __tablename__ = "lu_indicators"
 
     # id = Column(Integer, primary_key=True, index=True)
@@ -40,25 +42,27 @@ class Indicators(Base):
     Phrasing: Mapped[str]
     purpose: Mapped[str]
     link: Mapped[str]
-    # name = Column(String)
-    # group_id = Column(Integer, ForeignKey("lu_indicatory_types.id"))
-    # phrasing = Column(String)
-    # purpose = Column(String)
-    # link = Column(String)
-    group_id: Mapped[int] = mapped_column(ForeignKey("lu_indicatory_types.id"))
-    parent: Mapped["IndicatoryType"] = relationship(back_populates="parent")
+    group_id: Mapped[int] = mapped_column(
+        ForeignKey("lu_indicatory_types.id", load_on_pending=True)
+    )
+    parent: Mapped["IndicatoryType"] = relationship(
+        back_populates="parent", load_on_pending=True
+    )
 
-
-
+# TODO: Generate alembic migration to create a table using the sqlalchemy model below
 
 class TheoryOfChangeIndicators(Base):
     __tablename__ = "theory_of_change_indicators"
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    theory_of_change_id: Mapped[int] = mapped_column(ForeignKey("toc.id"))
+    indicatory_id: Mapped[int] = mapped_column(ForeignKey("lu_indicators.id"))
 
-    # id = Column(Integer, primary_key=True, index=True)
-    theory_of_change_id = Column(Integer, ForeignKey("toc.id"))
-    indicatory_id = Column(Integer, ForeignKey("lu_indicators.id"))
+    # theory_of_change_id = Column(Integer, ForeignKey("toc.id"))
+    # indicatory_id = Column(Integer, ForeignKey("lu_indicators.id"))
+    indicator = relationship(
+        "Indicator", back_populates="lu_indicators", load_on_pending=True
+    )
 
 
 # class Item(Base):

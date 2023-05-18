@@ -5,9 +5,9 @@ from config import settings
 
 # SQLALCHEMY_DATABASE_URL = "sqlite:///./sql_app.db"
 # TODO: read db value from env
-SQLALCHEMY_DATABASE_URL = f"postgresql://{settings.db_user}:{settings.db_password}@{settings.db_host}/{settings.db_name}"
+# SQLALCHEMY_DATABASE_URL = f"postgresql://{settings.db_user}:{settings.db_password}@{settings.db_host}/{settings.db_name}"
 
-engine = create_engine(SQLALCHEMY_DATABASE_URL)
+engine = create_engine(settings.db_url())
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
