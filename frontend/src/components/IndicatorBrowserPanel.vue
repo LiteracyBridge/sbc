@@ -68,7 +68,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <VueSidePanel v-model="isOpened" overlay-opacity="0.2" :hide-close-btn="true" :no-close="true" lock-scroll width="80vw"
+  <VueSidePanel v-model="isOpened"  :hide-close-btn="true" :no-close="true" lock-scroll width="80vw"
     transition-name="slide-right">
 
     <div class="columns">

@@ -6,10 +6,12 @@ import { useRouter } from "vue-router";
 import * as lambda from "@/apis/lambda";
 import MessageModal from '../components/MessageModal.vue';
 import PulseLoaderVue from "./spinners/PulseLoader.vue";
+import GPTSuggestionPanelVue from "./GPTSuggestionPanel.vue";
 
 const showMessageModal = ref(false);
 const userStore = useUserStore();
 const projectDataStore = useProjectDataStore();
+const suggestionsPanelHandler = ref({ questionId: null, isOpened: false, module: null })
 
 // GPT prompt
 const context = ref("Respond only with a list and without any other text.");
@@ -66,6 +68,10 @@ onMounted(() => {
 );
 
 async function submitContextAndPrompt(id, topic) {
+  suggestionsPanelHandler.value.questionId = id;
+  suggestionsPanelHandler.value.module = topic;
+  suggestionsPanelHandler.value.isOpened = true;
+
   const _gptResp = gptResponses.value[`${id}`] || { id: id, answer: "", isLoading: true };
   _gptResp.isLoading = true;
 
@@ -135,6 +141,10 @@ async function broadcastPage() {
     </Suspense>
     <br />
 
+    <GPTSuggestionPanelVue :is-visible="suggestionsPanelHandler.isOpened" @is-closed="suggestionsPanelHandler.isOpened = false;"
+      :question-id="suggestionsPanelHandler.questionId" :module="suggestionsPanelHandler.module">
+    </GPTSuggestionPanelVue>
+
     <div v-for="(q, count) in projectDataStore.questionsForTopic(topic)" :key="q.id" class="columns is-vcentered">
 
       <div class="column is-three-fifths">
@@ -177,7 +187,8 @@ async function broadcastPage() {
           {{ gptResponses[`${q.id}`]?.answer || 'No suggestions available. Click on the light bulb to see suggestions' }}
         </p>
 
-        <div class="field is-grouped mt-3" v-if="gptResponses[`${q.id}`]?.answer != undefined && gptResponses[`${q.id}`]?.isLoading != true">
+        <div class="field is-grouped mt-3"
+          v-if="gptResponses[`${q.id}`]?.answer != undefined && gptResponses[`${q.id}`]?.isLoading != true">
           <p class="control">
             <button class="button is-small is-dark"
               @click="projectDataStore.setData(q.id, projectDataStore.getData(q.id) + '\n\n' + gptResponses[`${q.id}`]?.answer);">
