@@ -1,16 +1,20 @@
 <script lang="ts" setup>
 import { ref, reactive, onMounted, onBeforeUnmount, computed } from "vue";
-import { Multiselect } from 'vue-multiselect'
-import { AccordionList, AccordionItem } from "vue3-rich-accordion";
 
-import { useProjectStore } from "../stores/projects";
-import { INDICATORS, INDICATOR_TYPES } from "../constants/indicators";
-import type { IIndicatorType } from '../constants/indicators'
 import { useProjectDataStore } from "@/stores/projectData";
+import * as lambda from "@/apis/lambda";
+import PulseLoaderVue from "./spinners/PulseLoader.vue";
+
 
 const projectStore = useProjectDataStore();
-
 const emit = defineEmits(['isClosed']);
+
+const gptResponse = ref({ answer: null, isLoading: false });
+const iconRefs = ref();
+
+const HOURGLASS_ICON = "/images/hourglass.svg"
+const BULB_ICON = "/images/lightbulb.png"
+
 
 const props = defineProps({
   module: {
@@ -21,10 +25,6 @@ const props = defineProps({
     type: Number,
     required: true,
   },
-  // modelValue: {
-  //   type: Boolean,
-  //   required: true,
-  // },
   isVisible: {
     type: Boolean,
     required: true,
@@ -35,30 +35,66 @@ const moduleQuestion = computed(() => {
   return projectStore.questionsForTopic(props.module).find(i => i.id == props.questionId);
 })
 
-const selectedIndicatorType = ref<{ id: number, name: string }>();
-const selectedGroup = ref<IIndicatorType>();
+async function submitContextAndPrompt() {
+  const { questionId: id, module: topic } = props;
+
+  const _gptResp = gptResponse.value || { id: id, answer: "", isLoading: true };
+  _gptResp.isLoading = true;
+  gptResponse.value = _gptResp;
+
+
+  let context = "";
+  let qToFill = null;
+  for (var q of projectStore.questions) {
+    const a = projectStore.getData(q.id);
+    if (q.id == id) {
+      qToFill = q
+    }
+    else if (!(a == null || a == "")) {
+      context += q.label + ":" + a + "\n";
+    }
+  }
+
+  console.log("submitContextAndPrompt:");
+  // console.log(qToFill.q2ai, context, qToFill.f4ai);
+  // const bulbCount = projectStore.countBulbs(id, topic);
+  // console.log("bulbCount", bulbCount);
+
+  iconRefs.value.src = HOURGLASS_ICON;
+
+  // this.$refs[`icon-${id}`].src = HOURGLASS_ICON;
+  const ai_answer = await lambda.gptCompletion(qToFill.q2ai, context, qToFill.f4ai);
+  iconRefs.value.src = BULB_ICON;
+
+  console.error("AI answer", ai_answer)
+
+  gptResponse.value.answer = ai_answer;
+  gptResponse.value.isLoading = false;
+  // gptResponses.value = gptResponses.value.concat({id: id, answer: ai_answer});
+  // projectDataStore.setData(qToFill.id, ai_answer);
+}
 
 const isOpened = computed(() => props.isVisible)
 
-const selectedIndicatorGroups = computed(() => {
-  if (selectedIndicatorType?.value == null) {
-    return [];
-  }
+// const selectedIndicatorGroups = computed(() => {
+//   if (selectedIndicatorType?.value == null) {
+//     return [];
+//   }
 
-  return INDICATOR_TYPES.filter(i => i.parentId == selectedIndicatorType.value.id);
-});
+//   return INDICATOR_TYPES.filter(i => i.parentId == selectedIndicatorType.value.id);
+// });
 
-const getMainIndicators = computed(() => {
-  return INDICATOR_TYPES.filter(i => i.parentId == null);
-});
+// const getMainIndicators = computed(() => {
+//   return INDICATOR_TYPES.filter(i => i.parentId == null);
+// });
 
-const groupIndicators = computed(() => {
-  if (selectedGroup.value?.id == null) {
-    return [];
-  }
+// const groupIndicators = computed(() => {
+//   if (selectedGroup.value?.id == null) {
+//     return [];
+//   }
 
-  return INDICATORS.filter(i => i.groupId == selectedGroup.value?.id);
-})
+//   return INDICATORS.filter(i => i.groupId == selectedGroup.value?.id);
+// })
 
 function onIndicatorSelected(item: any, _: any) {
   console.log(item)
@@ -72,7 +108,7 @@ const closeButton = () => {
 };
 
 onMounted(() => {
-  selectedGroup.value = getMainIndicators.value[0];
+  // selectedGroup.value = getMainIndicators.value[0];
 })
 
 function onInputChange(event: any) {
@@ -83,26 +119,37 @@ function onInputChange(event: any) {
 </script>
 
 <template>
-  <VueSidePanel v-model="isOpened" :hide-close-btn="false" :no-close="true" lock-scroll width="100vw"
+  <VueSidePanel v-model="isOpened" :hide-close-btn="true" :no-close="true" lock-scroll width="100vw"
     transition-name="slide-right">
+    <div class="level">
+      <div class="level-left"></div>
+      <div class="level-right mt-2 mr-2">
+        <button class="button is-close" @click.prevent="closeButton">
+          <span class="icon mr-1">
+            <i class="fas fa-times"></i>
+          </span>
+          Close
+        </button>
+      </div>
+    </div>
 
     <div class="columns my-5 mx-5">
 
       <div class="column">
 
         <!-- <strong>{{ count + 1 }}. {{ q.q2u }} </strong><br />
-  <img v-if="q.bulb" :src="BULB_ICON" ref="iconRefs" @click="submitContextAndPrompt(q.id, topic)"
-    class="image is-32x32" />
-  <textarea @change="updateData($event, q.id)" :value="projectDataStore.getData(q.id)" rows="4" cols="80" /><br />
-  <br /><br /> -->
+        <img v-if="q.bulb" :src="BULB_ICON" ref="iconRefs" @click="submitContextAndPrompt()"
+          class="image is-32x32" />
+        <textarea @change="updateData($event, q.id)" :value="projectDataStore.getData(q.id)" rows="4" cols="80" /><br />
+        <br /><br /> -->
 
         <div class="field">
           <label class="label" :for="`input`">{{ moduleQuestion?.q2u }}</label>
 
-          <!-- <div class="control">
-            <img v-if="q.bulb" :src="BULB_ICON" ref="iconRefs" @click="submitContextAndPrompt(q.id, topic)"
+          <div class="control">
+            <img v-if="moduleQuestion?.bulb" :src="BULB_ICON" ref="iconRefs" @click="submitContextAndPrompt()"
               class="image is-32x32" />
-          </div> -->
+          </div>
           <div class="control">
             <!-- <img v-if="q.bulb" :src="BULB_ICON" ref="iconRefs" @click="submitContextAndPrompt(q.id, topic)"
         class="image is-32x32" /> -->
@@ -114,41 +161,40 @@ function onInputChange(event: any) {
         </div>
       </div>
 
-      <div class="column  is-4">
-        <!-- <p>{{ gptResponses.find(i => i.id == q.id)?.answer || '' }}</p> -->
-
+      <div class="column is-4 mt-6">
         <!-- Display loading indicator -->
         <!-- TODO: implement displaying of suggestions -->
-        <!-- <div v-if="gptResponses[`${q.id}`]?.isLoading == true">
-          <PulseLoaderVue :loading="gptResponses[`${q.id}`]?.isLoading"></PulseLoaderVue>
+        <div class="mt-6">
+          <div v-if="gptResponse?.isLoading == true">
+            <PulseLoaderVue :loading="gptResponse?.isLoading"></PulseLoaderVue>
 
-          <span>Getting AI suggestions, please wait...</span>
+            <span>Getting AI suggestions, please wait...</span>
+          </div>
+
+          <p v-else>
+            {{ gptResponse?.answer || 'No suggestions available. Click on the light bulb to see suggestions' }}
+          </p>
+
+          <div class="field is-grouped mt-3" v-if="gptResponse?.answer != undefined && gptResponse?.isLoading != true">
+            <p class="control">
+              <button class="button is-small is-dark"
+                @click="projectStore.setData(props.questionId, projectStore.getData(props.questionId) + '\n\n' + gptResponse?.answer);">
+
+                <span class="icon is-small mr-1">
+                  <i class="fas fa-check"></i>
+                </span>
+
+                Accept
+              </button>
+            </p>
+
+            <p class="control">
+              <button class="button is-outlined is-small">
+                Cancel
+              </button>
+            </p>
+          </div>
         </div>
-
-        <p v-else>
-          {{ gptResponses[`${q.id}`]?.answer || 'No suggestions available. Click on the light bulb to see suggestions' }}
-        </p> -->
-
-        <!-- <div class="field is-grouped mt-3"
-          v-if="gptResponses[`${q.id}`]?.answer != undefined && gptResponses[`${q.id}`]?.isLoading != true">
-          <p class="control">
-            <button class="button is-small is-dark"
-              @click="projectDataStore.setData(q.id, projectDataStore.getData(q.id) + '\n\n' + gptResponses[`${q.id}`]?.answer);">
-
-              <span class="icon is-small mr-1">
-                <i class="fas fa-check"></i>
-              </span>
-
-              Accept
-            </button>
-          </p>
-
-          <p class="control">
-            <button class="button is-outlined is-small">
-              Cancel
-            </button>
-          </p>
-        </div> -->
 
       </div>
 

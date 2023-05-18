@@ -71,6 +71,7 @@ async function submitContextAndPrompt(id, topic) {
   suggestionsPanelHandler.value.questionId = id;
   suggestionsPanelHandler.value.module = topic;
   suggestionsPanelHandler.value.isOpened = true;
+  return;
 
   const _gptResp = gptResponses.value[`${id}`] || { id: id, answer: "", isLoading: true };
   _gptResp.isLoading = true;
