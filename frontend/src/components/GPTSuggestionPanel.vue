@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, reactive, onMounted, onBeforeUnmount, computed } from "vue";
+import { ref, reactive, onMounted, onBeforeUnmount, computed, watch } from "vue";
 
 import { useProjectDataStore } from "@/stores/projectData";
 import * as lambda from "@/apis/lambda";
@@ -24,6 +24,10 @@ const props = defineProps({
   questionId: {
     type: Number,
     required: true,
+  },
+  loadSuggestions: {
+    type: Boolean,
+    required: true
   },
   isVisible: {
     type: Boolean,
@@ -76,40 +80,27 @@ async function submitContextAndPrompt() {
 
 const isOpened = computed(() => props.isVisible)
 
-// const selectedIndicatorGroups = computed(() => {
-//   if (selectedIndicatorType?.value == null) {
-//     return [];
-//   }
-
-//   return INDICATOR_TYPES.filter(i => i.parentId == selectedIndicatorType.value.id);
-// });
-
-// const getMainIndicators = computed(() => {
-//   return INDICATOR_TYPES.filter(i => i.parentId == null);
-// });
-
-// const groupIndicators = computed(() => {
-//   if (selectedGroup.value?.id == null) {
-//     return [];
-//   }
-
-//   return INDICATORS.filter(i => i.groupId == selectedGroup.value?.id);
-// })
-
-function onIndicatorSelected(item: any, _: any) {
-  console.log(item)
-}
 
 const closeButton = () => {
-  // isOpened.value = false;
-
-  console.error("emitted")
   emit("isClosed", true);
 };
 
-onMounted(() => {
-  // selectedGroup.value = getMainIndicators.value[0];
-})
+watch(props, (newProps) => {
+  console.log(`x is`, newProps);
+
+  if (newProps.loadSuggestions) {
+    submitContextAndPrompt();
+  } else {
+    gptResponse.value = { answer: null, isLoading: false };
+  }
+});
+
+// onMounted(() => {
+//   // selectedGroup.value = getMainIndicators.value[0];
+//   if (props.loadSuggestions) {
+//     submitContextAndPrompt();
+//   }
+// })
 
 function onInputChange(event: any) {
   console.log("EVENT:", event.target.value);
@@ -133,15 +124,9 @@ function onInputChange(event: any) {
       </div>
     </div>
 
-    <div class="columns my-5 mx-5">
+    <div class="columns my-3 mx-5">
 
       <div class="column">
-
-        <!-- <strong>{{ count + 1 }}. {{ q.q2u }} </strong><br />
-        <img v-if="q.bulb" :src="BULB_ICON" ref="iconRefs" @click="submitContextAndPrompt()"
-          class="image is-32x32" />
-        <textarea @change="updateData($event, q.id)" :value="projectDataStore.getData(q.id)" rows="4" cols="80" /><br />
-        <br /><br /> -->
 
         <div class="field">
           <label class="label" :for="`input`">{{ moduleQuestion?.q2u }}</label>
@@ -155,7 +140,6 @@ function onInputChange(event: any) {
         class="image is-32x32" /> -->
             <textarea class="textarea" @change="onInputChange($event)" :value="projectStore.getData(moduleQuestion?.id)"
               rows="30" cols="10"></textarea>
-            <!-- <input class="input" type="text" placeholder="e.g Alex Smith"> -->
           </div>
 
         </div>

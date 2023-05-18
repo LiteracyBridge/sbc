@@ -11,7 +11,7 @@ import GPTSuggestionPanelVue from "./GPTSuggestionPanel.vue";
 const showMessageModal = ref(false);
 const userStore = useUserStore();
 const projectDataStore = useProjectDataStore();
-const suggestionsPanelHandler = ref({ questionId: null, isOpened: false, module: null })
+const suggestionsPanelHandler = ref({ questionId: null, isOpened: false, module: null, loadSuggestions: false })
 
 // GPT prompt
 const context = ref("Respond only with a list and without any other text.");
@@ -67,10 +67,11 @@ onMounted(() => {
 }
 );
 
-function showPanel(id, topic) {
+function showPanel(id, topic, loadSuggestions = true) {
   suggestionsPanelHandler.value.questionId = id;
   suggestionsPanelHandler.value.module = topic;
   suggestionsPanelHandler.value.isOpened = true;
+  suggestionsPanelHandler.value.loadSuggestions = loadSuggestions;
 }
 
 async function submitContextAndPrompt(id, topic) {
@@ -148,7 +149,7 @@ async function broadcastPage() {
 
     <GPTSuggestionPanelVue :is-visible="suggestionsPanelHandler.isOpened"
       @is-closed="suggestionsPanelHandler.isOpened = false;" :question-id="suggestionsPanelHandler.questionId"
-      :module="suggestionsPanelHandler.module">
+      :module="suggestionsPanelHandler.module" :load-suggestions="suggestionsPanelHandler.loadSuggestions">
     </GPTSuggestionPanelVue>
 
     <div v-for="(q, count) in projectDataStore.questionsForTopic(topic)" :key="q.id" class="columns mx-4 is-vcentered">
@@ -176,7 +177,7 @@ async function broadcastPage() {
               <textarea class="textarea" @change="updateData($event, q.id)" :value="projectDataStore.getData(q.id)"
                 rows="4" cols="80"></textarea>
               <!-- <input class="input" type="text" placeholder="e.g Alex Smith"> -->
-              <button class="button is-small is-outlined mr-1 mt-1" @click="showPanel(q.id, topic)">
+              <button class="button is-small is-outlined mr-1 mt-1" @click="showPanel(q.id, topic, false)">
                 <span class="icon is-small">
                   <i class="fas fa-maximize"></i>
                 </span>
