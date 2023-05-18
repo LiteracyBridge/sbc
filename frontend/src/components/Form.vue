@@ -67,10 +67,14 @@ onMounted(() => {
 }
 );
 
-async function submitContextAndPrompt(id, topic) {
+function showPanel(id, topic) {
   suggestionsPanelHandler.value.questionId = id;
   suggestionsPanelHandler.value.module = topic;
   suggestionsPanelHandler.value.isOpened = true;
+}
+
+async function submitContextAndPrompt(id, topic) {
+  showPanel(id, topic);
   return;
 
   const _gptResp = gptResponses.value[`${id}`] || { id: id, answer: "", isLoading: true };
@@ -142,13 +146,14 @@ async function broadcastPage() {
     </Suspense>
     <br />
 
-    <GPTSuggestionPanelVue :is-visible="suggestionsPanelHandler.isOpened" @is-closed="suggestionsPanelHandler.isOpened = false;"
-      :question-id="suggestionsPanelHandler.questionId" :module="suggestionsPanelHandler.module">
+    <GPTSuggestionPanelVue :is-visible="suggestionsPanelHandler.isOpened"
+      @is-closed="suggestionsPanelHandler.isOpened = false;" :question-id="suggestionsPanelHandler.questionId"
+      :module="suggestionsPanelHandler.module">
     </GPTSuggestionPanelVue>
 
-    <div v-for="(q, count) in projectDataStore.questionsForTopic(topic)" :key="q.id" class="columns is-vcentered">
+    <div v-for="(q, count) in projectDataStore.questionsForTopic(topic)" :key="q.id" class="columns mx-4 is-vcentered">
 
-      <div class="column is-three-fifths">
+      <div class="column is-8">
 
         <!-- <strong>{{ count + 1 }}. {{ q.q2u }} </strong><br />
         <img v-if="q.bulb" :src="BULB_ICON" ref="iconRefs" @click="submitContextAndPrompt(q.id, topic)"
@@ -164,51 +169,23 @@ async function broadcastPage() {
               class="image is-32x32" />
           </div>
           <div class="control">
-            <!-- <img v-if="q.bulb" :src="BULB_ICON" ref="iconRefs" @click="submitContextAndPrompt(q.id, topic)"
+            <div class="textarea-container">
+
+              <!-- <img v-if="q.bulb" :src="BULB_ICON" ref="iconRefs" @click="submitContextAndPrompt(q.id, topic)"
               class="image is-32x32" /> -->
-            <textarea class="textarea" @change="updateData($event, q.id)" :value="projectDataStore.getData(q.id)" rows="4"
-              cols="80"></textarea>
-            <!-- <input class="input" type="text" placeholder="e.g Alex Smith"> -->
+              <textarea class="textarea" @change="updateData($event, q.id)" :value="projectDataStore.getData(q.id)"
+                rows="4" cols="80"></textarea>
+              <!-- <input class="input" type="text" placeholder="e.g Alex Smith"> -->
+              <button class="button is-small is-outlined mr-1 mt-1" @click="showPanel(q.id, topic)">
+                <span class="icon is-small">
+                  <i class="fas fa-maximize"></i>
+                </span>
+              </button>
+            </div>
+
           </div>
 
         </div>
-      </div>
-
-      <div class="column">
-        <!-- <p>{{ gptResponses.find(i => i.id == q.id)?.answer || '' }}</p> -->
-
-        <!-- Display loading indicator -->
-        <div v-if="gptResponses[`${q.id}`]?.isLoading == true">
-          <PulseLoaderVue :loading="gptResponses[`${q.id}`]?.isLoading"></PulseLoaderVue>
-
-          <span>Getting AI suggestions, please wait...</span>
-        </div>
-
-        <p v-else>
-          {{ gptResponses[`${q.id}`]?.answer || 'No suggestions available. Click on the light bulb to see suggestions' }}
-        </p>
-
-        <div class="field is-grouped mt-3"
-          v-if="gptResponses[`${q.id}`]?.answer != undefined && gptResponses[`${q.id}`]?.isLoading != true">
-          <p class="control">
-            <button class="button is-small is-dark"
-              @click="projectDataStore.setData(q.id, projectDataStore.getData(q.id) + '\n\n' + gptResponses[`${q.id}`]?.answer);">
-
-              <span class="icon is-small mr-1">
-                <i class="fas fa-check"></i>
-              </span>
-
-              Accept
-            </button>
-          </p>
-
-          <p class="control">
-            <button class="button is-outlined is-small">
-              Cancel
-            </button>
-          </p>
-        </div>
-
       </div>
 
     </div>
@@ -221,5 +198,21 @@ async function broadcastPage() {
 <style>
 .vertical-center {
   margin: 2rem;
+}
+
+.textarea-container {
+  position: relative;
+}
+
+.textarea-container textarea {
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.textarea-container button {
+  position: absolute;
+  top: 0;
+  right: 0;
 }
 </style>
