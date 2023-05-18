@@ -131,10 +131,6 @@ onMounted(() => {
 
           <AccordionItem v-for="item in groupIndicators" :key="item.id">
             <template #summary>{{ item.name }}</template>
-            <!-- <template #icon>
-              <button class="button is-danger">Remove</button>
-              <button class="button is-primary">Add</button>
-            </template> -->
 
             <!-- Main content -->
             <div class="card is-shadowless is-small">
