@@ -13,6 +13,7 @@ from handlers.http_exception_handler import http_exception_handler
 from fastapi.middleware.cors import CORSMiddleware
 
 import models
+from config import settings
 
 # from database import SessionLocal, engine
 
@@ -21,9 +22,7 @@ import models
 
 app = FastAPI()
 
-origins = [
-    "*"
-]
+origins = ["*"]
 
 app.add_middleware(
     CORSMiddleware,
@@ -42,33 +41,42 @@ app.add_middleware(
 #     finally:
 #         db.close()
 
-###############################################################################
-#   Logging configuration                                                     #
-###############################################################################
+if not settings.is_local:
+    ###############################################################################
+    #   Logging configuration                                                     #
+    ###############################################################################
+    logging_config.configure_logging(
+        level="DEBUG", service="SBC", instance=str(uuid.uuid4())
+    )
 
-logging_config.configure_logging(level='DEBUG', service='SBC', instance=str(uuid.uuid4()))
+    ###############################################################################
+    #   Error handlers configuration                                              #
+    ###############################################################################
+    app.add_exception_handler(Exception, exception_handler)
+    app.add_exception_handler(HTTPException, http_exception_handler)
 
-###############################################################################
-#   Error handlers configuration                                              #
-###############################################################################
+    ###############################################################################
+    #   Middlewares configuration                                                 #
+    ###############################################################################
 
-app.add_exception_handler(Exception, exception_handler)
-app.add_exception_handler(HTTPException, http_exception_handler)
+    # Tip : middleware order : CorrelationIdMiddleware > LoggingMiddleware -> reverse order
+    app.add_middleware(LoggingMiddleware)
+    app.add_middleware(CorrelationIdMiddleware)
 
-###############################################################################
-#   Middlewares configuration                                                 #
-###############################################################################
-
-# Tip : middleware order : CorrelationIdMiddleware > LoggingMiddleware -> reverse order
-app.add_middleware(LoggingMiddleware)
-app.add_middleware(CorrelationIdMiddleware)
 
 ###############################################################################
 #   Routers configuration                                                     #
 ###############################################################################
 
-app.include_router(users.router, prefix='/users', tags=['users'], dependencies=[Depends(models.get_db)])
-app.include_router(indicators.router, prefix='/indicators', tags=['indicators'], dependencies=[Depends(models.get_db)])
+app.include_router(
+    users.router, prefix="/users", tags=["users"], dependencies=[Depends(models.get_db)]
+)
+app.include_router(
+    indicators.router,
+    prefix="/indicators",
+    tags=["indicators"],
+    dependencies=[Depends(models.get_db)],
+)
 
 ###############################################################################
 #   Handler for AWS Lambda                                                    #

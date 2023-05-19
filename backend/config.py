@@ -29,10 +29,13 @@ class Settings:
     db_user: str
     db_port: Optional[str] = "5432"
 
+    is_local: bool = False
+
     def __init__(self) -> None:
         if getenv("APP_ENV", "production") == "local":
             load_dotenv()
 
+            self.is_local = True
             self.db_name = getenv("DB_NAME", "impact")
             self.db_host = getenv("DB_HOST", "localhost")
             self.db_password = getenv("DB_PASSWORD", "")

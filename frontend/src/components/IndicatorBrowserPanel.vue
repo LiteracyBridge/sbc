@@ -4,8 +4,7 @@ import { Multiselect } from 'vue-multiselect'
 import { AccordionList, AccordionItem } from "vue3-rich-accordion";
 
 import { useProjectStore } from "../stores/projects";
-import { INDICATORS, INDICATOR_TYPES } from "../constants/indicators";
-import type { IIndicatorType } from '../constants/indicators'
+import { ApiRequest } from "@/apis/api";
 
 const projectStore = useProjectStore();
 
@@ -26,21 +25,26 @@ const props = defineProps({
   }
 });
 
-const selectedIndicatorType = ref<{ id: number, name: string }>();
-const selectedGroup = ref<IIndicatorType>();
+const selectedIndicatorType = ref<{ id: number, name: string }>(),
+  selectedGroup = ref<IndicatorType>(),
+  isFetchingIndicators = ref(false),
+  indicatorTypes = ref<IndicatorType[]>([]),
+  indicatorsList = ref<IndicatorGroup[]>([]);
 
 const isOpened = computed(() => props.isVisible)
 
 const selectedIndicatorGroups = computed(() => {
+  console.log(selectedIndicatorType.value);
+
   if (selectedIndicatorType?.value == null) {
     return [];
   }
 
-  return INDICATOR_TYPES.filter(i => i.parentId == selectedIndicatorType.value.id);
+  return indicatorTypes.value.filter(i => i.parent_id == selectedIndicatorType.value.id);
 });
 
 const getMainIndicators = computed(() => {
-  return INDICATOR_TYPES.filter(i => i.parentId == null);
+  return indicatorTypes.value.filter(i => i.parent_id == null);
 });
 
 const groupIndicators = computed(() => {
@@ -48,7 +52,7 @@ const groupIndicators = computed(() => {
     return [];
   }
 
-  return INDICATORS.filter(i => i.groupId == selectedGroup.value?.id);
+  return indicatorsList.value.filter(i => i.group_id == selectedGroup.value?.id);
 })
 
 function onIndicatorSelected(item: any, _: any) {
@@ -63,12 +67,33 @@ const closeButton = () => {
 };
 
 onMounted(() => {
-  selectedGroup.value = getMainIndicators.value[0];
+  // selectedGroup.value = getMainIndicators.value[0];
+
+  isFetchingIndicators.value = true;
+  Promise.all([
+    ApiRequest.get<IndicatorType[]>("indicators/types")
+      .then((resp) => {
+        console.log(resp)
+        if (resp != null) {
+          indicatorTypes.value = resp;
+        }
+      }),
+
+    ApiRequest.get<IndicatorGroup[]>("indicators")
+      .then((resp) => {
+        console.log(resp)
+
+        if (resp != null) {
+          indicatorsList.value = resp;
+        }
+      })
+  ]).then((resp) => console.log(resp))
+    .finally(() => isFetchingIndicators.value = false);
 })
 </script>
 
 <template>
-  <VueSidePanel v-model="isOpened"  :hide-close-btn="true" :no-close="true" lock-scroll width="80vw"
+  <VueSidePanel v-model="isOpened" :hide-close-btn="true" :no-close="true" lock-scroll width="80vw"
     transition-name="slide-right">
 
     <div class="columns">
@@ -89,7 +114,7 @@ onMounted(() => {
 
           <ul class="menu-list">
             <li v-for="indicator in selectedIndicatorGroups" :key="indicator.id">
-              <a @click.prevent="selectedGroup = indicator">{{ indicator.category }}</a>
+              <a @click.prevent="selectedGroup = indicator">{{ indicator.name }}</a>
             </li>
           </ul>
         </aside>
@@ -104,7 +129,7 @@ onMounted(() => {
             <div class="level-item">
 
               <!-- <div class="container mb-4"> -->
-              <h3 class="has-text-weight-bold">{{ selectedGroup?.category || '' }}</h3>
+              <h3 class="has-text-weight-bold">{{ selectedGroup?.name || '' }}</h3>
               <!-- </div> -->
             </div>
           </div>
@@ -140,7 +165,7 @@ onMounted(() => {
                     <strong>Indicator Phrasing</strong>
                   </div>
                   <div class="column">
-                    <p>{{ item.summary }}</p>
+                    <p>{{ item.phrasing }}</p>
                   </div>
                 </div>
                 <hr>
