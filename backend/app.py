@@ -77,6 +77,12 @@ app.include_router(
     tags=["indicators"],
     dependencies=[Depends(models.get_db)],
 )
+app.include_router(
+    indicators.router,
+    prefix="/theory-of-change",
+    tags=["theory-of-change"],
+    dependencies=[Depends(models.get_db)],
+)
 
 ###############################################################################
 #   Handler for AWS Lambda                                                    #
