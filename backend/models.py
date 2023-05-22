@@ -75,9 +75,9 @@ class Project(Base):
     country_id: Mapped[int] = mapped_column(ForeignKey("countries.id"))
 
     # TODO; add this back later
-    # theories_of_change = relationship(
-    #     "TheoryOfChange", back_populates="project", load_on_pending=True
-    # )
+    theories_of_change = relationship(
+        "TheoryOfChange", back_populates="project", load_on_pending=True
+    )
 
 
 class TheoryOfChange(Base):
@@ -89,7 +89,7 @@ class TheoryOfChange(Base):
     project_id: Mapped[int] = mapped_column(ForeignKey("projects.id"))
 
     project = relationship(
-        "Project", back_populates="theory_of_changes", load_on_pending=True
+        "Project", back_populates="theories_of_change", load_on_pending=True
     )
     graph = relationship(
         "TheoryOfChangeItem", back_populates="theory_of_change", load_on_pending=True
@@ -102,17 +102,38 @@ class TheoryOfChangeItem(Base):
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
     name: Mapped[str]
     description: Mapped[Optional[str]]
-    type_id: Mapped[int] = mapped_column(ForeignKey("lu_toc_types.id"))
-    from_id: Mapped[int] = mapped_column(ForeignKey("theories_of_change_item.id"))
+    type_id: Mapped[int] = mapped_column(ForeignKey("lu_toc_types.id"), nullable=True)
+    from_id: Mapped[int] = mapped_column(
+        ForeignKey("theories_of_change_item.id"), nullable=True
+    )
     to_id: Mapped[int] = mapped_column(
         ForeignKey("theories_of_change_item.id"), nullable=True
     )
     sem_id: Mapped[int] = mapped_column(ForeignKey("lu_sem.id"), nullable=True)
+    theory_of_change_id: Mapped[int] = mapped_column(
+        ForeignKey("theories_of_change.id"), nullable=False
+    )
 
     # project_id: Mapped[int] = mapped_column(ForeignKey("projects.id"))
     theory_of_change = relationship(
         "TheoryOfChange", back_populates="graph", load_on_pending=True
     )
+
+
+class LuSem(Base):
+    __tablename__ = "lu_sem"
+
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    name: Mapped[str]
+    description: Mapped[Optional[str]]
+
+
+class TheoryOfChangeType(Base):
+    __tablename__ = "lu_toc_types"
+
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    name: Mapped[str]
+    description: Mapped[Optional[str]]
 
 
 Base.metadata.create_all(bind=engine)

@@ -7,6 +7,9 @@
 	"settings": {
 		"vue.autoInsert.dotValue": true,
 		"vue.inlayHints.missingProps": true,
-		"vue.server.petiteVue.supportHtmlFile": true
+		"vue.server.petiteVue.supportHtmlFile": true,
+		"cSpell.words": [
+			"joinedload"
+		]
 	}
 }

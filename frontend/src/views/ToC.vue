@@ -5,6 +5,7 @@ import { useSideNavStore } from "../stores/sideNav";
 import axios from "axios";
 import { onClickOutside } from "@vueuse/core";
 import IndicatorBrowserPanel from "@/components/IndicatorBrowserPanel.vue";
+import { ApiRequest } from "@/apis/api";
 
 const isPanelVisible = ref(false);
 const showIndicatorModal = ref(false);
@@ -220,7 +221,20 @@ const diagram = reactive({
     this.nodes[this.nextNodeId] = node;
     this.nextNodeId =
       String.fromCharCode(this.nextNodeId.charCodeAt(0) + 1) + this.nextNodeId.charAt(1);
+
     drawDiagram();
+
+    const id = 1
+    ApiRequest.post(`theory-of-change/${id}/item`, {
+      name: label,
+      type_id: 1,
+      from_id: null,
+      to_id: null,
+      sem_id: 1,
+      description: "dummy description"
+    })
+      .then(resp => console.log(resp))
+
     return node;
   },
 
@@ -298,6 +312,7 @@ onMounted(() => {
       fromNodeId.value = nodeId;
     }
   };
+
 });
 
 onUnmounted(() => {
@@ -564,7 +579,8 @@ const loadExampleToc = async (filename) => {
     <div class="diagram-container" ref="diagramContainer" style="display: flex; width: 100%;"></div>
 
     <!-- <IndicatorBrowserModalVue :is-visible="isIndicatorModalVisible" v-if="isIndicatorModalVisible"></IndicatorBrowserModalVue> -->
-    <IndicatorBrowserPanel :is-visible="isPanelVisible" @is-closed="isPanelVisible = false; showIndicatorModal = true; useSideNavStore().hide();">
+    <IndicatorBrowserPanel :is-visible="isPanelVisible"
+      @is-closed="isPanelVisible = false; showIndicatorModal = true; useSideNavStore().hide();">
     </IndicatorBrowserPanel>
 
     <div v-if="selectedNodeId || showIndicatorModal == true" class="modal is-active p-2">
