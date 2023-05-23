@@ -1,4 +1,4 @@
-<script  setup>
+<script lang="ts"  setup>
 import mermaidAPI from "/node_modules/mermaid/dist/mermaid.esm.mjs";
 import { onMounted, onUnmounted, reactive, ref, computed } from "vue";
 import { useSideNavStore } from "@/stores/sideNav";
@@ -32,7 +32,27 @@ const modalConfig = ref({
   isItemNew: false,
   theoryOfChangeId: null
 });
-const theoryOfChangeModel = ref({ graph: [] });
+const theoryOfChangeModel = ref({
+  data: { graph: [] },
+  selectedItem: {}
+}),
+  tocItemModalConfig = ref({
+    visible: false,
+    itemId: null,
+    data: {},
+    isNew: false,
+    theoryOfChangeId: null,
+    isLoading: false,
+    form: {
+      name: undefined,
+      type: undefined,
+      sem: undefined,
+      description: undefined,
+      is_validated: false,
+      to_id: undefined,
+      from_id: undefined,
+    }
+  });
 
 const svgUrl = ref("");
 const svgImgSrcUrl = ref("");
@@ -244,12 +264,12 @@ const diagram = reactive({
   parseGraph: function (data) {
     if (Array.isArray(data)) data = data[0]
 
-    theoryOfChangeModel.value = data;
+    theoryOfChangeModel.value.data = data;
 
     console.log('parseGraph');
     // console.log(graph);
 
-    const graph = data.graph.map(r => {
+    const graph = data.graph.map((r: any) => {
       return {
         id: r.id,
         label: r.name,
@@ -381,6 +401,7 @@ onMounted(() => {
     console.log(fromNodeId, toNodeId); //selectedEdgeIds
     const edgeIndex = diagram.edges.findIndex((e) => e.fromId == fromNodeId && e.toId == toNodeId);
     selectedEdge.value = diagram.edges[edgeIndex];
+
     if (useSideNavStore().visible) {
       useSideNavStore().hide();
       tempNavHidden = true;
@@ -390,6 +411,18 @@ onMounted(() => {
     fromNodeId.value = null;
     selectedNodeId.value = nodeId;
     selectedNode.value = diagram.nodes[nodeId];
+
+    theoryOfChangeModel.value.selectedItem = theoryOfChangeModel.value.data.graph.find((item: any) => item.id == nodeId);
+
+    const selectedItem = theoryOfChangeModel.value.selectedItem as any;
+    if (selectedItem != null) {
+      tocItemModalConfig.value.isNew = false;
+      tocItemModalConfig.value.form = selectedItem;
+      tocItemModalConfig.value.itemId = selectedItem.id;
+      tocItemModalConfig.value.visible = true;
+    }
+
+
     if (useSideNavStore().visible) {
       useSideNavStore().hide();
       tempNavHidden = true;
@@ -559,23 +592,271 @@ const loadExampleToc = async (filename) => {
     console.error('Failed to fetch JSON data:', error);
   }
 }
+
+//=== END: Theory of Change Item Modal functions
+const saveFormItem = async () => {
+  // TODO: make http request to save the form
+  // TODO: send response as callback to close the form
+  const fields = tocItemModalConfig.value.form;
+
+  tocItemModalConfig.value.isLoading = true;
+
+  // TODO: if item is not new, then update it
+
+  await ApiRequest.post(`theory-of-change/${tocItemModalConfig.value.theoryOfChangeId}/item`, {
+    name: fields.name,
+    type_id: 1,
+    from_id: fields.from_id,
+    to_id: fields.to_id,
+    sem_id: 1,
+    description: "dummy description"
+  }).then(resp => {
+    console.log(resp)
+
+    diagram.parseGraph(resp);
+    // emit("onItemAdded", resp);
+    // closeModal();
+    tocItemModalConfig.value.visible = false;
+    useSideNavStore().show();
+  }).finally(() => {
+    tocItemModalConfig.value.isLoading = false;
+  });
+}
+
+
+function deleteItem() {
+  // TODO: implement deleting of the item
+  // remove edges
+}
+//=== END: Theory of Change Item Modal functions
 </script>
 
 <template>
   <div class="mx-3">
 
-    <TheoryOfChangeItemModalVue :is-new="modalConfig.isItemNew" :is-visible="modalConfig.isVisible"
+    <!-- <TheoryOfChangeItemModalVue :is-new="modalConfig.isItemNew" :is-visible="modalConfig.isVisible"
       :theory-of-change-id="modalConfig.theoryOfChangeId"
       @is-closed="modalConfig.isVisible = false; modalConfig.theoryOfChangeId = undefined"
-      @on-item-added="diagram.parseGraph($event)" v-if="modalConfig.isVisible === true"
-      :items="theoryOfChangeModel.graph">
-    </TheoryOfChangeItemModalVue>
+      @on-item-added="diagram.parseGraph($event)" v-if="modalConfig.isVisible === true" :items="theoryOfChangeModel.data.graph"
+      :item-details="selectedNode">
+    </TheoryOfChangeItemModalVue> -->
+
+
+    <!-- ======== START: Theory of Change Modal ======= -->
+    <div class="`modal`" :class="{ 'is-active': tocItemModalConfig.visible }" v-if="tocItemModalConfig.visible">
+      <div class="modal-background"></div>
+
+      <div ref="modalRef" class="modal-card">
+        <header class="modal-card-head">
+          <p class="modal-card-title">Theory of Change Item</p>
+          <button @click="closeModal" class="delete" aria-label="close"></button>
+        </header>
+
+        <section class="modal-card-body">
+          <form>
+            <div class="field">
+              <div class="field-body">
+                <div class="field">
+                  <div class="control">
+                    <label class="label">Label</label>
+                    <input class="input" type="text" maxlength="80" v-model="tocItemModalConfig.form.name" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="field is-horizontal">
+              <div class="field-body">
+
+                <div class="field">
+                  <label class="label">Links From</label>
+
+                  <div class="control">
+                    <div class="select is-fullwidth">
+                      <!-- TODO: show list of existing indicators -->
+                      <select v-model="tocItemModalConfig.form.from_id">
+                        <!-- @ts-ignore -->
+                        <option v-for="item in theoryOfChangeModel.data.graph" :key="item.id" :value="item.id">
+                          {{ item.name }}
+                        </option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="field">
+                  <label class="label">Links To</label>
+
+                  <div class="control">
+                    <div class="select is-fullwidth">
+                      <!-- TODO: show list of existing indicators -->
+                      <select v-model="tocItemModalConfig.form.to_id">
+                        <!-- @ts-ignore -->
+                        <option v-for="item in theoryOfChangeModel.data.graph" :key="item.id" :value="item.id">
+                          {{ item.name }}
+                        </option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="field is-horizontal">
+              <div class="field-body">
+                <div class="columns">
+                  <!-- Column 1: SEM Level and Category -->
+                  <div class="column">
+                    <div class="field">
+                      <label class="label">Logic Model Category</label>
+                      <div class="control">
+                        <div class="select">
+                          <select v-model="tocItemModalConfig.form.type">
+                            <option value="activity">Activity</option>
+                            <option value="output">Output</option>
+                            <option value="intermediate_outcome">
+                              Intermediate Outcome
+                            </option>
+                            <option value="outcome">Outcome</option>
+                            <option value="impact">Impact</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Column 2: Audience -->
+                  <div class="column">
+                    <div class="field">
+                      <label class="label">SEM Level</label>
+                      <div class="control">
+                        <div class="select">
+                          <select v-model="tocItemModalConfig.form.sem">
+                            <option value="individual">Individual</option>
+                            <option value="interpersonal">Interpersonal</option>
+                            <option value="community">Community</option>
+                            <option value="organizational">Organizational</option>
+                            <option value="policy">Policy</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="column">
+                    <div class="field">
+                      <div class="control">
+                        <label class="label">
+                          Validated<br />
+                          <input type="checkbox" v-model="tocItemModalConfig.form.is_validated" />
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="field">
+              <label class="label">Description</label>
+              <div class="control">
+                <textarea class="textarea" rows="4" columns="80" maxlength="999"
+                  v-model="tocItemModalConfig.form.description" />
+              </div>
+            </div>
+
+
+            <!-- TODO: implement saving of indicators -->
+            <div class="field">
+              <label class="label">Indicators</label>
+
+              <hr>
+
+              <div class="field is-grouped is-grouped-multiline">
+                <div class="control">
+                  <div class="tags has-addons">
+                    <a class="tag is-link">Technology</a>
+                    <a class="tag is-delete"></a>
+                  </div>
+                </div>
+
+                <div class="control">
+                  <div class="tags has-addons">
+                    <a class="tag is-link">CSS</a>
+                    <a class="tag is-delete"></a>
+                  </div>
+                </div>
+
+                <div class="control">
+                  <div class="tags has-addons">
+                    <a class="tag is-link">Flexbox</a>
+                    <a class="tag is-delete"></a>
+                  </div>
+                </div>
+
+                <div class="control">
+                  <div class="tags has-addons">
+                    <a class="tag is-link">Web Design</a>
+                    <a class="tag is-delete"></a>
+                  </div>
+                </div>
+              </div>
+
+              <!-- <div class="control">
+                      <input class="input" type="text" placeholder="Text input">
+                    </div> -->
+              <button class="button is-small" role="button"
+                @click.prevent="isPanelVisible = !isPanelVisible; showIndicatorModal = true; useSideNavStore().hide();">
+                <span class="icon is-small mr-1">
+                  <i class="fas fa-plus"></i>
+                </span>
+                Add Indicator
+              </button>
+            </div>
+
+          </form>
+        </section>
+
+        <footer class="modal-card-foot" style="display: block;">
+          <div class="level">
+            <div class="level-left">
+              <div class="level-item">
+                <button role="button" class="button is-small is-danger" @click="deleteItem()"
+                  v-if="tocItemModalConfig.isNew == false">
+                  <span class="icon">
+                    <i class="fas fa-trash"></i>
+                  </span>
+                  <!-- Delete Item -->
+                </button>
+
+              </div>
+            </div>
+
+            <div class="level-right">
+              <div class="level-item">
+                <button class="button is-primary" :class="{ 'is-loading': tocItemModalConfig.isLoading }" role="button"
+                  @click.prevent="saveFormItem()">
+                  {{ tocItemModalConfig.isNew ? 'Save' : 'Update' }}
+                </button>
+                <button class="button" role="button" @click="closeModal">Close</button>
+              </div>
+            </div>
+          </div>
+          <!-- <button class="button is-success">Save changes</button> -->
+          <!-- <button class="button" @click="closeModal">Cancel</button> -->
+        </footer>
+      </div>
+
+    </div>
+    <!-- ======== END: Theory of Change Modal ======= -->
+
+
+    <!-- TODO: add edge modal -->
 
     <div class="columns">
       <div class="column">
         <!-- TODO: change id -->
         <button
-          @click.prevent="modalConfig.isItemNew = true; modalConfig.isVisible = true; modalConfig.theoryOfChangeId = 1">Add
+          @click.prevent="tocItemModalConfig.isNew = true; tocItemModalConfig.visible = true; tocItemModalConfig.theoryOfChangeId = 1">Add
           Item</button>
       </div>
 
@@ -589,8 +870,6 @@ const loadExampleToc = async (filename) => {
     <div class="mt-4">
       <div class="diagram-container" ref="diagramContainer" style="display: flex; width: 100%;"></div>
     </div>
-
-    <!-- TODO: add edge modal -->
   </div>
 </template>
 

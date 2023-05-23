@@ -55,6 +55,10 @@ const props = defineProps({
     type: Boolean,
     required: true,
   },
+  itemDetails: {
+    type: Object,
+    required: false,
+  },
   items: {
     type: Array,
     required: false,
@@ -87,6 +91,9 @@ const saveForm = async () => {
   const fields = form.value;
 
   config.value.isLoading = true;
+
+  // TODO: if item is not new, then update it
+
   await ApiRequest.post(`theory-of-change/${props.theoryOfChangeId}/item`, {
     name: fields.name,
     type_id: 1,
@@ -113,6 +120,11 @@ function deleteItem() {
 onMounted(() => {
   if (props.isVisible) {
     useSideNavStore().hide();
+  }
+
+  if (props.itemDetails != null) {
+    console.log(props.itemDetails)
+    form.value = props.itemDetails as any;
   }
   // drawDiagram();
 });
@@ -332,7 +344,7 @@ onClickOutside(edgeModalRef, closeModal);
           <div class="level">
             <div class="level-left">
               <div class="level-item">
-                <button role="button" class="button is-small is-danger" @click="deleteItem()">
+                <button role="button" class="button is-small is-danger" @click="deleteItem()" v-if="props.isNew == false">
                   <span class="icon">
                     <i class="fas fa-trash"></i>
                   </span>
