@@ -224,6 +224,7 @@ const diagram = reactive({
 
     drawDiagram();
 
+    // TODO: replace id with current project id
     const id = 1
     ApiRequest.post(`theory-of-change/${id}/item`, {
       name: label,
@@ -280,7 +281,27 @@ const diagram = reactive({
   },
 });
 
+const fetchGraph = async (project_id) => {
+  try {
+    const id = 1
+    const resp = await ApiRequest.get(`theory-of-change/${id}`);
+
+    console.log(resp)
+    // if (!response.ok) {
+    //   throw new Error(`HTTP error! status: ${response.status}`);
+    // }
+    // const jsonText = await response.text();
+    // console.log("here we go");
+    // console.log(jsonText);
+    // diagram.parseJSON(jsonText);
+  } catch (error) {
+    console.error('Failed to fetch JSON data:', error);
+  }
+}
+
 onMounted(() => {
+  fetchGraph(1)
+
   mermaidAPI.initialize(mermaidConfig);
 
   window.addEventListener("keydown", escapeKeyHandler);

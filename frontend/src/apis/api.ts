@@ -25,7 +25,7 @@ export class ApiRequest {
       myInit.queryStringParameters = params;
     }
 
-    return API.get(apiName, `/${path}`, myInit)
+    return API.get(apiName, `/${path}/`, myInit)
       .then((response) => {
         return response.data as T;
         // Add your code here
@@ -63,7 +63,7 @@ export class ApiRequest {
       myInit.queryStringParameters = params;
     }
 
-    return API.post(apiName, `/${path}`, myInit)
+    return API.post(apiName, `/${path}/`, myInit)
       .then((response) => {
         return response.data as T;
         // Add your code here

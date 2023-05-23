@@ -53,7 +53,7 @@ def create(dto: NewTheoryOfChangeDto, db: Session = Depends(models.get_db)):
 
 
 @router.get("/{id}", response_model=ApiResponse)
-def create(id: int, db: Session = Depends(models.get_db)):
+def get_theory_of_change_details(id: int, db: Session = Depends(models.get_db)):
     record = (
         db.query(models.TheoryOfChange)
         .filter(models.TheoryOfChange.id == id)
@@ -70,19 +70,33 @@ def create(id: int, dto: TheoryOfChangeItemDto, db: Session = Depends(models.get
     record.name = dto.name
     record.type_id = dto.type_id
     record.from_id = dto.from_id
+    record.to_id = dto.to_id
     record.sem_id = dto.sem_id
     record.description = dto.description
     record.theory_of_change_id = id
 
     db.add(record)
     db.commit()
-    db.refresh(record)
 
-    return ApiResponse(data=[record])
+    if dto.to_id is not None:
+        # Query for the to_id and link it to the from_id
+        to_record = (
+            db.query(models.TheoryOfChangeItem)
+            .filter(models.TheoryOfChangeItem.id == dto.to_id)
+            .first()
+        )
+        to_record.from_id = record.id
+
+        db.add(to_record)
+        db.commit()
+
+    # db.refresh(record)
+
+    return get_theory_of_change_details(id, db)
 
 
 @router.post("/{id}/item/{item_id}", response_model=ApiResponse)
-def create(id: int, item_id: int, db: Session = Depends(models.get_db)):
+def add_item(id: int, item_id: int, db: Session = Depends(models.get_db)):
     resp = (
         db.query(models.TheoryOfChangeItem)
         .filter(
