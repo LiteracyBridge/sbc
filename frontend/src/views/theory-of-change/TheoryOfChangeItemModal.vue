@@ -12,13 +12,17 @@ const form = ref<{
   name: string; type: string | number,
   sem: string | number,
   is_validated: boolean,
-  description: string
+  description: string,
+  to_id?: number | number,
+  from_id?: number | number,
 }>({
   name: undefined,
   type: undefined,
   sem: undefined,
   description: undefined,
-  is_validated: false
+  is_validated: false,
+  to_id: undefined,
+  from_id: undefined,
 });
 const config = ref({ isLoading: false });
 
@@ -34,13 +38,7 @@ const addNodeLogicModel = ref("");
 const fromNodeId = ref(null);
 const selectedNodeId = ref(null);
 const selectedEdge = ref(null);
-const selectedNode = ref(null);
-const deleteFromId = ref(null);
-const deleteToId = ref(null);
-const textToImport = ref(null);
-const logicModelView = ref(false);
-let tempNavHidden = false;
-const selectedExampleToC = ref(null);
+
 
 const emit = defineEmits(['onItemAdded', 'isClosed']);
 
@@ -57,8 +55,16 @@ const props = defineProps({
     type: Boolean,
     required: true,
   },
+  items: {
+    type: Array,
+    required: false,
+    default: []
+  },
 });
 
+const getItems = computed<{ name: string; id: number }[]>(() => {
+  return props.items as { name: string; id: number }[];
+});
 
 const closeModal = () => {
 
@@ -84,8 +90,8 @@ const saveForm = async () => {
   await ApiRequest.post(`theory-of-change/${props.theoryOfChangeId}/item`, {
     name: fields.name,
     type_id: 1,
-    from_id: null,
-    to_id: null,
+    from_id: fields.from_id,
+    to_id: fields.to_id,
     sem_id: 1,
     description: "dummy description"
   }).then(resp => {
@@ -154,21 +160,39 @@ onClickOutside(edgeModalRef, closeModal);
               </div> -->
             </div>
 
-            <div class="field">
-              <label class="label">Links To:</label>
+            <div class="field is-horizontal">
+              <div class="field-body">
 
-              <div class="control">
-                <div class="select">
-                  <!-- TODO: show list of existing indicators -->
-                  <select v-model="form.type">
-                    <option value="activity">Activity</option>
-                    <option value="output">Output</option>
-                    <option value="intermediate_outcome">
-                      Intermediate Outcome
-                    </option>
-                    <option value="outcome">Outcome</option>
-                    <option value="impact">Impact</option>
-                  </select>
+                <div class="field">
+                  <label class="label">Links From</label>
+
+                  <div class="control">
+                    <div class="select is-fullwidth">
+                      <!-- TODO: show list of existing indicators -->
+                      <select v-model="form.from_id">
+                        <!-- @ts-ignore -->
+                        <option v-for="item in getItems" :key="item.id" :value="item.id">
+                          {{ item.name }}
+                        </option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="field">
+                  <label class="label">Links To</label>
+
+                  <div class="control">
+                    <div class="select is-fullwidth">
+                      <!-- TODO: show list of existing indicators -->
+                      <select v-model="form.to_id">
+                        <!-- @ts-ignore -->
+                        <option v-for="item in getItems" :key="item.id" :value="item.id">
+                          {{ item.name }}
+                        </option>
+                      </select>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

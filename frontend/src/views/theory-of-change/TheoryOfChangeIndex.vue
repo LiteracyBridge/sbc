@@ -8,6 +8,22 @@ import IndicatorBrowserPanel from "./IndicatorBrowserPanel.vue";
 import { ApiRequest } from "@/apis/api";
 import TheoryOfChangeItemModalVue from "./TheoryOfChangeItemModal.vue";
 
+const THEORY_OF_CHANGE_TYPES = {
+  "1": "input",
+  "2": "activity",
+  "3": "output",
+  "4": "outcome",
+  "5": "impact",
+}
+
+const SEMS = {
+  "1": "Individual",
+  "2": "Interpersonal",
+  "3": "Community",
+  "4": "Organizational",
+  "5": "Policy/Enabling environment",
+}
+
 const isPanelVisible = ref(false);
 const showIndicatorModal = ref(false);
 const modalConfig = ref({
@@ -16,6 +32,7 @@ const modalConfig = ref({
   isItemNew: false,
   theoryOfChangeId: null
 });
+const theoryOfChangeModel = ref({ graph: [] });
 
 const svgUrl = ref("");
 const svgImgSrcUrl = ref("");
@@ -175,6 +192,7 @@ const diagram = reactive({
   defaultNode: {
     id: "",
     label: "",
+    name: "",
     description: "",
     validated: false,
     indicator: "",
@@ -216,25 +234,56 @@ const diagram = reactive({
       const mergedNode = Object.assign({}, this.defaultNode, node);
       this.nodes[mergedNode.id] = mergedNode;
     }
+
+    console.log(this.nodes);
     for (const edge of inputObjects.edges) {
       this.createEdge(edge.fromId, edge.toId, false);
     }
     drawDiagram();
   },
-  parseGraph: function (graph) {
+  parseGraph: function (data) {
+    if (Array.isArray(data)) data = data[0]
+
+    theoryOfChangeModel.value = data;
+
     console.log('parseGraph');
-    console.log(graph);
+    // console.log(graph);
+
+    const graph = data.graph.map(r => {
+      return {
+        id: r.id,
+        label: r.name,
+        // name: r.name,
+        description: r.description,
+        validated: false,
+        // validated: r.validated,
+        indicator: r.indicator,
+        sem: SEMS[`${r.sem_id}`],
+        logicModel: THEORY_OF_CHANGE_TYPES[`${r.type_id}`],
+        audience: [],
+      }
+    });
 
     // const inputObjects = JSON.parse(jsonString);
-    // for (const node of inputObjects.nodes) {
-    //   // Merge the input object with the default node, so any missing properties are filled in
-    //   const mergedNode = Object.assign({}, this.defaultNode, node);
-    //   this.nodes[mergedNode.id] = mergedNode;
-    // }
-    // for (const edge of inputObjects.edges) {
-    //   this.createEdge(edge.fromId, edge.toId, false);
-    // }
-    // drawDiagram();
+    for (const node of graph) {
+      // Merge the input object with the default node, so any missing properties are filled in
+      const mergedNode = Object.assign({}, this.defaultNode, node);
+      this.nodes[mergedNode.id] = mergedNode;
+    }
+
+    const edges = data.graph.map(r => {
+      return {
+        fromId: r.from_id,
+        toId: r.to_id,
+        assumptions: r.assumptions,
+        risks: r.risks
+      }
+    });
+
+    for (const edge of edges) {
+      this.createEdge(edge.fromId, edge.toId, false);
+    }
+    drawDiagram();
   },
 
   createNode: function (label, logicModel) {
@@ -308,14 +357,14 @@ const fetchGraph = async (project_id) => {
     const id = 1
     const resp = await ApiRequest.get(`theory-of-change/${id}`);
 
-    console.log(resp)
+    // console.log(resp)
     // if (!response.ok) {
     //   throw new Error(`HTTP error! status: ${response.status}`);
     // }
     // const jsonText = await response.text();
     // console.log("here we go");
     // console.log(jsonText);
-    // diagram.parseJSON(jsonText);
+    diagram.parseGraph(resp);
   } catch (error) {
     console.error('Failed to fetch JSON data:', error);
   }
@@ -518,7 +567,8 @@ const loadExampleToc = async (filename) => {
     <TheoryOfChangeItemModalVue :is-new="modalConfig.isItemNew" :is-visible="modalConfig.isVisible"
       :theory-of-change-id="modalConfig.theoryOfChangeId"
       @is-closed="modalConfig.isVisible = false; modalConfig.theoryOfChangeId = undefined"
-      @on-item-added="diagram.parseGraph($event)" v-if="modalConfig.isVisible === true">
+      @on-item-added="diagram.parseGraph($event)" v-if="modalConfig.isVisible === true"
+      :items="theoryOfChangeModel.graph">
     </TheoryOfChangeItemModalVue>
 
     <div class="columns">
@@ -536,9 +586,11 @@ const loadExampleToc = async (filename) => {
 
     </div>
 
-    <div class="mt-4 container">
-      <p>Content here</p>
+    <div class="mt-4">
+      <div class="diagram-container" ref="diagramContainer" style="display: flex; width: 100%;"></div>
     </div>
+
+    <!-- TODO: add edge modal -->
   </div>
 </template>
 

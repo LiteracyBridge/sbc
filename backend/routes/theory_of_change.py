@@ -3,7 +3,7 @@ from dataclass_wizard import asdict, fromdict
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session, joinedload, subqueryload
 from schema import ApiResponse
 import models
 
@@ -57,7 +57,14 @@ def get_theory_of_change_details(id: int, db: Session = Depends(models.get_db)):
     record = (
         db.query(models.TheoryOfChange)
         .filter(models.TheoryOfChange.id == id)
-        .options(joinedload(models.TheoryOfChange.graph))
+        .options(
+            subqueryload(models.TheoryOfChange.graph)
+            # .options(
+            #     subqueryload(models.TheoryOfChangeItem.sem),
+            #     subqueryload(models.TheoryOfChangeItem.type),
+            # )
+        )
+        # .options(joinedload(models.TheoryOfChange.graph))
         .first()
     )
 
@@ -78,17 +85,17 @@ def create(id: int, dto: TheoryOfChangeItemDto, db: Session = Depends(models.get
     db.add(record)
     db.commit()
 
-    if dto.to_id is not None:
-        # Query for the to_id and link it to the from_id
-        to_record = (
-            db.query(models.TheoryOfChangeItem)
-            .filter(models.TheoryOfChangeItem.id == dto.to_id)
-            .first()
-        )
-        to_record.from_id = record.id
+    # if dto.to_id is not None:
+    #     # Query for the to_id and link it to the from_id
+    #     to_record = (
+    #         db.query(models.TheoryOfChangeItem)
+    #         .filter(models.TheoryOfChangeItem.id == dto.to_id)
+    #         .first()
+    #     )
+    #     to_record.from_id = record.id
 
-        db.add(to_record)
-        db.commit()
+    #     db.add(to_record)
+    #     db.commit()
 
     # db.refresh(record)
 

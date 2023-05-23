@@ -20,6 +20,14 @@ class User(Base):
     # items = relationship("Item", back_populates="owner")
 
 
+class LuSem(Base):
+    __tablename__ = "lu_sem"
+
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    name: Mapped[str]
+    description: Mapped[Optional[str]]
+
+
 class IndicatorType(Base):
     __tablename__ = "lu_indicator_types"
 
@@ -114,18 +122,28 @@ class TheoryOfChangeItem(Base):
         ForeignKey("theories_of_change.id"), nullable=False
     )
 
-    # project_id: Mapped[int] = mapped_column(ForeignKey("projects.id"))
+    # todo: add is_validated
+
+    # Related objects
     theory_of_change = relationship(
         "TheoryOfChange", back_populates="graph", load_on_pending=True
     )
-
-
-class LuSem(Base):
-    __tablename__ = "lu_sem"
-
-    id: Mapped[int] = mapped_column(primary_key=True, index=True)
-    name: Mapped[str]
-    description: Mapped[Optional[str]]
+    sem = relationship("LuSem", load_on_pending=True)
+    type = relationship("TheoryOfChangeType", load_on_pending=True)
+    # from_item = relationship(
+    #     "TheoryOfChangeItem",
+    #     remote_side=[to_id],
+    #     foreign_keys=[to_id],
+    #     # back_populates="to_item",
+    #     load_on_pending=True,
+    # )
+    # to_item = relationship(
+    #     "TheoryOfChangeItem",
+    #     # remote_side=[from_id],
+    #     # back_popul//ates="from_item",
+    #     foreign_keys=[from_id],
+    #     load_on_pending=True,
+    # )
 
 
 class TheoryOfChangeType(Base):
