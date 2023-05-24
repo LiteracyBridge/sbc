@@ -1,21 +1,36 @@
+
 interface IUser {
   id: number;
   email: string;
   name: string;
 }
 
-interface IndicatorType {
+export interface IndicatorType {
   id: number;
   name: string;
   parent_id?: number;
 }
 
-interface IndicatorGroup {
-    id: number;
-    name: string;
-    group_id: number;
-    // level: string;
-    phrasing: string;
-    purpose: string;
-    link: string;
+export interface IndicatorGroup {
+  id: number;
+  name: string;
+  group_id: number;
+  // level: string;
+  phrasing: string;
+  purpose: string;
+  link: string;
+}
+
+export class TheoryOfChangeItem {
+  name: string = "";
+  from_id?: number = undefined;
+  to_id?: number = undefined;
+  sem_id?: string;
+  indicators: [] = [];
+}
+
+export class TheoryOfChange {
+  graph: Array<TheoryOfChangeItem> = [];
+  id: string = null;
+  // indicators: any[] = [];
 }

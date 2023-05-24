@@ -5,6 +5,7 @@ import { AccordionList, AccordionItem } from "vue3-rich-accordion";
 
 import { useProjectStore } from "@/stores/projects";
 import { ApiRequest } from "@/apis/api";
+import { TheoryOfChange, type IndicatorGroup, type IndicatorType, TheoryOfChangeItem } from "@/types";
 
 const projectStore = useProjectStore();
 
@@ -19,21 +20,30 @@ const props = defineProps({
   //   type: Boolean,
   //   required: true,
   // },
-  theoryOfChangeId: {
-    type: Number,
+  tocItem: {
+    type: TheoryOfChangeItem,
     required: true,
   },
+  // theoryOfChange: {
+  //   type: TheoryOfChange,
+  //   required: true,
+  // },
   isVisible: {
     type: Boolean,
     required: true,
-  }
+  },
 });
 
 const selectedIndicatorType = ref<{ id: number, name: string }>(),
   selectedGroup = ref<IndicatorType>(),
   isFetchingIndicators = ref(false),
   indicatorTypes = ref<IndicatorType[]>([]),
-  indicatorsList = ref<IndicatorGroup[]>([]);
+  indicatorsList = ref<IndicatorGroup[]>([]),
+  config = ref({
+    isLoading: false,
+    indicatorsAdded: [],
+    indicatorsRemoved: [],
+  });
 
 const isOpened = computed(() => props.isVisible)
 
@@ -59,8 +69,20 @@ const groupIndicators = computed(() => {
   return indicatorsList.value.filter(i => i.group_id == selectedGroup.value?.id);
 })
 
+const tocIte = computed(() => {
+  if (selectedGroup.value?.id == null) {
+    return [];
+  }
+
+  return indicatorsList.value.filter(i => i.group_id == selectedGroup.value?.id);
+})
+
 function onIndicatorSelected(item: any, _: any) {
-  console.log(item)
+  // const temp = indicatorsAdded.value;
+  // temp.push(item.id)
+
+  // indicatorsAdded.value = temp;
+  // console.log(temp)
 }
 
 const closeButton = () => {
@@ -95,8 +117,31 @@ onMounted(() => {
     .finally(() => isFetchingIndicators.value = false);
 })
 
-const saveIndicator = (id: number) => {
+const itemExists = (indicatorId: number) => {
+  return props.tocItem.indicators
+    .find((i) => i.indicator_id == indicatorId) != null;
+  // .value.indicatorsAdded.find(i => i == id) != null;
+}
+
+const saveIndicators = async () => {
   // theory-of-change
+
+  config.value.isLoading = true;
+
+  // TODO: if item is not new, then update it
+
+  await ApiRequest.post(`theory-of-change/${props.tocItem.theory_of_change_id}/indicators`, {
+    added: config.value.indicatorsAdded,
+    removed: config.value.indicatorsAdded,
+  }).then(resp => {
+    console.log(resp)
+
+    // emit("onItemAdded", resp);
+    // closeModal();
+    emit("isClosed", true);
+  }).finally(() => {
+    config.value.isLoading = false;
+  });
 }
 
 </script>
@@ -149,8 +194,13 @@ const saveIndicator = (id: number) => {
                 Save
               </button>
             -->
+              <button class="button mr-2 is-primary" :class="{ 'is-loading': config.isLoading }"
+                :disabled="config.isLoading" @click.prevent="saveIndicators">
+                Save
+              </button>
+
               <button class="button mr-2" @click.prevent="closeButton">
-                Close
+                Cancel
               </button>
             </div>
           </div>
@@ -191,16 +241,17 @@ const saveIndicator = (id: number) => {
               </div>
 
               <footer class="card-footer">
-                <p class="card-footer-item">
-                  <button class="button is-primary">
+                <p class="card-footer-item" v-if="!itemExists(item.id)">
+                  <button class="button is-primary" @click="config.indicatorsAdded.push(item.id)">
                     <span class="icon mr-1">
                       <i class="fas fa-plus"></i>
                     </span>
                     Add Indicator
                   </button>
                 </p>
-                <p class="card-footer-item">
-                  <button class="button is-danger">
+
+                <p class="card-footer-item" v-if="itemExists(item.id)">
+                  <button class="button is-danger" @click="config.indicatorsRemoved.push(item.id)">
                     <span class="icon mr-1">
                       <i class="fas fa-trash"></i>
                     </span>

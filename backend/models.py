@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship, mapped_column
 from sqlalchemy.orm import Mapped
@@ -62,18 +62,6 @@ class Indicator(Base):
     # TODO: Generate alembic migration to create a table using the sqlalchemy model below
 
 
-class TheoryOfChangeIndicator(Base):
-    __tablename__ = "theory_of_change_indicators"
-
-    id: Mapped[int] = mapped_column(primary_key=True, index=True)
-    theory_of_change_id: Mapped[int] = mapped_column(ForeignKey("toc.id"))
-    indicatory_id: Mapped[int] = mapped_column(ForeignKey("lu_indicators.id"))
-
-    indicator = relationship(
-        "Indicator", back_populates="theory_of_change", load_on_pending=True
-    )
-
-
 class Project(Base):
     __tablename__ = "projects"
 
@@ -121,6 +109,9 @@ class TheoryOfChangeItem(Base):
     theory_of_change_id: Mapped[int] = mapped_column(
         ForeignKey("theories_of_change.id"), nullable=False
     )
+    indicators: Mapped[List["TheoryOfChangeIndicator"]] = relationship(
+        "TheoryOfChangeIndicator",
+    )
 
     # todo: add is_validated
 
@@ -144,6 +135,18 @@ class TheoryOfChangeItem(Base):
     #     foreign_keys=[from_id],
     #     load_on_pending=True,
     # )
+
+
+class TheoryOfChangeIndicator(Base):
+    __tablename__ = "theory_of_change_indicators"
+
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    theory_of_change_id: Mapped[int] = mapped_column(
+        ForeignKey("theories_of_change_item.id")
+    )
+    indicator_id: Mapped[int] = mapped_column(ForeignKey("lu_indicators.id"))
+
+    indicator: Mapped["Indicator"] = relationship("Indicator", load_on_pending=True)
 
 
 class TheoryOfChangeType(Base):

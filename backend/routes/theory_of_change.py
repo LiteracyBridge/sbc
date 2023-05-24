@@ -1,18 +1,20 @@
-from typing import Optional
+from typing import List, Optional
 from dataclass_wizard import asdict, fromdict
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
 from sqlalchemy.orm import Session, joinedload, subqueryload
 from schema import ApiResponse
+from models import TheoryOfChangeIndicator, TheoryOfChange, TheoryOfChangeItem
 import models
 
 router = APIRouter()
 
 
 # Types
-class IndicatorItem(BaseModel):
-    id: str | int
+class IndicatorDto(BaseModel):
+    removed: List[int]
+    added: List[int]
 
 
 class TheoryOfChangeItemDto(BaseModel):
@@ -58,7 +60,9 @@ def get_theory_of_change_details(id: int, db: Session = Depends(models.get_db)):
         db.query(models.TheoryOfChange)
         .filter(models.TheoryOfChange.id == id)
         .options(
-            subqueryload(models.TheoryOfChange.graph)
+            subqueryload(models.TheoryOfChange.graph).subqueryload(
+                TheoryOfChangeItem.indicators
+            ),
             # .options(
             #     subqueryload(models.TheoryOfChangeItem.sem),
             #     subqueryload(models.TheoryOfChangeItem.type),
@@ -120,18 +124,36 @@ def add_item(id: int, item_id: int, db: Session = Depends(models.get_db)):
 
 
 @router.post("/{id}/indicators", response_model=ApiResponse)
-def add_indicator(
-    id: int, indicator: IndicatorItem, db: Session = Depends(models.get_db)
-):
-    record = models.TheoryOfChangeIndicator()
-    record.theory_of_change_id = id
-    record.indicatory_id = indicator.id
+def update_indicators(id: int, dto: IndicatorDto, db: Session = Depends(models.get_db)):
+    print(dto.removed)
+    # Remove all indicators
+    db.query(models.TheoryOfChangeIndicator).filter(
+        TheoryOfChangeIndicator.theory_of_change_id == id,
+        TheoryOfChangeIndicator.indicator_id.in_(dto.removed),
+    ).delete()
+    # for i in removed_indicators:
+    #     db.delete(i)
 
-    db.add(record)
+    # Add all indicators
+    new_indicators = []
+    for i in dto.added:
+        record = models.TheoryOfChangeIndicator()
+        record.theory_of_change_id = id
+        record.indicator_id = i
+
+        new_indicators.append(record)
+
+    db.add_all(new_indicators)
     db.commit()
-    db.refresh(record)
 
-    return ApiResponse(data=[record])
+    indicators = (
+        db.query(models.TheoryOfChangeIndicator)
+        .filter(TheoryOfChangeIndicator.theory_of_change_id == id)
+        .options(subqueryload(TheoryOfChangeIndicator.indicator))
+        .all()
+    )
+
+    return ApiResponse(data=indicators)
 
 
 @router.get("/", response_model=ApiResponse)

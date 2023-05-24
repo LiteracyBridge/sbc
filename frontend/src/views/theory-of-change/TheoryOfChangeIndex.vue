@@ -1,12 +1,14 @@
 <script lang="ts"  setup>
+// @ts-ignore
 import mermaidAPI from "/node_modules/mermaid/dist/mermaid.esm.mjs";
+
 import { onMounted, onUnmounted, reactive, ref, computed } from "vue";
 import { useSideNavStore } from "@/stores/sideNav";
 import axios from "axios";
 import { onClickOutside } from "@vueuse/core";
 import IndicatorBrowserPanel from "./IndicatorBrowserPanel.vue";
 import { ApiRequest } from "@/apis/api";
-import TheoryOfChangeItemModalVue from "./TheoryOfChangeItemModal.vue";
+import { TheoryOfChange, TheoryOfChangeItem } from "@/types";
 
 const THEORY_OF_CHANGE_TYPES = {
   "1": "input",
@@ -32,9 +34,11 @@ const modalConfig = ref({
   isItemNew: false,
   theoryOfChangeId: null
 });
-const theoryOfChangeModel = ref({
-  data: { graph: [] },
-  selectedItem: {}
+const theoryOfChangeModel = ref<{
+  data: TheoryOfChange, selectedItem: TheoryOfChangeItem
+}>({
+  data: new TheoryOfChange(),
+  selectedItem: new TheoryOfChangeItem()
 }),
   tocItemModalConfig = ref({
     visible: false,
@@ -557,6 +561,8 @@ const closeModal = () => {
   selectedEdge.value = null;
   showIndicatorModal.value = false;
 
+  tocItemModalConfig.value.visible = false;
+  tocItemModalConfig.value.form = null;
   // if (tempNavHidden) {
   //   tempNavHidden = false;
   // }
@@ -641,6 +647,10 @@ function deleteItem() {
       :item-details="selectedNode">
     </TheoryOfChangeItemModalVue> -->
 
+    <IndicatorBrowserPanel :is-visible="isPanelVisible"
+      @is-closed="isPanelVisible = false; showIndicatorModal = true; useSideNavStore().hide();"
+      :toc-item="theoryOfChangeModel.selectedItem">
+    </IndicatorBrowserPanel>
 
     <!-- ======== START: Theory of Change Modal ======= -->
     <div class="`modal`" :class="{ 'is-active': tocItemModalConfig.visible }" v-if="tocItemModalConfig.visible">
@@ -822,10 +832,10 @@ function deleteItem() {
               <div class="level-item">
                 <button role="button" class="button is-small is-danger" @click="deleteItem()"
                   v-if="tocItemModalConfig.isNew == false">
-                  <span class="icon">
+                  <span class="icon mr-1">
                     <i class="fas fa-trash"></i>
                   </span>
-                  <!-- Delete Item -->
+                  Delete
                 </button>
 
               </div>
@@ -841,8 +851,6 @@ function deleteItem() {
               </div>
             </div>
           </div>
-          <!-- <button class="button is-success">Save changes</button> -->
-          <!-- <button class="button" @click="closeModal">Cancel</button> -->
         </footer>
       </div>
 

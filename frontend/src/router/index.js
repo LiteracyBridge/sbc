@@ -10,6 +10,7 @@ import Interventions from '../views/Interventions.vue'
 import { useUserStore } from '../stores/user'
 import { Auth } from 'aws-amplify'
 import { Hub } from "@aws-amplify/core"
+import TheoryOfChangeIndex from '@/views/theory-of-change/TheoryOfChangeIndex.vue'
 
 const ONLINE = true; // just for coding without internet
 let user;
@@ -86,7 +87,7 @@ const router = createRouter({
   {
     path: '/toc',
     name: 'toc',
-    component: ToC
+    component: TheoryOfChangeIndex
   }
   ]
 })

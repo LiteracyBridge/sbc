@@ -19,6 +19,10 @@ const props = defineProps({
   //   type: Boolean,
   //   required: true,
   // },
+  theoryOfChangeId: {
+    type: Number,
+    required: true,
+  },
   isVisible: {
     type: Boolean,
     required: true,
@@ -90,6 +94,11 @@ onMounted(() => {
   ]).then((resp) => console.log(resp))
     .finally(() => isFetchingIndicators.value = false);
 })
+
+const saveIndicator = (id: number) => {
+  // theory-of-change
+}
+
 </script>
 
 <template>
