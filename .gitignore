@@ -4,6 +4,7 @@ node_modules
 /lambda/package
 venv/**
 **__pycache__**
+backend/venv
 
 # local env files
 .env.local

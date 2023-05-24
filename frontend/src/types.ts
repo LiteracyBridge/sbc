@@ -1,5 +1,4 @@
-
-interface IUser {
+export interface IUser {
   id: number;
   email: string;
   name: string;
@@ -26,7 +25,8 @@ export class TheoryOfChangeItem {
   from_id?: number = undefined;
   to_id?: number = undefined;
   sem_id?: string;
-  indicators: [] = [];
+  theory_of_change_id: number;
+  indicators: any[] = [];
 }
 
 export class TheoryOfChange {

@@ -1,11 +1,11 @@
 <script lang="ts" setup>
-import { ref, reactive, onMounted, onBeforeUnmount, computed } from "vue";
+import { ref, reactive, onMounted, onBeforeUnmount, computed, watch } from "vue";
 import { Multiselect } from 'vue-multiselect'
 import { AccordionList, AccordionItem } from "vue3-rich-accordion";
 
 import { useProjectStore } from "@/stores/projects";
 import { ApiRequest } from "@/apis/api";
-import { TheoryOfChange, type IndicatorGroup, type IndicatorType, TheoryOfChangeItem } from "@/types";
+import { type IndicatorGroup, type IndicatorType, TheoryOfChangeItem } from "@/types";
 
 const projectStore = useProjectStore();
 
@@ -39,10 +39,20 @@ const selectedIndicatorType = ref<{ id: number, name: string }>(),
   isFetchingIndicators = ref(false),
   indicatorTypes = ref<IndicatorType[]>([]),
   indicatorsList = ref<IndicatorGroup[]>([]),
-  config = ref({
+  config = reactive<{
+    isLoading: boolean, indicatorsAdded: number[],
+    indicatorsRemoved: number[],
+    indicators: Record<string, boolean>
+  }>({
     isLoading: false,
     indicatorsAdded: [],
     indicatorsRemoved: [],
+    indicators: {
+
+    },
+    // added: {
+
+    // }
   });
 
 const isOpened = computed(() => props.isVisible)
@@ -92,6 +102,17 @@ const closeButton = () => {
   emit("isClosed", true);
 };
 
+
+const buildIndicatorsTree = (indicators?: any[], configIndicators?: Record<string, boolean>) => {
+  const tree: Record<string, boolean> = configIndicators || config.indicators;
+
+  for (const item of indicators || props.tocItem.indicators) {
+    tree[`${item.indicator_id}`] = true
+  }
+
+  config.indicators = tree;
+}
+
 onMounted(() => {
   // selectedGroup.value = getMainIndicators.value[0];
 
@@ -113,26 +134,70 @@ onMounted(() => {
           indicatorsList.value = resp;
         }
       })
-  ]).then((resp) => console.log(resp))
+  ]).then((resp) => {
+    buildIndicatorsTree()
+  })
     .finally(() => isFetchingIndicators.value = false);
 })
 
-const itemExists = (indicatorId: number) => {
-  return props.tocItem.indicators
-    .find((i) => i.indicator_id == indicatorId) != null;
-  // .value.indicatorsAdded.find(i => i == id) != null;
+watch(config, (newConfig, _oldConfig) => {
+  buildIndicatorsTree(undefined, newConfig.indicators)
+}, { deep: true });
+
+watch(props.tocItem, (newVal, old) => {
+  buildIndicatorsTree(newVal.indicators)
+}, { deep: true });
+
+const removeIndicator = (indicatorId: number) => {
+  const temp = config.indicatorsRemoved
+  temp.push(indicatorId)
+
+  config.indicatorsRemoved = temp;
+
+  const _temp2 = config.indicatorsAdded;
+  const index = _temp2.findIndex(i => i == indicatorId);
+  if (index > -1) {
+    _temp2.splice(index, 1)
+    config.indicatorsAdded = _temp2
+  }
+
+  buildIndicatorsTree()
 }
 
+// const itemExists = (indicatorId: number) => {
+//   console.log(indicatorId)
+
+//   const index = config.indicatorsAdded.findIndex(i => i == indicatorId);
+//   if (index > -1) {
+//     config.added[`${indicatorId}`] = true
+//   }
+//   if (!index) {
+//     return props.tocItem.indicators
+//       .find((i) => i.indicator_id == indicatorId) != null;
+//   }
+
+//   return index;
+// }
+
 const saveIndicators = async () => {
-  // theory-of-change
+  config.isLoading = true;
 
-  config.value.isLoading = true;
+  const removed = Object.keys(config.indicators).filter(i => {
+    return !config.indicators[i]
+  })
 
+  const added = Object.keys(config.indicators).filter(i => {
+    return config.indicators[i]
+  }).filter(i => props.tocItem.indicators.find(ind => ind.indicator_id == i) == null)
+  // Filter out duplicate indicators
+  // const uniqueAdded = props.tocItem.indicators.fi
+
+  console.log(added, removed)
   // TODO: if item is not new, then update it
 
   await ApiRequest.post(`theory-of-change/${props.tocItem.theory_of_change_id}/indicators`, {
-    added: config.value.indicatorsAdded,
-    removed: config.value.indicatorsAdded,
+    added: added,
+    removed: removed,
   }).then(resp => {
     console.log(resp)
 
@@ -140,10 +205,11 @@ const saveIndicators = async () => {
     // closeModal();
     emit("isClosed", true);
   }).finally(() => {
-    config.value.isLoading = false;
+    config.isLoading = false;
   });
 }
 
+// TODO: watch for config.indicators changes and update UI
 </script>
 
 <template>
@@ -191,9 +257,9 @@ const saveIndicators = async () => {
           <div class="level-right">
             <div class="level-item">
               <!-- <button class="button is-primary">
-                Save
-              </button>
-            -->
+                                                                      Save
+                                                                    </button>
+                                                                  -->
               <button class="button mr-2 is-primary" :class="{ 'is-loading': config.isLoading }"
                 :disabled="config.isLoading" @click.prevent="saveIndicators">
                 Save
@@ -241,21 +307,24 @@ const saveIndicators = async () => {
               </div>
 
               <footer class="card-footer">
-                <p class="card-footer-item" v-if="!itemExists(item.id)">
-                  <button class="button is-primary" @click="config.indicatorsAdded.push(item.id)">
-                    <span class="icon mr-1">
-                      <i class="fas fa-plus"></i>
-                    </span>
-                    Add Indicator
-                  </button>
-                </p>
+                <!-- <p class="card-footer-item" v-if="!config.indicators[`${item.id}`] == false">
+                                <button class="button is-primary" @click="config.indicators[`${item.id}`] = true">
+                                  <span class="icon mr-1">
+                                    <i class="fas fa-plus"></i>
+                                  </span>
+                                  Add Indicator
+                                </button>
+                              </p> -->
 
-                <p class="card-footer-item" v-if="itemExists(item.id)">
-                  <button class="button is-danger" @click="config.indicatorsRemoved.push(item.id)">
+                <p class="card-footer-item">
+                  <button class="button"
+                    :class="{ 'is-danger': config.indicators[`${item.id}`], 'is-primary': !config.indicators[`${item.id}`] }"
+                    @click.prevent="config.indicators[`${item.id}`] = !config.indicators[`${item.id}`]">
                     <span class="icon mr-1">
-                      <i class="fas fa-trash"></i>
+                      <i class="fas"
+                        :class="{ 'fa-trash': config.indicators[`${item.id}`], 'fa-plus': !config.indicators[`${item.id}`] }"></i>
                     </span>
-                    Remove Indicator
+                    {{ config.indicators[`${item.id}`] ? 'Remove ' : 'Add ' }} Indicator
                   </button>
                 </p>
               </footer>

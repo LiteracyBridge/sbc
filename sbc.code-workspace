@@ -10,6 +10,7 @@
 		"vue.server.petiteVue.supportHtmlFile": true,
 		"cSpell.words": [
 			"joinedload"
-		]
+		],
+		"typescript.tsdk": "node_modules/typescript/lib"
 	}
 }
