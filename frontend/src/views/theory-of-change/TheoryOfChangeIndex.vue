@@ -640,17 +640,45 @@ function deleteItem() {
 <template>
   <div class="mx-3">
 
-    <!-- <TheoryOfChangeItemModalVue :is-new="modalConfig.isItemNew" :is-visible="modalConfig.isVisible"
-      :theory-of-change-id="modalConfig.theoryOfChangeId"
-      @is-closed="modalConfig.isVisible = false; modalConfig.theoryOfChangeId = undefined"
-      @on-item-added="diagram.parseGraph($event)" v-if="modalConfig.isVisible === true" :items="theoryOfChangeModel.data.graph"
-      :item-details="selectedNode">
-    </TheoryOfChangeItemModalVue> -->
-
     <IndicatorBrowserPanel :is-visible="isPanelVisible"
       @is-closed="isPanelVisible = false; showIndicatorModal = true; useSideNavStore().hide();"
       :toc-item="theoryOfChangeModel.selectedItem">
     </IndicatorBrowserPanel>
+
+
+    <div class="level">
+      <div class="level-item has-text-centered">
+        <button class="button is-primary mr-6" role="button"
+          @click.prevent="tocItemModalConfig.isNew = true; tocItemModalConfig.visible = true; tocItemModalConfig.theoryOfChangeId = 1">
+          <span class="icon mr-1">
+            <i class="fas fa-plus"></i>
+          </span>
+          Add Item
+        </button>
+
+        <button class="button is-outlined ml-3">
+          <span class="icon mr-1">
+            <i class="fas fa-rotate"></i>
+          </span>
+
+          Rotate
+        </button>
+
+        <div class="field ml-3 mr-2">
+          <div class="control custom-control pt-2">
+            <label class="switch">
+              <input type="checkbox" v-model="logicModelView" @change="drawDiagram" />
+              <span class="slider"></span>
+            </label>
+            <!-- <label class="label">Logic Model View</label> -->
+          </div>
+        </div>
+        <div class="field">
+          <label class="label pb-3">Logic Model View</label>
+        </div>
+      </div>
+
+    </div>
 
     <!-- ======== START: Theory of Change Modal ======= -->
     <div class="`modal`" :class="{ 'is-active': tocItemModalConfig.visible }" v-if="tocItemModalConfig.visible">
@@ -838,20 +866,7 @@ function deleteItem() {
 
     <!-- TODO: add edge modal -->
 
-    <div class="columns">
-      <div class="column">
-        <!-- TODO: change id -->
-        <button
-          @click.prevent="tocItemModalConfig.isNew = true; tocItemModalConfig.visible = true; tocItemModalConfig.theoryOfChangeId = 1">Add
-          Item</button>
-      </div>
 
-      <div class="column">
-        <button>Logical View</button>
-        <button>Rotate</button>
-      </div>
-
-    </div>
 
     <div class="mt-4">
       <div class="diagram-container" ref="diagramContainer" style="display: flex; width: 100%;"></div>
