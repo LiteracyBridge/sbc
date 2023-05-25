@@ -160,7 +160,7 @@ function onInputChange(event: any) {
 
             <div class="control">
               <!-- TODO: implement regenerating suggestion -->
-              <button class="button is-outlined is-small">
+              <button class="button is-outlined is-small" @click="submitContextAndPrompt()">
                 Refresh
               </button>
             </div>
@@ -171,11 +171,6 @@ function onInputChange(event: any) {
       <div class="column">
         <div class="field">
           <label class="label" :for="`input`">{{ moduleQuestion?.q2u }}</label>
-
-          <div class="control">
-            <img v-if="moduleQuestion?.bulb" :src="BULB_ICON" ref="iconRefs" @click="submitContextAndPrompt()"
-              class="image is-32x32" />
-          </div>
 
           <div class="control">
             <!-- <img v-if="q.bulb" :src="BULB_ICON" ref="iconRefs" @click="submitContextAndPrompt(q.id, topic)"
