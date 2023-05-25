@@ -5,6 +5,7 @@ import { useProjectDataStore } from "@/stores/projectData";
 import * as lambda from "@/apis/lambda";
 import PulseLoaderVue from "./spinners/PulseLoader.vue";
 
+const formInput = ref("");
 
 const projectStore = useProjectDataStore();
 const emit = defineEmits(['isClosed']);
@@ -25,10 +26,6 @@ const props = defineProps({
     type: Number,
     required: true,
   },
-  loadSuggestions: {
-    type: Boolean,
-    required: true
-  },
   isVisible: {
     type: Boolean,
     required: true,
@@ -39,6 +36,7 @@ const moduleQuestion = computed(() => {
   return projectStore.questionsForTopic(props.module).find(i => i.id == props.questionId);
 })
 
+// FIXME: Rewrite submitContextAndPrompt function with more clarity
 async function submitContextAndPrompt() {
   const { questionId: id, module: topic } = props;
 
@@ -59,11 +57,6 @@ async function submitContextAndPrompt() {
     }
   }
 
-  console.log("submitContextAndPrompt:");
-  // console.log(qToFill.q2ai, context, qToFill.f4ai);
-  // const bulbCount = projectStore.countBulbs(id, topic);
-  // console.log("bulbCount", bulbCount);
-
   iconRefs.value.src = HOURGLASS_ICON;
 
   // this.$refs[`icon-${id}`].src = HOURGLASS_ICON;
@@ -74,31 +67,27 @@ async function submitContextAndPrompt() {
 
   gptResponse.value.answer = ai_answer;
   gptResponse.value.isLoading = false;
-  // gptResponses.value = gptResponses.value.concat({id: id, answer: ai_answer});
-  // projectDataStore.setData(qToFill.id, ai_answer);
 }
 
 const isOpened = computed(() => props.isVisible)
 
-
 const closeButton = () => {
+  gptResponse.value.answer = null;
+  formInput.value = "";
+
   emit("isClosed", true);
 };
 
 watch(props, (newProps) => {
-  console.log(`x is`, newProps);
+  submitContextAndPrompt();
 
-  if (newProps.loadSuggestions) {
-    submitContextAndPrompt();
-  } else {
-    gptResponse.value = { answer: null, isLoading: false };
-  }
-});
+  formInput.value = projectStore.getData(newProps.questionId);
+  gptResponse.value.answer = null;
+}, { deep: true });
 
 
 function onInputChange(event: any) {
-  console.log("EVENT:", event.target.value);
-  projectStore.setData(props.questionId, event.target.value);
+  formInput.value = event.target.value;
 }
 
 </script>
@@ -111,10 +100,12 @@ function onInputChange(event: any) {
       <div class="level-right mt-2 mr-4">
 
         <!-- FIXME: implement saving of changes -->
-        <button class="button is-primary mr-3" @click.prevent="closeButton">
+        <button class="button is-primary mr-3"
+          @click.prevent="projectStore.setData(props.questionId, formInput); closeButton()">
           <span class="icon mr-1">
             <i class="fas fa-save"></i>
           </span>
+
           Save and Close
         </button>
 
@@ -131,9 +122,8 @@ function onInputChange(event: any) {
 
 
       <div class="column is-4 mt-6">
-        <!-- Display loading indicator -->
-        <!-- TODO: implement displaying of suggestions -->
         <div class="mt-6">
+          <!-- Display loading indicator -->
           <div v-if="gptResponse?.isLoading == true">
             <PulseLoaderVue :loading="gptResponse?.isLoading"></PulseLoaderVue>
 
@@ -144,12 +134,10 @@ function onInputChange(event: any) {
             {{ gptResponse?.answer || 'No suggestions available. Click on the light bulb to see suggestions' }}
           </p>
 
-          <div class="field is-grouped mt-3" v-if="gptResponse?.answer != undefined && gptResponse?.isLoading != true">
-            <div class="control">
+          <div class="field is-grouped mt-3">
+            <div class="control" v-if="gptResponse?.answer != undefined && gptResponse?.isLoading != true">
               <!-- FIXME: hide this button if chatgpt throws error -->
-              <button class="button is-small is-dark"
-                @click="projectStore.setData(props.questionId, projectStore.getData(props.questionId) + '\n\n' + gptResponse?.answer);">
-
+              <button class="button is-small is-dark" @click="formInput = formInput + '\n\n' + gptResponse?.answer;">
                 <span class="icon is-small mr-1">
                   <i class="fas fa-check"></i>
                 </span>
@@ -160,7 +148,8 @@ function onInputChange(event: any) {
 
             <div class="control">
               <!-- TODO: implement regenerating suggestion -->
-              <button class="button is-outlined is-small" @click="submitContextAndPrompt()">
+              <button class="button is-outlined is-small" @click="submitContextAndPrompt()"
+                :class="{ 'is-loading disabled': gptResponse.isLoading }">
                 Refresh
               </button>
             </div>
@@ -173,15 +162,10 @@ function onInputChange(event: any) {
           <label class="label" :for="`input`">{{ moduleQuestion?.q2u }}</label>
 
           <div class="control">
-            <!-- <img v-if="q.bulb" :src="BULB_ICON" ref="iconRefs" @click="submitContextAndPrompt(q.id, topic)"
-        class="image is-32x32" /> -->
-            <textarea class="textarea" @change="onInputChange($event)" :value="projectStore.getData(moduleQuestion?.id)"
-              rows="15" cols="10"></textarea>
+            <textarea class="textarea" @change="onInputChange($event)" :value="formInput" rows="15" cols="10"></textarea>
           </div>
-
         </div>
       </div>
-
 
     </div>
 

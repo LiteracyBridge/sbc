@@ -11,7 +11,7 @@ import GPTSuggestionPanelVue from "./GPTSuggestionPanel.vue";
 const showMessageModal = ref(false);
 const userStore = useUserStore();
 const projectDataStore = useProjectDataStore();
-const suggestionsPanelHandler = ref({ questionId: null, isOpened: false, module: null, loadSuggestions: false })
+const suggestionsPanelHandler = ref({ questionId: null, isOpened: false, module: null })
 
 // GPT prompt
 const context = ref("Respond only with a list and without any other text.");
@@ -149,7 +149,7 @@ async function broadcastPage() {
 
     <GPTSuggestionPanelVue :is-visible="suggestionsPanelHandler.isOpened"
       @is-closed="suggestionsPanelHandler.isOpened = false;" :question-id="suggestionsPanelHandler.questionId"
-      :module="suggestionsPanelHandler.module" :load-suggestions="suggestionsPanelHandler.loadSuggestions">
+      :module="suggestionsPanelHandler.module">
     </GPTSuggestionPanelVue>
 
     <div v-for="(q, count) in projectDataStore.questionsForTopic(topic)" :key="q.id" class="columns mx-4 is-vcentered">
