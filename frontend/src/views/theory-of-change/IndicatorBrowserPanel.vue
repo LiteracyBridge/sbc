@@ -40,19 +40,11 @@ const selectedIndicatorType = ref<{ id: number, name: string }>(),
   indicatorTypes = ref<IndicatorType[]>([]),
   indicatorsList = ref<IndicatorGroup[]>([]),
   config = reactive<{
-    isLoading: boolean, indicatorsAdded: number[],
-    indicatorsRemoved: number[],
-    indicators: Record<string, boolean>
+    isLoading: boolean,
+    indicators: Record<string, boolean>,
   }>({
     isLoading: false,
-    indicatorsAdded: [],
-    indicatorsRemoved: [],
-    indicators: {
-
-    },
-    // added: {
-
-    // }
+    indicators: {},
   });
 
 const isOpened = computed(() => props.isVisible)

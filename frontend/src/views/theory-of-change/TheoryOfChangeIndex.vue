@@ -782,38 +782,16 @@ function deleteItem() {
               <hr>
 
               <div class="field is-grouped is-grouped-multiline">
-                <div class="control">
+                <div class="control" v-for="item in theoryOfChangeModel.selectedItem?.indicators" :key="item.id">
                   <div class="tags has-addons">
-                    <a class="tag is-link">Technology</a>
+                    <a class="tag is-link">{{ item.indicator.name }}</a>
                     <a class="tag is-delete"></a>
-                  </div>
-                </div>
 
-                <div class="control">
-                  <div class="tags has-addons">
-                    <a class="tag is-link">CSS</a>
-                    <a class="tag is-delete"></a>
-                  </div>
-                </div>
-
-                <div class="control">
-                  <div class="tags has-addons">
-                    <a class="tag is-link">Flexbox</a>
-                    <a class="tag is-delete"></a>
-                  </div>
-                </div>
-
-                <div class="control">
-                  <div class="tags has-addons">
-                    <a class="tag is-link">Web Design</a>
-                    <a class="tag is-delete"></a>
+                    <!-- TODO: implement deleting of item -->
                   </div>
                 </div>
               </div>
 
-              <!-- <div class="control">
-                      <input class="input" type="text" placeholder="Text input">
-                    </div> -->
               <button class="button is-small" role="button"
                 @click.prevent="isPanelVisible = !isPanelVisible; showIndicatorModal = true; useSideNavStore().hide();">
                 <span class="icon is-small mr-1">

@@ -60,9 +60,9 @@ def get_theory_of_change_details(id: int, db: Session = Depends(models.get_db)):
         db.query(models.TheoryOfChange)
         .filter(models.TheoryOfChange.id == id)
         .options(
-            subqueryload(models.TheoryOfChange.graph).subqueryload(
-                TheoryOfChangeItem.indicators
-            ),
+            subqueryload(models.TheoryOfChange.graph)
+            .subqueryload(TheoryOfChangeItem.indicators)
+            .subqueryload(TheoryOfChangeIndicator.indicator),
             # .options(
             #     subqueryload(models.TheoryOfChangeItem.sem),
             #     subqueryload(models.TheoryOfChangeItem.type),

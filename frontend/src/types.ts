@@ -26,7 +26,13 @@ export class TheoryOfChangeItem {
   to_id?: number = undefined;
   sem_id?: string;
   theory_of_change_id: number;
-  indicators: any[] = [];
+
+  indicators: Array<{
+    id: number;
+    theory_of_change_id: number;
+    indicator_id: number;
+    indicator: IndicatorGroup;
+  }> = [];
 }
 
 export class TheoryOfChange {
