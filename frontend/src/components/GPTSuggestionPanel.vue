@@ -95,12 +95,6 @@ watch(props, (newProps) => {
   }
 });
 
-// onMounted(() => {
-//   // selectedGroup.value = getMainIndicators.value[0];
-//   if (props.loadSuggestions) {
-//     submitContextAndPrompt();
-//   }
-// })
 
 function onInputChange(event: any) {
   console.log("EVENT:", event.target.value);
@@ -110,7 +104,7 @@ function onInputChange(event: any) {
 </script>
 
 <template>
-  <VueSidePanel v-model="isOpened" :hide-close-btn="true" :no-close="true" lock-scroll width="100vw"
+  <VueSidePanel v-model="isOpened" :hide-close-btn="true" :no-close="true" lock-scroll width="80vw"
     transition-name="slide-right">
     <div class="level">
       <div class="level-left"></div>
