@@ -1,7 +1,27 @@
+### Theory of change Details
 GET http://localhost:8000/theory-of-change/1
 Content-Type: application/json
 Accept: application/json
 
 {
 
+}
+
+
+### Update theory of change item
+PUT http://localhost:8000/theory-of-change/1/item/18
+Content-Type: application/json
+Accept: application/json
+
+{
+    "id": 18,
+    "is_validated": true,
+    "from_id": 1,
+    "sem_id": 1,
+    "name": "Label 88",
+    "description": "dummy description",
+    "type_id": 1,
+    "to_id": 1,
+    "theory_of_change_id": 1,
+    "indicators": []
 }

@@ -10,15 +10,15 @@ import IndicatorBrowserPanel from "./IndicatorBrowserPanel.vue";
 import { ApiRequest } from "@/apis/api";
 import { TheoryOfChange, TheoryOfChangeItem } from "@/types";
 
-const THEORY_OF_CHANGE_TYPES = {
-  "1": "input",
-  "2": "activity",
-  "3": "output",
-  "4": "outcome",
-  "5": "impact",
+const THEORY_OF_CHANGE_TYPES: Record<string, string> = {
+  "1": "Input",
+  "2": "Activity",
+  "3": "Output",
+  "4": "Outcome",
+  "5": "Impact",
 }
 
-const SEMS = {
+const SEMS: Record<string, string> = {
   "1": "Individual",
   "2": "Interpersonal",
   "3": "Community",
@@ -47,15 +47,7 @@ const theoryOfChangeModel = ref<{
     isNew: false,
     theoryOfChangeId: null,
     isLoading: false,
-    form: {
-      name: undefined,
-      type: undefined,
-      sem: undefined,
-      description: undefined,
-      is_validated: false,
-      to_id: undefined,
-      from_id: undefined,
-    }
+    form: new TheoryOfChangeItem()
   });
 
 const svgUrl = ref("");
@@ -273,7 +265,7 @@ const diagram = reactive({
     console.log('parseGraph');
     // console.log(graph);
 
-    const graph = data.graph.map((r: any) => {
+    const graph = data.graph.map((r: TheoryOfChangeItem) => {
       return {
         id: r.id,
         label: r.name,
@@ -281,10 +273,10 @@ const diagram = reactive({
         description: r.description,
         validated: false,
         // validated: r.validated,
-        indicator: r.indicator,
-        sem: SEMS[`${r.sem_id}`],
+        // indicator: r.indicators,
+        sem: SEMS[`${r.sem_id?.toString()}`],
         logicModel: THEORY_OF_CHANGE_TYPES[`${r.type_id}`],
-        audience: [],
+        audience: [] as any,
       }
     });
 
@@ -601,32 +593,42 @@ const loadExampleToc = async (filename) => {
 
 //=== END: Theory of Change Item Modal functions
 const saveFormItem = async () => {
-  // TODO: make http request to save the form
   // TODO: send response as callback to close the form
-  const fields = tocItemModalConfig.value.form;
+  const fields = tocItemModalConfig.value.form,
+    tocId = theoryOfChangeModel.value.data.id;
 
-  tocItemModalConfig.value.isLoading = true;
-
-  // TODO: if item is not new, then update it
-
-  await ApiRequest.post(`theory-of-change/${tocItemModalConfig.value.theoryOfChangeId}/item`, {
+  const data = {
     name: fields.name,
-    type_id: 1,
+    type_id: fields.type_id,
     from_id: fields.from_id,
     to_id: fields.to_id,
-    sem_id: 1,
-    description: "dummy description"
-  }).then(resp => {
-    console.log(resp)
+    sem_id: fields.sem_id,
+    description: fields.description,
+    is_validated: fields.is_validated || false
+  };
 
-    diagram.parseGraph(resp);
-    // emit("onItemAdded", resp);
-    // closeModal();
-    tocItemModalConfig.value.visible = false;
-    useSideNavStore().show();
-  }).finally(() => {
-    tocItemModalConfig.value.isLoading = false;
-  });
+  tocItemModalConfig.value.isLoading = true;
+  if (tocItemModalConfig.value.itemId != null || !tocItemModalConfig.value.isNew) {
+    // Update item
+    await ApiRequest.put(`theory-of-change/${tocId}/item/${tocItemModalConfig.value.itemId}`, data)
+      .then(resp => {
+        diagram.parseGraph(resp);
+        tocItemModalConfig.value.visible = false;
+        useSideNavStore().show();
+      }).finally(() => {
+        tocItemModalConfig.value.isLoading = false;
+      });
+  } else {
+    //  Create item
+    await ApiRequest.post(`theory-of-change/${tocId}/item`, data).then(resp => {
+      diagram.parseGraph(resp);
+      tocItemModalConfig.value.visible = false;
+      useSideNavStore().show();
+    }).finally(() => {
+      tocItemModalConfig.value.isLoading = false;
+    });
+  }
+
 }
 
 
@@ -704,17 +706,17 @@ function deleteItem() {
             </div>
 
             <div class="field is-horizontal">
-              <div class="field-body">
+              <div class="columns field-body">
 
-                <div class="field">
+                <div class="column field">
                   <label class="label">Links From</label>
 
                   <div class="control">
                     <div class="select is-fullwidth">
                       <!-- TODO: show list of existing indicators -->
                       <select v-model="tocItemModalConfig.form.from_id">
-                        <!-- @ts-ignore -->
-                        <option v-for="item in theoryOfChangeModel.data.graph" :key="item.id" :value="item.id">
+
+                        <option v-for="item in theoryOfChangeModel?.data?.graph" :key="item.id" :value="item.id">
                           {{ item.name }}
                         </option>
                       </select>
@@ -722,15 +724,14 @@ function deleteItem() {
                   </div>
                 </div>
 
-                <div class="field">
+                <div class="column field">
                   <label class="label">Links To</label>
 
                   <div class="control">
                     <div class="select is-fullwidth">
                       <!-- TODO: show list of existing indicators -->
                       <select v-model="tocItemModalConfig.form.to_id">
-                        <!-- @ts-ignore -->
-                        <option v-for="item in theoryOfChangeModel.data.graph" :key="item.id" :value="item.id">
+                        <option v-for="item in theoryOfChangeModel?.data?.graph" :key="item.id" :value="item.id">
                           {{ item.name }}
                         </option>
                       </select>
@@ -741,58 +742,50 @@ function deleteItem() {
             </div>
 
             <div class="field is-horizontal">
-              <div class="field-body">
-                <div class="columns">
-                  <!-- Column 1: SEM Level and Category -->
-                  <div class="column">
-                    <div class="field">
-                      <label class="label">Logic Model Category</label>
-                      <div class="control">
-                        <div class="select">
-                          <select v-model="tocItemModalConfig.form.type">
-                            <option value="activity">Activity</option>
-                            <option value="output">Output</option>
-                            <option value="intermediate_outcome">
-                              Intermediate Outcome
-                            </option>
-                            <option value="outcome">Outcome</option>
-                            <option value="impact">Impact</option>
-                          </select>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+              <div class="columns field-body">
+                <!-- Column 1: SEM Level and Category -->
+                <div class="column field">
+                  <label class="label">Logic Model Category</label>
+                  <div class="control">
+                    <div class="select is-fullwidth">
+                      <select v-model="tocItemModalConfig.form.type_id">
+                        <option v-for="key in Object.keys(THEORY_OF_CHANGE_TYPES)" :key="key" :value="key">
+                          {{ THEORY_OF_CHANGE_TYPES[key] }}
+                        </option>
 
-                  <!-- Column 2: Audience -->
-                  <div class="column">
-                    <div class="field">
-                      <label class="label">SEM Level</label>
-                      <div class="control">
-                        <div class="select">
-                          <select v-model="tocItemModalConfig.form.sem">
-                            <option value="individual">Individual</option>
-                            <option value="interpersonal">Interpersonal</option>
-                            <option value="community">Community</option>
-                            <option value="organizational">Organizational</option>
-                            <option value="policy">Policy</option>
-                          </select>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="column">
-                    <div class="field">
-                      <div class="control">
-                        <label class="label">
-                          Validated<br />
-                          <input type="checkbox" v-model="tocItemModalConfig.form.is_validated" />
-                        </label>
-                      </div>
+                      </select>
                     </div>
                   </div>
                 </div>
+
+                <!-- Column 2: Audience -->
+                <div class="column field">
+                  <label class="label">SEM Level</label>
+
+                  <div class="control">
+                    <div class="select is-fullwidth">
+                      <select v-model="tocItemModalConfig.form.sem_id">
+                        <option v-for="key in Object.keys(SEMS)" :key="key" :value="key">
+                          {{ SEMS[key] }}
+                        </option>
+
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
               </div>
             </div>
+
+            <div class="field">
+              <div class="control">
+                <label class="label">
+                  Validated
+                  <input type="checkbox" class="ml-3" v-model="tocItemModalConfig.form.is_validated" />
+                </label>
+              </div>
+            </div>
+
 
             <div class="field">
               <label class="label">Description</label>
@@ -849,11 +842,12 @@ function deleteItem() {
 
             <div class="level-right">
               <div class="level-item">
-                <button class="button is-primary" :class="{ 'is-loading': tocItemModalConfig.isLoading }" role="button"
-                  @click.prevent="saveFormItem()">
+                <button class="button is-primary" :class="{ 'is-loading': tocItemModalConfig.isLoading }"
+                  :disabled="tocItemModalConfig.isLoading" role="button" @click.prevent="saveFormItem()">
                   {{ tocItemModalConfig.isNew ? 'Save' : 'Update' }}
                 </button>
-                <button class="button" role="button" @click="closeModal">Close</button>
+
+                <button class="button" role="button" @click="closeModal">Cancel</button>
               </div>
             </div>
           </div>

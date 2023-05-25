@@ -21,11 +21,15 @@ export interface IndicatorGroup {
 }
 
 export class TheoryOfChangeItem {
+  id: number = undefined;
   name: string = "";
+  description: string = "";
+  type_id: number = undefined;
   from_id?: number = undefined;
   to_id?: number = undefined;
-  sem_id?: string;
+  sem_id?: number;
   theory_of_change_id: number;
+  is_validated: boolean = false;
 
   indicators: Array<{
     id: number;

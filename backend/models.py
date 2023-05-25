@@ -98,6 +98,7 @@ class TheoryOfChangeItem(Base):
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
     name: Mapped[str]
     description: Mapped[Optional[str]]
+    is_validated: Mapped[bool] = mapped_column(Boolean, default=False)
     type_id: Mapped[int] = mapped_column(ForeignKey("lu_toc_types.id"), nullable=True)
     from_id: Mapped[int] = mapped_column(
         ForeignKey("theories_of_change_item.id"), nullable=True
@@ -109,13 +110,14 @@ class TheoryOfChangeItem(Base):
     theory_of_change_id: Mapped[int] = mapped_column(
         ForeignKey("theories_of_change.id"), nullable=False
     )
-    indicators: Mapped[List["TheoryOfChangeIndicator"]] = relationship(
-        "TheoryOfChangeIndicator",
-    )
+
 
     # todo: add is_validated
 
     # Related objects
+    indicators: Mapped[List["TheoryOfChangeIndicator"]] = relationship(
+        "TheoryOfChangeIndicator",
+    )
     theory_of_change = relationship(
         "TheoryOfChange", back_populates="graph", load_on_pending=True
     )

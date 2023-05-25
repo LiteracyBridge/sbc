@@ -23,6 +23,7 @@ class TheoryOfChangeItemDto(BaseModel):
     to_id: Optional[str | int]
     sem_id: str | int
     name: str
+    is_validated: Optional[bool] = False
     description: Optional[str]
 
 
@@ -76,7 +77,9 @@ def get_theory_of_change_details(id: int, db: Session = Depends(models.get_db)):
 
 
 @router.post("/{id}/item", response_model=ApiResponse)
-def create(id: int, dto: TheoryOfChangeItemDto, db: Session = Depends(models.get_db)):
+def create_item(
+    id: int, dto: TheoryOfChangeItemDto, db: Session = Depends(models.get_db)
+):
     record = models.TheoryOfChangeItem()
     record.name = dto.name
     record.type_id = dto.type_id
@@ -86,7 +89,53 @@ def create(id: int, dto: TheoryOfChangeItemDto, db: Session = Depends(models.get
     record.description = dto.description
     record.theory_of_change_id = id
 
+    db.update(record)
     db.add(record)
+    db.commit()
+
+    # if dto.to_id is not None:
+    #     # Query for the to_id and link it to the from_id
+    #     to_record = (
+    #         db.query(models.TheoryOfChangeItem)
+    #         .filter(models.TheoryOfChangeItem.id == dto.to_id)
+    #         .first()
+    #     )
+    #     to_record.from_id = record.id
+
+    #     db.add(to_record)
+    #     db.commit()
+
+    # db.refresh(record)
+
+    return get_theory_of_change_details(id, db)
+
+
+@router.put("/{id}/item/{itemId}", response_model=ApiResponse)
+def update_item(
+    id: int,
+    itemId: int,
+    dto: TheoryOfChangeItemDto,
+    db: Session = Depends(models.get_db),
+):
+    record = (
+        db.query(models.TheoryOfChangeItem)
+        .filter(models.TheoryOfChangeItem.id == itemId)
+        .first()
+    )
+
+    if record is None:
+        raise HTTPException(status_code=404, detail="Item not found")
+
+
+    record.name = dto.name
+    record.type_id = dto.type_id
+    record.from_id = dto.from_id
+    record.to_id = dto.to_id
+    record.sem_id = dto.sem_id
+    record.description = dto.description
+    record.is_validated = dto.is_validated
+
+    # db.update(record)
     db.commit()
 
     # if dto.to_id is not None:
