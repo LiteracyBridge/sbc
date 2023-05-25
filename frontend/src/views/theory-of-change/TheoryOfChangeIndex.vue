@@ -47,6 +47,7 @@ const theoryOfChangeModel = ref<{
     isNew: false,
     theoryOfChangeId: null,
     isLoading: false,
+    isDeleting: false,
     form: new TheoryOfChangeItem()
   });
 
@@ -548,6 +549,15 @@ function rotateDiagram() {
   drawDiagram();
 }
 
+
+//=== END: Theory of Change Item Modal functions
+const newTocItem = () => {
+  tocItemModalConfig.value.form = new TheoryOfChangeItem()
+  tocItemModalConfig.value.isNew = true;
+  tocItemModalConfig.value.theoryOfChangeId = 1;
+  tocItemModalConfig.value.visible = true;
+}
+
 const closeModal = () => {
   selectedNodeId.value = null;
   selectedEdge.value = null;
@@ -555,13 +565,68 @@ const closeModal = () => {
 
   tocItemModalConfig.value.visible = false;
   tocItemModalConfig.value.form = null;
-  // if (tempNavHidden) {
-  //   tempNavHidden = false;
-  // }
 
   useSideNavStore().show();
   drawDiagram();
 };
+
+const saveFormItem = async () => {
+  // TODO: send response as callback to close the form
+  const fields = tocItemModalConfig.value.form,
+    tocId = theoryOfChangeModel.value.data.id;
+
+  const data = {
+    name: fields.name,
+    type_id: fields.type_id,
+    from_id: fields.from_id,
+    to_id: fields.to_id,
+    sem_id: fields.sem_id,
+    description: fields.description,
+    is_validated: fields.is_validated || false
+  };
+
+  tocItemModalConfig.value.isLoading = true;
+  if (tocItemModalConfig.value.itemId != null || !tocItemModalConfig.value.isNew) {
+    // Update item
+    await ApiRequest.put(`theory-of-change/${tocId}/item/${tocItemModalConfig.value.itemId}`, data)
+      .then(resp => {
+        diagram.parseGraph(resp);
+        closeModal();
+      }).finally(() => {
+        tocItemModalConfig.value.isLoading = false;
+      });
+  } else {
+    //  Create item
+    await ApiRequest.post(`theory-of-change/${tocId}/item`, data).then(resp => {
+      diagram.parseGraph(resp);
+
+      closeModal();
+    }).finally(() => {
+      tocItemModalConfig.value.isLoading = false;
+    });
+  }
+
+}
+
+
+function deleteItem() {
+  tocItemModalConfig.value.isDeleting = true;
+
+  const tocId = theoryOfChangeModel.value.data.id;
+  ApiRequest.delete(`theory-of-change/${tocId}/item/${tocItemModalConfig.value.itemId}`)
+    .then(resp => {
+      mermaidAPI.initialize(mermaidConfig);
+      console.log(resp)
+      // deleteNode(selectedNodeId.value);
+      diagram.parseGraph(resp);
+
+      closeModal();
+    }).finally(() => {
+      tocItemModalConfig.value.isDeleting = false;
+    });
+}
+//=== END: Theory of Change Item Modal functions
+
 
 const modalRef = ref(null);
 const edgeModalRef = ref(null);
@@ -590,53 +655,6 @@ const loadExampleToc = async (filename) => {
     console.error('Failed to fetch JSON data:', error);
   }
 }
-
-//=== END: Theory of Change Item Modal functions
-const saveFormItem = async () => {
-  // TODO: send response as callback to close the form
-  const fields = tocItemModalConfig.value.form,
-    tocId = theoryOfChangeModel.value.data.id;
-
-  const data = {
-    name: fields.name,
-    type_id: fields.type_id,
-    from_id: fields.from_id,
-    to_id: fields.to_id,
-    sem_id: fields.sem_id,
-    description: fields.description,
-    is_validated: fields.is_validated || false
-  };
-
-  tocItemModalConfig.value.isLoading = true;
-  if (tocItemModalConfig.value.itemId != null || !tocItemModalConfig.value.isNew) {
-    // Update item
-    await ApiRequest.put(`theory-of-change/${tocId}/item/${tocItemModalConfig.value.itemId}`, data)
-      .then(resp => {
-        diagram.parseGraph(resp);
-        tocItemModalConfig.value.visible = false;
-        useSideNavStore().show();
-      }).finally(() => {
-        tocItemModalConfig.value.isLoading = false;
-      });
-  } else {
-    //  Create item
-    await ApiRequest.post(`theory-of-change/${tocId}/item`, data).then(resp => {
-      diagram.parseGraph(resp);
-      tocItemModalConfig.value.visible = false;
-      useSideNavStore().show();
-    }).finally(() => {
-      tocItemModalConfig.value.isLoading = false;
-    });
-  }
-
-}
-
-
-function deleteItem() {
-  // TODO: implement deleting of the item
-  // remove edges
-}
-//=== END: Theory of Change Item Modal functions
 </script>
 
 <template>
@@ -650,19 +668,17 @@ function deleteItem() {
 
     <div class="level">
       <div class="level-item has-text-centered">
-        <button class="button is-primary mr-6" role="button"
-          @click.prevent="tocItemModalConfig.isNew = true; tocItemModalConfig.visible = true; tocItemModalConfig.theoryOfChangeId = 1">
+        <button class="button is-primary mr-6" role="button" @click.prevent="newTocItem()">
           <span class="icon mr-1">
             <i class="fas fa-plus"></i>
           </span>
           Add Item
         </button>
 
-        <button class="button is-outlined ml-3">
+        <button class="button is-outlined ml-3" @click="rotateDiagram()">
           <span class="icon mr-1">
             <i class="fas fa-rotate"></i>
           </span>
-
           Rotate
         </button>
 
@@ -830,7 +846,9 @@ function deleteItem() {
             <div class="level-left">
               <div class="level-item">
                 <button role="button" class="button is-small is-danger" @click="deleteItem()"
-                  v-if="tocItemModalConfig.isNew == false">
+                  v-if="tocItemModalConfig.isNew == false"
+                  :class="{ 'is-loading disabled': tocItemModalConfig.isDeleting }"
+                  :disabled="tocItemModalConfig.isDeleting">
                   <span class="icon mr-1">
                     <i class="fas fa-trash"></i>
                   </span>

@@ -111,7 +111,6 @@ class TheoryOfChangeItem(Base):
         ForeignKey("theories_of_change.id"), nullable=False
     )
 
-
     # todo: add is_validated
 
     # Related objects

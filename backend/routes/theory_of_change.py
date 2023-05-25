@@ -126,7 +126,6 @@ def update_item(
     if record is None:
         raise HTTPException(status_code=404, detail="Item not found")
 
-
     record.name = dto.name
     record.type_id = dto.type_id
     record.from_id = dto.from_id
@@ -151,6 +150,38 @@ def update_item(
     #     db.commit()
 
     # db.refresh(record)
+
+    return get_theory_of_change_details(id, db)
+
+
+@router.delete("/{id}/item/{itemId}", response_model=ApiResponse)
+def delete_item(
+    id: int,
+    itemId: int,
+    db: Session = Depends(models.get_db),
+):
+    record = (
+        db.query(models.TheoryOfChangeItem)
+        .filter(models.TheoryOfChangeItem.id == itemId)
+        .first()
+    )
+
+    if record is None:
+        raise HTTPException(status_code=404, detail="Item not found")
+
+    # Reset all the from_id
+    db.query(models.TheoryOfChangeItem).filter(
+        models.TheoryOfChangeItem.from_id == record.id
+    ).update({"from_id": None})
+
+    # Reset all the to_id
+    db.query(models.TheoryOfChangeItem).filter(
+        models.TheoryOfChangeItem.to_id == record.id
+    ).update({"to_id": None})
+
+    # Delete the record
+    db.delete(record)
+    db.commit()
 
     return get_theory_of_change_details(id, db)
 
