@@ -108,36 +108,27 @@ function onInputChange(event: any) {
     transition-name="slide-right">
     <div class="level">
       <div class="level-left"></div>
-      <div class="level-right mt-2 mr-2">
+      <div class="level-right mt-2 mr-4">
+
+        <!-- FIXME: implement saving of changes -->
+        <button class="button is-primary mr-3" @click.prevent="closeButton">
+          <span class="icon mr-1">
+            <i class="fas fa-save"></i>
+          </span>
+          Save and Close
+        </button>
+
         <button class="button is-close" @click.prevent="closeButton">
           <span class="icon mr-1">
             <i class="fas fa-times"></i>
           </span>
-          Close
+          Cancel
         </button>
       </div>
     </div>
 
     <div class="columns my-3 mx-5">
 
-      <div class="column">
-
-        <div class="field">
-          <label class="label" :for="`input`">{{ moduleQuestion?.q2u }}</label>
-
-          <div class="control">
-            <img v-if="moduleQuestion?.bulb" :src="BULB_ICON" ref="iconRefs" @click="submitContextAndPrompt()"
-              class="image is-32x32" />
-          </div>
-          <div class="control">
-            <!-- <img v-if="q.bulb" :src="BULB_ICON" ref="iconRefs" @click="submitContextAndPrompt(q.id, topic)"
-        class="image is-32x32" /> -->
-            <textarea class="textarea" @change="onInputChange($event)" :value="projectStore.getData(moduleQuestion?.id)"
-              rows="30" cols="10"></textarea>
-          </div>
-
-        </div>
-      </div>
 
       <div class="column is-4 mt-6">
         <!-- Display loading indicator -->
@@ -154,7 +145,8 @@ function onInputChange(event: any) {
           </p>
 
           <div class="field is-grouped mt-3" v-if="gptResponse?.answer != undefined && gptResponse?.isLoading != true">
-            <p class="control">
+            <div class="control">
+              <!-- FIXME: hide this button if chatgpt throws error -->
               <button class="button is-small is-dark"
                 @click="projectStore.setData(props.questionId, projectStore.getData(props.questionId) + '\n\n' + gptResponse?.answer);">
 
@@ -164,31 +156,39 @@ function onInputChange(event: any) {
 
                 Accept
               </button>
-            </p>
+            </div>
 
-            <p class="control">
+            <div class="control">
+              <!-- TODO: implement regenerating suggestion -->
               <button class="button is-outlined is-small">
-                Cancel
+                Refresh
               </button>
-            </p>
+            </div>
           </div>
         </div>
-
       </div>
+
+      <div class="column">
+        <div class="field">
+          <label class="label" :for="`input`">{{ moduleQuestion?.q2u }}</label>
+
+          <div class="control">
+            <img v-if="moduleQuestion?.bulb" :src="BULB_ICON" ref="iconRefs" @click="submitContextAndPrompt()"
+              class="image is-32x32" />
+          </div>
+
+          <div class="control">
+            <!-- <img v-if="q.bulb" :src="BULB_ICON" ref="iconRefs" @click="submitContextAndPrompt(q.id, topic)"
+        class="image is-32x32" /> -->
+            <textarea class="textarea" @change="onInputChange($event)" :value="projectStore.getData(moduleQuestion?.id)"
+              rows="15" cols="10"></textarea>
+          </div>
+
+        </div>
+      </div>
+
 
     </div>
 
   </VueSidePanel>
 </template>
-
-<style>
-textarea {
-  width: 100%;
-  -webkit-box-sizing: border-box;
-  /* Safari/Chrome, other WebKit */
-  -moz-box-sizing: border-box;
-  /* Firefox, other Gecko */
-  box-sizing: border-box;
-  /* Opera/IE 8+ */
-}
-</style>

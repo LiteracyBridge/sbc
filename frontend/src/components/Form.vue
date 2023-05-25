@@ -169,20 +169,10 @@ async function broadcastPage() {
             <img v-if="q.bulb" :src="BULB_ICON" ref="iconRefs" @click="submitContextAndPrompt(q.id, topic)"
               class="image is-32x32" />
           </div>
-          <div class="control">
-            <div class="textarea-container">
 
-              <!-- <img v-if="q.bulb" :src="BULB_ICON" ref="iconRefs" @click="submitContextAndPrompt(q.id, topic)"
-              class="image is-32x32" /> -->
-              <textarea class="textarea" @change="updateData($event, q.id)" :value="projectDataStore.getData(q.id)"
-                rows="4" cols="80"></textarea>
-              <!-- <input class="input" type="text" placeholder="e.g Alex Smith"> -->
-              <button class="button is-small is-outlined mr-1 mt-1" @click="showPanel(q.id, topic, false)">
-                <span class="icon is-small">
-                  <i class="fas fa-maximize"></i>
-                </span>
-              </button>
-            </div>
+          <div class="control">
+            <textarea class="textarea" @change="updateData($event, q.id)" :value="projectDataStore.getData(q.id)" rows="7"
+              cols="80"></textarea>
 
           </div>
 
@@ -199,21 +189,5 @@ async function broadcastPage() {
 <style>
 .vertical-center {
   margin: 2rem;
-}
-
-.textarea-container {
-  position: relative;
-}
-
-.textarea-container textarea {
-  width: 100%;
-  height: 100%;
-  box-sizing: border-box;
-}
-
-.textarea-container button {
-  position: absolute;
-  top: 0;
-  right: 0;
 }
 </style>
