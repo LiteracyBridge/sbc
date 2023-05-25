@@ -38,7 +38,7 @@ const moduleQuestion = computed(() => {
 
 // FIXME: Rewrite submitContextAndPrompt function with more clarity
 async function submitContextAndPrompt() {
-  const { questionId: id, module: topic } = props;
+  const { questionId: id } = props;
 
   const _gptResp = gptResponse.value || { id: id, answer: "", isLoading: true };
   _gptResp.isLoading = true;
@@ -57,13 +57,7 @@ async function submitContextAndPrompt() {
     }
   }
 
-  iconRefs.value.src = HOURGLASS_ICON;
-
-  // this.$refs[`icon-${id}`].src = HOURGLASS_ICON;
   const ai_answer = await lambda.gptCompletion(qToFill.q2ai, context, qToFill.f4ai);
-  iconRefs.value.src = BULB_ICON;
-
-  console.error("AI answer", ai_answer)
 
   gptResponse.value.answer = ai_answer;
   gptResponse.value.isLoading = false;
@@ -99,7 +93,6 @@ function onInputChange(event: any) {
       <div class="level-left"></div>
       <div class="level-right mt-2 mr-4">
 
-        <!-- FIXME: implement saving of changes -->
         <button class="button is-primary mr-3"
           @click.prevent="projectStore.setData(props.questionId, formInput); closeButton()">
           <span class="icon mr-1">
@@ -135,9 +128,11 @@ function onInputChange(event: any) {
           </p>
 
           <div class="field is-grouped mt-3">
-            <div class="control" v-if="gptResponse?.answer != undefined && gptResponse?.isLoading != true">
+            <div class="control">
               <!-- FIXME: hide this button if chatgpt throws error -->
-              <button class="button is-small is-dark" @click="formInput = formInput + '\n\n' + gptResponse?.answer;">
+              <button class="button is-small is-dark" @click="formInput = formInput + '\n\n' + gptResponse?.answer;"
+                :class="{ 'disabled': gptResponse.isLoading || gptResponse?.answer == undefined }"
+                :disabled="gptResponse.isLoading || gptResponse?.answer == undefined">
                 <span class="icon is-small mr-1">
                   <i class="fas fa-check"></i>
                 </span>
@@ -147,9 +142,8 @@ function onInputChange(event: any) {
             </div>
 
             <div class="control">
-              <!-- TODO: implement regenerating suggestion -->
               <button class="button is-outlined is-small" @click="submitContextAndPrompt()"
-                :class="{ 'is-loading disabled': gptResponse.isLoading }">
+                :class="{ 'is-loading disabled': gptResponse.isLoading }" :disabled="gptResponse.isLoading">
                 Refresh
               </button>
             </div>
