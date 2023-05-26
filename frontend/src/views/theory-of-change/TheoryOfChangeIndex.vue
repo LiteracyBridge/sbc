@@ -9,6 +9,9 @@ import { onClickOutside } from "@vueuse/core";
 import IndicatorBrowserPanel from "./IndicatorBrowserPanel.vue";
 import { ApiRequest } from "@/apis/api";
 import { TheoryOfChange, TheoryOfChangeItem } from "@/types";
+import GridLoader from "@/components/spinners/GridLoader.vue";
+import { useProjectDataStore } from "@/stores/projectData";
+import { useProjectStore } from '@/stores/projects';
 
 const THEORY_OF_CHANGE_TYPES: Record<string, string> = {
   "1": "Input",
@@ -49,7 +52,12 @@ const theoryOfChangeModel = ref<{
     isLoading: false,
     isDeleting: false,
     form: new TheoryOfChangeItem()
+  }),
+  config = reactive({
+    isLoading: true
   });
+
+const projectStore = useProjectStore()
 
 const svgUrl = ref("");
 const svgImgSrcUrl = ref("");
@@ -370,9 +378,10 @@ const diagram = reactive({
 });
 
 const fetchGraph = async (project_id) => {
+
   try {
-    const id = 1
-    const resp = await ApiRequest.get(`theory-of-change/${id}`);
+    config.isLoading = true;
+    const resp = await ApiRequest.get(`theory-of-change/${projectStore.projectId}`);
 
     // console.log(resp)
     // if (!response.ok) {
@@ -384,6 +393,8 @@ const fetchGraph = async (project_id) => {
     diagram.parseGraph(resp);
   } catch (error) {
     console.error('Failed to fetch JSON data:', error);
+  } finally {
+    config.isLoading = false;
   }
 }
 
@@ -552,10 +563,12 @@ function rotateDiagram() {
 
 //=== END: Theory of Change Item Modal functions
 const newTocItem = () => {
+
   tocItemModalConfig.value.form = new TheoryOfChangeItem()
   tocItemModalConfig.value.isNew = true;
   tocItemModalConfig.value.theoryOfChangeId = 1;
   tocItemModalConfig.value.visible = true;
+  useSideNavStore().hide();
 }
 
 const closeModal = () => {
@@ -658,7 +671,11 @@ const loadExampleToc = async (filename) => {
 </script>
 
 <template>
-  <div class="mx-3">
+  <div v-if="config.isLoading" id="graph-loader" style="margin-top: auto;">
+    <GridLoader :use-logo="false" :loading="config.isLoading"></GridLoader>
+  </div>
+
+  <div class="mx-3" v-if="!config.isLoading">
 
     <IndicatorBrowserPanel :is-visible="isPanelVisible"
       @is-closed="isPanelVisible = false; showIndicatorModal = true; useSideNavStore().hide();"
@@ -960,6 +977,14 @@ input:checked+.slider:before {
 
 .slider.round:before {
   border-radius: 50%;
+}
+
+#graph-loader {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  /* bring your own prefixes */
+  transform: translate(-50%, -50%);
 }
 </style>
 

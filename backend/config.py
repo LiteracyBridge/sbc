@@ -69,7 +69,6 @@ class Settings:
 
         except Exception as err:
             raise err
-            return secret_string
 
     def db_url(self):
         return f"postgresql://{self.db_user}:{self.db_password}@{self.db_host}:{self.db_port}/{self.db_name}"

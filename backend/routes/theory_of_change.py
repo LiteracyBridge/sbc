@@ -33,6 +33,25 @@ class NewTheoryOfChangeDto(BaseModel):
     notes: Optional[str]
 
 
+def get_toc_by_id(id: int, db: Session = Depends(models.get_db)):
+    record = (
+        db.query(models.TheoryOfChange)
+        .filter(models.TheoryOfChange.id == id)
+        .options(
+            subqueryload(models.TheoryOfChange.graph)
+            .subqueryload(TheoryOfChangeItem.indicators)
+            .subqueryload(TheoryOfChangeIndicator.indicator),
+            # .options(
+            #     subqueryload(models.TheoryOfChangeItem.sem),
+            #     subqueryload(models.TheoryOfChangeItem.type),
+            # )
+        )
+        # .options(joinedload(models.TheoryOfChange.graph))
+        .first()
+    )
+
+    return ApiResponse(data=[record])
+
 @router.post("/", response_model=ApiResponse)
 def create(dto: NewTheoryOfChangeDto, db: Session = Depends(models.get_db)):
     record = models.TheoryOfChange()
@@ -55,11 +74,11 @@ def create(dto: NewTheoryOfChangeDto, db: Session = Depends(models.get_db)):
     return ApiResponse(data=record)
 
 
-@router.get("/{id}", response_model=ApiResponse)
-def get_theory_of_change_details(id: int, db: Session = Depends(models.get_db)):
+@router.get("/{projectId}", response_model=ApiResponse)
+def get_toc_by_project_id(projectId: int, db: Session = Depends(models.get_db)):
     record = (
         db.query(models.TheoryOfChange)
-        .filter(models.TheoryOfChange.id == id)
+        .filter(models.TheoryOfChange.project_id == projectId)
         .options(
             subqueryload(models.TheoryOfChange.graph)
             .subqueryload(TheoryOfChangeItem.indicators)
@@ -89,7 +108,6 @@ def create_item(
     record.description = dto.description
     record.theory_of_change_id = id
 
-    db.update(record)
     db.add(record)
     db.commit()
 
@@ -107,7 +125,7 @@ def create_item(
 
     # db.refresh(record)
 
-    return get_theory_of_change_details(id, db)
+    return get_toc_by_id(id, db)
 
 
 @router.put("/{id}/item/{itemId}", response_model=ApiResponse)
@@ -150,8 +168,8 @@ def update_item(
     #     db.commit()
 
     # db.refresh(record)
+    return get_toc_by_id(id, db)
 
-    return get_theory_of_change_details(id, db)
 
 
 @router.delete("/{id}/item/{itemId}", response_model=ApiResponse)
@@ -183,7 +201,7 @@ def delete_item(
     db.delete(record)
     db.commit()
 
-    return get_theory_of_change_details(id, db)
+    return get_toc_by_id(id, db)
 
 
 @router.post("/{id}/item/{item_id}", response_model=ApiResponse)

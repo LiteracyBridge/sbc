@@ -1,20 +1,50 @@
 <!-- Author: https://github.com/greyby/vue-spinner -->
 
 <template>
-  <div class="v-spinner" v-bind:style="containerStyle" v-show="loading">
+  <div class="v-spinner" v-bind:style="containerStyle" v-show="loading" v-if="useLogo">
     <figure class="image is-128x128">
       <img src="@/assets/logo-color.png" />
     </figure>
-    <!-- <div class="v-grid v-grid1" v-bind:style="[spinnerStyle,animationStyle,animationStyle1]">
-    </div><div class="v-grid v-grid2" v-bind:style="[spinnerStyle,animationStyle,animationStyle2]">
-    </div><div class="v-grid v-grid3" v-bind:style="[spinnerStyle,animationStyle,animationStyle3]">
-    </div><div class="v-grid v-grid4" v-bind:style="[spinnerStyle,animationStyle,animationStyle4]">
-    </div><div class="v-grid v-grid5" v-bind:style="[spinnerStyle,animationStyle,animationStyle5]">
-    </div><div class="v-grid v-grid6" v-bind:style="[spinnerStyle,animationStyle,animationStyle6]">
-    </div><div class="v-grid v-grid7" v-bind:style="[spinnerStyle,animationStyle,animationStyle7]">
-    </div><div class="v-grid v-grid8" v-bind:style="[spinnerStyle,animationStyle,animationStyle8]"> -->
-    <!-- </div><div class="v-grid v-grid9" v-bind:style="[spinnerStyle,animationStyle,animationStyle9]"> -->
-    <!-- </div> -->
+
+    <div class="v-grid v-grid1" v-bind:style="[spinnerStyle, animationStyle, animationStyle1]">
+    </div>
+    <div class="v-grid v-grid2" v-bind:style="[spinnerStyle, animationStyle, animationStyle2]">
+    </div>
+    <div class="v-grid v-grid3" v-bind:style="[spinnerStyle, animationStyle, animationStyle3]">
+    </div>
+    <div class="v-grid v-grid4" v-bind:style="[spinnerStyle, animationStyle, animationStyle4]">
+    </div>
+    <div class="v-grid v-grid5" v-bind:style="[spinnerStyle, animationStyle, animationStyle5]">
+    </div>
+    <div class="v-grid v-grid6" v-bind:style="[spinnerStyle, animationStyle, animationStyle6]">
+    </div>
+    <div class="v-grid v-grid7" v-bind:style="[spinnerStyle, animationStyle, animationStyle7]">
+    </div>
+    <div class="v-grid v-grid8" v-bind:style="[spinnerStyle, animationStyle, animationStyle8]">
+    </div>
+    <div class="v-grid v-grid9" v-bind:style="[spinnerStyle, animationStyle, animationStyle9]">
+    </div>
+  </div>
+
+  <div class="v-spinner" v-bind:style="containerStyle" v-show="loading" v-else>
+    <div class="v-grid v-grid1" v-bind:style="[spinnerStyle, animationStyle, animationStyle1]">
+    </div>
+    <div class="v-grid v-grid2" v-bind:style="[spinnerStyle, animationStyle, animationStyle2]">
+    </div>
+    <div class="v-grid v-grid3" v-bind:style="[spinnerStyle, animationStyle, animationStyle3]">
+    </div>
+    <div class="v-grid v-grid4" v-bind:style="[spinnerStyle, animationStyle, animationStyle4]">
+    </div>
+    <div class="v-grid v-grid5" v-bind:style="[spinnerStyle, animationStyle, animationStyle5]">
+    </div>
+    <div class="v-grid v-grid6" v-bind:style="[spinnerStyle, animationStyle, animationStyle6]">
+    </div>
+    <div class="v-grid v-grid7" v-bind:style="[spinnerStyle, animationStyle, animationStyle7]">
+    </div>
+    <div class="v-grid v-grid8" v-bind:style="[spinnerStyle, animationStyle, animationStyle8]">
+    </div>
+    <div class="v-grid v-grid9" v-bind:style="[spinnerStyle, animationStyle, animationStyle9]">
+    </div>
   </div>
 </template>
 
@@ -43,6 +73,10 @@ export default {
     radius: {
       type: String,
       default: '100%'
+    },
+    useLogo: {
+      type: Boolean,
+      default: true
     }
   },
   data() {
