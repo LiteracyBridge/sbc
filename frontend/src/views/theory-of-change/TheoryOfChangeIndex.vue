@@ -296,15 +296,34 @@ const diagram = reactive({
       this.nodes[mergedNode.id] = mergedNode;
     }
 
-    const edges = data.graph.map(r => {
-      return {
-        fromId: r.from_id,
+    const edges: {
+      fromId: number;
+      toId: number;
+      assumptions: any;
+      risks: any;
+    }[] = [];
+
+    for (const r of data.graph) {
+      // data.graph.flatMap(r => {
+      edges.push({
+        fromId: r.id,
         toId: r.to_id,
         assumptions: r.assumptions,
         risks: r.risks
-      }
-    });
+      })
 
+      if (r.from_id != null) {
+        edges.push({
+          fromId: r.from_id,
+          toId: r.id,
+          assumptions: r.assumptions,
+          risks: r.risks
+        });
+      }
+      // });
+    }
+
+    console.log(edges);
     for (const edge of edges) {
       this.createEdge(edge.fromId, edge.toId, false);
     }
