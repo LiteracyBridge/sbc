@@ -2,10 +2,9 @@
 
 import { ref, onMounted, computed, watch } from "vue";
 import { Multiselect } from 'vue-multiselect'
-import { AccordionList, AccordionItem } from "vue3-rich-accordion";
 import { ApiRequest } from "@/apis/api";
 import { type IndicatorGroup, type IndicatorType, TheoryOfChangeItem, TheoryOfChange } from "@/types";
-import { Collapse, CollapsePanel, Empty } from "ant-design-vue";
+import { Collapse, CollapsePanel, Empty, Drawer, Space, Divider, TypographyTitle } from "ant-design-vue";
 
 
 const emit = defineEmits<{
@@ -137,11 +136,27 @@ const saveIndicators = async () => {
 </script>
 
 <template>
-  <VueSidePanel v-model="isOpened" :hide-close-btn="true" :no-close="true" lock-scroll width="80vw"
-    transition-name="slide-right">
+  <!-- <VueSidePanel v-model="isOpened" :hide-close-btn="true" :no-close="true" lock-scroll width="80vw"
+    transition-name="slide-right"> -->
+
+  <Drawer width="70vw" title="Indicators Browser" :visible="isOpened" :body-style="{ paddingBottom: '80px' }"
+    :footer-style="{ textAlign: 'right' }" @close="closePanel()">
+
+    <template #extra>
+      <Space>
+        <button class="button mr-2 is-primary" :class="{ 'is-loading': config.isLoading }" :disabled="config.isLoading"
+          @click.prevent="saveIndicators">
+          Save
+        </button>
+
+        <button class="button mr-2" @click.prevent="closePanel">
+          Cancel
+        </button>
+      </Space>
+    </template>
 
     <div class="columns">
-      <div class="column is-one-fifth mx-5 my-5">
+      <div class="column is-one-fifth mr-5 mb-5">
 
         <!-- TODO: add label -->
         <label class="label">Select Indicator</label>
@@ -164,35 +179,12 @@ const saveIndicators = async () => {
 
       </div>
 
-      <div class="column mx-1 my-5">
-        <div class="level">
+      <div class="column mb-5">
+        <TypographyTitle :level="4">
+          {{ selectedGroupType?.name || '' }}
+        </TypographyTitle>
 
-
-          <div class="level-left">
-            <div class="level-item">
-
-              <!-- <div class="container mb-4"> -->
-              <h3 class="has-text-weight-bold">{{ selectedGroupType?.name || '' }}</h3>
-              <!-- </div> -->
-            </div>
-          </div>
-
-          <div class="level-right">
-            <div class="level-item">
-
-              <button class="button mr-2 is-primary" :class="{ 'is-loading': config.isLoading }"
-                :disabled="config.isLoading" @click.prevent="saveIndicators">
-                Save
-              </button>
-
-              <button class="button mr-2" @click.prevent="closePanel">
-                Cancel
-              </button>
-            </div>
-          </div>
-
-        </div>
-        <hr>
+        <Divider></Divider>
 
         <div v-if="groupIndicators?.length == 0" style="margin-top: auto; position: fixed; top: 50%; left: 55%;">
           <Empty description="Choose indicator from the dropdown list"></Empty>
@@ -245,7 +237,7 @@ const saveIndicators = async () => {
 
     </div>
 
-  </VueSidePanel>
+  </Drawer>
 </template>
 
 <style>
