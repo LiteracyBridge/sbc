@@ -5,7 +5,7 @@ import { Multiselect } from 'vue-multiselect'
 import { AccordionList, AccordionItem } from "vue3-rich-accordion";
 import { ApiRequest } from "@/apis/api";
 import { type IndicatorGroup, type IndicatorType, TheoryOfChangeItem, TheoryOfChange } from "@/types";
-import { Empty } from "ant-design-vue";
+import { Collapse, CollapsePanel, Empty } from "ant-design-vue";
 
 
 const emit = defineEmits<{
@@ -15,7 +15,9 @@ const emit = defineEmits<{
 
 const props = defineProps<{ tocItem: TheoryOfChangeItem, isVisible: boolean }>();
 
-const selectedMainIndicatorType = ref<{ id: number, name: string }>(),
+const
+  collapseKey = ref<string[]>([]),
+  selectedMainIndicatorType = ref<{ id: number, name: string }>(),
   selectedGroupType = ref<IndicatorType>(),
   isFetchingIndicators = ref(false),
   mainIndicators = ref<IndicatorType[]>([]),
@@ -196,12 +198,8 @@ const saveIndicators = async () => {
           <Empty description="Choose indicator from the dropdown list"></Empty>
         </div>
 
-        <AccordionList v-else>
-
-          <AccordionItem v-for="item in groupIndicators" :key="item.id">
-            <template #summary>{{ item.name }}</template>
-
-            <!-- Main content -->
+        <Collapse v-model:activeKey="collapseKey" v-else>
+          <CollapsePanel v-for="item in groupIndicators" :key="item.id" :header="item.name">
             <div class="card is-shadowless is-small">
               <div class="card-content">
                 <div class="columns">
@@ -239,8 +237,9 @@ const saveIndicators = async () => {
                 </p>
               </footer>
             </div>
-          </AccordionItem>
-        </AccordionList>
+          </CollapsePanel>
+
+        </Collapse>
 
       </div>
 
