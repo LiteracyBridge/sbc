@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 
 import { ref, onMounted, computed, watch } from "vue";
-import { Multiselect } from 'vue-multiselect'
 import { ApiRequest } from "@/apis/api";
 import { type IndicatorGroup, type IndicatorType, TheoryOfChangeItem, TheoryOfChange } from "@/types";
 import { Collapse, CollapsePanel, Empty, Drawer, Space, Divider, TypographyTitle, Select } from "ant-design-vue";

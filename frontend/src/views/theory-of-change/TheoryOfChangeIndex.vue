@@ -12,7 +12,8 @@ import { TheoryOfChange, TheoryOfChangeItem } from "@/types";
 import GridLoader from "@/components/spinners/GridLoader.vue";
 import { useProjectDataStore } from "@/stores/projectData";
 import { useProjectStore } from '@/stores/projects';
-import { Modal } from "ant-design-vue";
+import { Button, Divider, Modal, Space } from "ant-design-vue";
+import TheoryOfChangeExamplesBrowser from "./TheoryOfChangeExamplesBrowser.vue";
 
 const THEORY_OF_CHANGE_TYPES: Record<string, string> = {
   "1": "Input",
@@ -32,12 +33,6 @@ const SEMS: Record<string, string> = {
 
 const isPanelVisible = ref(false);
 const showIndicatorModal = ref(false);
-const modalConfig = ref({
-  isVisible: false,
-  itemId: null,
-  isItemNew: false,
-  theoryOfChangeId: null
-});
 const theoryOfChangeModel = ref<{
   data: TheoryOfChange, selectedItem: TheoryOfChangeItem
 }>({
@@ -55,7 +50,8 @@ const theoryOfChangeModel = ref<{
     form: new TheoryOfChangeItem()
   }),
   config = reactive({
-    isLoading: true
+    isLoading: true,
+    isExamplePanelVisible: false,
   });
 
 const projectStore = useProjectStore()
@@ -289,6 +285,8 @@ const diagram = reactive({
         audience: [] as any,
       }
     });
+
+    console.warn(graph)
 
     // const inputObjects = JSON.parse(jsonString);
     for (const node of graph) {
@@ -708,11 +706,16 @@ const loadExampleToc = async (filename) => {
 
   <div class="mx-3" v-if="!config.isLoading">
 
+    <!-- Indicator Browser Panel -->
     <IndicatorBrowserPanel :is-visible="isPanelVisible"
       @is-closed="isPanelVisible = false; showIndicatorModal = true; useSideNavStore().hide();"
       :toc-item="theoryOfChangeModel.selectedItem"
       @is-saved="updateToCModel($event, theoryOfChangeModel.selectedItem?.id)">
     </IndicatorBrowserPanel>
+
+    <!-- Theory of Change examples browser panel -->
+    <TheoryOfChangeExamplesBrowser :is-visible="config.isExamplePanelVisible"
+      @is-closed="config.isExamplePanelVisible = false"> </TheoryOfChangeExamplesBrowser>
 
 
     <div class="level">
@@ -745,7 +748,15 @@ const loadExampleToc = async (filename) => {
         </div>
       </div>
 
+      <Space>
+        <span>
+          Need help? <Button style="padding-left; 0px; margin-left: 0px; display: inline" type="link"
+            @click="config.isExamplePanelVisible = true;">Browse theory of change examples</Button>
+        </span>
+      </Space>
     </div>
+
+    <Divider></Divider>
 
     <!-- ======== START: Theory of Change Modal ======= -->
     <Modal v-model:visible="tocItemModalConfig.visible" title="Theory of Change Item" @ok="closeModal()">
