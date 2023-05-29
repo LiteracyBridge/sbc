@@ -4,7 +4,7 @@ import { ref, onMounted, computed, watch } from "vue";
 import { Multiselect } from 'vue-multiselect'
 import { ApiRequest } from "@/apis/api";
 import { type IndicatorGroup, type IndicatorType, TheoryOfChangeItem, TheoryOfChange } from "@/types";
-import { Collapse, CollapsePanel, Empty, Drawer, Space, Divider, TypographyTitle } from "ant-design-vue";
+import { Collapse, CollapsePanel, Empty, Drawer, Space, Divider, TypographyTitle, Select } from "ant-design-vue";
 
 
 const emit = defineEmits<{
@@ -16,7 +16,7 @@ const props = defineProps<{ tocItem: TheoryOfChangeItem, isVisible: boolean }>()
 
 const
   collapseKey = ref<string[]>([]),
-  selectedMainIndicatorType = ref<{ id: number, name: string }>(),
+  selectedMainIndicatorType = ref<{ value: number, label: string }>(),
   selectedGroupType = ref<IndicatorType>(),
   isFetchingIndicators = ref(false),
   mainIndicators = ref<IndicatorType[]>([]),
@@ -42,7 +42,7 @@ const selectedIndicatorGroups = computed(() => {
     return [];
   }
 
-  return mainIndicators.value.filter(i => i.parent_id == selectedMainIndicatorType.value.id);
+  return mainIndicators.value.filter(i => i.parent_id == selectedMainIndicatorType.value as unknown as number);
 });
 
 const groupIndicators = computed(() => {
@@ -52,6 +52,10 @@ const groupIndicators = computed(() => {
 
   return indicatorsList.value.filter(i => i.group_id == selectedGroupType.value?.id);
 })
+
+const filterOption = (input: string, option: any) => {
+  return option.name.toLowerCase().indexOf(input?.toLowerCase() ?? '') >= 0;
+};
 
 const closePanel = () => {
   config.value.indicators = {};
@@ -106,7 +110,8 @@ watch(props, (newProp) => {
     const indicatorType = mainIndicators.value.find(i => i.id == indicator?.group_id);
 
     selectedGroupType.value = indicatorType;
-    selectedMainIndicatorType.value = mainIndicators.value.find(i => i.id == indicatorType?.parent_id);
+    const _find = mainIndicators.value.find(i => i.id == indicatorType?.parent_id);
+    selectedMainIndicatorType.value = { value: _find?.id ?? 0, label: _find?.name ?? "" }
   }
 }, { deep: true });
 
@@ -161,13 +166,18 @@ const saveIndicators = async () => {
         <!-- TODO: add label -->
         <label class="label">Select Indicator</label>
 
-        <Multiselect v-model="selectedMainIndicatorType" :options="getMainIndicators" :close-on-select="true"
-          :clear-on-select="false" placeholder="Select indicator" label="name" track-by="value" />
+        <!-- <Multiselect v-model="selectedMainIndicatorType" :options="getMainIndicators" :close-on-select="true"
+          :clear-on-select="false" placeholder="Select indicator" label="name" track-by="value" /> -->
+
+        <Select v-model:value="selectedMainIndicatorType" show-search placeholder="Select an indicator"
+          style="width: 200px" :allow-clear="true" :options="getMainIndicators"
+          :field-names="{ label: 'name', value: 'id' }" :filter-option="filterOption">
+        </Select>
         <hr>
 
         <aside class="menu">
           <p class="menu-label">
-            {{ selectedMainIndicatorType?.name || 'No indicatory type selected' }}
+            {{ selectedMainIndicatorType?.label || 'No indicatory type selected' }}
           </p>
 
           <ul class="menu-list">
@@ -239,9 +249,3 @@ const saveIndicators = async () => {
 
   </Drawer>
 </template>
-
-<style>
-.text-with-line-breaks {
-  white-space: pre-line;
-}
-</style>
