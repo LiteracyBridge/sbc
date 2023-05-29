@@ -20,11 +20,11 @@ def upgrade():
     op.create_table(
         "theory_of_change_indicators",
         sa.Column("id", sa.Integer(), primary_key=True, nullable=False),
-        sa.Column("theory_of_change_id", sa.Integer(), nullable=True),
+        sa.Column("toc_item_id", sa.Integer(), nullable=True),
         sa.Column("indicator_id", sa.Integer(), nullable=True),
         sa.ForeignKeyConstraint(
-            ["theory_of_change_id"],
-            ["toc.id"],
+            ["toc_item_id"],
+            ["theories_of_change_item.id"],
         ),
         sa.ForeignKeyConstraint(
             ["indicator_id"],

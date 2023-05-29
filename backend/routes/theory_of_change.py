@@ -221,12 +221,12 @@ def add_item(id: int, item_id: int, db: Session = Depends(models.get_db)):
     return ApiResponse(data=[resp])
 
 
-@router.post("/{id}/indicators", response_model=ApiResponse)
-def update_indicators(id: int, dto: IndicatorDto, db: Session = Depends(models.get_db)):
+@router.post("/{itemId}/indicators", response_model=ApiResponse)
+def update_indicators(itemId: int, dto: IndicatorDto, db: Session = Depends(models.get_db)):
     print(dto.removed)
     # Remove all indicators
     db.query(models.TheoryOfChangeIndicator).filter(
-        TheoryOfChangeIndicator.theory_of_change_id == id,
+        TheoryOfChangeIndicator.toc_item_id == itemId,
         TheoryOfChangeIndicator.indicator_id.in_(dto.removed),
     ).delete()
     # for i in removed_indicators:
@@ -236,7 +236,7 @@ def update_indicators(id: int, dto: IndicatorDto, db: Session = Depends(models.g
     new_indicators = []
     for i in dto.added:
         record = models.TheoryOfChangeIndicator()
-        record.theory_of_change_id = id
+        record.toc_item_id = itemId
         record.indicator_id = i
 
         new_indicators.append(record)
@@ -246,7 +246,7 @@ def update_indicators(id: int, dto: IndicatorDto, db: Session = Depends(models.g
 
     indicators = (
         db.query(models.TheoryOfChangeIndicator)
-        .filter(TheoryOfChangeIndicator.theory_of_change_id == id)
+        .filter(TheoryOfChangeIndicator.toc_item_id == itemId)
         .options(subqueryload(TheoryOfChangeIndicator.indicator))
         .all()
     )

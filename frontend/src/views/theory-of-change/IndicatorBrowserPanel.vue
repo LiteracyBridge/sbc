@@ -12,28 +12,7 @@ const projectStore = useProjectStore();
 
 const emit = defineEmits(['isClosed']);
 
-const props = defineProps({
-  // topic: {
-  //   type: String,
-  //   required: true,
-  // },
-  // modelValue: {
-  //   type: Boolean,
-  //   required: true,
-  // },
-  tocItem: {
-    type: TheoryOfChangeItem,
-    required: true,
-  },
-  // theoryOfChange: {
-  //   type: TheoryOfChange,
-  //   required: true,
-  // },
-  isVisible: {
-    type: Boolean,
-    required: true,
-  },
-});
+const props = defineProps<{ tocItem: TheoryOfChangeItem, isVisible: boolean }>();
 
 const selectedIndicatorType = ref<{ id: number, name: string }>(),
   selectedGroup = ref<IndicatorType>(),
@@ -48,7 +27,14 @@ const selectedIndicatorType = ref<{ id: number, name: string }>(),
     indicators: {},
   });
 
+// const tocItemIndicators = ref(props.tocItem.indicators ?? []);
+
 const isOpened = computed(() => props.isVisible)
+
+
+const getMainIndicators = computed(() => {
+  return indicatorTypes.value.filter(i => i.parent_id == null);
+});
 
 const selectedIndicatorGroups = computed(() => {
   console.log(selectedIndicatorType.value);
@@ -58,10 +44,6 @@ const selectedIndicatorGroups = computed(() => {
   }
 
   return indicatorTypes.value.filter(i => i.parent_id == selectedIndicatorType.value.id);
-});
-
-const getMainIndicators = computed(() => {
-  return indicatorTypes.value.filter(i => i.parent_id == null);
 });
 
 const groupIndicators = computed(() => {
@@ -95,6 +77,9 @@ const closeButton = () => {
   emit("isClosed", true);
 };
 
+const tocItemHasIndicators = computed<boolean>(() => {
+  return props.tocItem.indicators.length > 0;
+})
 
 const buildIndicatorsTree = (indicators?: any[], configIndicators?: Record<string, boolean>) => {
   const tree: Record<string, boolean> = configIndicators || config.indicators;
@@ -167,14 +152,14 @@ const saveIndicators = async () => {
 
   const added = Object.keys(config.indicators).filter(i => {
     return config.indicators[i]
-  }).filter(i => props.tocItem.indicators.find(ind => ind.indicator_id == i) == null)
+  }).filter(i => props.tocItem.indicators.find(ind => ind.indicator_id == +i) == null)
   // Filter out duplicate indicators
   // const uniqueAdded = props.tocItem.indicators.fi
 
   console.log(added, removed)
   // TODO: if item is not new, then update it
 
-  await ApiRequest.post(`theory-of-change/${props.tocItem.theory_of_change_id}/indicators`, {
+  await ApiRequest.post(`theory-of-change/${props.tocItem.id}/indicators`, {
     added: added,
     removed: removed,
   }).then(resp => {
@@ -257,8 +242,7 @@ const saveIndicators = async () => {
 
         <!-- TODO: show a helper text in center if nothing is selected -->
 
-        <div v-if="groupIndicators?.length == 0"
-          style="margin-top: auto; position: fixed; top: 50%; left: 55%;">
+        <div v-if="groupIndicators?.length == 0" style="margin-top: auto; position: fixed; top: 50%; left: 55%;">
           <Empty description="Choose indicator from the dropdown list"></Empty>
         </div>
 

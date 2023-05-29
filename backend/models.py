@@ -142,7 +142,7 @@ class TheoryOfChangeIndicator(Base):
     __tablename__ = "theory_of_change_indicators"
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
-    theory_of_change_id: Mapped[int] = mapped_column(
+    toc_item_id: Mapped[int] = mapped_column(
         ForeignKey("theories_of_change_item.id")
     )
     indicator_id: Mapped[int] = mapped_column(ForeignKey("lu_indicators.id"))
