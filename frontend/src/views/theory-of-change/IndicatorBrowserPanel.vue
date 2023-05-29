@@ -6,6 +6,7 @@ import { AccordionList, AccordionItem } from "vue3-rich-accordion";
 import { useProjectStore } from "@/stores/projects";
 import { ApiRequest } from "@/apis/api";
 import { type IndicatorGroup, type IndicatorType, TheoryOfChangeItem } from "@/types";
+import { Empty } from "ant-design-vue";
 
 const projectStore = useProjectStore();
 
@@ -140,36 +141,22 @@ watch(props.tocItem, (newVal, old) => {
   buildIndicatorsTree(newVal.indicators)
 }, { deep: true });
 
-const removeIndicator = (indicatorId: number) => {
-  const temp = config.indicatorsRemoved
-  temp.push(indicatorId)
+// const removeIndicator = (indicatorId: number) => {
+//   const temp = config.indicatorsRemoved
+//   temp.push(indicatorId)
 
-  config.indicatorsRemoved = temp;
+//   config.indicatorsRemoved = temp;
 
-  const _temp2 = config.indicatorsAdded;
-  const index = _temp2.findIndex(i => i == indicatorId);
-  if (index > -1) {
-    _temp2.splice(index, 1)
-    config.indicatorsAdded = _temp2
-  }
-
-  buildIndicatorsTree()
-}
-
-// const itemExists = (indicatorId: number) => {
-//   console.log(indicatorId)
-
-//   const index = config.indicatorsAdded.findIndex(i => i == indicatorId);
+//   const _temp2 = config.indicatorsAdded;
+//   const index = _temp2.findIndex(i => i == indicatorId);
 //   if (index > -1) {
-//     config.added[`${indicatorId}`] = true
-//   }
-//   if (!index) {
-//     return props.tocItem.indicators
-//       .find((i) => i.indicator_id == indicatorId) != null;
+//     _temp2.splice(index, 1)
+//     config.indicatorsAdded = _temp2
 //   }
 
-//   return index;
+//   buildIndicatorsTree()
 // }
+
 
 const saveIndicators = async () => {
   config.isLoading = true;
@@ -269,7 +256,13 @@ const saveIndicators = async () => {
         <hr>
 
         <!-- TODO: show a helper text in center if nothing is selected -->
-        <AccordionList>
+
+        <div v-if="groupIndicators?.length == 0"
+          style="margin-top: auto; position: fixed; top: 50%; left: 55%;">
+          <Empty description="Choose indicator from the dropdown list"></Empty>
+        </div>
+
+        <AccordionList v-else>
 
           <AccordionItem v-for="item in groupIndicators" :key="item.id">
             <template #summary>{{ item.name }}</template>
