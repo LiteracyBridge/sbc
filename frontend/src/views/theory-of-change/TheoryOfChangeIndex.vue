@@ -56,28 +56,13 @@ const theoryOfChangeModel = ref<{
 
 const projectStore = useProjectStore()
 
-const svgUrl = ref("");
-const svgImgSrcUrl = ref("");
 const diagramContainer = ref(null);
-const addNodeLabel = ref("");
-const addNodeLogicModel = ref("");
 const fromNodeId = ref(null);
 const selectedNodeId = ref(null);
 const selectedEdge = ref(null);
 const selectedNode = ref(null);
-const deleteFromId = ref(null);
-const deleteToId = ref(null);
-const textToImport = ref(null);
 const logicModelView = ref(false);
-// let tempNavHidden = false;
-const selectedExampleToC = ref(null);
 
-const incomingEdges = computed(() =>
-  diagram.edges.filter((e) => e.toId === selectedNodeId.value)
-);
-const outgoingEdges = computed(() =>
-  diagram.edges.filter((e) => e.fromId === selectedNodeId.value)
-);
 
 const mermaidConfig = {
   startOnLoad: true,
@@ -100,7 +85,6 @@ const mermaidConfig = {
     curve: "linear",
   },
 };
-
 
 const drawDiagram = async function () {
   const { svg } = await mermaidAPI.render("graphDiv", diagram.toMermaid());
@@ -135,8 +119,6 @@ const drawDiagram = async function () {
       });
 
       node.addEventListener("dblclick", (event) => {
-        console.log("NODE");
-
         isSingleClick = false;
         clearTimeout(clickTimeout);
 
@@ -172,18 +154,12 @@ const drawDiagram = async function () {
   }
 };
 
-function nodesToSubgraph(nodes, category) {
+function nodesToSubgraph(nodes: Object, category: string) {
   category = category.toLowerCase();
-  console.error(nodes, category)
   let result = "";
-  // console.log('nodesToSubgraph('+category+')');
-  // console.log(nodes);
   const arrayInCategory = Object.fromEntries(
     Object.entries(nodes).filter(([, node]) => node.logicModel.toLowerCase() == category)
   );
-  // console.log('type:'+typeof(arrayInCategory));
-  // console.log('arrayInCategory',arrayInCategory);
-  // console.log('arrayInCategory.length',arrayInCategory.length);
   if (Object.keys(arrayInCategory).length) {
     result += "subgraph " + (category == "" ? "no category" : category) + "\n";
     for (const key in arrayInCategory) {
@@ -191,11 +167,10 @@ function nodesToSubgraph(nodes, category) {
     }
     result += "end\n";
   }
-  // console.log('result:'+result);
   return result;
 }
 
-function Node(id, label, defaultProperties) {
+function Node(id: number, label: string, defaultProperties: Object) {
   const mergedProperties = Object.assign({}, defaultProperties, { id, label });
   this.id = mergedProperties.id;
   this.label = mergedProperties.label;
@@ -207,7 +182,7 @@ function Node(id, label, defaultProperties) {
   this.audience = mergedProperties.audience;
 }
 
-function Edge(fromNodeId, toNodeId) {
+function Edge(fromNodeId: number, toNodeId: number) {
   this.fromId = fromNodeId;
   this.toId = toNodeId;
 }
@@ -251,27 +226,10 @@ const diagram = reactive({
     this.orientationIndex++;
     if (this.orientationIndex == 4) this.orientationIndex = 0;
   },
-  parseJSON: function (jsonString) {
-    const inputObjects = JSON.parse(jsonString);
-    for (const node of inputObjects.nodes) {
-      // Merge the input object with the default node, so any missing properties are filled in
-      const mergedNode = Object.assign({}, this.defaultNode, node);
-      this.nodes[mergedNode.id] = mergedNode;
-    }
-
-    console.log(this.nodes);
-    for (const edge of inputObjects.edges) {
-      this.createEdge(edge.fromId, edge.toId, false);
-    }
-    drawDiagram();
-  },
   parseGraph: function (data) {
     if (Array.isArray(data)) data = data[0]
 
     theoryOfChangeModel.value.data = data;
-
-    console.log('parseGraph');
-    // console.log(graph);
 
     const graph = data.graph.map((r: TheoryOfChangeItem) => {
       return {
@@ -288,9 +246,6 @@ const diagram = reactive({
       }
     });
 
-    console.warn(graph)
-
-    // const inputObjects = JSON.parse(jsonString);
     for (const node of graph) {
       // Merge the input object with the default node, so any missing properties are filled in
       const mergedNode = Object.assign({}, this.defaultNode, node);
@@ -322,7 +277,6 @@ const diagram = reactive({
       }
     }
 
-    console.log(edges);
     for (const edge of edges) {
       this.createEdge(edge.fromId, edge.toId, false);
     }
@@ -341,7 +295,6 @@ const diagram = reactive({
   },
 
   createEdge: function (fromNodeId, toNodeId, draw = true) {
-    console.log('createEdge:' + fromNodeId + toNodeId + draw);
     if (fromNodeId == toNodeId) return; // prevent double click from creating a useless self-edge
     const key = `${fromNodeId}|${toNodeId}`;
     if (!this.edgeSet.has(key)) {
@@ -373,7 +326,6 @@ const diagram = reactive({
     for (const edge of this.edges) {
       result += `${edge.fromId} -->|factors| ${edge.toId}\n`;
     }
-    console.log(result);
     return result;
   },
   toJSON: function (inputNodes, edges) {
@@ -382,19 +334,11 @@ const diagram = reactive({
   },
 });
 
-const fetchGraph = async (project_id) => {
-
+const fetchGraph = async () => {
   try {
     config.isLoading = true;
     const resp = await ApiRequest.get(`theory-of-change/${projectStore.projectId}`);
 
-    // console.log(resp)
-    // if (!response.ok) {
-    //   throw new Error(`HTTP error! status: ${response.status}`);
-    // }
-    // const jsonText = await response.text();
-    // console.log("here we go");
-    // console.log(jsonText);
     diagram.parseGraph(resp);
   } catch (error) {
     console.error('Failed to fetch JSON data:', error);
@@ -403,15 +347,20 @@ const fetchGraph = async (project_id) => {
   }
 }
 
+const escapeKeyHandler = (event) => {
+  if (event.key === "Escape" || event.keyCode === 27) {
+    closeModal();
+  }
+};
+
 onMounted(() => {
-  fetchGraph(1)
+  fetchGraph()
 
   mermaidAPI.initialize(mermaidConfig);
 
   window.addEventListener("keydown", escapeKeyHandler);
 
   window.edgeDoubleClick = function (fromNodeId, toNodeId) {
-    console.log(fromNodeId, toNodeId); //selectedEdgeIds
     const edgeIndex = diagram.edges.findIndex((e) => e.fromId == fromNodeId && e.toId == toNodeId);
     selectedEdge.value = diagram.edges[edgeIndex];
   };
@@ -432,7 +381,6 @@ onMounted(() => {
 
   };
   window.nodeClick = function (nodeId) {
-    console.log("callback: " + nodeId);
     if (fromNodeId.value) {
       diagram.createEdge(fromNodeId.value, nodeId);
       fromNodeId.value = null;
@@ -447,46 +395,10 @@ onUnmounted(() => {
   window.removeEventListener("keydown", escapeKeyHandler);
 });
 
-async function addNode() {
-  diagram.createNode(addNodeLabel.value, addNodeLogicModel.value);
-}
-
-function removeFromEdge(array, value) {
-  const index = array.findIndex((item) => item.toId === value);
-  if (index !== -1) {
-    array.splice(index, 1);
-  }
-  return array;
-}
-
-function removeToEdge(array, value) {
-  const index = array.findIndex((item) => item.fromId === value);
-  if (index !== -1) {
-    array.splice(index, 1);
-  }
-  return array;
-}
-
-function deleteConnection(fromId, toId) {
-  const index = diagram.edges.findIndex(
-    (edge) => edge.fromId === fromId && edge.toId === toId
-  );
-  diagram.edges.splice(index, 1);
-
-  const key = `${fromId}|${toId}`;
-  diagram.edgeSet.delete(key);
-
-  drawDiagram();
-  // reset select dropdown and disable the delete button
-  deleteFromId.value = deleteToId.value = null;
-  selectedEdge.value = null; // closes modal (needed if coming from edge Modal)
-}
-
 function deleteNode(nodeId) {
   // remove edges
   let i = 0;
   while (diagram.edges[i]) {
-    console.log(i);
     if (diagram.edges[i].fromId == nodeId || diagram.edges[i].toId == nodeId) {
       diagram.edges.splice(i, 1);
       i--;
@@ -498,62 +410,12 @@ function deleteNode(nodeId) {
   drawDiagram();
 }
 
-const getJSON = () => {
-  console.log(diagram.toJSON(diagram.nodes, diagram.edges));
-};
-
-const uploadDiagram = async function () {
-  await getUploadUrl(diagramContainer.value.innerHTML);
-};
-
-async function getUploadUrl(svgElement) {
-  console.log(svgElement);
-  // URL for the AWS API Gateway that returns a pre-signed URL and filename for uploading to S3.
-  const s3uploaderUrl = "https://238xuirz88.execute-api.us-west-2.amazonaws.com/uploads";
-
-  // URL to download the file after it it uploaded
-  const downloadUrl = "https://sbc-upload.s3.us-west-2.amazonaws.com/";
-
-  // Pass the content type as a query parameter
-  const contentType = "image/svg+xml"; // or  'image/svg';
-
-  axios
-    .get(s3uploaderUrl, {
-      params: {
-        contentType: contentType,
-      },
-    })
-    .then((response) => {
-      console.log("Signed URL:", response.data.uploadURL);
-      console.log("Key:", response.data.Key);
-      svgUrl.value = downloadUrl + response.data.Key;
-
-      // This is the SVG file you want to upload. In a web app,
-      // you can get this from an input field, for example.
-      const svgBlob = new Blob([svgElement], { type: contentType });
-
-      // Perform the actual upload using the signed URL
-      return axios.put(response.data.uploadURL, svgBlob, {
-        headers: {
-          "Content-Type": contentType,
-        },
-      });
-    })
-    .then((response) => {
-      console.log("Upload successful!");
-      // now that it's uploaded, we can update the img tag's src attribute
-      svgImgSrcUrl.value = svgUrl.value;
-    })
-    .catch((error) => console.error("Error:", error));
-}
-
 function rotateDiagram() {
   diagram.rotate();
   drawDiagram();
 }
 
-
-//=== END: Theory of Change Item Modal functions
+//=== START: Theory of Change Item Modal functions
 const newTocItem = () => {
 
   tocItemModalConfig.value.form = new TheoryOfChangeItem()
@@ -641,34 +503,6 @@ function updateToCModel(resp: TheoryOfChange | TheoryOfChange[], itemId?: number
 }
 //=== END: Theory of Change Item Modal functions
 
-
-const modalRef = ref(null);
-const edgeModalRef = ref(null);
-
-onClickOutside(modalRef, closeModal);
-onClickOutside(edgeModalRef, closeModal);
-
-const escapeKeyHandler = (event) => {
-  if (event.key === "Escape" || event.keyCode === 27) {
-    closeModal();
-  }
-};
-
-const loadExampleToc = async (filename) => {
-  try {
-    const response = await fetch(`/tocs/${filename}.json`);
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    const jsonText = await response.text();
-    console.log("here we go");
-    console.log(jsonText);
-    diagram.parseJSON(jsonText);
-  } catch (error) {
-    console.error('Failed to fetch JSON data:', error);
-  }
-}
 </script>
 
 <template>
@@ -993,42 +827,3 @@ input:checked+.slider:before {
   transform: translate(-50%, -50%);
 }
 </style>
-
-
-
-<!--
-        <div class="field">
-          <div class="control">
-            <div>
-              <button class="button is-info" type="button" @click="uploadDiagram">
-                Upload
-              </button>
-            </div>
-          </div>
-        </div>
-        <div class="field">
-          <div class="control">
-            <div>
-              <button class="button is-info" type="button" @click="getJSON">
-                Download JSON
-              </button>
-            </div>
-          </div>
-        </div>
--->
-
-
-
-        <!-- <div class="field" v-if="true">
-          <label class="label">JSON String to Import</label>
-          <div class="control">
-            <input
-              class="input"
-              @change="diagram.parseJSON(textToImport)"
-              type="text"
-              name="importNode"
-              id="importNode"
-              v-model="textToImport"
-            />
-          </div>
-        </div> -->
