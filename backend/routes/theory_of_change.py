@@ -5,7 +5,7 @@ from pydantic import BaseModel
 
 from sqlalchemy.orm import Session, joinedload, subqueryload
 from schema import ApiResponse
-from models import TheoryOfChangeIndicator, TheoryOfChange, TheoryOfChangeItem
+from models import Risk, TheoryOfChangeIndicator, TheoryOfChange, TheoryOfChangeItem
 import models
 
 router = APIRouter()
@@ -31,6 +31,15 @@ class NewTheoryOfChangeDto(BaseModel):
     name: str
     project_id: int
     notes: Optional[str]
+
+
+class RisksDto(BaseModel):
+    name: Optional[str]
+    mitigation: Optional[str]
+    assumptions: Optional[str]
+    risks: Optional[str]
+    toc_from_id: Optional[int]
+    toc_to_id: Optional[int]
 
 
 def get_toc_by_id(id: int, db: Session = Depends(models.get_db)):
@@ -153,22 +162,8 @@ def update_item(
     record.description = dto.description
     record.is_validated = dto.is_validated
 
-    # db.update(record)
     db.commit()
 
-    # if dto.to_id is not None:
-    #     # Query for the to_id and link it to the from_id
-    #     to_record = (
-    #         db.query(models.TheoryOfChangeItem)
-    #         .filter(models.TheoryOfChangeItem.id == dto.to_id)
-    #         .first()
-    #     )
-    #     to_record.from_id = record.id
-
-    #     db.add(to_record)
-    #     db.commit()
-
-    # db.refresh(record)
     return get_toc_by_id(id, db)
 
 
@@ -225,14 +220,10 @@ def add_item(id: int, item_id: int, db: Session = Depends(models.get_db)):
 def update_indicators(
     itemId: int, dto: IndicatorDto, db: Session = Depends(models.get_db)
 ):
-    print(dto.removed)
-    # Remove all indicators
     db.query(models.TheoryOfChangeIndicator).filter(
         TheoryOfChangeIndicator.toc_item_id == itemId,
         TheoryOfChangeIndicator.indicator_id.in_(dto.removed),
     ).delete()
-    # for i in removed_indicators:
-    #     db.delete(i)
 
     # Add all indicators
     new_indicators = []
@@ -245,13 +236,6 @@ def update_indicators(
 
     db.add_all(new_indicators)
     db.commit()
-
-    indicators = (
-        db.query(models.TheoryOfChangeIndicator)
-        .filter(TheoryOfChangeIndicator.toc_item_id == itemId)
-        .options(subqueryload(TheoryOfChangeIndicator.indicator))
-        .all()
-    )
 
     toc_item = (
         db.query(models.TheoryOfChangeItem)
@@ -266,3 +250,25 @@ def get_indicator(db: Session = Depends(models.get_db)):
     data = db.query(models.Indicator).all()
 
     return ApiResponse(data=data)
+
+
+@router.post("/risks", response_model=ApiResponse)
+def risks(dto: RisksDto, db: Session = Depends(models.get_db)):
+    risk = Risk(risks=dto.risks, mitigation=dto.mitigation, impact=dto.impact)
+
+    risk.name = dto.name
+    risk.mitigation = dto.mitigation
+    risk.assumptions = dto.assumptions
+    risk.risks = dto.risks
+    risk.toc_from_id = dto.toc_from_id
+    risk.toc_to_id = dto.toc_to_id
+
+    db.add(risk)
+    db.commit()
+
+    toc_item = (
+        db.query(models.TheoryOfChangeItem)
+        .filter(models.TheoryOfChangeItem.id == dto.toc_from_id)
+        .first()
+    )
+    return get_toc_by_id(toc_item.theory_of_change_id, db)

@@ -28,6 +28,28 @@ class LuSem(Base):
     description: Mapped[Optional[str]]
 
 
+class LuDriver(Base):
+    __tablename__ = "lu_drivers"
+
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    name: Mapped[str]
+    dgroup: Mapped[str]
+    text_short: Mapped[Optional[str]]
+    text_long: Mapped[Optional[str]]
+    url: Mapped[Optional[str]]
+    sequence: Mapped[int]
+
+    category_id: Mapped[Optional[int]]
+    framework_id: Mapped[Optional[int]]
+    intervention_ids: Mapped[int]
+    parent_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("lu_drivers.id"), nullable=True
+    )
+    sem_id: Mapped[int] = mapped_column(Integer, ForeignKey("lu_sem.id"), nullable=True)
+
+    description: Mapped[Optional[str]]
+
+
 class IndicatorType(Base):
     __tablename__ = "lu_indicator_types"
 
@@ -70,10 +92,23 @@ class Project(Base):
     is_archived: Mapped[bool] = mapped_column(Boolean, default=False)
     country_id: Mapped[int] = mapped_column(ForeignKey("countries.id"))
 
-    # TODO; add this back later
     theories_of_change = relationship(
         "TheoryOfChange", back_populates="project", load_on_pending=True
     )
+
+
+class ProjectDriver(Base):
+    __tablename__ = "drivers_in_prj"
+
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    name: Mapped[str]
+    notes_context: Mapped[Optional[str]]
+    notes_gap: Mapped[Optional[str]]
+    notes_goal: Mapped[Optional[str]]
+
+    prj_id: Mapped[int] = mapped_column(ForeignKey("projects.id"))
+    lu_driver_id: Mapped[int] = mapped_column(ForeignKey("lu_drivers.id"))
+    editing_user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
 
 
 class TheoryOfChange(Base):
@@ -142,9 +177,7 @@ class TheoryOfChangeIndicator(Base):
     __tablename__ = "theory_of_change_indicators"
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
-    toc_item_id: Mapped[int] = mapped_column(
-        ForeignKey("theories_of_change_item.id")
-    )
+    toc_item_id: Mapped[int] = mapped_column(ForeignKey("theories_of_change_item.id"))
     indicator_id: Mapped[int] = mapped_column(ForeignKey("lu_indicators.id"))
 
     indicator: Mapped["Indicator"] = relationship("Indicator", load_on_pending=True)
@@ -156,6 +189,27 @@ class TheoryOfChangeType(Base):
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
     name: Mapped[str]
     description: Mapped[Optional[str]]
+
+
+class Risk(Base):
+    __tablename__ = "risks"
+
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    name: Mapped[str]
+    mitigation: Mapped[Optional[str]]
+    assumptions: Mapped[Optional[str]]
+    risks: Mapped[Optional[str]]
+
+    project_id: Mapped[int] = mapped_column(ForeignKey("projects.id"), nullable=True)
+    driver_id: Mapped[int] = mapped_column(
+        ForeignKey("drivers_in_prj.id"), nullable=True
+    )
+    toc_from_id: Mapped[int] = mapped_column(
+        ForeignKey("theories_of_change_item.id"), nullable=True
+    )
+    toc_to_id: Mapped[int] = mapped_column(
+        ForeignKey("theories_of_change_item.id"), nullable=True
+    )
 
 
 Base.metadata.create_all(bind=engine)
