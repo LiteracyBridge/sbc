@@ -13,9 +13,9 @@ import mermaidDirective from "./directives/mermaid";
 // Ant Design imports
 import { message } from "ant-design-vue";
 // FIXME: Use vite to customize the Ant Design theme
-import 'ant-design-vue/dist/antd.css';
+import './theme.less';
+// import 'antd-css-utilities/utility.min.css'
 
-import "vue3-rich-accordion/accordion-library-styles.css";
 import "vue-multiselect/dist/vue-multiselect.css";
 import "vue3-side-panel/dist/vue3-side-panel.css";
 

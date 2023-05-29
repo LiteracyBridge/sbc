@@ -12,8 +12,9 @@ import { TheoryOfChange, TheoryOfChangeItem } from "@/types";
 import GridLoader from "@/components/spinners/GridLoader.vue";
 import { useProjectDataStore } from "@/stores/projectData";
 import { useProjectStore } from '@/stores/projects';
-import { Button, Divider, Modal, Space } from "ant-design-vue";
+import { Button, Divider, Modal, Space, Switch } from "ant-design-vue";
 import TheoryOfChangeExamplesBrowser from "./TheoryOfChangeExamplesBrowser.vue";
+import { PlusCircleOutlined, RotateRightOutlined } from "@ant-design/icons-vue";
 
 const THEORY_OF_CHANGE_TYPES: Record<string, string> = {
   "1": "Input",
@@ -527,32 +528,24 @@ function updateToCModel(resp: TheoryOfChange | TheoryOfChange[], itemId?: number
 
     <div class="level">
       <div class="level-item has-text-centered">
-        <button class="button is-primary mr-6" role="button" @click.prevent="newTocItem()">
-          <span class="icon mr-1">
-            <i class="fas fa-plus"></i>
-          </span>
+
+        <Button type="primary" class="mr-6" @click.prevent="newTocItem()">
+          <template #icon>
+            <PlusCircleOutlined />
+          </template>
           Add Item
-        </button>
+        </Button>
 
-        <button class="button is-outlined ml-3" @click="rotateDiagram()">
-          <span class="icon mr-1">
-            <i class="fas fa-rotate"></i>
-          </span>
+        <Button type="ghost" shape="round" @click="rotateDiagram()">
+          <template #icon>
+            <RotateRightOutlined />
+          </template>
           Rotate
-        </button>
+        </Button>
 
-        <div class="field ml-3 mr-2">
-          <div class="control custom-control pt-2">
-            <label class="switch">
-              <input type="checkbox" v-model="logicModelView" @change="drawDiagram" />
-              <span class="slider"></span>
-            </label>
-            <!-- <label class="label">Logic Model View</label> -->
-          </div>
-        </div>
-        <div class="field">
-          <label class="label pb-3">Logic Model View</label>
-        </div>
+        <Switch v-model:checked="logicModelView" checked-children="Logic Model View" un-checked-children="Normal View"
+          class="ml-3" @change="drawDiagram" />
+
       </div>
 
       <Space>
@@ -744,81 +737,6 @@ function updateToCModel(resp: TheoryOfChange | TheoryOfChange[], itemId?: number
 </template>
 
 <style>
-.custom-flex-container {
-  display: flex;
-  align-items: flex-end;
-}
-
-.custom-control {
-  display: flex;
-  flex-direction: column-reverse;
-  align-items: flex-end;
-}
-
-.buttons-container {
-  position: absolute;
-  top: 20px;
-  right: 10px;
-}
-
-.button-container {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  padding-bottom: calc(0.5em + 0.25rem);
-}
-
-.switch {
-  position: relative;
-  display: inline-block;
-  width: 60px;
-  height: 34px;
-}
-
-.switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #ccc;
-  transition: 0.4s;
-}
-
-.slider:before {
-  position: absolute;
-  content: "";
-  height: 26px;
-  width: 26px;
-  left: 4px;
-  bottom: 4px;
-  background-color: white;
-  transition: 0.4s;
-}
-
-input:checked+.slider {
-  background-color: #3f51b5;
-}
-
-input:checked+.slider:before {
-  transform: translateX(26px);
-}
-
-.slider.round {
-  border-radius: 34px;
-}
-
-.slider.round:before {
-  border-radius: 50%;
-}
-
 #graph-loader {
   position: fixed;
   top: 50%;

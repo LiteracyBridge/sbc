@@ -14,6 +14,7 @@
     "@vueform/multiselect": "^2.5.2",
     "@vueuse/core": "^8.9.4",
     "ant-design-vue": "^3.2.20",
+    "antd-css-utilities": "^1.0.3",
     "aws-amplify": "^4.3.30",
     "axios": "^0.27.2",
     "bulma": "^0.9.4",
@@ -34,6 +35,7 @@
     "@vue/tsconfig": "^0.3.2",
     "eslint": "^8.40.0",
     "eslint-plugin-vue": "^9.11.1",
+    "less": "^4.1.3",
     "typescript": "^5.0.4",
     "vite": "^3.0.1"
   }
