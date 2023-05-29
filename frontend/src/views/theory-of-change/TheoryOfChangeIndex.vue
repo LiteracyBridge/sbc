@@ -12,6 +12,7 @@ import { TheoryOfChange, TheoryOfChangeItem } from "@/types";
 import GridLoader from "@/components/spinners/GridLoader.vue";
 import { useProjectDataStore } from "@/stores/projectData";
 import { useProjectStore } from '@/stores/projects';
+import { Modal } from "ant-design-vue";
 
 const THEORY_OF_CHANGE_TYPES: Record<string, string> = {
   "1": "Input",
@@ -596,7 +597,7 @@ const closeModal = () => {
   showIndicatorModal.value = false;
 
   tocItemModalConfig.value.visible = false;
-  tocItemModalConfig.value.form = null;
+  tocItemModalConfig.value.form = new TheoryOfChangeItem();
 
   useSideNavStore().show();
   drawDiagram();
@@ -747,149 +748,9 @@ const loadExampleToc = async (filename) => {
     </div>
 
     <!-- ======== START: Theory of Change Modal ======= -->
-    <div class="`modal`" :class="{ 'is-active': tocItemModalConfig.visible }" v-if="tocItemModalConfig.visible">
-      <div class="modal-background"></div>
-
-      <div ref="modalRef" class="modal-card">
-        <header class="modal-card-head">
-          <p class="modal-card-title">Theory of Change Item</p>
-          <button @click="closeModal" class="delete" aria-label="close"></button>
-        </header>
-
-        <section class="modal-card-body">
-          <form>
-            <div class="field">
-              <div class="field-body">
-                <div class="field">
-                  <div class="control">
-                    <label class="label">Label</label>
-                    <input class="input" type="text" maxlength="80" v-model="tocItemModalConfig.form.name" />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="field is-horizontal">
-              <div class="columns field-body">
-
-                <div class="column field">
-                  <label class="label">Links From</label>
-
-                  <div class="control">
-                    <div class="select is-fullwidth">
-                      <!-- TODO: show list of existing indicators -->
-                      <select v-model="tocItemModalConfig.form.from_id">
-
-                        <option v-for="item in theoryOfChangeModel?.data?.graph" :key="item.id" :value="item.id">
-                          {{ item.name }}
-                        </option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="column field">
-                  <label class="label">Links To</label>
-
-                  <div class="control">
-                    <div class="select is-fullwidth">
-                      <!-- TODO: show list of existing indicators -->
-                      <select v-model="tocItemModalConfig.form.to_id">
-                        <option v-for="item in theoryOfChangeModel?.data?.graph" :key="item.id" :value="item.id">
-                          {{ item.name }}
-                        </option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="field is-horizontal">
-              <div class="columns field-body">
-                <!-- Column 1: SEM Level and Category -->
-                <div class="column field">
-                  <label class="label">Logic Model Category</label>
-                  <div class="control">
-                    <div class="select is-fullwidth">
-                      <select v-model="tocItemModalConfig.form.type_id">
-                        <option v-for="key in Object.keys(THEORY_OF_CHANGE_TYPES)" :key="key" :value="key">
-                          {{ THEORY_OF_CHANGE_TYPES[key] }}
-                        </option>
-
-                      </select>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Column 2: Audience -->
-                <div class="column field">
-                  <label class="label">SEM Level</label>
-
-                  <div class="control">
-                    <div class="select is-fullwidth">
-                      <select v-model="tocItemModalConfig.form.sem_id">
-                        <option v-for="key in Object.keys(SEMS)" :key="key" :value="key">
-                          {{ SEMS[key] }}
-                        </option>
-
-                      </select>
-                    </div>
-                  </div>
-                </div>
-
-              </div>
-            </div>
-
-            <div class="field">
-              <div class="control">
-                <label class="label">
-                  Validated
-                  <input type="checkbox" class="ml-3" v-model="tocItemModalConfig.form.is_validated" />
-                </label>
-              </div>
-            </div>
-
-
-            <div class="field">
-              <label class="label">Description</label>
-              <div class="control">
-                <textarea class="textarea" rows="4" columns="80" maxlength="999"
-                  v-model="tocItemModalConfig.form.description" />
-              </div>
-            </div>
-
-
-            <!-- TODO: implement saving of indicators -->
-            <div class="field">
-              <label class="label">Indicators</label>
-
-              <hr>
-
-              <div class="field is-grouped is-grouped-multiline">
-                <div class="control" v-for="item in theoryOfChangeModel.selectedItem?.indicators" :key="item.id">
-                  <div class="tags has-addons">
-                    <a class="tag is-link">{{ item.indicator.name }}</a>
-                    <a class="tag is-delete"></a>
-
-                    <!-- TODO: implement deleting of item -->
-                  </div>
-                </div>
-              </div>
-
-              <button class="button is-small" role="button"
-                @click.prevent="isPanelVisible = !isPanelVisible; showIndicatorModal = true; useSideNavStore().hide();">
-                <span class="icon is-small mr-1">
-                  <i class="fas fa-plus"></i>
-                </span>
-                Add Indicator
-              </button>
-            </div>
-
-          </form>
-        </section>
-
-        <footer class="modal-card-foot" style="display: block;">
+    <Modal v-model:visible="tocItemModalConfig.visible" title="Theory of Change Item" @ok="closeModal()">
+      <template #footer>
+        <footer style="display: block;">
           <div class="level">
             <div class="level-left">
               <div class="level-item">
@@ -918,9 +779,139 @@ const loadExampleToc = async (filename) => {
             </div>
           </div>
         </footer>
-      </div>
+      </template>
 
-    </div>
+      <form>
+        <div class="field">
+          <div class="field-body">
+            <div class="field">
+              <div class="control">
+                <label class="label">Label</label>
+                <input class="input" type="text" maxlength="80" v-model="tocItemModalConfig.form.name" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="field is-horizontal">
+          <div class="columns field-body">
+
+            <div class="column field">
+              <label class="label">Links From</label>
+
+              <div class="control">
+                <div class="select is-fullwidth">
+                  <!-- TODO: show list of existing indicators -->
+                  <select v-model="tocItemModalConfig.form.from_id">
+
+                    <option v-for="item in theoryOfChangeModel?.data?.graph" :key="item.id" :value="item.id">
+                      {{ item.name }}
+                    </option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="column field">
+              <label class="label">Links To</label>
+
+              <div class="control">
+                <div class="select is-fullwidth">
+                  <!-- TODO: show list of existing indicators -->
+                  <select v-model="tocItemModalConfig.form.to_id">
+                    <option v-for="item in theoryOfChangeModel?.data?.graph" :key="item.id" :value="item.id">
+                      {{ item.name }}
+                    </option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="field is-horizontal">
+          <div class="columns field-body">
+            <!-- Column 1: SEM Level and Category -->
+            <div class="column field">
+              <label class="label">Logic Model Category</label>
+              <div class="control">
+                <div class="select is-fullwidth">
+                  <select v-model="tocItemModalConfig.form.type_id">
+                    <option v-for="key in Object.keys(THEORY_OF_CHANGE_TYPES)" :key="key" :value="key">
+                      {{ THEORY_OF_CHANGE_TYPES[key] }}
+                    </option>
+
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Column 2: Audience -->
+            <div class="column field">
+              <label class="label">SEM Level</label>
+
+              <div class="control">
+                <div class="select is-fullwidth">
+                  <select v-model="tocItemModalConfig.form.sem_id">
+                    <option v-for="key in Object.keys(SEMS)" :key="key" :value="key">
+                      {{ SEMS[key] }}
+                    </option>
+
+                  </select>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="control">
+            <label class="label">
+              Validated
+              <input type="checkbox" class="ml-3" v-model="tocItemModalConfig.form.is_validated" />
+            </label>
+          </div>
+        </div>
+
+
+        <div class="field">
+          <label class="label">Description</label>
+          <div class="control">
+            <textarea class="textarea" rows="4" columns="80" maxlength="999"
+              v-model="tocItemModalConfig.form.description" />
+          </div>
+        </div>
+
+
+        <!-- TODO: implement saving of indicators -->
+        <div class="field">
+          <label class="label">Indicators</label>
+
+          <hr>
+
+          <div class="field is-grouped is-grouped-multiline">
+            <div class="control" v-for="item in theoryOfChangeModel.selectedItem?.indicators" :key="item.id">
+              <div class="tags has-addons">
+                <a class="tag is-link">{{ item.indicator.name }}</a>
+                <a class="tag is-delete"></a>
+
+                <!-- TODO: implement deleting of item -->
+              </div>
+            </div>
+          </div>
+
+          <button class="button is-small" role="button"
+            @click.prevent="isPanelVisible = !isPanelVisible; showIndicatorModal = true; useSideNavStore().hide();">
+            <span class="icon is-small mr-1">
+              <i class="fas fa-plus"></i>
+            </span>
+            Add Indicator
+          </button>
+        </div>
+
+      </form>
+    </Modal>
     <!-- ======== END: Theory of Change Modal ======= -->
 
 
