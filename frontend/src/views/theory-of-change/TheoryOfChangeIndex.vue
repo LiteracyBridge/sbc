@@ -12,7 +12,7 @@ import { TheoryOfChange, TheoryOfChangeItem } from "@/types";
 import GridLoader from "@/components/spinners/GridLoader.vue";
 import { useProjectDataStore } from "@/stores/projectData";
 import { useProjectStore } from '@/stores/projects';
-import { Button, Divider, Modal, Space, Switch } from "ant-design-vue";
+import { Button, Divider, Form, FormItem, Input, Modal, Space, Spin, Switch, Textarea } from "ant-design-vue";
 import TheoryOfChangeExamplesBrowser from "./TheoryOfChangeExamplesBrowser.vue";
 import { PlusCircleOutlined, RotateRightOutlined } from "@ant-design/icons-vue";
 
@@ -49,6 +49,50 @@ const theoryOfChangeModel = ref<{
     isLoading: false,
     isDeleting: false,
     form: new TheoryOfChangeItem()
+  }),
+  risksModalConfig = reactive({
+    visible: false,
+    isSaving: false,
+    form: {
+      assumptions: '',
+      risks: '',
+      toc_to_id: '',
+      toc_from_id: '',
+      name: '',
+    },
+    closeModal: () => {
+      risksModalConfig.visible = false;
+      risksModalConfig.form = {
+        assumptions: '',
+        risks: '',
+        toc_to_id: '',
+        toc_from_id: '',
+        name: ''
+      }
+    },
+    saveForm: async () => {
+      const tocId = theoryOfChangeModel.value?.data?.id;
+      if (tocId == null) {
+        return;
+      }
+
+      const data = {
+        name: risksModalConfig.form.name,
+        assumptions: risksModalConfig.form.assumptions,
+        risks: risksModalConfig.form.risks,
+        toc_to_id: risksModalConfig.form.toc_to_id,
+        toc_from_id: risksModalConfig.form.toc_from_id ?? undefined,
+      };
+
+      risksModalConfig.isSaving = true;
+      await ApiRequest.post(`theory-of-change/${tocId}/risks`, data)
+        .then(resp => {
+          diagram.parseGraph(resp);
+          risksModalConfig.closeModal();
+        }).finally(() => {
+          risksModalConfig.isSaving = false;
+        });
+    }
   }),
   config = reactive({
     isLoading: true,
@@ -363,7 +407,11 @@ onMounted(() => {
 
   window.edgeDoubleClick = function (fromNodeId, toNodeId) {
     const edgeIndex = diagram.edges.findIndex((e) => e.fromId == fromNodeId && e.toId == toNodeId);
+
     selectedEdge.value = diagram.edges[edgeIndex];
+    risksModalConfig.form.toc_from_id = fromNodeId;
+    risksModalConfig.form.toc_to_id = toNodeId;
+    risksModalConfig.visible = true;
   };
   window.nodeDoubleClick = function (nodeId) {
     fromNodeId.value = null;
@@ -559,7 +607,7 @@ function updateToCModel(resp: TheoryOfChange | TheoryOfChange[], itemId?: number
     <Divider></Divider>
 
     <!-- ======== START: Theory of Change Modal ======= -->
-    <Modal v-model:visible="tocItemModalConfig.visible" title="Theory of Change Item" @ok="closeModal()">
+    <Modal v-model:visible="tocItemModalConfig.visible" @ok="closeModal()">
       <template #footer>
         <footer style="display: block;">
           <div class="level">
@@ -726,8 +774,70 @@ function updateToCModel(resp: TheoryOfChange | TheoryOfChange[], itemId?: number
     <!-- ======== END: Theory of Change Modal ======= -->
 
 
-    <!-- TODO: add edge modal -->
+    <!-- ======== START: Risks Modal ======= -->
+    <Modal v-model:visible="risksModalConfig.visible" @ok="risksModalConfig.closeModal()">
 
+      <template #title>
+        <p>working </p>
+      </template>
+
+      <template #footer>
+        <footer style="display: block;">
+          <Button :disabled="risksModalConfig.isSaving" @click="risksModalConfig.closeModal()">Cancel</Button>
+
+          <Button :loading="risksModalConfig.isSaving" @click="risksModalConfig.saveForm()" type="primary">Save</Button>
+          <!-- <div class="level">
+            <div class="level-left">
+              <div class="level-item">
+                <button role="button" class="button is-small is-danger" @click="deleteItem()"
+                  v-if="tocItemModalConfig.isNew == false"
+                  :class="{ 'is-loading disabled': tocItemModalConfig.isDeleting }"
+                  :disabled="tocItemModalConfig.isDeleting">
+                  <span class="icon mr-1">
+                    <i class="fas fa-trash"></i>
+                  </span>
+                  Delete
+                </button>
+
+              </div>
+            </div>
+
+            <div class="level-right">
+              <div class="level-item">
+                <button class="button is-primary" :class="{ 'is-loading': tocItemModalConfig.isLoading }"
+                  :disabled="tocItemModalConfig.isLoading" role="button" @click.prevent="saveFormItem()">
+                  {{ tocItemModalConfig.isNew ? 'Save' : 'Update' }}
+                </button>
+
+                <button class="button" role="button" @click="closeModal">Cancel</button>
+              </div>
+            </div>
+          </div> -->
+        </footer>
+      </template>
+
+      <Form layout="vertical" :model="risksModalConfig.form">
+        <Spin :spinning="risksModalConfig.isSaving">
+          <FormItem label="Name">
+            <Input v-model:value="risksModalConfig.form.name" placeholder="" />
+          </FormItem>
+
+          <FormItem label="Assumptions">
+            <Textarea v-model:value="risksModalConfig.form.assumptions" placeholder="" />
+          </FormItem>
+
+          <FormItem label="Risks">
+            <Textarea v-model:value="risksModalConfig.form.risks" placeholder="" />
+          </FormItem>
+        </Spin>
+      </Form>
+
+
+    </Modal>
+    <!-- ======== END: Risks Modal ======= -->
+
+
+    <!-- TODO: add edge modal -->
 
 
     <div class="mt-4">

@@ -99,16 +99,10 @@ export class ApiRequest {
       myInit.queryStringParameters = params;
     }
 
-    return API.post(apiName, `/${path}/`, myInit)
-      .then((response) => {
-        return response.data as T[];
-        // Add your code here
-      })
-      .catch((error) => {
-        console.error(error.response);
-
-        return null;
-      });
+    return API.post(apiName, `/${path}/`, myInit).then((response) => {
+      return response.data as T[];
+      // Add your code here
+    });
   }
 
   static async put<T>(

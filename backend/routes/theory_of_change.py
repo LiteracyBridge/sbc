@@ -252,9 +252,9 @@ def get_indicator(db: Session = Depends(models.get_db)):
     return ApiResponse(data=data)
 
 
-@router.post("/risks", response_model=ApiResponse)
-def risks(dto: RisksDto, db: Session = Depends(models.get_db)):
-    risk = Risk(risks=dto.risks, mitigation=dto.mitigation, impact=dto.impact)
+@router.post("/{tocId}/risks", response_model=ApiResponse)
+def risks(tocId: int, dto: RisksDto, db: Session = Depends(models.get_db)):
+    risk = Risk()
 
     risk.name = dto.name
     risk.mitigation = dto.mitigation
@@ -266,9 +266,4 @@ def risks(dto: RisksDto, db: Session = Depends(models.get_db)):
     db.add(risk)
     db.commit()
 
-    toc_item = (
-        db.query(models.TheoryOfChangeItem)
-        .filter(models.TheoryOfChangeItem.id == dto.toc_from_id)
-        .first()
-    )
-    return get_toc_by_id(toc_item.theory_of_change_id, db)
+    return get_toc_by_id(tocId, db)
