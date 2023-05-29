@@ -5,11 +5,6 @@ import mermaidAPI from "/node_modules/mermaid/dist/mermaid.esm.mjs";
 
 import { onMounted, onUnmounted, reactive, ref, computed } from "vue";
 import { useSideNavStore } from "@/stores/sideNav";
-import axios from "axios";
-import { onClickOutside } from "@vueuse/core";
-import IndicatorBrowserPanel from "@/components/IndicatorBrowserPanel.vue";
-import { ApiRequest } from "@/apis/api";
-
 import { Collapse, CollapsePanel, Empty, Drawer, Space, Divider, TypographyTitle, Select } from "ant-design-vue";
 
 const emit = defineEmits<{
@@ -25,28 +20,14 @@ const closePanel = () => {
 };
 
 
-const svgUrl = ref("");
-const svgImgSrcUrl = ref("");
 const exampleDiagramContainer = ref(null);
-const addNodeLabel = ref("");
-const addNodeLogicModel = ref("");
 const fromNodeId = ref(null);
 const selectedNodeId = ref(null);
 const selectedEdge = ref(null);
 const selectedNode = ref(null);
-const deleteFromId = ref(null);
-const deleteToId = ref(null);
-const textToImport = ref(null);
 const logicModelView = ref(false);
-let tempNavHidden = false;
 const selectedExampleToC = ref(null);
 
-const incomingEdges = computed(() =>
-  diagram.edges.filter((e) => e.toId === selectedNodeId.value)
-);
-const outgoingEdges = computed(() =>
-  diagram.edges.filter((e) => e.fromId === selectedNodeId.value)
-);
 
 const mermaidConfig = {
   startOnLoad: true,
@@ -104,8 +85,6 @@ const drawDiagram = async function () {
       });
 
       node.addEventListener("dblclick", (event) => {
-        console.log("NODE");
-
         isSingleClick = false;
         clearTimeout(clickTimeout);
 
@@ -143,14 +122,10 @@ const drawDiagram = async function () {
 
 function nodesToSubgraph(nodes, category) {
   let result = "";
-  // console.log('nodesToSubgraph('+category+')');
-  // console.log(nodes);
   const arrayInCategory = Object.fromEntries(
     Object.entries(nodes).filter(([, node]) => node.logicModel === category)
   );
-  // console.log('type:'+typeof(arrayInCategory));
-  // console.log('arrayInCategory',arrayInCategory);
-  // console.log('arrayInCategory.length',arrayInCategory.length);
+
   if (Object.keys(arrayInCategory).length) {
     result += "subgraph " + (category == "" ? "no category" : category) + "\n";
     for (const key in arrayInCategory) {
@@ -158,7 +133,6 @@ function nodesToSubgraph(nodes, category) {
     }
     result += "end\n";
   }
-  // console.log('result:'+result);
   return result;
 }
 
@@ -238,24 +212,10 @@ const diagram = reactive({
       String.fromCharCode(this.nextNodeId.charCodeAt(0) + 1) + this.nextNodeId.charAt(1);
 
     drawDiagram();
-
-    // TODO: replace id with current project id
-    const id = 1
-    ApiRequest.post(`theory-of-change/${id}/item`, {
-      name: label,
-      type_id: 1,
-      from_id: null,
-      to_id: null,
-      sem_id: 1,
-      description: "dummy description"
-    })
-      .then(resp => console.log(resp))
-
     return node;
   },
 
   createEdge: function (fromNodeId, toNodeId, draw = true) {
-    console.log('createEdge:' + fromNodeId + toNodeId + draw);
     if (fromNodeId == toNodeId) return; // prevent double click from creating a useless self-edge
     const key = `${fromNodeId}|${toNodeId}`;
     if (!this.edgeSet.has(key)) {
@@ -287,7 +247,6 @@ const diagram = reactive({
     for (const edge of this.edges) {
       result += `${edge.fromId} -->|factors| ${edge.toId}\n`;
     }
-    console.log(result);
     return result;
   },
   toJSON: function (inputNodes, edges) {
@@ -303,7 +262,6 @@ onMounted(() => {
   window.addEventListener("keydown", escapeKeyHandler);
 
   window.edgeDoubleClick = function (fromNodeId, toNodeId) {
-    console.log(fromNodeId, toNodeId); //selectedEdgeIds
     const edgeIndex = diagram.edges.findIndex((e) => e.fromId == fromNodeId && e.toId == toNodeId);
     selectedEdge.value = diagram.edges[edgeIndex];
     if (useSideNavStore().visible) {
@@ -321,7 +279,6 @@ onMounted(() => {
     }
   };
   window.nodeClick = function (nodeId) {
-    console.log("callback: " + nodeId);
     if (fromNodeId.value) {
       diagram.createEdge(fromNodeId.value, nodeId);
       fromNodeId.value = null;
@@ -336,133 +293,18 @@ onUnmounted(() => {
   window.removeEventListener("keydown", escapeKeyHandler);
 });
 
-async function addNode() {
-  diagram.createNode(addNodeLabel.value, addNodeLogicModel.value);
-  addNodeLabel.value = "";
-  // now put focus on the input element with id 'addNodeLabel'
-  document.getElementById('addNodeLabel').focus();
-}
-
-function removeFromEdge(array, value) {
-  const index = array.findIndex((item) => item.toId === value);
-  if (index !== -1) {
-    array.splice(index, 1);
-  }
-  return array;
-}
-
-function removeToEdge(array, value) {
-  const index = array.findIndex((item) => item.fromId === value);
-  if (index !== -1) {
-    array.splice(index, 1);
-  }
-  return array;
-}
-
-function deleteConnection(fromId, toId) {
-  const index = diagram.edges.findIndex(
-    (edge) => edge.fromId === fromId && edge.toId === toId
-  );
-  diagram.edges.splice(index, 1);
-
-  const key = `${fromId}|${toId}`;
-  diagram.edgeSet.delete(key);
-
-  drawDiagram();
-  // reset select dropdown and disable the delete button
-  deleteFromId.value = deleteToId.value = null;
-  selectedEdge.value = null; // closes modal (needed if coming from edge Modal)
-}
-
-function deleteNode(nodeId) {
-  // remove edges
-  let i = 0;
-  while (diagram.edges[i]) {
-    console.log(i);
-    if (diagram.edges[i].fromId === nodeId || diagram.edges[i].toId === nodeId) {
-      diagram.edges.splice(i, 1);
-      i--;
-    }
-    i++;
-  }
-  delete diagram.nodes[nodeId];
-  selectedNodeId.value = null; // closes modal
-  drawDiagram();
-}
-
-async function getUploadUrl(svgElement) {
-  console.log(svgElement);
-  // URL for the AWS API Gateway that returns a pre-signed URL and filename for uploading to S3.
-  const s3uploaderUrl = "https://238xuirz88.execute-api.us-west-2.amazonaws.com/uploads";
-
-  // URL to download the file after it it uploaded
-  const downloadUrl = "https://sbc-upload.s3.us-west-2.amazonaws.com/";
-
-  // Pass the content type as a query parameter
-  const contentType = "image/svg+xml"; // or  'image/svg';
-
-  axios
-    .get(s3uploaderUrl, {
-      params: {
-        contentType: contentType,
-      },
-    })
-    .then((response) => {
-      console.log("Signed URL:", response.data.uploadURL);
-      console.log("Key:", response.data.Key);
-      svgUrl.value = downloadUrl + response.data.Key;
-
-      // This is the SVG file you want to upload. In a web app,
-      // you can get this from an input field, for example.
-      const svgBlob = new Blob([svgElement], { type: contentType });
-
-      // Perform the actual upload using the signed URL
-      return axios.put(response.data.uploadURL, svgBlob, {
-        headers: {
-          "Content-Type": contentType,
-        },
-      });
-    })
-    .then((response) => {
-      console.log("Upload successful!");
-      // now that it's uploaded, we can update the img tag's src attribute
-      svgImgSrcUrl.value = svgUrl.value;
-    })
-    .catch((error) => console.error("Error:", error));
-}
-
 function rotateDiagram() {
   diagram.rotate();
   drawDiagram();
 }
 
-
-const closeModal = () => {
-  selectedNodeId.value = null;
-  selectedEdge.value = null;
-  showIndicatorModal.value = false;
-
-  // if (tempNavHidden) {
-  //   tempNavHidden = false;
-  // }
-
-  useSideNavStore().show();
-  drawDiagram();
-};
-
-const modalRef = ref(null);
-const edgeModalRef = ref(null);
-
-onClickOutside(modalRef, closeModal);
-onClickOutside(edgeModalRef, closeModal);
-
-const escapeKeyHandler = (event) => {
+const escapeKeyHandler = (event: { key: string; keyCode: number; }) => {
   if (event.key === "Escape" || event.keyCode === 27) {
     closeModal();
   }
 };
 
-const loadExampleToc = async (filename) => {
+const loadExampleToc = async (filename: string) => {
   try {
     const response = await fetch(`/tocs/${filename}.json`);
 
@@ -470,8 +312,6 @@ const loadExampleToc = async (filename) => {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     const jsonText = await response.text();
-    console.log("here we go");
-    console.log(jsonText);
     diagram.parseJSON(jsonText);
   } catch (error) {
     console.error('Failed to fetch JSON data:', error);
