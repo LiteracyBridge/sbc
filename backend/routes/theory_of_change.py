@@ -52,6 +52,7 @@ def get_toc_by_id(id: int, db: Session = Depends(models.get_db)):
 
     return ApiResponse(data=[record])
 
+
 @router.post("/", response_model=ApiResponse)
 def create(dto: NewTheoryOfChangeDto, db: Session = Depends(models.get_db)):
     record = models.TheoryOfChange()
@@ -171,7 +172,6 @@ def update_item(
     return get_toc_by_id(id, db)
 
 
-
 @router.delete("/{id}/item/{itemId}", response_model=ApiResponse)
 def delete_item(
     id: int,
@@ -222,7 +222,9 @@ def add_item(id: int, item_id: int, db: Session = Depends(models.get_db)):
 
 
 @router.post("/{itemId}/indicators", response_model=ApiResponse)
-def update_indicators(itemId: int, dto: IndicatorDto, db: Session = Depends(models.get_db)):
+def update_indicators(
+    itemId: int, dto: IndicatorDto, db: Session = Depends(models.get_db)
+):
     print(dto.removed)
     # Remove all indicators
     db.query(models.TheoryOfChangeIndicator).filter(
@@ -251,7 +253,12 @@ def update_indicators(itemId: int, dto: IndicatorDto, db: Session = Depends(mode
         .all()
     )
 
-    return ApiResponse(data=indicators)
+    toc_item = (
+        db.query(models.TheoryOfChangeItem)
+        .filter(models.TheoryOfChangeItem.id == itemId)
+        .first()
+    )
+    return get_toc_by_id(toc_item.theory_of_change_id, db)
 
 
 @router.get("/", response_model=ApiResponse)

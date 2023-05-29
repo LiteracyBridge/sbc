@@ -82,7 +82,7 @@ export class ApiRequest {
     headers?: {
       [key: string]: any;
     }
-  ): Promise<T | null> {
+  ): Promise<T[] | null> {
     const apiName = "sbc-api";
     // const path = "/users";
     const myInit = {
@@ -101,7 +101,7 @@ export class ApiRequest {
 
     return API.post(apiName, `/${path}/`, myInit)
       .then((response) => {
-        return response.data as T;
+        return response.data as T[];
         // Add your code here
       })
       .catch((error) => {

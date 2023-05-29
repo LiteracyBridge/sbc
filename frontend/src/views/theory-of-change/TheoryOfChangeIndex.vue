@@ -657,6 +657,17 @@ function deleteItem() {
       tocItemModalConfig.value.isDeleting = false;
     });
 }
+
+function updateToCModel(resp: TheoryOfChange | TheoryOfChange[], itemId?: number) {
+  if (Array.isArray(resp)) {
+    resp = resp[0];
+  }
+
+  theoryOfChangeModel.value.data = resp;
+  if (itemId != null) {
+    theoryOfChangeModel.value.selectedItem = resp.graph.find(i => i.id == itemId);
+  }
+}
 //=== END: Theory of Change Item Modal functions
 
 
@@ -698,7 +709,8 @@ const loadExampleToc = async (filename) => {
 
     <IndicatorBrowserPanel :is-visible="isPanelVisible"
       @is-closed="isPanelVisible = false; showIndicatorModal = true; useSideNavStore().hide();"
-      :toc-item="theoryOfChangeModel.selectedItem">
+      :toc-item="theoryOfChangeModel.selectedItem"
+      @is-saved="updateToCModel($event, theoryOfChangeModel.selectedItem?.id)">
     </IndicatorBrowserPanel>
 
 

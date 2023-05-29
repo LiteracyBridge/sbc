@@ -5,12 +5,14 @@ import { AccordionList, AccordionItem } from "vue3-rich-accordion";
 
 import { useProjectStore } from "@/stores/projects";
 import { ApiRequest } from "@/apis/api";
-import { type IndicatorGroup, type IndicatorType, TheoryOfChangeItem } from "@/types";
+import { type IndicatorGroup, type IndicatorType, TheoryOfChangeItem, TheoryOfChange } from "@/types";
 import { Empty } from "ant-design-vue";
 
-const projectStore = useProjectStore();
 
-const emit = defineEmits(['isClosed']);
+const emit = defineEmits<{
+  (e: 'isClosed', status: boolean): boolean
+  (e: 'isSaved', resp: TheoryOfChange | TheoryOfChange[]): TheoryOfChange | TheoryOfChange[]
+}>()
 
 const props = defineProps<{ tocItem: TheoryOfChangeItem, isVisible: boolean }>();
 
@@ -19,7 +21,7 @@ const selectedIndicatorType = ref<{ id: number, name: string }>(),
   isFetchingIndicators = ref(false),
   indicatorTypes = ref<IndicatorType[]>([]),
   indicatorsList = ref<IndicatorGroup[]>([]),
-  config = reactive<{
+  config = ref<{
     isLoading: boolean,
     indicators: Record<string, boolean>,
   }>({
@@ -54,13 +56,13 @@ const groupIndicators = computed(() => {
   return indicatorsList.value.filter(i => i.group_id == selectedGroup.value?.id);
 })
 
-const tocIte = computed(() => {
-  if (selectedGroup.value?.id == null) {
-    return [];
-  }
+// const tocIte = computed(() => {
+//   if (selectedGroup.value?.id == null) {
+//     return [];
+//   }
 
-  return indicatorsList.value.filter(i => i.group_id == selectedGroup.value?.id);
-})
+//   return indicatorsList.value.filter(i => i.group_id == selectedGroup.value?.id);
+// })
 
 function onIndicatorSelected(item: any, _: any) {
   // const temp = indicatorsAdded.value;
@@ -70,28 +72,31 @@ function onIndicatorSelected(item: any, _: any) {
   // console.log(temp)
 }
 
-const closeButton = () => {
+const closePanel = () => {
+  config.value.indicators = {};
   // isOpened.value = false;
 
   console.error("emitted")
   emit("isClosed", true);
 };
 
-const tocItemHasIndicators = computed<boolean>(() => {
-  return props.tocItem.indicators.length > 0;
-})
+// const tocItemHasIndicators = computed<boolean>(() => {
+//   return props.tocItem.indicators.length > 0;
+// })
 
-const buildIndicatorsTree = (indicators?: any[], configIndicators?: Record<string, boolean>) => {
-  const tree: Record<string, boolean> = configIndicators || config.indicators;
+const buildIndicatorsTree = (indicators: any[]) => {
+  const tree: Record<string, boolean> = {};
 
-  for (const item of indicators || props.tocItem.indicators) {
+  for (const item of indicators) {
     tree[`${item.indicator_id}`] = true
   }
 
-  config.indicators = tree;
+  config.value.indicators = tree;
 }
 
 onMounted(() => {
+  buildIndicatorsTree(props.tocItem?.indicators ?? []);
+
   // selectedGroup.value = getMainIndicators.value[0];
 
   isFetchingIndicators.value = true;
@@ -113,17 +118,19 @@ onMounted(() => {
         }
       })
   ]).then((resp) => {
-    buildIndicatorsTree()
+    buildIndicatorsTree(props.tocItem?.indicators ?? [])
   })
     .finally(() => isFetchingIndicators.value = false);
 })
 
-watch(config, (newConfig, _oldConfig) => {
-  buildIndicatorsTree(undefined, newConfig.indicators)
-}, { deep: true });
+// watch(config, (newConfig, _oldConfig) => {
+//   buildIndicatorsTree(newConfig.indicators)
+// }, { deep: true });
 
-watch(props.tocItem, (newVal, old) => {
-  buildIndicatorsTree(newVal.indicators)
+watch(props, (newProp) => {
+  buildIndicatorsTree(newProp.tocItem.indicators)
+
+  // TODO: auto select indicator type & group
 }, { deep: true });
 
 // const removeIndicator = (indicatorId: number) => {
@@ -144,14 +151,14 @@ watch(props.tocItem, (newVal, old) => {
 
 
 const saveIndicators = async () => {
-  config.isLoading = true;
+  config.value.isLoading = true;
 
-  const removed = Object.keys(config.indicators).filter(i => {
-    return !config.indicators[i]
+  const removed = Object.keys(config.value.indicators).filter(i => {
+    return !config.value.indicators[i]
   })
 
-  const added = Object.keys(config.indicators).filter(i => {
-    return config.indicators[i]
+  const added = Object.keys(config.value.indicators).filter(i => {
+    return config.value.indicators[i]
   }).filter(i => props.tocItem.indicators.find(ind => ind.indicator_id == +i) == null)
   // Filter out duplicate indicators
   // const uniqueAdded = props.tocItem.indicators.fi
@@ -159,17 +166,16 @@ const saveIndicators = async () => {
   console.log(added, removed)
   // TODO: if item is not new, then update it
 
-  await ApiRequest.post(`theory-of-change/${props.tocItem.id}/indicators`, {
+  await ApiRequest.post<TheoryOfChange>(`theory-of-change/${props.tocItem.id}/indicators`, {
     added: added,
     removed: removed,
   }).then(resp => {
     console.log(resp)
 
-    // emit("onItemAdded", resp);
-    // closeModal();
-    emit("isClosed", true);
+    emit("isSaved", resp);
+    closePanel();
   }).finally(() => {
-    config.isLoading = false;
+    config.value.isLoading = false;
   });
 }
 
@@ -229,7 +235,7 @@ const saveIndicators = async () => {
                 Save
               </button>
 
-              <button class="button mr-2" @click.prevent="closeButton">
+              <button class="button mr-2" @click.prevent="closePanel">
                 Cancel
               </button>
             </div>
