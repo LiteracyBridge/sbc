@@ -5,7 +5,7 @@ import mermaidAPI from "/node_modules/mermaid/dist/mermaid.esm.mjs";
 
 import { onMounted, onUnmounted, reactive, ref, computed } from "vue";
 import { useSideNavStore } from "@/stores/sideNav";
-import { Collapse, CollapsePanel, Empty, Drawer, Space, Divider, TypographyTitle, Select } from "ant-design-vue";
+import { Drawer, Select } from "ant-design-vue";
 
 const emit = defineEmits<{
   (e: 'isClosed', status: boolean): boolean
@@ -53,7 +53,7 @@ const mermaidConfig = {
 
 
 const drawDiagram = async function () {
-  const { svg } = await mermaidAPI.render("graphDiv", diagram.toMermaid());
+  const { svg } = await mermaidAPI.render("example-graph-div", diagram.toMermaid());
   if (exampleDiagramContainer.value) {
     exampleDiagramContainer.value.innerHTML = "";
     const svgWrapper = document.createElement("div");

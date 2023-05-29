@@ -69,7 +69,7 @@ const deleteFromId = ref(null);
 const deleteToId = ref(null);
 const textToImport = ref(null);
 const logicModelView = ref(false);
-let tempNavHidden = false;
+// let tempNavHidden = false;
 const selectedExampleToC = ref(null);
 
 const incomingEdges = computed(() =>
@@ -114,7 +114,7 @@ const drawDiagram = async function () {
     // Add click event listeners to the nodes manually
     const nodes = diagramContainer.value.querySelectorAll(".node");
     nodes.forEach((node) => {
-      let clickTimeout;
+      let clickTimeout: any;
       let isSingleClick = true;
 
       node.addEventListener("click", (event) => {
@@ -173,11 +173,13 @@ const drawDiagram = async function () {
 };
 
 function nodesToSubgraph(nodes, category) {
+  category = category.toLowerCase();
+  console.error(nodes, category)
   let result = "";
   // console.log('nodesToSubgraph('+category+')');
   // console.log(nodes);
   const arrayInCategory = Object.fromEntries(
-    Object.entries(nodes).filter(([, node]) => node.logicModel === category)
+    Object.entries(nodes).filter(([, node]) => node.logicModel.toLowerCase() == category)
   );
   // console.log('type:'+typeof(arrayInCategory));
   // console.log('arrayInCategory',arrayInCategory);
@@ -303,7 +305,6 @@ const diagram = reactive({
     }[] = [];
 
     for (const r of data.graph) {
-      // data.graph.flatMap(r => {
       edges.push({
         fromId: r.id,
         toId: r.to_id,
@@ -319,7 +320,6 @@ const diagram = reactive({
           risks: r.risks
         });
       }
-      // });
     }
 
     console.log(edges);
@@ -337,19 +337,6 @@ const diagram = reactive({
       String.fromCharCode(this.nextNodeId.charCodeAt(0) + 1) + this.nextNodeId.charAt(1);
 
     drawDiagram();
-
-    // TODO: replace id with current project id
-    const id = 1
-    ApiRequest.post(`theory-of-change/${id}/item`, {
-      name: label,
-      type_id: 1,
-      from_id: null,
-      to_id: null,
-      sem_id: 1,
-      description: "dummy description"
-    })
-      .then(resp => console.log(resp))
-
     return node;
   },
 
@@ -427,11 +414,6 @@ onMounted(() => {
     console.log(fromNodeId, toNodeId); //selectedEdgeIds
     const edgeIndex = diagram.edges.findIndex((e) => e.fromId == fromNodeId && e.toId == toNodeId);
     selectedEdge.value = diagram.edges[edgeIndex];
-
-    if (useSideNavStore().visible) {
-      useSideNavStore().hide();
-      tempNavHidden = true;
-    }
   };
   window.nodeDoubleClick = function (nodeId) {
     fromNodeId.value = null;
@@ -448,11 +430,6 @@ onMounted(() => {
       tocItemModalConfig.value.visible = true;
     }
 
-
-    if (useSideNavStore().visible) {
-      useSideNavStore().hide();
-      tempNavHidden = true;
-    }
   };
   window.nodeClick = function (nodeId) {
     console.log("callback: " + nodeId);
@@ -472,9 +449,6 @@ onUnmounted(() => {
 
 async function addNode() {
   diagram.createNode(addNodeLabel.value, addNodeLogicModel.value);
-  addNodeLabel.value = "";
-  // now put focus on the input element with id 'addNodeLabel'
-  document.getElementById('addNodeLabel').focus();
 }
 
 function removeFromEdge(array, value) {
@@ -513,7 +487,7 @@ function deleteNode(nodeId) {
   let i = 0;
   while (diagram.edges[i]) {
     console.log(i);
-    if (diagram.edges[i].fromId === nodeId || diagram.edges[i].toId === nodeId) {
+    if (diagram.edges[i].fromId == nodeId || diagram.edges[i].toId == nodeId) {
       diagram.edges.splice(i, 1);
       i--;
     }
@@ -589,7 +563,7 @@ const newTocItem = () => {
   useSideNavStore().hide();
 }
 
-const closeModal = () => {
+const closeModal = (redraw = true) => {
   selectedNodeId.value = null;
   selectedEdge.value = null;
   showIndicatorModal.value = false;
@@ -597,8 +571,10 @@ const closeModal = () => {
   tocItemModalConfig.value.visible = false;
   tocItemModalConfig.value.form = new TheoryOfChangeItem();
 
-  useSideNavStore().show();
-  drawDiagram();
+  // useSideNavStore().show();
+  if (redraw) {
+    drawDiagram();
+  }
 };
 
 const saveFormItem = async () => {
@@ -622,7 +598,7 @@ const saveFormItem = async () => {
     await ApiRequest.put(`theory-of-change/${tocId}/item/${tocItemModalConfig.value.itemId}`, data)
       .then(resp => {
         diagram.parseGraph(resp);
-        closeModal();
+        closeModal(false);
       }).finally(() => {
         tocItemModalConfig.value.isLoading = false;
       });
@@ -631,7 +607,7 @@ const saveFormItem = async () => {
     await ApiRequest.post(`theory-of-change/${tocId}/item`, data).then(resp => {
       diagram.parseGraph(resp);
 
-      closeModal();
+      closeModal(false);
     }).finally(() => {
       tocItemModalConfig.value.isLoading = false;
     });
@@ -639,19 +615,15 @@ const saveFormItem = async () => {
 
 }
 
-
 function deleteItem() {
   tocItemModalConfig.value.isDeleting = true;
 
   const tocId = theoryOfChangeModel.value.data.id;
   ApiRequest.delete(`theory-of-change/${tocId}/item/${tocItemModalConfig.value.itemId}`)
-    .then(resp => {
-      mermaidAPI.initialize(mermaidConfig);
-      console.log(resp)
-      // deleteNode(selectedNodeId.value);
-      diagram.parseGraph(resp);
+    .then(_ => {
+      deleteNode(selectedNodeId.value);
 
-      closeModal();
+      closeModal(false);
     }).finally(() => {
       tocItemModalConfig.value.isDeleting = false;
     });
@@ -715,7 +687,8 @@ const loadExampleToc = async (filename) => {
 
     <!-- Theory of Change examples browser panel -->
     <TheoryOfChangeExamplesBrowser :is-visible="config.isExamplePanelVisible"
-      @is-closed="config.isExamplePanelVisible = false"> </TheoryOfChangeExamplesBrowser>
+      @is-closed="config.isExamplePanelVisible = false" v-if="config.isExamplePanelVisible">
+    </TheoryOfChangeExamplesBrowser>
 
 
     <div class="level">
