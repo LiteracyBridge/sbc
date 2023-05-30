@@ -44,6 +44,7 @@ export class Risk {
   name: string = "";
   assumptions: string = "";
   mitigation: string = "";
+  risks: string = "";
 
   project_id?: number = null;
   toc_from_id?: number = null;

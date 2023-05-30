@@ -50,46 +50,6 @@ const theoryOfChangeModel = ref<{
     isDeleting: false,
     form: new TheoryOfChangeItem()
   }),
-  risksModalConfig = reactive({
-    visible: false,
-    isSaving: false,
-    form: new Risk(),
-    showModal: () => {
-      if(selectedEdge?.value == null){
-        return
-      }
-
-      const existingRisk = {}
-      // const from_edge = this.nodes[edge.fromId];
-    },
-    closeModal: () => {
-      risksModalConfig.visible = false;
-      risksModalConfig.form = new Risk();
-    },
-    saveForm: async () => {
-      const tocId = theoryOfChangeModel.value?.data?.id;
-      if (tocId == null) {
-        return;
-      }
-
-      const data = {
-        name: risksModalConfig.form.name,
-        assumptions: risksModalConfig.form.assumptions,
-        risks: risksModalConfig.form.risks,
-        toc_to_id: risksModalConfig.form.toc_to_id,
-        toc_from_id: risksModalConfig.form.toc_from_id ?? undefined,
-      };
-
-      risksModalConfig.isSaving = true;
-      await ApiRequest.post(`theory-of-change/${tocId}/risks`, data)
-        .then(resp => {
-          diagram.parseGraph(resp);
-          risksModalConfig.closeModal();
-        }).finally(() => {
-          risksModalConfig.isSaving = false;
-        });
-    }
-  }),
   config = reactive({
     isLoading: true,
     isExamplePanelVisible: false,
@@ -407,7 +367,7 @@ onMounted(() => {
     selectedEdge.value = diagram.edges[edgeIndex];
     risksModalConfig.form.toc_from_id = fromNodeId;
     risksModalConfig.form.toc_to_id = toNodeId;
-    risksModalConfig.visible = true;
+    risksModalConfig.showModal()
   };
   window.nodeDoubleClick = function (nodeId) {
     fromNodeId.value = null;
@@ -548,6 +508,55 @@ function updateToCModel(resp: TheoryOfChange | TheoryOfChange[], itemId?: number
 }
 //=== END: Theory of Change Item Modal functions
 
+
+// === START: Risks Modal functions
+const risksModalConfig = reactive({
+  visible: false,
+  isSaving: false,
+  form: new Risk(),
+  showModal: () => {
+    const edge = selectedEdge?.value;
+    if (edge == null) {
+      return
+    }
+    const toc = theoryOfChangeModel.value?.data
+    if (toc == null) {
+      return;
+    }
+
+    const existingRisk = toc.risks.find(i => i.toc_from_id == edge.fromId && i.toc_to_id == edge.toId)
+    risksModalConfig.form = existingRisk ?? new Risk();
+    risksModalConfig.visible = true;
+  },
+  closeModal: () => {
+    risksModalConfig.visible = false;
+    risksModalConfig.form = new Risk();
+  },
+  saveForm: async () => {
+    const tocId = theoryOfChangeModel.value?.data?.id;
+    if (tocId == null) {
+      return;
+    }
+
+    const data = {
+      name: risksModalConfig.form.name,
+      assumptions: risksModalConfig.form.assumptions,
+      risks: risksModalConfig.form.risks,
+      toc_to_id: risksModalConfig.form.toc_to_id,
+      toc_from_id: risksModalConfig.form.toc_from_id ?? undefined,
+    };
+
+    risksModalConfig.isSaving = true;
+    await ApiRequest.post(`theory-of-change/${tocId}/risks`, data)
+      .then(resp => {
+        diagram.parseGraph(resp);
+        risksModalConfig.closeModal();
+      }).finally(() => {
+        risksModalConfig.isSaving = false;
+      });
+  }
+});
+// === END: Risks Modal functions
 </script>
 
 <template>
