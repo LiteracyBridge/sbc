@@ -32,10 +32,10 @@ const selectedExampleToC = ref(null);
 const mermaidConfig = {
   startOnLoad: true,
   securityLevel: "loose",
-  flowchart: {
-    htmlLabels: false,
-    curve: "basis",
-  },
+  // flowchart: {
+  //   htmlLabels: false,
+  //   curve: "basis",
+  // },
   theme: "default",
   themeVariables: {
     primaryColor: "#304148",

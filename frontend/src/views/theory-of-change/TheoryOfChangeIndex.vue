@@ -68,10 +68,6 @@ const logicModelView = ref(false);
 const mermaidConfig = {
   startOnLoad: true,
   securityLevel: "loose",
-  flowchart: {
-    htmlLabels: false,
-    curve: "basis",
-  },
   theme: "default",
   themeVariables: {
     primaryColor: "#304148",
