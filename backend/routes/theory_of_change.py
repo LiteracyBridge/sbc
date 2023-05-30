@@ -47,6 +47,7 @@ def get_toc_by_id(id: int, db: Session = Depends(models.get_db)):
         db.query(models.TheoryOfChange)
         .filter(models.TheoryOfChange.id == id)
         .options(
+            subqueryload(models.TheoryOfChange.risks),
             subqueryload(models.TheoryOfChange.graph)
             .subqueryload(TheoryOfChangeItem.indicators)
             .subqueryload(TheoryOfChangeIndicator.indicator),
@@ -262,6 +263,7 @@ def risks(tocId: int, dto: RisksDto, db: Session = Depends(models.get_db)):
     risk.risks = dto.risks
     risk.toc_from_id = dto.toc_from_id
     risk.toc_to_id = dto.toc_to_id
+    risk.theory_of_change_id = tocId
 
     db.add(risk)
     db.commit()

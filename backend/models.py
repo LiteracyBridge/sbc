@@ -125,6 +125,7 @@ class TheoryOfChange(Base):
     graph = relationship(
         "TheoryOfChangeItem", back_populates="theory_of_change", load_on_pending=True
     )
+    risks = relationship("Risk", load_on_pending=True)
 
 
 class TheoryOfChangeItem(Base):
@@ -203,6 +204,9 @@ class Risk(Base):
     project_id: Mapped[int] = mapped_column(ForeignKey("projects.id"), nullable=True)
     driver_id: Mapped[int] = mapped_column(
         ForeignKey("drivers_in_prj.id"), nullable=True
+    )
+    theory_of_change_id: Mapped[int] = mapped_column(
+        ForeignKey("theories_of_change.id"), nullable=True
     )
     toc_from_id: Mapped[int] = mapped_column(
         ForeignKey("theories_of_change_item.id"), nullable=True

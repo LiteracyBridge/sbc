@@ -8,13 +8,13 @@ import axios from "axios";
 import { onClickOutside } from "@vueuse/core";
 import IndicatorBrowserPanel from "./IndicatorBrowserPanel.vue";
 import { ApiRequest } from "@/apis/api";
-import { TheoryOfChange, TheoryOfChangeItem } from "@/types";
+import { Risk, TheoryOfChange, TheoryOfChangeItem } from "@/types";
 import GridLoader from "@/components/spinners/GridLoader.vue";
 import { useProjectDataStore } from "@/stores/projectData";
 import { useProjectStore } from '@/stores/projects';
 import { Button, Divider, Form, FormItem, Input, Modal, Space, Spin, Switch, Textarea } from "ant-design-vue";
 import TheoryOfChangeExamplesBrowser from "./TheoryOfChangeExamplesBrowser.vue";
-import { PlusCircleOutlined, RotateRightOutlined } from "@ant-design/icons-vue";
+import { PlusCircleOutlined, RotateRightOutlined, SwapLeftOutlined, SwapOutlined } from "@ant-design/icons-vue";
 
 const THEORY_OF_CHANGE_TYPES: Record<string, string> = {
   "1": "Input",
@@ -53,22 +53,18 @@ const theoryOfChangeModel = ref<{
   risksModalConfig = reactive({
     visible: false,
     isSaving: false,
-    form: {
-      assumptions: '',
-      risks: '',
-      toc_to_id: '',
-      toc_from_id: '',
-      name: '',
+    form: new Risk(),
+    showModal: () => {
+      if(selectedEdge?.value == null){
+        return
+      }
+
+      const existingRisk = {}
+      // const from_edge = this.nodes[edge.fromId];
     },
     closeModal: () => {
       risksModalConfig.visible = false;
-      risksModalConfig.form = {
-        assumptions: '',
-        risks: '',
-        toc_to_id: '',
-        toc_from_id: '',
-        name: ''
-      }
+      risksModalConfig.form = new Risk();
     },
     saveForm: async () => {
       const tocId = theoryOfChangeModel.value?.data?.id;
@@ -778,7 +774,11 @@ function updateToCModel(resp: TheoryOfChange | TheoryOfChange[], itemId?: number
     <Modal v-model:visible="risksModalConfig.visible" @ok="risksModalConfig.closeModal()">
 
       <template #title>
-        <p>working </p>
+        <span>
+          {{ diagram.edgeLabel(selectedEdge, 'from') }}
+          <SwapOutlined />
+          {{ diagram.edgeLabel(selectedEdge, 'to') }}
+        </span>
       </template>
 
       <template #footer>
@@ -786,33 +786,6 @@ function updateToCModel(resp: TheoryOfChange | TheoryOfChange[], itemId?: number
           <Button :disabled="risksModalConfig.isSaving" @click="risksModalConfig.closeModal()">Cancel</Button>
 
           <Button :loading="risksModalConfig.isSaving" @click="risksModalConfig.saveForm()" type="primary">Save</Button>
-          <!-- <div class="level">
-            <div class="level-left">
-              <div class="level-item">
-                <button role="button" class="button is-small is-danger" @click="deleteItem()"
-                  v-if="tocItemModalConfig.isNew == false"
-                  :class="{ 'is-loading disabled': tocItemModalConfig.isDeleting }"
-                  :disabled="tocItemModalConfig.isDeleting">
-                  <span class="icon mr-1">
-                    <i class="fas fa-trash"></i>
-                  </span>
-                  Delete
-                </button>
-
-              </div>
-            </div>
-
-            <div class="level-right">
-              <div class="level-item">
-                <button class="button is-primary" :class="{ 'is-loading': tocItemModalConfig.isLoading }"
-                  :disabled="tocItemModalConfig.isLoading" role="button" @click.prevent="saveFormItem()">
-                  {{ tocItemModalConfig.isNew ? 'Save' : 'Update' }}
-                </button>
-
-                <button class="button" role="button" @click="closeModal">Cancel</button>
-              </div>
-            </div>
-          </div> -->
         </footer>
       </template>
 
@@ -831,8 +804,6 @@ function updateToCModel(resp: TheoryOfChange | TheoryOfChange[], itemId?: number
           </FormItem>
         </Spin>
       </Form>
-
-
     </Modal>
     <!-- ======== END: Risks Modal ======= -->
 

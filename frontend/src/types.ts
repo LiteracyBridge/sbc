@@ -39,8 +39,21 @@ export class TheoryOfChangeItem {
   }> = [];
 }
 
+export class Risk {
+  id: number = undefined;
+  name: string = "";
+  assumptions: string = "";
+  mitigation: string = "";
+
+  project_id?: number = null;
+  toc_from_id?: number = null;
+  toc_to_id?: number = null;
+  theory_of_change_id?: number = null;
+}
+
 export class TheoryOfChange {
   graph: Array<TheoryOfChangeItem> = [];
   id: string = null;
+  risks: Risk[] = [];
   // indicators: any[] = [];
 }
