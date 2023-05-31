@@ -33,22 +33,26 @@ const config = ref({
 
 const columns = [
     {
+        title: 'Indicator ID',
         name: 'Indicator ID',
         dataIndex: 'indicatorId',
         key: 'indicatorId',
     },
     {
+        title: 'Indicator',
         name: 'Indicator',
         dataIndex: 'indicator',
         key: 'indicator',
     },
     {
         title: 'Related Results',
+        name: 'Related Results',
         dataIndex: 'relatedResults',
         key: 'relatedResults',
     },
     {
         title: 'Date Collection Method',
+        name: 'Date Collection Method',
         dataIndex: 'dataCollectionMethod',
         key: 'dataCollectionMethod',
     },
@@ -112,7 +116,7 @@ const data = [
 <template>
     <Tabs v-model:activeKey="config.activeTab" centered class="my-3 mx-3">
         <TabPane key="1" tab="Indicators Monitoring">
-            <Table :columns="columns" :data-source="data" bordered>
+            <Table :columns="columns" :data-source="data" bordered >
                 <template #title>
                     <div class="level">
                         <div class="level-left">
@@ -131,11 +135,18 @@ const data = [
                 </template>
 
                 <template #bodyCell="{ column, record }">
-                    <template v-if="column.key === 'name'">
-                        <a>
-                            {{ record.name }}
-                        </a>
+                    <template v-if="column.key === 'indicatorId'">
+                        {{ record.name }}
                     </template>
+
+                    <template v-if="column.key === 'indicator'">
+                        {{ record.name }}
+                    </template>
+
+                    <template v-if="column.key === 'relatedResults'">
+                        {{ record.name }}
+                    </template>
+
                     <template v-else-if="column.key === 'tags'">
                         <span>
                             <Tag v-for="tag in record.tags" :key="tag"
