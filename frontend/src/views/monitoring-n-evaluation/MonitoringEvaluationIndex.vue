@@ -2,7 +2,7 @@
 // TODO: add button for viewing progress in a modal
 // TODO: add button for capturing progress in a modal
 
-import { SmileOutlined, DownOutlined, PlusCircleOutlined } from '@ant-design/icons-vue';
+import { SmileOutlined, DownOutlined, PlusCircleOutlined, SettingOutlined } from '@ant-design/icons-vue';
 import { Tag, Table, Divider, Button, Space, Typography, ButtonGroup, Modal, DescriptionsItem, Descriptions, Form, FormItem, Input, Select, SelectOption, Tabs, TabPane, Textarea } from 'ant-design-vue';
 import { ref } from 'vue';
 
@@ -11,6 +11,15 @@ const config = ref({
     evaluationForm: {
         evaluation_strategy: '',
         feedback_strategy: '',
+    },
+    settingsModal: {
+        visible: false,
+        onClose: () => {
+            config.value.settingsModal.visible = false;
+        },
+        form: {
+            evaluation_period: '',
+        }
     },
     evaluationModal: {
         visible: false,
@@ -116,7 +125,7 @@ const data = [
 <template>
     <Tabs v-model:activeKey="config.activeTab" centered class="my-3 mx-3">
         <TabPane key="1" tab="Indicators Monitoring">
-            <Table :columns="columns" :data-source="data" bordered >
+            <Table :columns="columns" :data-source="data" bordered>
                 <template #title>
                     <div class="level">
                         <div class="level-left">
@@ -124,12 +133,21 @@ const data = [
                         </div>
 
                         <div class="level-right">
-                            <Button type="primary">
-                                <template #icon>
-                                    <PlusCircleOutlined />
-                                </template>
-                                Add Indicator
-                            </Button>
+                            <Space>
+                                <Button type="primary">
+                                    <template #icon>
+                                        <PlusCircleOutlined />
+                                    </template>
+                                    Add Indicator
+                                </Button>
+
+                                <Button type="ghost" @click="config.settingsModal.visible = true">
+                                    <template #icon>
+                                        <SettingOutlined />
+                                    </template>
+                                    Settings
+                                </Button>
+                            </Space>
                         </div>
                     </div>
                 </template>
@@ -247,6 +265,23 @@ const data = [
 
             <FormItem label="Value" name="value" :rules="[{ required: true, message: 'Please input your username!' }]">
                 <Input v-model:value="config.progressTrackingModal.form.value" />
+            </FormItem>
+        </Form>
+    </Modal>
+
+
+    <Modal v-model:visible="config.settingsModal.visible" title="Record Progress" @ok="config.settingsModal.onClose()">
+
+        <Form layout="vertical" name="settings" :model="config.settingsModal.form">
+
+            <!-- TODO: Make this one time configuration -->
+            <FormItem name="period" label="Select Evaluation Period" has-feedback
+                :rules="[{ required: true, message: 'Please select an evaluation period!' }]">
+                <Select v-model:value="config.settingsModal.form.evaluation_period"
+                    placeholder="Please select evaluation period" :show-search="true">
+                    <SelectOption value="weekly">Weekly</SelectOption>
+                    <SelectOption value="monthly">Monthly</SelectOption>
+                </Select>
             </FormItem>
         </Form>
 
