@@ -25,18 +25,18 @@ const isExactActive = (item) => {
 
 const projectStore = useProjectStore();
 const menuItems = [
-  { label: 'Project Info', name: 'forms', params: { module: 'basic' }},
-  { label: 'Background and context', name: 'forms', params: { module: 'background' }},
-  { label: 'Project objectives', name: 'forms', params: { module: 'objectives' }},
-  { label: 'Audiences', name: 'forms', params: { module: 'audiences' }},
+  { label: 'Project Info', name: 'forms', params: { module: 'basic' } },
+  { label: 'Background and context', name: 'forms', params: { module: 'background' } },
+  { label: 'Project objectives', name: 'forms', params: { module: 'objectives' } },
+  { label: 'Audiences', name: 'forms', params: { module: 'audiences' } },
   { label: 'Behavioral Drivers', path: '/drivers' },
-  { label: 'Approaches', path: '/interventions'},
-  { label: 'Activities', path: '/activities'},
+  { label: 'Approaches', path: '/interventions' },
+  { label: 'Activities', path: '/activities' },
   { label: 'Theory of Change', path: '/toc' },
-  { label: 'Communications and Messaging', name: 'forms', params: { module: 'communications' }},
-  { label: 'Monitoring and Evaluation', name: 'forms', params: { module: 'monitoring' }},
-  { label: 'Project Management', name: 'forms', params: { module: 'prjmgmt' }},
-  { label: 'Project Documents', name: 'forms', params: { module: 'prjdocs' }},
+  { label: 'Communications and Messaging', name: 'forms', params: { module: 'communications' } },
+  { label: 'Monitoring and Evaluation', path: '/monitoring-and-evaluation', params: { module: 'monitoring' } },
+  { label: 'Project Management', name: 'forms', params: { module: 'prjmgmt' } },
+  { label: 'Project Documents', name: 'forms', params: { module: 'prjdocs' } },
 ];
 
 const projectSelected = computed(() => projectStore.prj_id !== null && projectStore.prj_id !== undefined);
@@ -87,30 +87,22 @@ watch(projectSelected, (newVal) => {
 
 <template>
   <div>
-    <aside
-      class="menu is-hidden-mobile"
-      v-show="showSideNav"
-    >
+    <aside class="menu is-hidden-mobile" v-show="showSideNav">
       <p class="menu-label">
-        {{projectStore.projectName}}
+        {{ projectStore.projectName }}
       </p>
       <ul class="menu-list">
         <li v-for="(item, index) in menuItems" :key="index">
-          <router-link
-            v-if="item.name && !(isActive(item) && isExactActive(item))"
-            :to="{ name: item.name, params: { module: item.params.module }}"
-          >
-            {{item.label}}
+          <router-link v-if="item.name && !(isActive(item) && isExactActive(item))"
+            :to="{ name: item.name, params: { module: item.params.module } }">
+            {{ item.label }}
           </router-link>
-          <router-link
-            v-if="item.path && !(isActive(item) && isExactActive(item))"
-            :to="item.path"
-          >
-            {{item.label}}
+          <router-link v-if="item.path && !(isActive(item) && isExactActive(item))" :to="item.path">
+            {{ item.label }}
           </router-link>
           <router-link to="item.path" v-if="isActive(item) && isExactActive(item)">
-            <strong >
-            {{item.label}}
+            <strong>
+              {{ item.label }}
             </strong>
           </router-link>
         </li>
@@ -125,7 +117,8 @@ watch(projectSelected, (newVal) => {
 .menu {
   width: 240px;
   position: fixed;
-  top: 3.25rem; /* Adjust this value based on the height of your NavBar */
+  top: 3.25rem;
+  /* Adjust this value based on the height of your NavBar */
   left: 0;
   height: calc(100% - 3.25rem);
   background-color: #f5f5f5;
@@ -133,6 +126,7 @@ watch(projectSelected, (newVal) => {
   padding: 1rem;
   overflow-y: auto;
 }
+
 .is-floating {
   border-radius: 50%;
   width: 2.5rem;
@@ -142,7 +136,8 @@ watch(projectSelected, (newVal) => {
   align-items: center;
   position: fixed;
   left: 1rem;
-  top: calc(3.25rem + 5rem); /* Add 1rem margin to the existing top value */
+  top: calc(3.25rem + 5rem);
+  /* Add 1rem margin to the existing top value */
   z-index: 100;
 }
 </style>
