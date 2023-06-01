@@ -1,4 +1,5 @@
 import { API } from "aws-amplify";
+import axios from "axios";
 
 export class ApiRequest {
   static async get<T>(
@@ -25,9 +26,10 @@ export class ApiRequest {
       myInit.queryStringParameters = params;
     }
 
-    return API.get(apiName, `/${path}/`, myInit)
+    return axios
+      .get(`/${path}/`, { params })
       .then((response) => {
-        return response.data as T;
+        return response.data.data as T;
         // Add your code here
       })
       .catch((error) => {
@@ -35,6 +37,17 @@ export class ApiRequest {
 
         return null;
       });
+
+    // return API.get(apiName, `/${path}/`, myInit)
+    // .then((response) => {
+    //   return response.data as T;
+    //   // Add your code here
+    // })
+    // .catch((error) => {
+    //   console.error(error.response);
+
+    //   return null;
+    // });
   }
 
   static async delete<T>(
