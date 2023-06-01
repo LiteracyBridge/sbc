@@ -4,7 +4,6 @@ import { onMounted, onUnmounted, reactive, ref, computed } from "vue";
 import { useSideNavStore } from "../stores/sideNav";
 import axios from "axios";
 import { onClickOutside } from "@vueuse/core";
-import IndicatorBrowserPanel from "@/components/IndicatorBrowserPanel.vue";
 import { ApiRequest } from "@/apis/api";
 
 const isPanelVisible = ref(false);
@@ -600,9 +599,9 @@ const loadExampleToc = async (filename) => {
     <div class="diagram-container" ref="diagramContainer" style="display: flex; width: 100%;"></div>
 
     <!-- <IndicatorBrowserModalVue :is-visible="isIndicatorModalVisible" v-if="isIndicatorModalVisible"></IndicatorBrowserModalVue> -->
-    <IndicatorBrowserPanel :is-visible="isPanelVisible"
+    <!-- <IndicatorBrowserPanel :is-visible="isPanelVisible"
       @is-closed="isPanelVisible = false; showIndicatorModal = true; useSideNavStore().hide();">
-    </IndicatorBrowserPanel>
+    </IndicatorBrowserPanel> -->
 
     <div v-if="selectedNodeId || showIndicatorModal == true" class="modal is-active p-2">
       <div class="modal-background"></div>

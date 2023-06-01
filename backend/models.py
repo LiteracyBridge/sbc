@@ -216,6 +216,23 @@ class Risk(Base):
     )
 
 
+class Activity(Base):
+    __tablename__ = "activities"
+
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    name: Mapped[str]
+    notes: Mapped[Optional[str]]
+
+    prj_id: Mapped[int] = mapped_column(ForeignKey("projects.id"), nullable=False)
+    editing_user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=True)
+    toc_indicator_id: Mapped[int] = mapped_column(ForeignKey("theory_of_change_indicators.id"), nullable=True)
+    intervention_id: Mapped[int] = mapped_column(ForeignKey("interventions.id"), nullable=True)
+    owner_id: Mapped[int] = mapped_column(ForeignKey("project_user.id"), nullable=True)
+    status_id: Mapped[int] = mapped_column(ForeignKey("lu_activity_status.id"), nullable=True)
+    driver_ids: Mapped[int] = mapped_column(default=[], nullable=True)
+
+
+
 Base.metadata.create_all(bind=engine)
 
 
