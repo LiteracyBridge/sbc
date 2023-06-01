@@ -27,7 +27,7 @@ export class ApiRequest {
     }
 
     return axios
-      .get(`/${path}/`, { params })
+      .get(`${import.meta.env.VITE_SBC_API_URL}/${path}/`, { params })
       .then((response) => {
         return response.data.data as T;
         // Add your code here
