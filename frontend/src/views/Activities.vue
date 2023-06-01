@@ -167,7 +167,10 @@ const columns = [
     <span v-if="!showEditModal">Edit Activity</span>
   </button> -->
   <AddActivityModal v-if="showAddModal" :draft-activity="emptyActivity" v-model="showAddModal" />
-  <AddActivityModal v-if="showEditModal" :draft-activity="draftActivity" v-model="showEditModal" />
+
+  <!-- TODO: fix this -->
+  <AddActivityModal v-if="showEditModal" @update:model-value="showEditModal = $event" v-model="showEditModal"
+    :draft-activity="emptyActivity" />
 
   <!-- <table class="table">
     <thead>

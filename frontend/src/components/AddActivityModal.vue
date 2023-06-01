@@ -1,4 +1,4 @@
-<script setup>
+<script lang="ts" setup>
 import { ref, reactive, watch } from "vue";
 import { onClickOutside } from "@vueuse/core";
 import { useActivityStore } from "../stores/activities";
@@ -8,17 +8,8 @@ import { useInterventionStore } from "../stores/interventions";
 import { useDriverStore } from "../stores/drivers"
 import { useUserStore } from "@/stores/user";
 import { useParticipantStore } from "../stores/participants";
-import { Button, Col, Form, FormItem, Input, Modal, Row, Select, SelectOption } from "ant-design-vue";
+import { Button, Col, Form, FormItem, Input, Modal, Row, Select, SelectOption, type FormInstance, Textarea } from "ant-design-vue";
 
-const activityStore = useActivityStore();
-const userStore = useUserStore();
-const lookupStore = useLookupStore();
-const projectStore = useProjectStore();
-const interventionStore = useInterventionStore();
-const participantStore = useParticipantStore();
-const driverStore = useDriverStore();
-const driverValues = ref(props.draftActivity.driver_ids);
-const driverOptions = ref(driverStore.driversInProject);
 
 const props = defineProps({
   draftActivity: {
@@ -31,29 +22,45 @@ const props = defineProps({
   }
 })
 
+const activityStore = useActivityStore();
+const userStore = useUserStore();
+const lookupStore = useLookupStore();
+const projectStore = useProjectStore();
+const interventionStore = useInterventionStore();
+const participantStore = useParticipantStore();
+const driverStore = useDriverStore();
+
+const driverValues = ref(props.draftActivity.driver_ids);
+const driverOptions = ref(driverStore.driversInProject);
+const formRef = ref<FormInstance>();
+
 const emit = defineEmits(["update:modelValue", "save"]);
 
 const cancelButton = () => {
   emit("update:modelValue", false);
 };
 
-const saveButton = () => {
-  props.draftActivity.driver_ids = [...driverValues.value];
+const saveForm = () => {
+  formRef.value
+    .validateFields()
+    .then(values => {
+      props.draftActivity.driver_ids = [...driverValues.value];
 
-  // Update editing user
-  props.draftActivity.editing_user_id = userStore.user.id;
+      // Update editing user
+      props.draftActivity.editing_user_id = userStore.user.id;
 
-  // Set project id
-  if (props.draftActivity.prj_id == null) {
-    props.draftActivity.prj_id = projectStore.projectId;
-  }
+      // Set project id
+      if (props.draftActivity.prj_id == null) {
+        props.draftActivity.prj_id = projectStore.projectId;
+      }
 
-  if (props.draftActivity.id == null) {
-    activityStore.addActivity(props.draftActivity);
-  } else {
-    activityStore.updateActivity(props.draftActivity);
-  }
-  emit("update:modelValue", false);
+      if (props.draftActivity.id == null) {
+        activityStore.addActivity(props.draftActivity);
+      } else {
+        activityStore.updateActivity(props.draftActivity);
+      }
+      emit("update:modelValue", false);
+    });
 };
 
 const modalRef = ref(null);
@@ -62,31 +69,23 @@ const child = ref(false);
 onClickOutside(modalRef, cancelButton);
 
 
-
 </script>
 
 <template>
-  <Modal v-model:visible="props.modelValue" @ok="cancelButton()" width="750px">
-    <template #closeIcon></template>
+  <Modal v-model:visible="props.modelValue" @cancel="cancelButton()" width="750px" ok-text="Save" cancel-text="Cancel"
+    :closable="false" :mask-closable="false" @ok="saveForm">
     <template #title>
       <!-- TODO: show add/update activity depending on item state -->
       <span>Add Activity</span>
     </template>
+
     <template #footer>
-      <Button @click="cancelButton" type="gho">Cancel</Button>
-      <Button @click="saveButton" type="primary">Save</Button>
+      <Button @click="cancelButton()" type="ghost">Cancel</Button>
+      <Button @click="saveForm" type="primary">Save</Button>
     </template>
 
+    <Form name="activity-form" ref="formRef" :model="draftActivity" layout="vertical">
 
-    <!-- <div class="modal-background"></div>
-    <div ref="modalRef" class="modal-card">
-      <header class="modal-card-head">
-        <p class="modal-card-title"></p>
-        <button @click="cancelButton" class="delete" aria-label="close"></button>
-      </header> -->
-
-    <!-- <section class="modal-card-body"> -->
-    <Form name="activity-form" layout="vertical">
       <Row :gutter="6">
         <Col :span="12">
         <FormItem label="Name" name="name" :rules="[{ required: true, message: 'Please activity name!' }]">
@@ -95,7 +94,7 @@ onClickOutside(modalRef, cancelButton);
         </Col>
 
         <Col :span="12">
-        <FormItem name="owner" label="Owner" has-feedback
+        <FormItem name="owner_id" label="Owner" has-feedback
           :rules="[{ required: true, message: 'Please select an owner!' }]">
           <Select v-model:value="draftActivity.owner_id" placeholder="Select owner" :show-search="true">
             <SelectOption v-for="user in projectStore.users_in_project" :value="user.user_id" :key="user.user_id">{{
@@ -105,62 +104,9 @@ onClickOutside(modalRef, cancelButton);
         </Col>
       </Row>
 
-
-
-      <!--
-      <div class="field">
-        <label class="label">Name</label>
-        <div class="control">
-          <input v-model="draftActivity.name" class="input" type="text" placeholder="Text input">
-        </div>
-      </div> -->
-
-
-      <!-- <div class="field">
-        <label class="label">Owner</label>
-        <div class="control">
-          <div class="select">
-            <select v-model="draftActivity.owner_id">
-              <option v-for="user in projectStore.users_in_project" :value="user.user_id" :key="user.user_id">
-                {{ user.name }}
-              </option>
-            </select>
-          </div>
-        </div>
-      </div> -->
-
-
-      <div class="field">
-        <label class="label">Status</label>
-        <div class="control">
-          <div class="select">
-            <select v-model="draftActivity.status_id">
-              <option v-for="status in lookupStore.activity_status" :value="status.id" :key="status.id">
-                {{ status.name }}
-              </option>
-            </select>
-          </div>
-        </div>
-      </div>
-      <!--
-      <div class="field">
-        <label class="label">Group Parent</label>
-        <div class="control">
-          <div class="select">
-            <select v-model="draftActivity.parent_id">
-              <option :value="null">Not part of a group</option>
-              <option v-for="activity in activityStore.activities.filter((a) => a.id != draftActivity.id)"
-                :value="activity.id" :key="activity.id">
-                {{ activity.name }}
-              </option>
-            </select>
-          </div>
-        </div>
-      </div> -->
-
       <Row :gutter="6">
         <Col :span="12">
-        <FormItem name="group_parent" label="Group Parent" has-feedback
+        <FormItem name="parent_id" label="Group Parent" has-feedback
           :rules="[{ required: true, message: 'Please select a group parent!' }]">
 
           <Select v-model:value="draftActivity.parent_id" placeholder="Select group" :show-search="true">
@@ -176,7 +122,7 @@ onClickOutside(modalRef, cancelButton);
         </Col>
 
         <Col :span="12">
-        <FormItem name="intervention" label="Supported Intervention" has-feedback
+        <FormItem name="intervention_id" label="Supported Intervention" has-feedback
           :rules="[{ required: true, message: 'Please select an intervention!' }]">
 
           <Select v-model:value="draftActivity.intervention_id" placeholder="Select intervention" :show-search="true">
@@ -191,27 +137,7 @@ onClickOutside(modalRef, cancelButton);
         </Col>
       </Row>
 
-
-
-
-
-      <!-- <div class="field">
-        <label class="label">Supported Intervention</label>
-        <div class="control">
-          <div class="select">
-            <select v-model="draftActivity.intervention_id">
-              <option :value="null">None</option>
-              <option v-for="intervention in interventionStore.interventions" :value="intervention.id"
-                :key="intervention.id">
-                {{ intervention.name }}
-              </option>
-            </select>
-          </div>
-        </div>
-      </div> -->
-
-      <FormItem name="drivers" label="Supported Drivers" has-feedback
-        :rules="[{ required: true, message: 'Please select a driver' }]">
+      <FormItem name="driverValues" label="Supported Drivers" has-feedback :rules="[{ required: false }]">
 
         <Select v-model:value="driverValues" placeholder="Please owner" :show-search="true" mode="multiple">
           <SelectOption v-for="i in driverOptions" :value="i.id" :key="i.id">
@@ -221,27 +147,40 @@ onClickOutside(modalRef, cancelButton);
         </Select>
       </FormItem>
 
-      <!-- <div>
-        <label class="label">Supported Drivers</label>
-        <Multiselect v-model="driverValues" :options="driverOptions" mode="tags" valueProp="id" nameProp="name"
-          label="name" placeholder="" />
-      </div> -->
+      <Row :gutter="6">
+        <Col :span="12">
+        <FormItem name="status_id" label="Activity status" has-feedback
+          :rules="[{ required: true, message: 'Please select an activity status!' }]">
 
-      <div class="field">
-        <label class="label">Notes</label>
-        <div class="control">
-          <textarea v-model="draftActivity.notes" class="textarea" placeholder="Textarea"></textarea>
-        </div>
-      </div>
+          <Select v-model:value="draftActivity.status_id" placeholder="Select activity status" :show-search="true">
+            <SelectOption :value="null">None</SelectOption>
+            <SelectOption v-for="status in lookupStore.activity_status" :value="status.id" :key="status.id">
+              {{ status.name }}
+            </SelectOption>
 
-      <div class="field">
-        <label class="label">URL</label>
-        <div class="control">
-          <input v-model="draftActivity.url" class="input" type="text" placeholder="Text input">
-        </div>
-      </div>
-      <hr />
+          </Select>
+        </FormItem>
+        </Col>
 
+        <Col :span="12">
+        <FormItem name="url" label="URL" has-feedback :rules="[{ required: false }]">
+
+          <Input type="url" v-model:value="draftActivity.url"></Input>
+        </FormItem>
+        </Col>
+      </Row>
+
+
+      <Row :gutter="6">
+
+        <Col :span="24">
+        <FormItem name="notes" label="Notes" has-feedback :rules="[{ required: false }]">
+
+          <Textarea v-model:value="draftActivity.notes" :rows="3"></Textarea>
+        </FormItem>
+        </Col>
+
+      </Row>
 
       <table class="table">
         <thead>
@@ -363,11 +302,5 @@ onClickOutside(modalRef, cancelButton);
 
 
     </Form>
-
-    <!-- </section> -->
-    <!-- <footer class="modal-card-foot is-justify-content-flex-end">
-
-      </footer>
-    </div> -->
   </Modal>
 </template>
