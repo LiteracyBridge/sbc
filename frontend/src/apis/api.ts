@@ -27,7 +27,7 @@ export class ApiRequest {
     }
 
     return axios
-      .get(`${import.meta.env.VITE_SBC_API_URL}/${path}/`, { params })
+      .get(`${import.meta.env.VITE_SBC_API_URL}/${path}`, { params })
       .then((response) => {
         return response.data.data as T;
         // Add your code here
@@ -38,7 +38,7 @@ export class ApiRequest {
         return null;
       });
 
-    // return API.get(apiName, `/${path}/`, myInit)
+    // return API.get(apiName, `/${path}`, myInit)
     // .then((response) => {
     //   return response.data as T;
     //   // Add your code here
@@ -74,7 +74,7 @@ export class ApiRequest {
       myInit.queryStringParameters = params;
     }
 
-    return API.del(apiName, `/${path}/`, myInit)
+    return API.del(apiName, `/${path}`, myInit)
       .then((response) => {
         return response.data as T;
         // Add your code here
@@ -112,7 +112,7 @@ export class ApiRequest {
       myInit.queryStringParameters = params;
     }
 
-    return API.post(apiName, `/${path}/`, myInit).then((response) => {
+    return API.post(apiName, `/${path}`, myInit).then((response) => {
       return response.data as T[];
       // Add your code here
     });
@@ -144,7 +144,7 @@ export class ApiRequest {
       myInit.queryStringParameters = params;
     }
 
-    return API.put(apiName, `/${path}/`, myInit)
+    return API.put(apiName, `/${path}`, myInit)
       .then((response) => {
         return response.data as T;
         // Add your code here

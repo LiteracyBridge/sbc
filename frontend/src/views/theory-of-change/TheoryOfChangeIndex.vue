@@ -334,7 +334,7 @@ const diagram = reactive({
 const fetchGraph = async () => {
   try {
     config.isLoading = true;
-    const resp = await ApiRequest.get(`theory-of-change/${projectStore.projectId}`);
+    const resp = await ApiRequest.get(`theory-of-change/${projectStore.projectId}/`);
 
     diagram.parseGraph(resp);
   } catch (error) {

@@ -84,7 +84,7 @@ onMounted(() => {
         }
       }),
 
-    ApiRequest.get<IndicatorGroup[]>("indicators")
+    ApiRequest.get<IndicatorGroup[]>("indicators/")
       .then((resp) => {
         console.log(resp)
 
