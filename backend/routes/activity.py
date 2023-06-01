@@ -3,7 +3,7 @@ from typing import List, Optional
 import models
 from dataclass_wizard import asdict, fromdict
 from fastapi import APIRouter, Depends, HTTPException
-from models import Activity
+from models import Activity, TheoryOfChangeItem
 from pydantic import BaseModel
 from schema import ApiResponse
 from sqlalchemy.orm import Session, joinedload, subqueryload
@@ -24,6 +24,15 @@ class ActivityDto(BaseModel):
     owner_id: Optional[int]
     status_id: Optional[int]
     driver_ids: Optional[List[int]]
+
+
+def get_toc_by_project_id(projectId: int, db: Session = Depends(models.get_db)):
+    record = (
+        db.query(models.TheoryOfChange)
+        .filter(models.TheoryOfChange.project_id == projectId)
+        .first()
+    )
+    return record
 
 
 def get_project_activities(project_id: int, db: Session = Depends(models.get_db)):
@@ -51,24 +60,45 @@ def get_project_activities(project_id: int, db: Session = Depends(models.get_db)
 
 @router.post("/", response_model=ApiResponse)
 def create(dto: ActivityDto, db: Session = Depends(models.get_db)):
-    record: Activity = Activity()
-    record.name = dto.name
-    record.url = dto.url
-    record.notes = dto.notes
-    record.prj_id = dto.prj_id
-    record.editing_user_id = dto.editing_user_id
-    record.toc_indicator_id = dto.toc_indicator_id
-    record.intervention_id = dto.intervention_id
-    record.owner_id = dto.owner_id
-    record.status_id = dto.status_id
-    record.driver_ids = dto.driver_ids
+    new_activity: Activity = Activity()
+    new_activity.name = dto.name
+    new_activity.url = dto.url
+    new_activity.notes = dto.notes
+    new_activity.prj_id = dto.prj_id
+    new_activity.editing_user_id = dto.editing_user_id
+    new_activity.toc_item_id = dto.toc_indicator_id
+    new_activity.intervention_id = dto.intervention_id
+    new_activity.owner_id = dto.owner_id
+    new_activity.status_id = dto.status_id
 
-    db.add(record)
+    if dto.driver_ids is None:
+        new_activity.driver_ids = []
+    else:
+        new_activity.driver_ids = dto.driver_ids
+
+    db.add(new_activity)
     db.commit()
-    db.refresh(record)
+    db.refresh(new_activity)
+
+    # Create a new record in the toc graph table
+    toc_item = TheoryOfChangeItem()
+    toc_item.name = dto.name
+    toc_item.type_id = 2  # id of the activity type
+    toc_item.from_id = None
+    toc_item.to_id = None
+    toc_item.sem_id = 1  # id of the sem type. TODO: make this dynamic
+    toc_item.description = dto.notes
+    toc_item.theory_of_change_id = get_toc_by_project_id(dto.prj_id, db).id
+
+    db.add(toc_item)
+    db.commit()
+
+    # Update the activity with the toc_item id
+    new_activity.toc_item_id = toc_item.id
+    db.commit()
 
     # return ApiResponse(data=[record])
-    return get_project_activities(record.prj_id, db)
+    return get_project_activities(new_activity.prj_id, db)
 
 
 @router.get("/{projectId}", response_model=ApiResponse)

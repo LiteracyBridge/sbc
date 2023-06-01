@@ -42,6 +42,25 @@ class RisksDto(BaseModel):
     toc_to_id: Optional[int]
 
 
+def get_toc_by_project_id(projectId: int, db: Session = Depends(models.get_db)):
+    record = (
+        db.query(models.TheoryOfChange)
+        .filter(models.TheoryOfChange.project_id == projectId)
+        .options(
+            subqueryload(models.TheoryOfChange.graph)
+            .subqueryload(TheoryOfChangeItem.indicators)
+            .subqueryload(TheoryOfChangeIndicator.indicator),
+            # .options(
+            #     subqueryload(models.TheoryOfChangeItem.sem),
+            #     subqueryload(models.TheoryOfChangeItem.type),
+            # )
+        )
+        # .options(joinedload(models.TheoryOfChange.graph))
+        .first()
+    )
+    return record
+
+
 def get_toc_by_id(id: int, db: Session = Depends(models.get_db)):
     record = (
         db.query(models.TheoryOfChange)
@@ -86,24 +105,8 @@ def create(dto: NewTheoryOfChangeDto, db: Session = Depends(models.get_db)):
 
 
 @router.get("/{projectId}", response_model=ApiResponse)
-def get_toc_by_project_id(projectId: int, db: Session = Depends(models.get_db)):
-    record = (
-        db.query(models.TheoryOfChange)
-        .filter(models.TheoryOfChange.project_id == projectId)
-        .options(
-            subqueryload(models.TheoryOfChange.graph)
-            .subqueryload(TheoryOfChangeItem.indicators)
-            .subqueryload(TheoryOfChangeIndicator.indicator),
-            # .options(
-            #     subqueryload(models.TheoryOfChangeItem.sem),
-            #     subqueryload(models.TheoryOfChangeItem.type),
-            # )
-        )
-        # .options(joinedload(models.TheoryOfChange.graph))
-        .first()
-    )
-
-    return ApiResponse(data=[record])
+def get_by_project_id(projectId: int, db: Session = Depends(models.get_db)):
+    return ApiResponse(data=[get_toc_by_project_id(projectId, db)])
 
 
 @router.post("/{id}/item", response_model=ApiResponse)
@@ -211,7 +214,7 @@ def add_item(id: int, item_id: int, db: Session = Depends(models.get_db)):
         .first()
     )
 
-    db.delete()
+    db.delete(resp)
     db.commit()
 
     return ApiResponse(data=[resp])

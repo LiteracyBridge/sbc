@@ -254,7 +254,7 @@ class Activity(Base):
     editing_user_id: Mapped[int] = mapped_column(
         ForeignKey("project_users.id"), nullable=True
     )
-    toc_indicator_id: Mapped[int] = mapped_column(
+    toc_item_id: Mapped[int] = mapped_column(
         ForeignKey("theory_of_change_indicators.id"), nullable=True
     )
     intervention_id: Mapped[int] = mapped_column(
