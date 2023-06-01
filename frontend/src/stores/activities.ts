@@ -1,6 +1,21 @@
 import { defineStore } from "pinia";
 import { useUserStore } from "./user";
 import * as api from "../apis/lambda";
+import { ApiRequest } from "@/apis/api";
+
+// export class Activity {
+//   id: number
+//   name: string
+//   notes: Optional[str]
+//   project_id: number;
+//   intervention_id: number;
+//   editing_user_id: number;
+//   toc_indicator_id: number;
+//   owner_id: number;
+//   status_id: number;
+//   notes: string = "";
+//   url: string = "";
+// }
 
 const init_objects = {
   activities: {
@@ -88,8 +103,11 @@ export const useActivityStore = defineStore({
     async addActivity(activity) {
       delete activity.id;
       const table = "activities";
-      const newId = await api.insert(table, { ...activity }); //const newId = 99; //
-      activity.id = newId;
+      // const newId = await api.insert(table, { ...activity }); //const newId = 99; //
+      const resp = await ApiRequest.post("activity", { ...activity });
+      console.warn("created activity");
+      console.warn(resp);
+      // activity.id = newId;
       this.activities.push(activity);
     },
 

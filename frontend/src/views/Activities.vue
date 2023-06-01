@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { onMounted, ref, reactive } from "vue";
+import { onMounted, ref, reactive, watch } from "vue";
 import { useActivityStore } from "../stores/activities";
 import { useInterventionStore } from "../stores/interventions";
 import { useDriverStore } from "../stores/drivers";
@@ -10,7 +10,7 @@ import { useUserStore } from "@/stores/user";
 import { useRouter } from 'vue-router'
 import AddActivityModal from '../components/AddActivityModal.vue';
 import { Button, Table, Tag, Typography } from "ant-design-vue";
-import type { PlusCircleOutlined } from "@ant-design/icons-vue";
+import { PlusCircleOutlined } from "@ant-design/icons-vue";
 
 const showAddModal = ref(false);
 const showEditModal = ref(false);
@@ -88,21 +88,19 @@ const columns = [
           </div>
 
           <div class="level-right">
-            <Space>
-              <Button type="primary" @click="showAddModal = true">
-                <template #icon>
-                  <PlusCircleOutlined />
-                </template>
-                Add Activity
-              </Button>
+            <Button type="primary" @click="showAddModal = true">
+              <template #icon>
+                <PlusCircleOutlined />
+              </template>
+              Add Activity
+            </Button>
 
-              <!-- <Button type="ghost" @click="config.settingsModal.visible = true">
+            <!-- <Button type="ghost" @click="config.settingsModal.visible = true">
                 <template #icon>
                   <SettingOutlined />
                 </template>
                 Settings
               </Button> -->
-            </Space>
           </div>
         </div>
       </template>

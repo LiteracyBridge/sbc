@@ -17,7 +17,46 @@ class User(Base):
 
     # is_active = Column(Boolean, default=True)
 
-    # items = relationship("Item", back_populates="owner")
+
+class Project(Base):
+    __tablename__ = "projects"
+
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    name: Mapped[str]
+    is_archived: Mapped[bool] = mapped_column(Boolean, default=False)
+    country_id: Mapped[int] = mapped_column(ForeignKey("countries.id"))
+
+    theories_of_change = relationship(
+        "TheoryOfChange", back_populates="project", load_on_pending=True
+    )
+
+
+class ProjectUser(Base):
+    __tablename__ = "project_users"
+
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    prj_id: Mapped[int] = mapped_column(ForeignKey("projects.id"))
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    editing_user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    # TODO: add access_id
+
+
+class LuIntervention(Base):
+    __tablename__ = "lu_interventions"
+
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    name: Mapped[str]
+    url_description: Mapped[Optional[str]]
+    text_short: Mapped[Optional[str]]
+    sequence: Mapped[int]
+
+
+class LuActivityStatus(Base):
+    __tablename__ = "lu_activity_status"
+
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    name: Mapped[str]
+    sequence: Mapped[int]
 
 
 class LuSem(Base):
@@ -82,19 +121,6 @@ class Indicator(Base):
     )
 
     # TODO: Generate alembic migration to create a table using the sqlalchemy model below
-
-
-class Project(Base):
-    __tablename__ = "projects"
-
-    id: Mapped[int] = mapped_column(primary_key=True, index=True)
-    name: Mapped[str]
-    is_archived: Mapped[bool] = mapped_column(Boolean, default=False)
-    country_id: Mapped[int] = mapped_column(ForeignKey("countries.id"))
-
-    theories_of_change = relationship(
-        "TheoryOfChange", back_populates="project", load_on_pending=True
-    )
 
 
 class ProjectDriver(Base):
@@ -221,16 +247,24 @@ class Activity(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
     name: Mapped[str]
+    url: Mapped[Optional[str]]
     notes: Mapped[Optional[str]]
 
     prj_id: Mapped[int] = mapped_column(ForeignKey("projects.id"), nullable=False)
-    editing_user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=True)
-    toc_indicator_id: Mapped[int] = mapped_column(ForeignKey("theory_of_change_indicators.id"), nullable=True)
-    intervention_id: Mapped[int] = mapped_column(ForeignKey("interventions.id"), nullable=True)
-    owner_id: Mapped[int] = mapped_column(ForeignKey("project_user.id"), nullable=True)
-    status_id: Mapped[int] = mapped_column(ForeignKey("lu_activity_status.id"), nullable=True)
+    editing_user_id: Mapped[int] = mapped_column(
+        ForeignKey("project_users.id"), nullable=True
+    )
+    toc_indicator_id: Mapped[int] = mapped_column(
+        ForeignKey("theory_of_change_indicators.id"), nullable=True
+    )
+    intervention_id: Mapped[int] = mapped_column(
+        ForeignKey("lu_interventions.id"), nullable=True
+    )
+    owner_id: Mapped[int] = mapped_column(ForeignKey("project_users.id"), nullable=True)
+    status_id: Mapped[int] = mapped_column(
+        ForeignKey("lu_activity_status.id"), nullable=True
+    )
     driver_ids: Mapped[int] = mapped_column(default=[], nullable=True)
-
 
 
 Base.metadata.create_all(bind=engine)
