@@ -18,6 +18,7 @@ class ActivityDto(BaseModel):
     notes: Optional[str]
     url: Optional[str]
     prj_id: int
+    parent_id: Optional[int]
     editing_user_id: Optional[int]
     toc_indicator_id: Optional[int]
     intervention_id: Optional[int]
@@ -69,6 +70,7 @@ def create(dto: ActivityDto, db: Session = Depends(models.get_db)):
     new_activity.toc_item_id = dto.toc_indicator_id
     new_activity.intervention_id = dto.intervention_id
     new_activity.owner_id = dto.owner_id
+    new_activity.parent_id = dto.parent_id
     new_activity.status_id = dto.status_id
 
     if dto.driver_ids is None:

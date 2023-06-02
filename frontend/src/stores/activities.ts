@@ -3,19 +3,22 @@ import { useUserStore } from "./user";
 import * as api from "../apis/lambda";
 import { ApiRequest } from "@/apis/api";
 
-// export class Activity {
-//   id: number
-//   name: string
-//   notes: Optional[str]
-//   project_id: number;
-//   intervention_id: number;
-//   editing_user_id: number;
-//   toc_indicator_id: number;
-//   owner_id: number;
-//   status_id: number;
-//   notes: string = "";
-//   url: string = "";
-// }
+export class Activity {
+  id: number;
+  name: string;
+  project_id: number;
+  prj_id: number;
+  intervention_id: number;
+  parent_id: number;
+  editing_user_id: number;
+  toc_indicator_id: number;
+  owner_id: number;
+  status_id: number;
+  notes: string = "";
+  url: string = "";
+
+  driver_ids: number[] = [];
+}
 
 const init_objects = {
   activities: {

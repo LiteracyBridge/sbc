@@ -1,7 +1,7 @@
 <script lang="ts" setup>
+
 import { ref, reactive, watch } from "vue";
-import { onClickOutside } from "@vueuse/core";
-import { useActivityStore } from "../stores/activities";
+import { Activity, useActivityStore } from "../stores/activities";
 import { useLookupStore } from "../stores/lookups";
 import { useProjectStore } from "../stores/projects";
 import { useInterventionStore } from "../stores/interventions";
@@ -11,16 +11,7 @@ import { useParticipantStore } from "../stores/participants";
 import { Button, Col, Form, FormItem, Input, Modal, Row, Select, SelectOption, type FormInstance, Textarea } from "ant-design-vue";
 
 
-const props = defineProps({
-  draftActivity: {
-    type: Object,
-    required: true
-  },
-  modelValue: {
-    type: Boolean,
-    required: true,
-  }
-})
+const props = defineProps<{ draftActivity: Activity, modelValue: boolean }>();
 
 const activityStore = useActivityStore();
 const userStore = useUserStore();
@@ -37,6 +28,7 @@ const formRef = ref<FormInstance>();
 const emit = defineEmits(["update:modelValue", "save"]);
 
 const cancelButton = () => {
+  formRef.value.resetFields();
   emit("update:modelValue", false);
 };
 
@@ -63,17 +55,11 @@ const saveForm = () => {
     });
 };
 
-const modalRef = ref(null);
-const child = ref(false);
-
-onClickOutside(modalRef, cancelButton);
-
-
 </script>
 
 <template>
   <Modal v-model:visible="props.modelValue" @cancel="cancelButton()" width="750px" ok-text="Save" cancel-text="Cancel"
-    :closable="false" :mask-closable="false" @ok="saveForm">
+    :mask-closable="false" @ok="saveForm">
     <template #title>
       <!-- TODO: show add/update activity depending on item state -->
       <span>Add Activity</span>
