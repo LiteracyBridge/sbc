@@ -6,6 +6,40 @@ from sqlalchemy.orm import Mapped
 from database import Base, SessionLocal, engine
 
 
+class LuCountries(Base):
+    __tablename__ = "lu_countries"
+
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    name: Mapped[str]
+
+
+class Organisation(Base):
+    __tablename__ = "organisations"
+
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    name: Mapped[str]
+    country_id: Mapped[int] = mapped_column(ForeignKey("lu_countries.id"))
+
+    users: Mapped[List["User"]] = relationship(
+        "User", back_populates="organisation", load_on_pending=True
+    )
+
+
+class Invitation(Base):
+    __tablename__ = "invitations"
+
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    name: Mapped[str]
+    email: Mapped[str]
+    phoneNumber: Mapped[Optional[str]]
+    status: Mapped[str]
+    organisation_id: Mapped[int] = mapped_column(ForeignKey("organisations.id"))
+
+    organisation: Mapped["Organisation"] = relationship(
+        "Organisation", back_populates="invitations"
+    )
+
+
 class User(Base):
     __tablename__ = "users"
 
@@ -14,8 +48,11 @@ class User(Base):
     email = Column(String, unique=True, index=True)
     name = Column(String)
     address_as = Column(String, nullable=True)
+    organisation_id: Mapped[int] = mapped_column(ForeignKey("organisations.id"))
 
-    # is_active = Column(Boolean, default=True)
+    organisation: Mapped["Organisation"] = relationship(
+        "Organisation", back_populates="users"
+    )
 
 
 class Project(Base):
