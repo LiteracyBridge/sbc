@@ -2,52 +2,11 @@ import { defineStore } from "pinia";
 import { useUserStore } from "./user";
 import * as api from "../apis/lambda";
 import { ApiRequest } from "@/apis/api";
+import { Activity, Schedule } from "@/types";
 
-export class Activity {
-  id: number;
-  name: string;
-  project_id: number;
-  prj_id: number;
-  intervention_id: number;
-  parent_id: number;
-  editing_user_id: number;
-  toc_indicator_id: number;
-  owner_id: number;
-  status_id: number;
-  notes: string = "";
-  url: string = "";
-
-  driver_ids: number[] = [];
-}
-
-const init_objects = {
-  activities: {
-    id: 0,
-    name: "",
-    parent_id: 0,
-    intervention_id: 0,
-    driver_ids: [],
-    editing_user_id: 0,
-    owner_id: 0,
-    status_id: 0,
-    notes: "",
-    url: "",
-  },
-  schedules: {
-    id: 0,
-    editing_user_id: 0,
-    activity_id: 0,
-    planned_date_from: new Date(2007, 9, 26),
-    planned_date_to: new Date(2022, 9, 26),
-    actual_date_from: new Date(2007, 9, 26),
-    actual_date_to: new Date(2022, 9, 26),
-    dependency_ids: [],
-    owner_id: 0,
-    participant_id: 0,
-    status_id: 0,
-    notes: "",
-    url: "",
-  },
+const init_objects: { activities: Activity; schedules: Schedule } = {
+  activities: new Activity(),
+  schedules: new Schedule(),
 };
 
 export const useActivityStore = defineStore({
@@ -57,18 +16,18 @@ export const useActivityStore = defineStore({
     schedules: [],
   }),
   getters: {
-    driverInActivities: (state) => (driverId) =>
+    driverInActivities: (state) => (driverId: number) =>
       state.activities.filter((a) => a.driver_ids.includes(driverId)).length >
       0,
-    activityById: (state) => (activityId) =>
+    activityById: (state) => (activityId: number) =>
       state.activities.find((a) => a.id == activityId),
     topLevelActivities: (state) =>
       state.activities.filter((a) => a.parent_id == null),
-    subActivitiesByActivityId: (state) => (activityId) =>
+    subActivitiesByActivityId: (state) => (activityId: number) =>
       state.activities.filter((a) => a.parent_id == activityId),
-    schedulesByActivityId: (state) => (activityId) =>
+    schedulesByActivityId: (state) => (activityId: number) =>
       state.schedules.filter((s) => s.activity_id == activityId),
-    fromDate: (state) => (activityId) => {
+    fromDate: (state) => (activityId: number) => {
       const schedules = state.schedules.filter(
         (s) => s.activity_id == activityId
       );
@@ -80,7 +39,7 @@ export const useActivityStore = defineStore({
       }
       return date;
     },
-    toDate: (state) => (activityId) => {
+    toDate: (state) => (activityId: number) => {
       const schedules = state.schedules.filter(
         (s) => s.activity_id == activityId
       );
@@ -96,14 +55,14 @@ export const useActivityStore = defineStore({
   actions: {
     clear() {
       for (const property of Object.keys(this.$state)) {
-        this.$state[property] = [];
+        (this.$state as any)[property] = [];
       }
     },
     download() {
       api.downloadObjects(init_objects, this, "", true);
     },
 
-    async addActivity(activity) {
+    async addActivity(activity: Activity) {
       delete activity.id;
       const table = "activities";
       // const newId = await api.insert(table, { ...activity }); //const newId = 99; //
@@ -114,14 +73,14 @@ export const useActivityStore = defineStore({
       this.activities.push(activity);
     },
 
-    updateActivity(activity) {
+    updateActivity(activity: Partial<Activity>) {
       // console.log(activity);
       let idx = this.activities.findIndex((a) => a.id == activity.id);
       this.activities.splice(idx, 1, activity);
       api.update("activities", activity.id, { ...activity });
     },
 
-    async deleteActivity(activityId, deleteChildren = false) {
+    async deleteActivity(activityId: number, deleteChildren: boolean = false) {
       // find activity to be deleted
       const activity = this.activities.find((a) => a.id === activityId);
 
@@ -129,7 +88,10 @@ export const useActivityStore = defineStore({
       const children = this.activities.filter(
         (a) => a.parent_id === activityId
       );
-      const deleteIds = [].push(activity).push(children);
+      const deleteIds = [];
+      deleteIds.push(activity);
+      deleteIds.push(children);
+
       // console.log('deleteIds:');
       // console.log(deleteIds);
       const table = "activities";
@@ -140,7 +102,7 @@ export const useActivityStore = defineStore({
       this.activities = this.activities.filter((a) => a != activity);
     },
 
-    async deleteIntervention(interventionId) {
+    async deleteIntervention(interventionId: number) {
       // Delete an activity from an intervention id ONLY IF:
       //    - it has no schedules
       //    - it has no notes

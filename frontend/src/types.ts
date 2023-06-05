@@ -1,7 +1,10 @@
-export interface IUser {
+export class User {
   id: number;
   email: string;
   name: string;
+  address?: string;
+  last_project_id?: number;
+  organization_id?: number;
 }
 
 export interface IndicatorType {
@@ -57,4 +60,37 @@ export class TheoryOfChange {
   id: string = null;
   risks: Risk[] = [];
   // indicators: any[] = [];
+}
+
+export class Activity {
+  id: number;
+  name: string;
+  project_id: number;
+  prj_id: number;
+  intervention_id: number;
+  parent_id: number;
+  editing_user_id: number;
+  toc_indicator_id: number;
+  owner_id: number;
+  status_id: number;
+  notes: string = "";
+  url: string = "";
+
+  driver_ids: number[] = [];
+}
+
+export class Schedule {
+  id: number = 0;
+  editing_user_id: number = 0;
+  activity_id: number = 0;
+  planned_date_from: Date = new Date(2007, 9, 26);
+  planned_date_to: Date = new Date(2022, 9, 26);
+  actual_date_from: Date = new Date(2007, 9, 26);
+  actual_date_to: Date = new Date(2022, 9, 26);
+  dependency_ids: number[] = [];
+  owner_id: number = 0;
+  participant_id: number = 0;
+  status_id: number = 0;
+  notes: string = "";
+  url: string = "";
 }

@@ -1,4 +1,4 @@
-<script  setup>
+<script lang="ts" setup>
 
 import { onMounted, ref, watch, computed } from "vue";
 import { Multiselect } from 'vue-multiselect'
@@ -7,13 +7,16 @@ import { useProjectStore } from "@/stores/projects";
 import { useUserStore } from "@/stores/user";
 import { useRouter } from "vue-router";
 import * as api from "@/apis/lambda";
-import {UsersApi} from "@/apis/lambda";
+import { UsersApi } from "@/apis/lambda";
 import axios from "axios";
+import { ApiRequest } from "@/apis/api";
+import { User } from "@/types";
 
 const router = useRouter();
 const userStore = useUserStore();
 const lookupStore = useLookupStore();
 const projectStore = useProjectStore();
+
 const projectSelection = ref(projectStore.prj_id);
 const draftingNewProject = ref(false);
 const newPrjName = ref("");
@@ -63,9 +66,9 @@ function saveNewProject() {
 }
 
 function fetchUsers() {
-  UsersApi.getAll().then((resp) => {
+  ApiRequest.get<User>(`users/`, {email: userStore.email}).then((resp) => {
     console.log(resp);
-    allUsers.value = resp.data;
+    allUsers.value = resp;
   });
 
   // axios.get("/api/users").then((response) => {
@@ -96,14 +99,14 @@ function changeProject(prjId) {
 
 const usersDropdownOptions = computed(() => {
   return allUsers.value.map((user) => {
-      return {
-        value: user.email,
-        label: user.name != '' ? `${user.name} (${user.email})` : user.email,
-      };
-    });
+    return {
+      value: user.email,
+      label: user.name != '' ? `${user.name} (${user.email})` : user.email,
+    };
+  });
 });
 
-function onUserSelected(item, _){
+function onUserSelected(item, _) {
   const user = allUsers.value.find(user => user.email == item.value)
 
   // newUserEmail.value = user.email
@@ -239,8 +242,8 @@ function onUserSelected(item, _){
           <td>
             <!-- TODO: change this dropdown -->
 
-            <Multiselect v-model="newUserEmail" :options="usersDropdownOptions" :close-on-select="true" :clear-on-select="false"
-              placeholder="Select user" label="label" track-by="value"
+            <Multiselect v-model="newUserEmail" :options="usersDropdownOptions" :close-on-select="true"
+              :clear-on-select="false" placeholder="Select user" label="label" track-by="value"
               @select="onUserSelected" />
           </td>
 

@@ -19,6 +19,7 @@ from config import settings
 
 # models.Base.metadata.create_all(bind=engine)
 
+# FIXME: add congnito JWT verify middleware
 
 app = FastAPI()
 

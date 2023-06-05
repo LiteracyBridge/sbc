@@ -27,6 +27,7 @@ class Organisation(Base):
 
 class Invitation(Base):
     __tablename__ = "invitations"
+    __allow_unmapped__ = True
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
     name: Mapped[str]
@@ -35,13 +36,12 @@ class Invitation(Base):
     status: Mapped[str]
     organisation_id: Mapped[int] = mapped_column(ForeignKey("organisations.id"))
 
-    organisation: Mapped["Organisation"] = relationship(
-        "Organisation", back_populates="invitations"
-    )
+    organisation: Organisation = relationship("Organisation")
 
 
 class User(Base):
     __tablename__ = "users"
+    __allow_unmapped__ = True
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
     # id = Column(Integer, primary_key=True, index=True)
@@ -49,10 +49,9 @@ class User(Base):
     name = Column(String)
     address_as = Column(String, nullable=True)
     organisation_id: Mapped[int] = mapped_column(ForeignKey("organisations.id"))
+    last_project_id: Mapped[Optional[int]] = mapped_column(ForeignKey("projects.id"))
 
-    organisation: Mapped["Organisation"] = relationship(
-        "Organisation", back_populates="users"
-    )
+    organisation: Organisation = relationship("Organisation", back_populates="users")
 
 
 class Project(Base):

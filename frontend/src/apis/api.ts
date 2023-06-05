@@ -10,7 +10,7 @@ export class ApiRequest {
     headers?: {
       [key: string]: any;
     }
-  ): Promise<T | null> {
+  ): Promise<T[] | null> {
     const apiName = "sbc-api";
     // const path = "/users";
     const myInit = {
