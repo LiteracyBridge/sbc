@@ -323,6 +323,11 @@ class Monitoring(Base):
     )
     project_id: Mapped[int] = mapped_column(ForeignKey("projects.id"), nullable=False)
 
+    toc_item_indicator = relationship("TheoryOfChangeIndicator")
+
+
+
+
 
 Base.metadata.create_all(bind=engine)
 

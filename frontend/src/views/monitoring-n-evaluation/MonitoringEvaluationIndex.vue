@@ -2,12 +2,17 @@
 // TODO: add button for viewing progress in a modal
 // TODO: add button for capturing progress in a modal
 
+import { ApiRequest } from '@/apis/api';
+import { useProjectStore } from '@/stores/projects';
 import { SmileOutlined, DownOutlined, PlusCircleOutlined, SettingOutlined } from '@ant-design/icons-vue';
-import { Tag, Table, Divider, Button, Space, Typography, ButtonGroup, Modal, DescriptionsItem, Descriptions, Form, FormItem, Input, Select, SelectOption, Tabs, TabPane, Textarea } from 'ant-design-vue';
-import { ref } from 'vue';
+import { Tag, Table, Divider, Button, Space, Typography, ButtonGroup, Modal, DescriptionsItem, Descriptions, Form, FormItem, Input, Select, SelectOption, Tabs, TabPane, Textarea, Spin } from 'ant-design-vue';
+import { onMounted, ref } from 'vue';
+
+const projectStore = useProjectStore();
 
 const config = ref({
     activeTab: '1',
+    isLoading: false,
     evaluationForm: {
         evaluation_strategy: '',
         feedback_strategy: '',
@@ -120,117 +125,135 @@ const data = [
         tags: ['cool', 'teacher'],
     },
 ];
+
+function fetchData() {
+    config.value.isLoading = true;
+
+    ApiRequest.get(`monitoring/${projectStore.projectId}/`)
+        .then((resp) => {
+            console.warn(resp)
+        })
+        .finally(() => config.value.isLoading = false)
+}
+
+onMounted(() => {
+    fetchData();
+});
 </script>
 
 <template>
-    <Tabs v-model:activeKey="config.activeTab" centered class="my-3 mx-3">
-        <TabPane key="1" tab="Indicators Monitoring">
-            <Table :columns="columns" :data-source="data" bordered>
-                <template #title>
-                    <div class="level">
-                        <div class="level-left">
-                            <Typography :level="3">Indicators Monitoring</Typography>
-                        </div>
+    <Spin :spinning="config.isLoading">
+        <Tabs v-model:activeKey="config.activeTab" centered class="my-3 mx-3">
+            <TabPane key="1" tab="Indicators Monitoring">
+                <Table :columns="columns" :data-source="data" bordered>
+                    <template #title>
+                        <div class="level">
+                            <div class="level-left">
+                                <Typography :level="3">Indicators Monitoring</Typography>
+                            </div>
 
-                        <div class="level-right">
+                            <div class="level-right">
+                                <Space>
+                                    <Button type="primary">
+                                        <template #icon>
+                                            <PlusCircleOutlined />
+                                        </template>
+                                        Add Indicator
+                                    </Button>
+
+                                    <Button type="ghost" @click="config.settingsModal.visible = true">
+                                        <template #icon>
+                                            <SettingOutlined />
+                                        </template>
+                                        Settings
+                                    </Button>
+                                </Space>
+                            </div>
+                        </div>
+                    </template>
+
+                    <template #bodyCell="{ column, record }">
+                        <template v-if="column.key === 'indicatorId'">
+                            {{ record.name }}
+                        </template>
+
+                        <template v-if="column.key === 'indicator'">
+                            {{ record.name }}
+                        </template>
+
+                        <template v-if="column.key === 'relatedResults'">
+                            {{ record.name }}
+                        </template>
+
+                        <template v-else-if="column.key === 'tags'">
+                            <span>
+                                <Tag v-for="tag in record.tags" :key="tag"
+                                    :color="tag === 'loser' ? 'volcano' : tag.length > 5 ? 'geekblue' : 'green'">
+                                    {{ tag.toUpperCase() }}
+                                </Tag>
+                            </span>
+                        </template>
+                        <template v-else-if="column.key === 'action'">
+                            <span>
+                                <a>Invite 一 {{ record.name }}</a>
+                                <Divider type="vertical" />
+                                <a>Delete</a>
+                                <Divider type="vertical" />
+                                <a class="ant-dropdown-link">
+                                    More actions
+                                    <down-outlined />
+                                </a>
+                            </span>
+                        </template>
+
+                        <template v-else-if="column.key === 'progress_rate'">
+                            <!-- TODO: Should only display modal -->
+                            <Tag @click="config.evaluationModal.visible = true">x%</Tag>
+                        </template>
+
+                        <template v-else-if="column.key === 'actions'">
                             <Space>
-                                <Button type="primary">
-                                    <template #icon>
-                                        <PlusCircleOutlined />
-                                    </template>
-                                    Add Indicator
-                                </Button>
+                                <Button type="primary" :ghost="true" size="small"
+                                    @click="config.progressTrackingModal.visible = true">Record
+                                    Progress</Button>
 
-                                <Button type="ghost" @click="config.settingsModal.visible = true">
-                                    <template #icon>
-                                        <SettingOutlined />
-                                    </template>
-                                    Settings
-                                </Button>
+                                <!-- TODO: should open edit modal -->
+                                <Button type="primary" :danger="true" :ghost="true" size="small">Edit</Button>
                             </Space>
-                        </div>
-                    </div>
-                </template>
-
-                <template #bodyCell="{ column, record }">
-                    <template v-if="column.key === 'indicatorId'">
-                        {{ record.name }}
+                        </template>
                     </template>
+                </Table>
+            </TabPane>
 
-                    <template v-if="column.key === 'indicator'">
-                        {{ record.name }}
-                    </template>
+            <TabPane key="2" tab="Project Evaluation Strategy">
 
-                    <template v-if="column.key === 'relatedResults'">
-                        {{ record.name }}
-                    </template>
+                <Form class="mx-6" layout="vertical" name="evaluation_strategy_form">
+                    <!-- TODO: Implement saving of form -->
 
-                    <template v-else-if="column.key === 'tags'">
-                        <span>
-                            <Tag v-for="tag in record.tags" :key="tag"
-                                :color="tag === 'loser' ? 'volcano' : tag.length > 5 ? 'geekblue' : 'green'">
-                                {{ tag.toUpperCase() }}
-                            </Tag>
-                        </span>
-                    </template>
-                    <template v-else-if="column.key === 'action'">
-                        <span>
-                            <a>Invite 一 {{ record.name }}</a>
-                            <Divider type="vertical" />
-                            <a>Delete</a>
-                            <Divider type="vertical" />
-                            <a class="ant-dropdown-link">
-                                More actions
-                                <down-outlined />
-                            </a>
-                        </span>
-                    </template>
+                    <FormItem label="How will you evaluate the impact of our project? (evaluation strategy narrative)"
+                        name="evaluation_strategy"
+                        :rules="[{ required: true, message: 'Please input your evaluation strategy!' }]">
+                        <Textarea v-model:value="config.evaluationForm.evaluation_strategy" :rows="8"></Textarea>
+                    </FormItem>
 
-                    <template v-else-if="column.key === 'progress_rate'">
-                        <!-- TODO: Should only display modal -->
-                        <Tag @click="config.evaluationModal.visible = true">x%</Tag>
-                    </template>
+                    <FormItem label="How will you gather and respond to feedback from participants and stakeholders?"
+                        name="feedback_strategy"
+                        :rules="[{ required: true, message: 'Please input your feedback strategy!' }]">
+                        <Textarea v-model:value="config.evaluationForm.feedback_strategy" :rows="8"></Textarea>
+                    </FormItem>
 
-                    <template v-else-if="column.key === 'actions'">
+                    <FormItem>
+                        <!-- TODO: center button -->
                         <Space>
-                            <Button type="primary" :ghost="true" size="small"
-                                @click="config.progressTrackingModal.visible = true">Record
-                                Progress</Button>
-
-                            <!-- TODO: should open edit modal -->
-                            <Button type="primary" :danger="true" :ghost="true" size="small">Edit</Button>
+                            <Button type="primary" html-type="submit">Submit</Button>
                         </Space>
-                    </template>
-                </template>
-            </Table>
-        </TabPane>
+                    </FormItem>
+                </Form>
 
-        <TabPane key="2" tab="Project Evaluation Strategy">
+            </TabPane>
+        </Tabs>
+    </Spin>
 
-            <Form class="mx-6" layout="vertical" name="evaluation_strategy_form">
-                <!-- TODO: Implement saving of form -->
-
-                <FormItem label="How will you evaluate the impact of our project? (evaluation strategy narrative)"
-                    name="evaluation_strategy"
-                    :rules="[{ required: true, message: 'Please input your evaluation strategy!' }]">
-                    <Textarea v-model:value="config.evaluationForm.evaluation_strategy" :rows="8"></Textarea>
-                </FormItem>
-
-                <FormItem label="How will you gather and respond to feedback from participants and stakeholders?"
-                    name="feedback_strategy" :rules="[{ required: true, message: 'Please input your feedback strategy!' }]">
-                    <Textarea v-model:value="config.evaluationForm.feedback_strategy" :rows="8"></Textarea>
-                </FormItem>
-
-                <FormItem>
-                    <!-- TODO: center button -->
-                    <Space>
-                        <Button type="primary" html-type="submit">Submit</Button>
-                    </Space>
-                </FormItem>
-            </Form>
-
-        </TabPane>
-    </Tabs>
 
     <Modal v-model:visible="config.evaluationModal.visible" title="Evaluation Periods" width="800px"
         @ok="config.evaluationModal.onClose()">
