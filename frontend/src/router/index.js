@@ -51,7 +51,7 @@ if (ONLINE) {
       case "signUp":
         console.log(data);
         // TODO: add a/c to sbc
-        const _user = data.payload.data;
+        const _user = data.payload.data.attributes;
         console.log(_user);
 
         ApiRequest.post("users/", {
