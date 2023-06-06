@@ -10,9 +10,12 @@ import Interventions from "../views/Interventions.vue";
 import { useUserStore } from "../stores/user";
 import { Auth } from "aws-amplify";
 import { Hub } from "@aws-amplify/core";
+import { ApiRequest } from "@/apis/api";
+
 import TheoryOfChangeIndex from "@/views/theory-of-change/TheoryOfChangeIndex.vue";
 import MonitoringEvaluationIndex from "@/views/monitoring-n-evaluation/MonitoringEvaluationIndex.vue";
-import { ApiRequest } from "@/apis/api";
+import ProjectManagementIndex from "@/views/project-management/ProjectManagementIndex.vue";
+
 
 const ONLINE = true; // just for coding without internet
 let user;
@@ -101,11 +104,6 @@ const router = createRouter({
       component: Interventions,
     },
     {
-      path: "/activities",
-      name: "activities",
-      component: Activities,
-    },
-    {
       path: "/projects",
       name: "projects",
       component: Projects,
@@ -124,6 +122,11 @@ const router = createRouter({
       path: "/monitoring-and-evaluation",
       name: "monitoring-and-evaluation",
       component: MonitoringEvaluationIndex,
+    },
+    {
+      path: "/project-management",
+      name: "project-management",
+      component: ProjectManagementIndex,
     },
   ],
 });

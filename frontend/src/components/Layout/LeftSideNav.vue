@@ -31,11 +31,14 @@ const menuItems = [
   { label: 'Audiences', name: 'forms', params: { module: 'audiences' } },
   { label: 'Behavioral Drivers', path: '/drivers' },
   { label: 'Approaches', path: '/interventions' },
-  { label: 'Activities', path: '/activities' },
   { label: 'Theory of Change', path: '/toc' },
   { label: 'Communications and Messaging', name: 'forms', params: { module: 'communications' } },
   { label: 'Monitoring and Evaluation', path: '/monitoring-and-evaluation', params: { module: 'monitoring' } },
-  { label: 'Project Management', name: 'forms', params: { module: 'prjmgmt' } },
+  {
+    label: 'Project Management',
+    path: '/project-management',
+    params: { module: 'prjmgmt' }
+  },
   { label: 'Project Documents', name: 'forms', params: { module: 'prjdocs' } },
 ];
 
