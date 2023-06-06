@@ -78,6 +78,8 @@ export const useActivityStore = defineStore({
       let idx = this.activities.findIndex((a) => a.id == activity.id);
       this.activities.splice(idx, 1, activity);
       api.update("activities", activity.id, { ...activity });
+
+      // TODO: implement updating activity via api
     },
 
     async deleteActivity(activityId: number, deleteChildren: boolean = false) {

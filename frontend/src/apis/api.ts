@@ -112,10 +112,13 @@ export class ApiRequest {
       myInit.queryStringParameters = params;
     }
 
-    return API.post(apiName, `/${path}`, myInit).then((response) => {
-      return response.data as T[];
-      // Add your code here
-    });
+    // API.post(apiName, `/${path}`, myInit)
+    return axios
+      .get(`${import.meta.env.VITE_SBC_API_URL}/${path}`, { params })
+      .then((response) => {
+        return response.data as T[];
+        // Add your code here
+      });
   }
 
   static async put<T>(
