@@ -22,3 +22,5 @@ amplifytools.xcconfig
 
 .env.*
 tsconfig.tsbuildinfo
+
+amplify/mock-api-resources

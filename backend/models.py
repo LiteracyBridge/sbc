@@ -2,6 +2,8 @@ from typing import List, Optional
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship, mapped_column
 from sqlalchemy.orm import Mapped
+from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.ext.mutable import MutableDict
 
 from database import Base, SessionLocal, engine
 
@@ -59,6 +61,8 @@ class Project(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
     name: Mapped[str]
+    evaluation_strategy: Mapped[Optional[str]]
+    feedback_strategy: Mapped[Optional[str]]
     is_archived: Mapped[bool] = mapped_column(Boolean, default=False)
     country_id: Mapped[int] = mapped_column(ForeignKey("countries.id"))
 
@@ -302,6 +306,22 @@ class Activity(Base):
         ForeignKey("lu_activity_status.id"), nullable=True
     )
     driver_ids: Mapped[int] = mapped_column(default=[], nullable=True)
+
+
+class Monitoring(Base):
+    __tablename__ = "monitoring"
+
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    target: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    baseline: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    progress: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    data_collection_period: Mapped[Optional[str]]
+    evaluation = mapped_column(MutableDict.as_mutable(JSONB), nullable=True, default={})
+
+    toc_item_indicator_id: Mapped[int] = mapped_column(
+        ForeignKey("theory_of_change_indicators.id"), nullable=True
+    )
+    project_id: Mapped[int] = mapped_column(ForeignKey("projects.id"), nullable=False)
 
 
 Base.metadata.create_all(bind=engine)
