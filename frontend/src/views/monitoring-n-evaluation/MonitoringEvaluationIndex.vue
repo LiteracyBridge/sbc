@@ -206,7 +206,8 @@ onMounted(() => {
 
                         <template v-else-if="column.key === 'progress_rate'">
                             <!-- TODO: Should only display modal -->
-                            <Tag @click="config.evaluationModal.visible = true">{{ record.progress || 0 }}%</Tag>
+                            <Tag @click="config.selectedRow = record; config.evaluationModal.visible = true">{{
+                                record.progress || 0 }}%</Tag>
                         </template>
 
                         <template v-else-if="column.key === 'actions'">
@@ -255,16 +256,12 @@ onMounted(() => {
 
 
     <Modal v-model:visible="config.evaluationModal.visible" title="Evaluation Periods" width="800px"
-        @ok="config.evaluationModal.onClose()">
+        @ok="config.evaluationModal.onClose(); config.selectedRow = null">
         <template #footer></template>
 
-        <Descriptions size="small">
-            <DescriptionsItem label="Week 1">Cloud Database</DescriptionsItem>
-            <DescriptionsItem label="Week 2">Prepaid</DescriptionsItem>
-            <DescriptionsItem label="Week 3">18:00:00</DescriptionsItem>
-            <DescriptionsItem label="Week 6">$80.00</DescriptionsItem>
-            <DescriptionsItem label="Week 7">$20.00</DescriptionsItem>
-            <DescriptionsItem label="Week 9">$60.00</DescriptionsItem>
+        <Descriptions size="small" :label-style="{'fontWeight': 'bold'}">
+            <DescriptionsItem v-for="period in Object.keys(config.selectedRow.evaluation || {})" :label="period"> {{
+                config.selectedRow.evaluation[period] }}</DescriptionsItem>
         </Descriptions>
     </Modal>
 </template>

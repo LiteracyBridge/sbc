@@ -54,8 +54,6 @@ function recordProgress() {
 
       ApiRequest.post<Monitoring>(`monitoring/${props.record.id}/evaluation`, config.value.form)
         .then((resp) => {
-          console.log(resp);
-
           message.success('Progress recorded successfully!');
           emit('isUpdated', resp);
 
