@@ -24,19 +24,22 @@ def upgrade() -> None:
         sa.Column("baseline", sa.Integer(), nullable=True),
         sa.Column("progress", sa.Integer(), nullable=True),
         sa.Column("data_collection_period", sa.String(), nullable=True),
-        sa.Column("evaluation", sa.JSON(), nullable=True, server_default="{}"),
+        sa.Column("evaluation", sa.JSON(), nullable=True, server_default="[]"),
         sa.Column("toc_item_indicator_id", sa.Integer(), nullable=True),
         sa.Column("project_id", sa.Integer(), nullable=False),
+
         sa.PrimaryKeyConstraint("id"),
         sa.ForeignKeyConstraint(
             ["toc_item_indicator_id"],
             ["theory_of_change_indicators.id"],
             name="fk_monitoring_toc_item_indicator_id",
+            ondelete="CASCADE",
         ),
         sa.ForeignKeyConstraint(
             ["project_id"],
             ["projects.id"],
             name="fk_monitoring_project_id",
+            ondelete="CASCADE",
         ),
     )
 

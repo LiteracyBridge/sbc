@@ -5,13 +5,7 @@ from pydantic import BaseModel
 
 from sqlalchemy.orm import Session, joinedload, subqueryload
 from schema import ApiResponse
-from models import (
-    Monitoring,
-    Risk,
-    TheoryOfChangeIndicator,
-    TheoryOfChange,
-    TheoryOfChangeItem,
-)
+from models import Risk, TheoryOfChangeIndicator, TheoryOfChange, TheoryOfChangeItem
 import models
 
 router = APIRouter()
@@ -247,36 +241,12 @@ def update_indicators(
     db.add_all(new_indicators)
     db.commit()
 
-    # Fetch theory of change
     toc_item = (
         db.query(models.TheoryOfChangeItem)
         .filter(models.TheoryOfChangeItem.id == itemId)
         .first()
     )
-    toc = get_toc_by_id(toc_item.theory_of_change_id, db)
-
-    # Create monitoring item
-    toc_indicators = (
-        db.query(models.TheoryOfChangeIndicator)
-        .filter(
-            TheoryOfChangeIndicator.toc_item_id == itemId,
-            TheoryOfChangeIndicator.indicator_id.in_(dto.added),
-        )
-        .all()
-    )
-
-    monitoring_items = []
-    for i in toc_indicators:
-        record = Monitoring()
-        record.toc_item_indicator_id = i.id
-        record.project_id = toc.data[0].project_id
-
-        monitoring_items.append(record)
-
-    db.add_all(monitoring_items)
-    db.commit()
-
-    return toc
+    return get_toc_by_id(toc_item.theory_of_change_id, db)
 
 
 @router.get("/", response_model=ApiResponse)
