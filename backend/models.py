@@ -65,6 +65,7 @@ class Project(Base):
     feedback_strategy: Mapped[Optional[str]]
     is_archived: Mapped[bool] = mapped_column(Boolean, default=False)
     country_id: Mapped[int] = mapped_column(ForeignKey("countries.id"))
+    organisation_id: Mapped[int] = mapped_column(ForeignKey("organisations.id"))
 
     theories_of_change = relationship(
         "TheoryOfChange", back_populates="project", load_on_pending=True

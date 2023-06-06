@@ -16,14 +16,20 @@ branch_labels = None
 depends_on = None
 
 
-
 # Upgrade function
 def upgrade():
-    op.add_column('users', sa.Column('organisation_id', sa.Integer(), nullable=True))
-    op.create_foreign_key('users_organisation_id_fkey', 'users', 'organisations', ['organisation_id'], ['id'])
+    op.add_column("users", sa.Column("organisation_id", sa.Integer(), nullable=True))
+    op.create_foreign_key(
+        "users_organisation_id_fkey",
+        "users",
+        "organisations",
+        ["organisation_id"],
+        ["id"],
+        ondelete="CASCADE",
+    )
 
 
 # Downgrade function
 def downgrade():
-    op.drop_constraint('users_organisation_id_fkey', 'users', type_='foreignkey')
-    op.drop_column('users', 'organisation_id')
+    op.drop_constraint("users_organisation_id_fkey", "users", type_="foreignkey")
+    op.drop_column("users", "organisation_id")
