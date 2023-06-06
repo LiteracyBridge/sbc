@@ -22,15 +22,6 @@ const config = ref({
         evaluation_strategy: '',
         feedback_strategy: '',
     },
-    settingsModal: {
-        visible: false,
-        onClose: () => {
-            config.value.settingsModal.visible = false;
-        },
-        form: {
-            evaluation_period: '',
-        }
-    },
     evaluationModal: {
         visible: false,
         onClose: () => {
@@ -173,12 +164,6 @@ onMounted(() => {
                                         Add Indicator
                                     </Button>
 
-                                    <Button type="ghost" @click="config.settingsModal.visible = true">
-                                        <template #icon>
-                                            <SettingOutlined />
-                                        </template>
-                                        Settings
-                                    </Button>
                                 </Space>
                             </div>
                         </div>
@@ -320,23 +305,5 @@ onMounted(() => {
                 <Input v-model:value="config.progressTrackingModal.form.value" />
             </FormItem>
         </Form>
-    </Modal>
-
-
-    <Modal v-model:visible="config.settingsModal.visible" title="Record Progress" @ok="config.settingsModal.onClose()">
-
-        <Form layout="vertical" name="settings" :model="config.settingsModal.form">
-
-            <!-- TODO: Make this one time configuration -->
-            <FormItem name="period" label="Select Evaluation Period" has-feedback
-                :rules="[{ required: true, message: 'Please select an evaluation period!' }]">
-                <Select v-model:value="config.settingsModal.form.evaluation_period"
-                    placeholder="Please select evaluation period" :show-search="true">
-                    <SelectOption value="weekly">Weekly</SelectOption>
-                    <SelectOption value="monthly">Monthly</SelectOption>
-                </Select>
-            </FormItem>
-        </Form>
-
     </Modal>
 </template>
