@@ -52,10 +52,9 @@ const config = ref({
 
 const columns = [
     {
-        title: 'Indicator ID',
-        name: 'Indicator ID',
-        dataIndex: 'indicatorId',
-        key: 'indicatorId',
+        title: 'Theory of Change Item',
+        dataIndex: 'tocItem',
+        key: 'tocItem',
     },
     {
         title: 'Indicator',
@@ -186,8 +185,8 @@ onMounted(() => {
                     </template>
 
                     <template #bodyCell="{ column, record }">
-                        <template v-if="column.key === 'indicatorId'">
-                            {{ record.name }}
+                        <template v-if="column.key === 'tocItem'">
+                            {{ record.toc_item_indicator.toc_item.name }}
                         </template>
 
                         <template v-if="column.key === 'indicator'">

@@ -31,27 +31,10 @@ def get_monitoring_by_project_id(projectId: int, db: Session = Depends(models.ge
         db.query(Monitoring)
         .filter(Monitoring.project_id == projectId)
         .options(
-            subqueryload(Monitoring.toc_item_indicator).subqueryload(
-                TheoryOfChangeIndicator.indicator
+            subqueryload(Monitoring.toc_item_indicator).options(
+                subqueryload(TheoryOfChangeIndicator.indicator),
+                subqueryload(TheoryOfChangeIndicator.toc_item),
             )
-            #     .subqueryload(TheoryOfChangeItem.indicators)
-            #     .subqueryload(TheoryOfChangeIndicator.indicator),
-        )
-        # .options(joinedload(models.TheoryOfChange.graph))
-        .all()
-    )
-    return record
-
-
-def get_monitoring_by_id(id: int, db: Session = Depends(models.get_db)):
-    record = (
-        db.query(Monitoring)
-        .filter(Monitoring.id == id)
-        .options(
-            subqueryload(Monitoring.toc_item_indicator).subqueryload(
-                TheoryOfChangeIndicator.indicator
-            )
-            #     .subqueryload(TheoryOfChangeItem.indicators)
             #     .subqueryload(TheoryOfChangeIndicator.indicator),
         )
         # .options(joinedload(models.TheoryOfChange.graph))

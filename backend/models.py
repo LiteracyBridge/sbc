@@ -248,6 +248,9 @@ class TheoryOfChangeIndicator(Base):
     indicator_id: Mapped[int] = mapped_column(ForeignKey("lu_indicators.id"))
 
     indicator: Mapped["Indicator"] = relationship("Indicator", load_on_pending=True)
+    toc_item: Mapped["TheoryOfChangeItem"] = relationship(
+        "TheoryOfChangeItem", load_on_pending=True, back_populates="indicators"
+    )
 
 
 class TheoryOfChangeType(Base):
@@ -326,9 +329,6 @@ class Monitoring(Base):
     project_id: Mapped[int] = mapped_column(ForeignKey("projects.id"), nullable=False)
 
     toc_item_indicator = relationship("TheoryOfChangeIndicator")
-
-
-
 
 
 Base.metadata.create_all(bind=engine)

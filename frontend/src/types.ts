@@ -23,13 +23,6 @@ export interface IndicatorGroup {
   link: string;
 }
 
-class TheoryOfChangeIndicator {
-  id: number;
-  theory_of_change_id: number;
-  indicator_id: number;
-  indicator: IndicatorGroup;
-}
-
 export class TheoryOfChangeItem {
   id: number = undefined;
   name: string = "";
@@ -42,6 +35,15 @@ export class TheoryOfChangeItem {
   is_validated: boolean = false;
 
   indicators: Array<TheoryOfChangeIndicator> = [];
+}
+
+class TheoryOfChangeIndicator {
+  id: number;
+  toc_item_id: number;
+  indicator_id: number;
+  indicator: IndicatorGroup;
+
+  toc_item: TheoryOfChangeItem;
 }
 
 export class Risk {

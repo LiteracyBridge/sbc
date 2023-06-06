@@ -8,7 +8,7 @@ import {
   Col, Select, Spin, SelectOption,
   message
 } from 'ant-design-vue';
-import { defineProps, ref, watch } from 'vue';
+import { ref, watch } from 'vue';
 
 const props = defineProps<{ visible: boolean, form: Monitoring }>();
 const emit = defineEmits<{
