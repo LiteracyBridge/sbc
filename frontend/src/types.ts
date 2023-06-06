@@ -101,7 +101,8 @@ export class Monitoring {
   id: number;
   target?: number;
   baseline?: number;
-  data_collection_period?: string;
+  data_collection_method?: string;
+  data_collection_frequency?: string;
   evaluate: any;
 
   toc_item_indicator_id?: number;

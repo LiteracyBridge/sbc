@@ -4,12 +4,14 @@
 
 import { ApiRequest } from '@/apis/api';
 import { useProjectStore } from '@/stores/projects';
+import { Monitoring } from '@/types';
 import { SmileOutlined, DownOutlined, PlusCircleOutlined, SettingOutlined } from '@ant-design/icons-vue';
 import { Tag, Table, Divider, Button, Space, Typography, ButtonGroup, Modal, DescriptionsItem, Descriptions, Form, FormItem, Input, Select, SelectOption, Tabs, TabPane, Textarea, Spin } from 'ant-design-vue';
 import { onMounted, ref } from 'vue';
 
 const projectStore = useProjectStore();
 
+const monitoringData = ref<Array<Monitoring>>([]);
 const config = ref({
     activeTab: '1',
     isLoading: false,
@@ -68,7 +70,7 @@ const columns = [
         title: 'Date Collection Method',
         name: 'Date Collection Method',
         dataIndex: 'dataCollectionMethod',
-        key: 'dataCollectionMethod',
+        key: 'data_collection_method',
     },
     {
         title: 'Frequency of Data Collection',
@@ -76,10 +78,12 @@ const columns = [
         dataIndex: 'frequencyOfCollection',
     },
     {
+        dataIndex: 'target',
         title: 'Target',
         key: 'target',
     },
     {
+        dataIndex: 'baseline',
         title: 'Baseline',
         key: 'baseline',
     },
@@ -129,9 +133,10 @@ const data = [
 function fetchData() {
     config.value.isLoading = true;
 
-    ApiRequest.get(`monitoring/${projectStore.projectId}/`)
+    ApiRequest.get<Monitoring>(`monitoring/${projectStore.projectId}/`)
         .then((resp) => {
             console.warn(resp)
+            monitoringData.value = resp;
         })
         .finally(() => config.value.isLoading = false)
 }
@@ -145,7 +150,7 @@ onMounted(() => {
     <Spin :spinning="config.isLoading">
         <Tabs v-model:activeKey="config.activeTab" centered class="my-3 mx-3">
             <TabPane key="1" tab="Indicators Monitoring">
-                <Table :columns="columns" :data-source="data" bordered>
+                <Table :columns="columns" :data-source="monitoringData" bordered>
                     <template #title>
                         <div class="level">
                             <div class="level-left">
@@ -178,11 +183,19 @@ onMounted(() => {
                         </template>
 
                         <template v-if="column.key === 'indicator'">
-                            {{ record.name }}
+                            {{ record.toc_item_indicator.indicator.name }}
                         </template>
 
                         <template v-if="column.key === 'relatedResults'">
                             {{ record.name }}
+                        </template>
+
+                        <template v-if="column.key === 'dataCollectionMethod'">
+                            {{ record.data_collection_method }}
+                        </template>
+
+                        <template v-if="column.key === 'frequencyOfCollection'">
+                            {{ record.data_collection_frequency }}
                         </template>
 
                         <template v-else-if="column.key === 'tags'">
@@ -193,6 +206,7 @@ onMounted(() => {
                                 </Tag>
                             </span>
                         </template>
+
                         <template v-else-if="column.key === 'action'">
                             <span>
                                 <a>Invite 一 {{ record.name }}</a>
@@ -206,9 +220,17 @@ onMounted(() => {
                             </span>
                         </template>
 
+                        <template v-else-if="column.key === 'target'">
+                            {{ record.target }}
+                        </template>
+
+                        <template v-else-if="column.key === 'baseline'">
+                            {{ record.baseline }}
+                        </template>
+
                         <template v-else-if="column.key === 'progress_rate'">
                             <!-- TODO: Should only display modal -->
-                            <Tag @click="config.evaluationModal.visible = true">x%</Tag>
+                            <Tag @click="config.evaluationModal.visible = true">{{ record.progress || 0 }}%</Tag>
                         </template>
 
                         <template v-else-if="column.key === 'actions'">

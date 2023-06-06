@@ -315,7 +315,8 @@ class Monitoring(Base):
     target: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     baseline: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     progress: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
-    data_collection_period: Mapped[Optional[str]]
+    data_collection_method: Mapped[Optional[str]]
+    data_collection_frequency: Mapped[Optional[str]]
     evaluation = mapped_column(MutableDict.as_mutable(JSONB), nullable=True, default={})
 
     toc_item_indicator_id: Mapped[int] = mapped_column(
