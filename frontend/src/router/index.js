@@ -12,6 +12,7 @@ import { Auth } from "aws-amplify";
 import { Hub } from "@aws-amplify/core";
 import TheoryOfChangeIndex from "@/views/theory-of-change/TheoryOfChangeIndex.vue";
 import MonitoringEvaluationIndex from "@/views/monitoring-n-evaluation/MonitoringEvaluationIndex.vue";
+import { ApiRequest } from "@/apis/api";
 
 const ONLINE = true; // just for coding without internet
 let user;
@@ -42,13 +43,36 @@ if (ONLINE) {
 
   console.log("online");
   Hub.listen("auth", async (data) => {
-    if (data.payload.event === "signOut") {
-      user = null;
-      useUserStore().setUser();
-      router.push({ path: "/login" });
-    } else if (data.payload.event === "signIn") {
-      user = await getUser();
-      router.push({ path: "/" });
+    switch (data.payload.event) {
+      case "signIn":
+        user = await getUser();
+        router.push({ path: "/" });
+        break;
+      case "signUp":
+        console.log(data);
+        // TODO: add a/c to sbc
+        const _user = data.payload.data;
+        console.log(_user);
+
+        ApiRequest.post("users/", {
+          email: _user.email,
+          name: _user.name,
+        }).then((resp) => {
+          console.log("account created");
+          console.warn(resp);
+        });
+        console.log("user signed up");
+        break;
+      case "signOut":
+        user = null;
+        useUserStore().setUser();
+        router.push({ path: "/login" });
+        break;
+      case "signIn_failure":
+        console.log("user sign in failed");
+        break;
+      case "configured":
+        console.log("the Auth module is configured");
     }
   });
 }

@@ -9,7 +9,8 @@
 		"vue.inlayHints.missingProps": true,
 		"vue.server.petiteVue.supportHtmlFile": true,
 		"cSpell.words": [
-			"joinedload"
+			"joinedload",
+			"organisation"
 		],
 		"typescript.tsdk": "node_modules/typescript/lib",
 		"[python]": {
