@@ -114,9 +114,9 @@ export class ApiRequest {
 
     // API.post(apiName, `/${path}`, myInit)
     return axios
-      .get(`${import.meta.env.VITE_SBC_API_URL}/${path}`, { params })
+      .post(`${import.meta.env.VITE_SBC_API_URL}/${path}`, body, { params })
       .then((response) => {
-        return response.data as T[];
+        return response.data.data as T[];
         // Add your code here
       });
   }

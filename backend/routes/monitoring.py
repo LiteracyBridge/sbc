@@ -1,3 +1,4 @@
+from functools import reduce
 from typing import List, Optional
 from dataclass_wizard import asdict, fromdict
 from fastapi import APIRouter, Depends, HTTPException
@@ -24,6 +25,11 @@ class UpdateMonitoringDto(BaseModel):
     data_collection_method: Optional[str]
     data_collection_frequency: Optional[str]
     evaluation_period: Optional[str]
+
+
+class RecordProgressDto(BaseModel):
+    value: Optional[int]
+    period: Optional[str]
 
 
 def get_monitoring_by_project_id(projectId: int, db: Session = Depends(models.get_db)):
@@ -61,10 +67,33 @@ def update_item(
 
     record.target = dto.target
     record.baseline = dto.baseline
-    # record.progress = dto.progress
     record.data_collection_method = dto.data_collection_method
     record.data_collection_frequency = dto.data_collection_frequency
     record.evaluation_period = dto.evaluation_period
+
+    db.commit()
+
+    return ApiResponse(data=get_monitoring_by_project_id(record.project_id, db))
+
+
+@router.post("/{id}/evaluation", response_model=ApiResponse)
+def record_progress(
+    id: int,
+    dto: RecordProgressDto,
+    db: Session = Depends(models.get_db),
+):
+    record = db.query(Monitoring).filter(Monitoring.id == id).first()
+
+    if record is None:
+        raise HTTPException(status_code=404, detail="Item not found")
+
+    evaluation = record.evaluation
+    if evaluation is None:
+        evaluation = {}
+
+    evaluation[dto.period] = dto.value
+    record.evaluation = evaluation
+    record.progress = (sum(evaluation.values()) / record.target) * 100
 
     db.commit()
 

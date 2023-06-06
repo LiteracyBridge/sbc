@@ -8,7 +8,9 @@ import { Monitoring } from '@/types';
 import { SmileOutlined, DownOutlined, PlusCircleOutlined, SettingOutlined } from '@ant-design/icons-vue';
 import { Tag, Table, Divider, Button, Space, Typography, ButtonGroup, Modal, DescriptionsItem, Descriptions, Form, FormItem, Input, Select, SelectOption, Tabs, TabPane, Textarea, Spin } from 'ant-design-vue';
 import { onMounted, ref } from 'vue';
+
 import MonitoringEditModal from './MonitoringEditModal.vue';
+import ProgressTrackingModal from './ProgressTrackingModal.vue';
 
 const projectStore = useProjectStore();
 
@@ -16,7 +18,7 @@ const monitoringData = ref<Array<Monitoring>>([]);
 const config = ref({
     activeTab: '1',
     isLoading: false,
-    selectedMonitoring: undefined,
+    selectedRow: undefined,
     editModalVisible: false,
     evaluationForm: {
         evaluation_strategy: '',
@@ -99,29 +101,6 @@ const columns = [
     },
 ];
 
-const data = [
-    {
-        key: '1',
-        name: 'John Brown',
-        age: 32,
-        address: 'New York No. 1 Lake Park',
-        tags: ['nice', 'developer'],
-    },
-    {
-        key: '2',
-        name: 'Jim Green',
-        age: 42,
-        address: 'London No. 1 Lake Park',
-        tags: ['loser'],
-    },
-    {
-        key: '3',
-        name: 'Joe Black',
-        age: 32,
-        address: 'Sidney No. 1 Lake Park',
-        tags: ['cool', 'teacher'],
-    },
-];
 
 function fetchData() {
     config.value.isLoading = true;
@@ -137,13 +116,18 @@ function fetchData() {
 onMounted(() => {
     fetchData();
 });
+
 </script>
 
 <template>
-    <MonitoringEditModal v-if="config.selectedMonitoring != null" :visible="config.editModalVisible"
-        :form="config.selectedMonitoring" @is-closed="config.selectedMonitoring = null; config.editModalVisible = false;"
-        @is-updated="monitoringData = $event">
+    <MonitoringEditModal v-if="config.selectedRow != null" :visible="config.editModalVisible" :form="config.selectedRow"
+        @is-closed="config.selectedRow = null; config.editModalVisible = false;" @is-updated="monitoringData = $event">
     </MonitoringEditModal>
+
+    <ProgressTrackingModal v-if="config.selectedRow != null" :visible="config.progressTrackingModal.visible"
+        @is-closed="config.progressTrackingModal.visible = true" :record="config.selectedRow"
+        @is-updated="monitoringData = $event">
+    </ProgressTrackingModal>
 
     <Spin :spinning="config.isLoading">
         <Tabs v-model:activeKey="config.activeTab" centered class="my-3 mx-3">
@@ -228,12 +212,12 @@ onMounted(() => {
                         <template v-else-if="column.key === 'actions'">
                             <Space>
                                 <Button type="primary" :ghost="true" size="small"
-                                    @click="config.progressTrackingModal.visible = true">Record
+                                    @click="config.selectedRow = record; config.progressTrackingModal.visible = true">Record
                                     Progress</Button>
 
                                 <!-- TODO: should open edit modal -->
                                 <Button type="primary" :danger="true" :ghost="true" size="small"
-                                    @click="config.selectedMonitoring = record; config.editModalVisible = true;">Edit</Button>
+                                    @click="config.selectedRow = record; config.editModalVisible = true;">Edit</Button>
                             </Space>
                         </template>
                     </template>
@@ -282,28 +266,5 @@ onMounted(() => {
             <DescriptionsItem label="Week 7">$20.00</DescriptionsItem>
             <DescriptionsItem label="Week 9">$60.00</DescriptionsItem>
         </Descriptions>
-    </Modal>
-
-
-    <Modal v-model:visible="config.progressTrackingModal.visible" title="Record Progress"
-        @ok="config.progressTrackingModal.onClose()">
-
-        <Form layout="vertical" name="progress_tracking_form">
-
-            <!-- TODO: exclude already tracked periods from dropdown -->
-            <FormItem name="period" label="Select Period" has-feedback
-                :rules="[{ required: true, message: 'Please select a period!' }]">
-                <Select v-model:value="config.progressTrackingModal.form.period" placeholder="Please period"
-                    :show-search="true">
-                    <SelectOption value="week 1">Week 1</SelectOption>
-                    <SelectOption value="week 2">Week 2</SelectOption>
-                    <SelectOption value="week 3">Week 3</SelectOption>
-                </Select>
-            </FormItem>
-
-            <FormItem label="Value" name="value" :rules="[{ required: true, message: 'Please input your username!' }]">
-                <Input v-model:value="config.progressTrackingModal.form.value" />
-            </FormItem>
-        </Form>
     </Modal>
 </template>

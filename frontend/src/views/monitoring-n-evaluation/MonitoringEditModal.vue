@@ -16,7 +16,7 @@ const emit = defineEmits<{
   (e: 'isUpdated', data: Monitoring[]): void,
 }>()
 
-const monitorEditModalFormRef = ref<FormInstance>(),
+const monitorEditFormRef = ref<FormInstance>(),
   config = ref({
     visible: props.visible,
     isLoading: false,
@@ -28,14 +28,14 @@ watch((props), (newProps) => {
 }, { deep: true })
 
 function closeModal() {
-  monitorEditModalFormRef.value.resetFields();
+  monitorEditFormRef.value.resetFields();
   config.value.visible = false;
 
   emit('isClosed', true);
 }
 
 function saveForm() {
-  monitorEditModalFormRef.value
+  monitorEditFormRef.value
     .validateFields()
     .then(values => {
       config.value.isLoading = true;
@@ -61,12 +61,11 @@ function saveForm() {
 </script>
 
 <template>
-  <!-- Monitory item edit modal -->
   <Modal v-model:visible="config.visible" title="Update Indicator Monitoring" ok-text="Update" cancel-text="Cancel"
     @cancel="closeModal()" :mask-closable="false" @ok="saveForm">
 
     <Spin :spinning="config.isLoading">
-      <Form layout="vertical" ref="monitorEditModalFormRef" name="monitoring_edit" :model="props.form">
+      <Form layout="vertical" ref="monitorEditFormRef" name="monitoring_edit" :model="props.form">
 
         <!-- TODO: exclude already tracked periods from dropdown -->
         <FormItem name="data_collection_method" label="Data collection method" has-feedback
