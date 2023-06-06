@@ -276,7 +276,7 @@ def update_indicators(
     db.add_all(monitoring_items)
     db.commit()
 
-    return toc
+    return get_toc_by_id(toc_item.theory_of_change_id, db)
 
 
 @router.get("/", response_model=ApiResponse)

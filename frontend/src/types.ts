@@ -103,7 +103,8 @@ export class Monitoring {
   baseline?: number;
   data_collection_method?: string;
   data_collection_frequency?: string;
-  evaluate: any;
+  evaluation: any;
+  evaluation_period?: string;
 
   toc_item_indicator_id?: number;
   project_id?: number;

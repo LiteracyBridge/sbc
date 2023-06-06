@@ -127,7 +127,7 @@ export class ApiRequest {
     headers?: {
       [key: string]: any;
     }
-  ): Promise<T | null> {
+  ): Promise<T[] | null> {
     const apiName = "sbc-api";
     // const path = "/users";
     const myInit = {
@@ -144,15 +144,14 @@ export class ApiRequest {
       myInit.queryStringParameters = params;
     }
 
-    return API.put(apiName, `/${path}`, myInit)
-      .then((response) => {
-        return response.data as T;
-        // Add your code here
-      })
-      .catch((error) => {
-        console.log(error.response);
+    return API.put(apiName, `/${path}`, myInit).then((response) => {
+      return response.data as T[];
+      // Add your code here
+    });
+    // .catch((error) => {
+    //   console.log(error.response);
 
-        return null;
-      });
+    //   return null;
+    // });
   }
 }

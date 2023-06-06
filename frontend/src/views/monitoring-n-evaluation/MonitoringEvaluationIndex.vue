@@ -8,6 +8,7 @@ import { Monitoring } from '@/types';
 import { SmileOutlined, DownOutlined, PlusCircleOutlined, SettingOutlined } from '@ant-design/icons-vue';
 import { Tag, Table, Divider, Button, Space, Typography, ButtonGroup, Modal, DescriptionsItem, Descriptions, Form, FormItem, Input, Select, SelectOption, Tabs, TabPane, Textarea, Spin } from 'ant-design-vue';
 import { onMounted, ref } from 'vue';
+import MonitoringEditModal from './MonitoringEditModal.vue';
 
 const projectStore = useProjectStore();
 
@@ -15,6 +16,8 @@ const monitoringData = ref<Array<Monitoring>>([]);
 const config = ref({
     activeTab: '1',
     isLoading: false,
+    selectedMonitoring: undefined,
+    editModalVisible: false,
     evaluationForm: {
         evaluation_strategy: '',
         feedback_strategy: '',
@@ -69,13 +72,13 @@ const columns = [
     {
         title: 'Date Collection Method',
         name: 'Date Collection Method',
-        dataIndex: 'dataCollectionMethod',
+        dataIndex: 'data_collection_method',
         key: 'data_collection_method',
     },
     {
         title: 'Frequency of Data Collection',
-        key: 'frequencyOfCollection',
-        dataIndex: 'frequencyOfCollection',
+        key: 'data_collection_frequency',
+        dataIndex: 'data_collection_frequency',
     },
     {
         dataIndex: 'target',
@@ -147,6 +150,11 @@ onMounted(() => {
 </script>
 
 <template>
+    <MonitoringEditModal v-if="config.selectedMonitoring != null" :visible="config.editModalVisible"
+        :form="config.selectedMonitoring" @is-closed="config.selectedMonitoring = null; config.editModalVisible = false;"
+        @is-updated="monitoringData = $event">
+    </MonitoringEditModal>
+
     <Spin :spinning="config.isLoading">
         <Tabs v-model:activeKey="config.activeTab" centered class="my-3 mx-3">
             <TabPane key="1" tab="Indicators Monitoring">
@@ -190,11 +198,11 @@ onMounted(() => {
                             {{ record.name }}
                         </template>
 
-                        <template v-if="column.key === 'dataCollectionMethod'">
+                        <template v-if="column.key === 'data_collection_method'">
                             {{ record.data_collection_method }}
                         </template>
 
-                        <template v-if="column.key === 'frequencyOfCollection'">
+                        <template v-if="column.key === 'data_collection_frequency'">
                             {{ record.data_collection_frequency }}
                         </template>
 
@@ -240,7 +248,8 @@ onMounted(() => {
                                     Progress</Button>
 
                                 <!-- TODO: should open edit modal -->
-                                <Button type="primary" :danger="true" :ghost="true" size="small">Edit</Button>
+                                <Button type="primary" :danger="true" :ghost="true" size="small"
+                                    @click="config.selectedMonitoring = record; config.editModalVisible = true;">Edit</Button>
                             </Space>
                         </template>
                     </template>

@@ -16,6 +16,15 @@
 		"[python]": {
 			"editor.defaultFormatter": "ms-python.black-formatter"
 		},
+		"[typescript]": {
+			"editor.indentSize": "2"
+		},
+		"[javascript]": {
+			"editor.indentSize": "2"
+		},
+		"[vue]": {
+			"editor.indentSize": "2"
+		},
 		"python.formatting.provider": "none",
 		"mypy.runUsingActiveInterpreter": false,
 		"mypy.dmypyExecutable": "${workspaceFolder}/backend/venv/bin/dmypy",

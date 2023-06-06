@@ -25,6 +25,7 @@ def upgrade() -> None:
         sa.Column("progress", sa.Integer(), nullable=True),
         sa.Column("data_collection_method", sa.String(), nullable=True),
         sa.Column("data_collection_frequency", sa.String(), nullable=True),
+        sa.Column("evaluation_period", sa.String(), nullable=True),
         sa.Column("evaluation", sa.JSON(), nullable=True, server_default="[]"),
         sa.Column("toc_item_indicator_id", sa.Integer(), nullable=True),
         sa.Column("project_id", sa.Integer(), nullable=False),
