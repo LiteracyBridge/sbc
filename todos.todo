@@ -1,5 +1,9 @@
+Today:
+    ☐ filter projects by organisation
+    ☐ show an error page for users without organisation setup on sign in
+
 Frontend:
     Theory of Change:
-        ☐ Graph re-render error
-        ☐ Toc template
+        ✔ Graph re-render error @done(23-06-07 12:37)
+        ✔ Toc template @done(23-06-07 12:37)
         ☐ Toc examples browser

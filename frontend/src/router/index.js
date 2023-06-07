@@ -15,21 +15,42 @@ import { ApiRequest } from "@/apis/api";
 import TheoryOfChangeIndex from "@/views/theory-of-change/TheoryOfChangeIndex.vue";
 import MonitoringEvaluationIndex from "@/views/monitoring-n-evaluation/MonitoringEvaluationIndex.vue";
 import ProjectManagementIndex from "@/views/project-management/ProjectManagementIndex.vue";
-
+import Unauthorized from "@/views/Unauthorized.vue";
+// import { User } from "@/types";
 
 const ONLINE = true; // just for coding without internet
 let user;
 
 async function getUser() {
   return Auth.currentAuthenticatedUser()
-    .then((data) => {
+    .then(async (data) => {
       if (data && data.signInUserSession) {
-        useUserStore().setUser(
-          data.attributes.email,
-          data.signInUserSession.accessToken.jwtToken
+        // Verify user from server
+        return await ApiRequest.get(`users/${data.attributes.email}`).then(
+          async (resp) => {
+            console.warn(resp);
+
+            if (resp.length == 0) {
+              await Auth.signOut();
+              return { authorized: false };
+            }
+
+            const user = {
+              ...resp[0],
+              token: data.signInUserSession.accessToken.jwtToken,
+            };
+            // TODO: save full info into state
+
+            useUserStore().setUser(
+              data.attributes.email,
+              data.signInUserSession.accessToken.jwtToken
+            );
+            return { ...data, authorized: true };
+          }
         );
-        return data;
       }
+
+      return null;
     })
     .catch(() => {
       useUserStore().setUser();
@@ -39,7 +60,8 @@ async function getUser() {
 
 if (ONLINE) {
   getUser().then((user) => {
-    if (user) {
+    console.log(user);
+    if (user?.authorized == true) {
       router.push({ path: "/" });
     }
   });
@@ -49,7 +71,12 @@ if (ONLINE) {
     switch (data.payload.event) {
       case "signIn":
         user = await getUser();
-        router.push({ path: "/" });
+        if (user?.authorized) {
+          router.push({ path: "/" });
+        } else {
+          router.push({ path: "/unauthorized" });
+        }
+        // router.push({ path: "/" });
         break;
       case "signUp":
         console.log(data);
@@ -127,6 +154,11 @@ const router = createRouter({
       path: "/project-management",
       name: "project-management",
       component: ProjectManagementIndex,
+    },
+    {
+      path: "/unauthorized",
+      name: "unauthorized",
+      component: Unauthorized,
     },
   ],
 });

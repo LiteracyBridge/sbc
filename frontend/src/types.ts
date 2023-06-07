@@ -3,6 +3,7 @@ export class User {
   email: string;
   name: string;
   address?: string;
+  token?: string;
   last_project_id?: number;
   organization_id?: number;
 }
