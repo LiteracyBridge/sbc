@@ -66,14 +66,20 @@ def get_user_by_email(email: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Email is required")
 
     user = db.query(User).filter(User.email == email).first()
-    print(user)
 
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
 
     if user.organisation_id is None:
-        # TODO: try to update user's organisation id if not set
-        return ApiResponse(data=[])
-        # raise HTTPException(status_code=404, detail="User not found")
+        # If the user is not associated with an organisation, check if they have an invitation
+        # and if so, associate them with the organisation
+        invitation = db.query(Invitation).filter(Invitation.email == email).first()
+
+        if invitation is None:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        user.organisation_id = invitation.organisation_id
+        db.commit()
+        db.refresh(user)
 
     return ApiResponse(data=[user])
