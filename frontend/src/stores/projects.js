@@ -165,6 +165,7 @@ export const useProjectStore = defineStore({
         name,
         country_id,
         private_prj,
+        organisation_id: useUserStore().organisation_id,
       });
 
       // create entry in db user_projects table, no id needed

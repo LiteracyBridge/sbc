@@ -12,6 +12,8 @@ export const useUserStore = defineStore({
       name: null,
       address_as: null,
       last_project_id: null,
+      organisation_id: null,
+      token: null,
     } as User;
   },
   getters: {
@@ -29,41 +31,37 @@ export const useUserStore = defineStore({
     async fetchUser(email: string) {},
 
     // Set the user details based on email and token, if provided
-    async setUser(email?: string, token?: string) {
-      this.email = email;
-      if (email == null) {
-        this.id = null;
-        this.name = null;
-        this.address_as = null;
-        this.last_project_id = null;
+    async setUser(user?: User) {
+      if (user == null) {
+        this.$state = new User();
+        return;
+      }
+
+      this.$state = user;
+
+      // FIXME: Rewrite to use users endpoint
+      // Query user details from the database
+      const response = await api.downloadObject(
+        "users",
+        ["id", "name", "address_as", "last_project_id"],
+        "email=" + this.email
+      );
+
+      // Check whether there's a match for the user's email
+      if (response.length > 0) {
+        // At least one user with that email address (hopefully only one -- take the first one)
+        this.$state = response[0] as User;
+        useProjectStore().setPrj(this.last_project_id);
       } else {
-        // Query user details from the database
-        const response = await api.downloadObject(
-          "users",
-          ["id", "name", "address_as", "last_project_id"],
-          "email=" + this.email
-        );
+        // No user with that email -- create one so we can have a user_id
+        // Name cannot be null
+        const user_attributes = user;
+        const user_id = await api.insert("users", user_attributes);
 
-        // Check whether there's a match for the user's email
-        if (response.length > 0) {
-          // At least one user with that email address (hopefully only one -- take the first one)
-          this.$state = response[0] as User;
-          useProjectStore().setPrj(this.last_project_id);
-        } else {
-          // No user with that email -- create one so we can have a user_id
-          // Name cannot be null
-          const user_attributes: User = {
-            id: null,
-            name: null,
-            email: email,
-            last_project_id: null,
-          };
-          const user_id = await api.insert("users", user_attributes);
-
-          user_attributes["id"] = user_id;
-          this.$state = user_attributes;
-          console.log(this.$state);
-        }
+        console.log(user_id);
+        user_attributes["id"] = user_id;
+        this.$state = user_attributes;
+        console.log(this.$state);
       }
     },
   },

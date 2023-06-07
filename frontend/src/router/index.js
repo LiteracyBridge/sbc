@@ -18,7 +18,6 @@ import ProjectManagementIndex from "@/views/project-management/ProjectManagement
 import Unauthorized from "@/views/Unauthorized.vue";
 // import { User } from "@/types";
 
-const ONLINE = true; // just for coding without internet
 let user;
 
 async function getUser() {
@@ -34,17 +33,10 @@ async function getUser() {
               await Auth.signOut();
               return { authorized: false };
             }
-
-            const user = {
+            useUserStore().setUser({
               ...resp[0],
               token: data.signInUserSession.accessToken.jwtToken,
-            };
-            // TODO: save full info into state
-
-            useUserStore().setUser(
-              data.attributes.email,
-              data.signInUserSession.accessToken.jwtToken
-            );
+            });
             return { ...data, authorized: true };
           }
         );
@@ -58,54 +50,51 @@ async function getUser() {
     });
 }
 
-if (ONLINE) {
-  getUser().then((user) => {
-    console.log(user);
-    if (user?.authorized == true) {
-      router.push({ path: "/" });
-    }
-  });
+getUser().then((user) => {
+  console.log(user);
+  if (user?.authorized == true) {
+    router.push({ path: "/" });
+  }
+});
 
-  console.log("online");
-  Hub.listen("auth", async (data) => {
-    switch (data.payload.event) {
-      case "signIn":
-        user = await getUser();
-        if (user?.authorized) {
-          router.push({ path: "/" });
-        } else {
-          router.push({ path: "/unauthorized" });
-        }
-        // router.push({ path: "/" });
-        break;
-      case "signUp":
-        console.log(data);
-        // TODO: add a/c to sbc
-        const _user = data.payload.data.attributes;
-        console.log(_user);
+Hub.listen("auth", async (data) => {
+  switch (data.payload.event) {
+    case "signIn":
+      user = await getUser();
+      if (user?.authorized) {
+        router.push({ path: "/" });
+      } else {
+        router.push({ path: "/unauthorized" });
+      }
+      // router.push({ path: "/" });
+      break;
+    case "signUp":
+      console.log(data);
+      // TODO: add a/c to sbc
+      const _user = data.payload.data.attributes;
+      console.log(_user);
 
-        ApiRequest.post("users/", {
-          email: _user.email,
-          name: _user.name,
-        }).then((resp) => {
-          console.log("account created");
-          console.warn(resp);
-        });
-        console.log("user signed up");
-        break;
-      case "signOut":
-        user = null;
-        useUserStore().setUser();
-        router.push({ path: "/login" });
-        break;
-      case "signIn_failure":
-        console.log("user sign in failed");
-        break;
-      case "configured":
-        console.log("the Auth module is configured");
-    }
-  });
-}
+      ApiRequest.post("users/", {
+        email: _user.email,
+        name: _user.name,
+      }).then((resp) => {
+        console.log("account created");
+        console.warn(resp);
+      });
+      console.log("user signed up");
+      break;
+    case "signOut":
+      user = null;
+      useUserStore().setUser();
+      router.push({ path: "/login" });
+      break;
+    case "signIn_failure":
+      console.log("user sign in failed");
+      break;
+    case "configured":
+      console.log("the Auth module is configured");
+  }
+});
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),

@@ -5,7 +5,7 @@ export class User {
   address_as?: string;
   token?: string;
   last_project_id?: number;
-  organization_id?: number;
+  organisation_id?: number;
 }
 
 export interface IndicatorType {
