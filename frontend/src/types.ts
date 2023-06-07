@@ -2,7 +2,7 @@ export class User {
   id: number;
   email: string;
   name: string;
-  address?: string;
+  address_as?: string;
   token?: string;
   last_project_id?: number;
   organization_id?: number;
