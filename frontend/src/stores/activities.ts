@@ -62,7 +62,15 @@ export const useActivityStore = defineStore({
       }
     },
     download() {
-      api.downloadObjects(init_objects, this, "", true);
+      this.$state.isLoading = true;
+      ApiRequest.get<Activity>(`activity/${useProjectStore().prj_id}`)
+        .then((resp) => {
+          this.$state.activities = resp;
+        })
+        .catch((err) => message.error(err.message))
+        .finally(() => (this.$state.isLoading = false));
+
+      // api.downloadObjects(init_objects, this, "", true);
     },
     async addActivity(activity: Activity) {
       activity.prj_id ??= useProjectStore().prj_id;
@@ -84,7 +92,6 @@ export const useActivityStore = defineStore({
       let idx = this.activities.findIndex((a) => a.id == activity.id);
       api.update("activities", activity.id, { ...activity });
       this.activities.splice(idx, 1, activity as any);
-
     },
 
     async deleteActivity(activityId: number, deleteChildren: boolean = false) {

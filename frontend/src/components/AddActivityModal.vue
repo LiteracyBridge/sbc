@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 
 import { ref, reactive, watch } from "vue";
-import { Activity, useActivityStore } from "../stores/activities";
+import { useActivityStore } from "../stores/activities";
 import { useLookupStore } from "../stores/lookups";
 import { useProjectStore } from "../stores/projects";
 import { useInterventionStore } from "../stores/interventions";
@@ -9,6 +9,7 @@ import { useDriverStore } from "../stores/drivers"
 import { useUserStore } from "@/stores/user";
 import { useParticipantStore } from "../stores/participants";
 import { Button, Col, Form, FormItem, Input, Modal, Row, Select, SelectOption, type FormInstance, Textarea } from "ant-design-vue";
+import { Activity } from "@/types";
 
 
 const props = defineProps<{ draftActivity: Activity, modelValue: boolean }>();
@@ -109,9 +110,10 @@ const saveForm = () => {
 
         <Col :span="12">
         <FormItem name="intervention_id" label="Supported Intervention" has-feedback
-          :rules="[{ required: true, message: 'Please select an intervention!' }]">
+          :rules="[{ required: false, message: 'Please select an intervention!' }]">
 
-          <Select v-model:value="draftActivity.intervention_id" placeholder="Select intervention" :show-search="true">
+          <Select v-model:value="draftActivity.intervention_id" placeholder="Select intervention" :show-search="true"
+            :allow-clear="true">
             <SelectOption :value="null">None</SelectOption>
             <SelectOption v-for="intervention in interventionStore.interventions" :value="intervention.id"
               :key="intervention.id">

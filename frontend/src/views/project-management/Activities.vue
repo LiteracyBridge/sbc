@@ -9,7 +9,7 @@ import { useParticipantStore } from '@/stores/participants'
 import { useUserStore } from "@/stores/user";
 import { useRouter } from 'vue-router'
 import AddActivityModal from '@/components/AddActivityModal.vue';
-import { Button, Table, Tag, Typography } from "ant-design-vue";
+import { Button, Spin, Table, Tag, Typography } from "ant-design-vue";
 import { PlusCircleOutlined } from "@ant-design/icons-vue";
 
 const showAddModal = ref(false);
@@ -39,6 +39,9 @@ function editActivity(activity) {
   showEditModal.value = true;
 }
 
+onMounted(() => {
+  activityStore.download();
+})
 const columns = [
   {
     title: 'Name',
@@ -60,11 +63,6 @@ const columns = [
     dataIndex: 'duration',
     key: 'duration',
   },
-  // {
-  //   title: 'To',
-  //   dataIndex: 'to',
-  //   key: 'to',
-  // },
   {
     title: 'Intervention',
     dataIndex: 'intervention',
@@ -79,66 +77,68 @@ const columns = [
 </script>
 
 <template>
-  <Table :columns="columns" :data-source="activityStore.topLevelActivities" bordered>
-    <template #title>
-      <div class="level">
-        <div class="level-left">
-          <Typography :level="3">Project Activities</Typography>
-        </div>
+  <Spin :spinning="activityStore.isLoading">
+    <Table :columns="columns" :data-source="activityStore.topLevelActivities" bordered>
+      <template #title>
+        <div class="level">
+          <div class="level-left">
+            <Typography :level="3">Project Activities</Typography>
+          </div>
 
-        <div class="level-right">
-          <Button type="primary" @click="showAddModal = true">
-            <template #icon>
-              <PlusCircleOutlined />
-            </template>
-            Add Activity
-          </Button>
+          <div class="level-right">
+            <Button type="primary" @click="showAddModal = true">
+              <template #icon>
+                <PlusCircleOutlined />
+              </template>
+              Add Activity
+            </Button>
 
-          <!-- <Button type="ghost" @click="config.settingsModal.visible = true">
+            <!-- <Button type="ghost" @click="config.settingsModal.visible = true">
                 <template #icon>
                   <SettingOutlined />
                 </template>
                 Settings
               </Button> -->
+          </div>
         </div>
-      </div>
-    </template>
-
-    <template #bodyCell="{ column, record: activity }">
-      <template v-if="column.key === 'name'">
-        <a @click="editActivity(activity)">{{ activity.name }}</a>
-
-        <!-- TODO: display subactivities in a modal -->
-        <Tag>sub activities</Tag>
       </template>
 
-      <template v-if="column.key === 'status'">
-        {{ lookupStore.lookupNameById('activity_status', activity.status_id) }}
-      </template>
+      <template #bodyCell="{ column, record: activity }">
+        <template v-if="column.key === 'name'">
+          <a @click="editActivity(activity)">{{ activity.name }}</a>
 
-      <template v-if="column.key === 'owner'">
-        {{ projectStore.userName(activity.owner_id) }}
-      </template>
+          <!-- TODO: display subactivities in a modal -->
+          <Tag>sub activities</Tag>
+        </template>
 
-      <template v-if="column.key === 'duration'">
-        {{ activityStore.fromDate(activity.id) }} - {{ activityStore.toDate(activity.id) }}
-      </template>
+        <template v-if="column.key === 'status'">
+          {{ lookupStore.lookupNameById('activity_status', activity.status_id) }}
+        </template>
 
-      <template v-if="column.key === 'intervention'">
-        {{ interventionStore.interventionNameById(activity.intervention_id) }}
-      </template>
+        <template v-if="column.key === 'owner'">
+          {{ projectStore.userName(activity.owner_id) }}
+        </template>
 
-      <template v-if="column.key === 'drivers'">
-        <span v-if="activity.driver_ids && activity.driver_ids.length == 1">{{
-          driverStore.nameById(activity.driver_ids[0]) }}
-        </span>
+        <template v-if="column.key === 'duration'">
+          {{ activityStore.fromDate(activity.id) }} - {{ activityStore.toDate(activity.id) }}
+        </template>
 
-        <span v-else>
-          <i>{{ activity.driver_ids.length }} drivers</i>
-        </span>
+        <template v-if="column.key === 'intervention'">
+          {{ interventionStore.interventionNameById(activity.intervention_id) }}
+        </template>
+
+        <template v-if="column.key === 'drivers'">
+          <span v-if="activity.driver_ids && activity.driver_ids.length == 1">{{
+            driverStore.nameById(activity.driver_ids[0]) }}
+          </span>
+
+          <span v-else>
+            <i>{{ activity.driver_ids.length }} drivers</i>
+          </span>
+        </template>
       </template>
-    </template>
-  </Table>
+    </Table>
+  </Spin>
 
   <!-- TODO: display sub activites in a modal -->
   <!-- <template v-if="expandActivity.includes(activity.id)">
@@ -232,7 +232,4 @@ const columns = [
 </template>
 
 <style>
-.vertical-center {
-  margin: 2rem;
-}
 </style>
