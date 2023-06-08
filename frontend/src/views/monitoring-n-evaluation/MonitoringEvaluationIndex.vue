@@ -6,7 +6,7 @@ import { ApiRequest } from '@/apis/api';
 import { useProjectStore } from '@/stores/projects';
 import { Monitoring } from '@/types';
 import { SmileOutlined, DownOutlined, PlusCircleOutlined, SettingOutlined } from '@ant-design/icons-vue';
-import { Tag, Table, Divider, Button, Space, Typography, ButtonGroup, Modal, DescriptionsItem, Descriptions, Form, FormItem, Input, Select, SelectOption, Tabs, TabPane, Textarea, Spin } from 'ant-design-vue';
+import { Tag, Table, Divider, Button, Space, Typography, ButtonGroup, Modal, DescriptionsItem, Descriptions, Form, FormItem, Input, Select, SelectOption, Tabs, TabPane, Textarea, Spin, message } from 'ant-design-vue';
 import { onMounted, ref } from 'vue';
 
 import MonitoringEditModal from './MonitoringEditModal.vue';
@@ -105,11 +105,12 @@ const columns = [
 function fetchData() {
     config.value.isLoading = true;
 
-    ApiRequest.get<Monitoring>(`monitoring/${projectStore.projectId}`)
+    ApiRequest.get<Monitoring>(`monitoring/${projectStore.prj_id}`)
         .then((resp) => {
             console.warn(resp)
             monitoringData.value = resp;
         })
+        .catch(err => message.error(err.message))
         .finally(() => config.value.isLoading = false)
 }
 
@@ -197,8 +198,10 @@ onMounted(() => {
 
                         <template v-else-if="column.key === 'progress_rate'">
                             <!-- TODO: Should only display modal -->
-                            <Tag @click="config.selectedRow = record; config.evaluationModal.visible = true">{{
-                                record.progress || 0 }}%</Tag>
+                            <Tag :color="'cyan'"
+                                @click="config.selectedRow = record; config.evaluationModal.visible = true">
+                                <Typography :level="'4'">{{ record.progress || 0 }}% </Typography>
+                            </Tag>
                         </template>
 
                         <template v-else-if="column.key === 'actions'">
@@ -250,7 +253,7 @@ onMounted(() => {
         @ok="config.evaluationModal.onClose(); config.selectedRow = null">
         <template #footer></template>
 
-        <Descriptions size="small" :label-style="{'fontWeight': 'bold'}">
+        <Descriptions size="small" :label-style="{ 'fontWeight': 'bold' }">
             <DescriptionsItem v-for="period in Object.keys(config.selectedRow.evaluation || {})" :label="period"> {{
                 config.selectedRow.evaluation[period] }}</DescriptionsItem>
         </Descriptions>
