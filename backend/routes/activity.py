@@ -13,7 +13,6 @@ router = APIRouter()
 
 # Types
 class ActivityDto(BaseModel):
-    id: Optional[int]
     name: str
     notes: Optional[str]
     url: Optional[str]

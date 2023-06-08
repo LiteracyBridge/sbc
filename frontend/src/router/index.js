@@ -27,8 +27,6 @@ async function getUser() {
         // Verify user from server
         return await ApiRequest.get(`users/${data.attributes.email}`).then(
           async (resp) => {
-            console.warn(resp);
-
             if (resp.length == 0) {
               await Auth.signOut();
               return { authorized: false };

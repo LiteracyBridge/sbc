@@ -1,12 +1,14 @@
 <script lang="ts" setup>
 import { useActivityStore } from "../stores/activities";
 import { useInterventionStore } from "../stores/interventions";
-import { ref, computed } from "vue";
-import { Button, Collapse, CollapsePanel } from "ant-design-vue";
-import { CheckCircleOutlined, DeleteOutlined } from "@ant-design/icons-vue";
+import { ref, computed, onMounted } from "vue";
+import { Button, Collapse, CollapsePanel, Spin, TabPane, Tabs } from "ant-design-vue";
+import { CheckCircleOutlined, DeleteOutlined, PlusCircleOutlined } from "@ant-design/icons-vue";
+import { groupBy } from 'lodash-es'
 
 const config = ref({
-  activePanel: ''
+  activePanel: '',
+  activeTab: ''
 })
 
 const activityStore = useActivityStore();
@@ -15,24 +17,92 @@ const selectedPrjDriver = ref(null);
 
 
 function addIntervention(intervention: { name: string, id: number }) {
+
   let driver_ids: number[] = [];
   if (selectedPrjDriver.value) {
     driver_ids = [selectedPrjDriver.value.id];
   }
-  activityStore.addActivity({ name: intervention.name, driver_ids, intervention_id: intervention.id })
+  activityStore.addActivity({
+    name: intervention.name, driver_ids, intervention_id: intervention.id
+  })
 }
 
 const getInterventions = computed(() => {
+
   return interventionStore.interventions.filter((i) => {
     return i.name != 'Social movements';
   })
+})
+
+const drivers = computed(() => {
+  const data = groupBy(interventionStore.project_drivers.map(d => {
+    return {
+      ...d,
+      interventions: interventionStore.interventions
+        .filter(i => d.intervention_ids.includes(i.id))
+    }
+  }), 'name')
+  return Object.keys(data).map(name => {
+    return {
+      name,
+      interventions: data[name].flatMap((i) => i.interventions)
+    }
+  })
+})
+
+onMounted(() => {
+  interventionStore.downloadProjectDrivers()
+    .then(() => {
+      if (interventionStore.project_drivers.length > 0) {
+        config.value.activeTab = interventionStore.project_drivers[0].name
+      }
+    })
 })
 
 </script>
 
 <template>
   <section class="section">
-    <Collapse v-model:activeKey="config.activePanel">
+    <Spin :spinning="interventionStore.loading || activityStore.isLoading">
+      <Tabs v-model:activeKey="config.activeTab" tab-position="left" type="card">
+
+        <TabPane v-for="driver in drivers" :key="driver.name" :tab="driver.name">
+
+          <Collapse v-model:activeKey="config.activePanel">
+
+            <CollapsePanel v-for="intervention in driver.interventions" :key="intervention.key"
+              :header="intervention.name">
+              <template #extra>
+                <Button v-if="!interventionStore.activityIds(intervention.id).length"
+                  @click="addIntervention(intervention)" type="primary" :ghost="true">
+                  <template #icon>
+                    <PlusCircleOutlined />
+                  </template>
+                  Add
+                </Button>
+
+                <Button v-if="interventionStore.activityIds(intervention.id).length"
+                  @click="activityStore.deleteIntervention(intervention.id)" type="ghost" :danger="true" size="small">
+                  <template #icon>
+                    <DeleteOutlined />
+                  </template>
+                  Remove
+                </Button>
+
+              </template>
+
+              <p class="is-italic">{{ intervention.text_short }}</p>
+              <br />
+              <p>{{ intervention.text_long }}</p>
+            </CollapsePanel>
+
+          </Collapse>
+        </TabPane>
+
+      </Tabs>
+    </Spin>
+
+    <!-- <Collapse v-model:activeKey="config.activePanel">
 
       <CollapsePanel v-for="intervention in getInterventions" :key="intervention.key" :header="intervention.name">
         <template #extra>
@@ -59,6 +129,6 @@ const getInterventions = computed(() => {
         <p>{{ intervention.text_long }}</p>
       </CollapsePanel>
 
-    </Collapse>
+    </Collapse> -->
   </section>
 </template>

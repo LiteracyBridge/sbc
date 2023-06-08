@@ -4,6 +4,7 @@ import { downloadObject, downloadObjects } from "@/apis/lambda.js";
 import { useDriverStore } from "./drivers";
 import { useProjectStore } from "./projects";
 import { ApiRequest } from "@/apis/api";
+import { message } from "ant-design-vue";
 
 const init_objects = {
   interventions: { id: 0, name: "", text_short: "", text_long: "" },
@@ -13,6 +14,8 @@ export const useInterventionStore = defineStore({
   id: "interventions",
   state: () => ({
     interventions: [],
+    project_drivers: [],
+    loading: false,
   }),
   getters: {
     interventionById: (state) => (interventionId: number) =>
@@ -63,12 +66,13 @@ export const useInterventionStore = defineStore({
     },
     // Download data
     downloadProjectDrivers() {
-      ApiRequest.get(`project/drivers/${useProjectStore().prj_id}`).then(
-        (drivers) => {
-          console.warn("downloading project drivers");
-          console.warn(drivers);
-        }
-      );
+      this.$state.loading = true;
+      return ApiRequest.get(`project/drivers/${useProjectStore().prj_id}`)
+        .then((drivers) => {
+          this.$state.project_drivers = drivers;
+        })
+        .catch((error) => message.error(error))
+        .finally(() => (this.$state.loading = false));
     },
   },
 });

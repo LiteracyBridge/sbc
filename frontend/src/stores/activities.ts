@@ -3,6 +3,8 @@ import { useUserStore } from "./user";
 import * as api from "../apis/lambda";
 import { ApiRequest } from "@/apis/api";
 import { Activity, Schedule } from "@/types";
+import { useProjectStore } from "./projects";
+import { message } from "ant-design-vue";
 
 const init_objects: { activities: Activity; schedules: Schedule } = {
   activities: new Activity(),
@@ -12,8 +14,9 @@ const init_objects: { activities: Activity; schedules: Schedule } = {
 export const useActivityStore = defineStore({
   id: "activities",
   state: () => ({
-    activities: [],
+    activities: [] as Activity[],
     schedules: [],
+    isLoading: false,
   }),
   getters: {
     driverInActivities: (state) => (driverId: number) =>
@@ -61,25 +64,27 @@ export const useActivityStore = defineStore({
     download() {
       api.downloadObjects(init_objects, this, "", true);
     },
-
     async addActivity(activity: Activity) {
-      delete activity.id;
-      const table = "activities";
-      // const newId = await api.insert(table, { ...activity }); //const newId = 99; //
-      const resp = await ApiRequest.post("activity", { ...activity });
-      console.warn("created activity");
-      console.warn(resp);
-      // activity.id = newId;
-      this.activities.push(activity);
+      activity.prj_id ??= useProjectStore().prj_id;
+      activity.editing_user_id = useUserStore().id;
+
+      this.$state.isLoading = true;
+      await ApiRequest.post<Activity>("activity", { ...activity })
+        .then((resp) => {
+          this.$state.activities = resp;
+          message.success("Activity created successfully!");
+        })
+        .catch((err) => message.error(err.message))
+        .finally(() => (this.$state.isLoading = false));
     },
 
     updateActivity(activity: Partial<Activity>) {
       // console.log(activity);
-      let idx = this.activities.findIndex((a) => a.id == activity.id);
-      this.activities.splice(idx, 1, activity);
-      api.update("activities", activity.id, { ...activity });
-
       // TODO: implement updating activity via api
+      let idx = this.activities.findIndex((a) => a.id == activity.id);
+      api.update("activities", activity.id, { ...activity });
+      this.activities.splice(idx, 1, activity as any);
+
     },
 
     async deleteActivity(activityId: number, deleteChildren: boolean = false) {
