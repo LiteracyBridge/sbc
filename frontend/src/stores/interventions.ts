@@ -1,6 +1,9 @@
 import { defineStore } from "pinia";
 import { useActivityStore } from "./activities";
-import { downloadObjects } from "@/apis/lambda.js";
+import { downloadObject, downloadObjects } from "@/apis/lambda.js";
+import { useDriverStore } from "./drivers";
+import { useProjectStore } from "./projects";
+import { ApiRequest } from "@/apis/api";
 
 const init_objects = {
   interventions: { id: 0, name: "", text_short: "", text_long: "" },
@@ -12,10 +15,10 @@ export const useInterventionStore = defineStore({
     interventions: [],
   }),
   getters: {
-    interventionById: (state) => (interventionId) =>
+    interventionById: (state) => (interventionId: number) =>
       state.interventions.find((i) => i.id == interventionId),
     interventionNameById: (state) =>
-      function (interventionId) {
+      function (interventionId: number) {
         let name = "";
         const intervention = state.interventions.find(
           (i) => i.id == interventionId
@@ -25,14 +28,14 @@ export const useInterventionStore = defineStore({
         }
         return name;
       },
-    interventionsByDriver: (state) => (driver) =>
+    interventionsByDriver: (state) => (driver: any) =>
       driver.intervention_ids
         ? state.interventions.filter((i) =>
-            driver.intervention_ids.some((id) => id === i.id)
+            driver.intervention_ids.some((id: number) => id === i.id)
           )
         : null,
     activityIds: (state) =>
-      function (interventionId) {
+      function (interventionId: number) {
         const activityStore = useActivityStore();
         return activityStore.activities.reduce(
           (prev, current) =>
@@ -42,15 +45,30 @@ export const useInterventionStore = defineStore({
           []
         );
       },
+    groupedByDrivers: (state) => {
+      const $drivers = useDriverStore().drivers_in_prj;
+
+      console.log($drivers);
+    },
   },
   actions: {
     clear() {
-      for (const property of Object.keys(this.$state)) {
-        this.$state[property] = [];
-      }
+      this.$state.interventions = [];
+      // for (const property of Object.keys(this.$state)) {
+      //   this.$state.[property] = [];
+      // }
     },
     download() {
       downloadObjects(init_objects, this, "lu_");
+    },
+    // Download data
+    downloadProjectDrivers() {
+      ApiRequest.get(`project/drivers/${useProjectStore().prj_id}`).then(
+        (drivers) => {
+          console.warn("downloading project drivers");
+          console.warn(drivers);
+        }
+      );
     },
   },
 });

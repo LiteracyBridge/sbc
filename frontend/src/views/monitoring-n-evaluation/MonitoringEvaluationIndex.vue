@@ -105,7 +105,7 @@ const columns = [
 function fetchData() {
     config.value.isLoading = true;
 
-    ApiRequest.get<Monitoring>(`monitoring/${projectStore.projectId}/`)
+    ApiRequest.get<Monitoring>(`monitoring/${projectStore.projectId}`)
         .then((resp) => {
             console.warn(resp)
             monitoringData.value = resp;

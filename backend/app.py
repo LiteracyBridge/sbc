@@ -4,7 +4,7 @@ import uvicorn
 from fastapi import Depends, FastAPI, HTTPException
 from mangum import Mangum
 
-from routes import users, indicators, theory_of_change, activity, monitoring
+from routes import users, indicators, theory_of_change, activity, monitoring, project
 from monitoring import logging_config
 from middlewares.correlation_id_middleware import CorrelationIdMiddleware
 from middlewares.logging_middleware import LoggingMiddleware
@@ -94,6 +94,12 @@ app.include_router(
     monitoring.router,
     prefix="/monitoring",
     tags=["monitoring"],
+    dependencies=[Depends(models.get_db)],
+)
+app.include_router(
+    project.router,
+    prefix="/project",
+    tags=["project"],
     dependencies=[Depends(models.get_db)],
 )
 

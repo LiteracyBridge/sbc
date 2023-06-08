@@ -85,10 +85,12 @@ def create(dto: ActivityDto, db: Session = Depends(models.get_db)):
     # Create a new record in the toc graph table
     toc_item = TheoryOfChangeItem()
     toc_item.name = dto.name
+    # TODO: make this optional
     toc_item.type_id = 2  # id of the activity type
     toc_item.from_id = None
     toc_item.to_id = None
-    toc_item.sem_id = 1  # id of the sem type. TODO: make this dynamic
+    # TODO: make this optional
+    toc_item.sem_id = 1  # id of the sem type.
     toc_item.description = dto.notes
     toc_item.theory_of_change_id = get_toc_by_project_id(dto.prj_id, db).id
 
