@@ -8,9 +8,11 @@ import { useProjectStore } from '@/stores/projects'
 import { useParticipantStore } from '@/stores/participants'
 import { useUserStore } from "@/stores/user";
 import { useRouter } from 'vue-router'
-import AddActivityModal from '@/components/AddActivityModal.vue';
 import { Button, Space, Spin, Table, Tag, Typography } from "ant-design-vue";
 import { PlusCircleOutlined } from "@ant-design/icons-vue";
+
+import AddActivityModal from './AddActivityModal.vue';
+import SubActivitiesModal from "./SubActivitiesModal.vue";
 
 const showAddModal = ref(false);
 const showEditModal = ref(false);
@@ -23,7 +25,10 @@ const projectStore = useProjectStore();
 const participantStore = useParticipantStore();
 const expandActivity = ref([]);
 
-onMounted(() => userStore.loggedIn ? null : useRouter().push({ path: '/login' }));
+const config = ref({
+  selectedActivity: null,
+  subActivityModal: { visible: false },
+});
 
 const activityStore = useActivityStore();
 
@@ -77,6 +82,10 @@ const columns = [
 </script>
 
 <template>
+  <SubActivitiesModal :visible="config.subActivityModal.visible"
+    @is-closed="config.selectedActivity = null; config.subActivityModal.visible = false"
+    :activity="config.selectedActivity" v-if="config.selectedActivity != null"></SubActivitiesModal>
+
   <Spin :spinning="activityStore.isLoading">
     <Table :columns="columns" :data-source="activityStore.topLevelActivities" bordered>
       <template #title>
@@ -108,7 +117,10 @@ const columns = [
           <Space>
             <a @click="editActivity(activity)">{{ activity.name }}</a>
 
-            <Tag :style="{'border-radius': '10px'}" :color="'#108ee9'">sub activities</Tag>
+            <Tag :style="{ 'border-radius': '10px' }" :color="'#108ee9'" v-if="expandActivity.includes(activity.id)"
+              @click="config.selectedActivity = activity; config.subActivityModal.visible = true">
+              sub activities
+            </Tag>
           </Space>
         </template>
 

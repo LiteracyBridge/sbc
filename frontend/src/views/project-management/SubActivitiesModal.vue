@@ -1,42 +1,43 @@
 <script lang="ts" setup>
 import { onMounted, ref, reactive, watch } from "vue";
-import { useActivityStore } from "../stores/activities";
-import { useInterventionStore } from "../stores/interventions";
-import { useDriverStore } from "../stores/drivers";
+import { useActivityStore } from "@/stores/activities";
+import { useInterventionStore } from "@/stores/interventions";
+import { useDriverStore } from "@/stores/drivers";
 import { useLookupStore } from "@/stores/lookups";
 import { useProjectStore } from '@/stores/projects'
 import { useParticipantStore } from '@/stores/participants'
 import { useUserStore } from "@/stores/user";
-import { useRouter } from 'vue-router'
-import AddActivityModal from '../components/AddActivityModal.vue';
-import { Button, Table, Tag, Typography } from "ant-design-vue";
-import { PlusCircleOutlined } from "@ant-design/icons-vue";
+import { Button, Modal, Space, Spin, Table, Tag, Typography } from "ant-design-vue";
+import { Activity } from "@/types";
 
-const showAddModal = ref(false);
-const showEditModal = ref(false);
 
-const userStore = useUserStore();
 const interventionStore = useInterventionStore();
 const driverStore = useDriverStore();
 const lookupStore = useLookupStore();
 const projectStore = useProjectStore();
-const participantStore = useParticipantStore();
-const expandActivity = ref([]);
 
-onMounted(() => userStore.loggedIn ? null : useRouter().push({ path: '/login' }));
+const emit = defineEmits<{
+  (e: 'isClosed', status: boolean): boolean,
+}>()
+const props = defineProps<{ activity: Activity, visible: boolean }>()
+
+const config = ref({ visible: false })
 
 const activityStore = useActivityStore();
 
-const emptyActivity = reactive({
-  name: '', parent_id: null, intervention_id: null,
-  driver_ids: [], owner_id: null, status_id: 1, notes: '', url: ''
-});
 
-const draftActivity = ref(null);
+// function editActivity(activity) {
+//   draftActivity.value = JSON.parse(JSON.stringify(activity));
+//   showEditModal.value = true;
+// }
 
-function editActivity(activity) {
-  draftActivity.value = JSON.parse(JSON.stringify(activity));
-  showEditModal.value = true;
+watch(props, (newProps) => {
+  config.value.visible = newProps.visible
+}, { deep: true })
+
+function closeModal() {
+  config.value.visible = false
+  emit('isClosed', false)
 }
 
 const columns = [
@@ -60,11 +61,6 @@ const columns = [
     dataIndex: 'duration',
     key: 'duration',
   },
-  // {
-  //   title: 'To',
-  //   dataIndex: 'to',
-  //   key: 'to',
-  // },
   {
     title: 'Intervention',
     dataIndex: 'intervention',
@@ -79,38 +75,16 @@ const columns = [
 </script>
 
 <template>
-  <section class="section">
-    <Table :columns="columns" :data-source="activityStore.topLevelActivities" bordered>
-      <template #title>
-        <div class="level">
-          <div class="level-left">
-            <Typography :level="3">Project Activities</Typography>
-          </div>
+  <Modal title="Sub Activities" v-model:visible="config.visible" @cancel="closeModal()" @ok="closeModal()">
 
-          <div class="level-right">
-            <Button type="primary" @click="showAddModal = true">
-              <template #icon>
-                <PlusCircleOutlined />
-              </template>
-              Add Activity
-            </Button>
-
-            <!-- <Button type="ghost" @click="config.settingsModal.visible = true">
-                <template #icon>
-                  <SettingOutlined />
-                </template>
-                Settings
-              </Button> -->
-          </div>
-        </div>
-      </template>
-
+    <Table :columns="columns" :data-source="activityStore.subActivitiesByActivityId(activity.id)" bordered>
       <template #bodyCell="{ column, record: activity }">
         <template v-if="column.key === 'name'">
-          <a @click="editActivity(activity)">{{ activity.name }}</a>
+          <Space>
+            <a @click="editActivity(activity)">{{ activity.name }}</a>
 
-          <!-- TODO: display subactivities in a modal -->
-          <Tag>sub activities</Tag>
+            <Tag :style="{ 'border-radius': '10px' }" :color="'#108ee9'">sub activities</Tag>
+          </Space>
         </template>
 
         <template v-if="column.key === 'status'">
@@ -135,42 +109,13 @@ const columns = [
           </span>
 
           <span v-else>
-            <i>{{ activity.driver_ids.length }} drivers</i>
+            <i>0 drivers</i>
           </span>
         </template>
       </template>
     </Table>
+  </Modal>
 
-    <!-- TODO: display sub activites in a modal -->
-    <!-- <template v-if="expandActivity.includes(activity.id)">
-      <tr v-for="subActivity in activityStore.subActivitiesByActivityId(activity.id)" class="has-text-weight-normal">
-        <td></td>
-        <td>{{ subActivity.id }}</td>
-        <td><span class="mx-2"><a @click="editActivity(subActivity)">{{ subActivity.name }}</a></span></td>
-        <td>{{ lookupStore.lookupNameById('activity_status', subActivity.status_id) }}</td>
-        <td>{{ projectStore.userName(subActivity.owner_id) }}</td>
-        <td>{{ activityStore.fromDate(subActivity.id) }}</td>
-        <td>{{ activityStore.toDate(subActivity.id) }}</td>
-        <td>{{ interventionStore.interventionNameById(subActivity.intervention_id) }}</td>
-        <td v-if="subActivity.driver_ids && subActivity.driver_ids.length == 1">
-          {{ driverStore.nameById(subActivity.driver_ids[0]) }}</td>
-        <td v-else><i>{{ subActivity.driver_ids.length }} drivers</i></td>
-      </tr>
-    </template> -->
-  </section>
-
-  <!-- <button class="button is-primary m-4" @click.prevent="showAddModal = true">
-    <span v-if="!showAddModal">Add</span>
-  </button> -->
-
-  <!-- <button class="button" @click.prevent = "showEditModal = true">
-    <span v-if="!showEditModal">Edit Activity</span>
-  </button> -->
-  <AddActivityModal v-if="showAddModal" :draft-activity="emptyActivity" v-model="showAddModal" />
-
-  <!-- TODO: fix this -->
-  <AddActivityModal v-if="showEditModal" @update:model-value="showEditModal = $event" v-model="showEditModal"
-    :draft-activity="emptyActivity" />
 
   <!-- <table class="table">
     <thead>
@@ -234,7 +179,4 @@ const columns = [
 </template>
 
 <style>
-.vertical-center {
-  margin: 2rem;
-}
 </style>
