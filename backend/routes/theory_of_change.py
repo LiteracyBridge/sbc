@@ -131,6 +131,8 @@ def create_item(
     db.add(record)
     db.commit()
 
+    # Create activity item if toc item is an activity
+
     # if dto.to_id is not None:
     #     # Query for the to_id and link it to the from_id
     #     to_record = (
@@ -207,23 +209,6 @@ def delete_item(
     db.commit()
 
     return get_toc_by_id(id, db)
-
-
-@router.post("/{id}/item/{item_id}", response_model=ApiResponse)
-def add_item(id: int, item_id: int, db: Session = Depends(models.get_db)):
-    resp = (
-        db.query(models.TheoryOfChangeItem)
-        .filter(
-            models.TheoryOfChangeItem.id == item_id,
-            models.TheoryOfChangeItem.theory_of_change_id == id,
-        )
-        .first()
-    )
-
-    db.delete(resp)
-    db.commit()
-
-    return ApiResponse(data=[resp])
 
 
 @router.post("/{itemId}/indicators", response_model=ApiResponse)
