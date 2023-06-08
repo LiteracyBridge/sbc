@@ -9,10 +9,13 @@ import { SmileOutlined, DownOutlined, PlusCircleOutlined, SettingOutlined } from
 import { Tag, Table, Divider, Button, Space, Typography, ButtonGroup, Modal, DescriptionsItem, Descriptions, Form, FormItem, Input, Select, SelectOption, Tabs, TabPane, Textarea, Spin, message } from 'ant-design-vue';
 import { onMounted, ref } from 'vue';
 
+import { useTheoryOfChangeStore } from '@/stores/theory_of_change';
 import MonitoringEditModal from './MonitoringEditModal.vue';
 import ProgressTrackingModal from './ProgressTrackingModal.vue';
+import AddMonitoringIndicatorModal from './AddMonitoringIndicatorModal.vue';
 
-const projectStore = useProjectStore();
+const projectStore = useProjectStore(),
+    theoryOfChangeStore = useTheoryOfChangeStore();
 
 const monitoringData = ref<Array<Monitoring>>([]);
 const config = ref({
@@ -20,6 +23,7 @@ const config = ref({
     isLoading: false,
     selectedRow: undefined,
     editModalVisible: false,
+    indicatorModalVisible: false,
     evaluationForm: {
         evaluation_strategy: '',
         feedback_strategy: '',
@@ -107,7 +111,6 @@ function fetchData() {
 
     ApiRequest.get<Monitoring>(`monitoring/${projectStore.prj_id}`)
         .then((resp) => {
-            console.warn(resp)
             monitoringData.value = resp;
         })
         .catch(err => message.error(err.message))
@@ -115,7 +118,10 @@ function fetchData() {
 }
 
 onMounted(() => {
-    fetchData();
+    Promise.all([
+        fetchData(),
+        theoryOfChangeStore.download()
+    ]);
 });
 
 </script>
@@ -124,6 +130,10 @@ onMounted(() => {
     <MonitoringEditModal v-if="config.selectedRow != null" :visible="config.editModalVisible" :form="config.selectedRow"
         @is-closed="config.selectedRow = null; config.editModalVisible = false;" @is-updated="monitoringData = $event">
     </MonitoringEditModal>
+
+    <AddMonitoringIndicatorModal :visible="config.indicatorModalVisible" @is-closed="config.indicatorModalVisible = false"
+        @is-updated="fetchData()">
+    </AddMonitoringIndicatorModal>
 
     <ProgressTrackingModal v-if="config.selectedRow != null" :visible="config.progressTrackingModal.visible"
         @is-closed="config.progressTrackingModal.visible = true" :record="config.selectedRow"
@@ -142,7 +152,7 @@ onMounted(() => {
 
                             <div class="level-right">
                                 <Space>
-                                    <Button type="primary">
+                                    <Button type="primary" @click="config.indicatorModalVisible = true">
                                         <template #icon>
                                             <PlusCircleOutlined />
                                         </template>

@@ -11,7 +11,7 @@ import { useProjectStore } from "./projects";
 import { message } from "ant-design-vue";
 
 export const useTheoryOfChangeStore = defineStore({
-  id: "activities",
+  id: "theory_of_change",
   state: () => ({
     theory_of_change: {} as TheoryOfChange,
     indicator_groups: [] as IndicatorGroup[],
