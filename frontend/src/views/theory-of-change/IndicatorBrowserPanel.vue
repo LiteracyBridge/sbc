@@ -1,25 +1,24 @@
 <script lang="ts" setup>
 
 import { ref, onMounted, computed, watch } from "vue";
-import { ApiRequest } from "@/apis/api";
-import { type IndicatorGroup, type IndicatorType, TheoryOfChangeItem, TheoryOfChange } from "@/types";
 import { Collapse, CollapsePanel, Empty, Drawer, Space, Divider, TypographyTitle, Select } from "ant-design-vue";
-
+import { useTheoryOfChangeStore } from "@/stores/theory_of_change";
+import { IndicatorType, TheoryOfChange, TheoryOfChangeItem } from "@/types";
 
 const emit = defineEmits<{
   (e: 'isClosed', status: boolean): boolean
-  (e: 'isSaved', resp: TheoryOfChange | TheoryOfChange[]): TheoryOfChange | TheoryOfChange[]
+  (e: 'isSaved', resp: TheoryOfChange | TheoryOfChange[]): TheoryOfChange
 }>()
 
 const props = defineProps<{ tocItem: TheoryOfChangeItem, isVisible: boolean }>();
+
+const theoryOfChangeStore = useTheoryOfChangeStore();
 
 const
   collapseKey = ref<string[]>([]),
   selectedMainIndicatorType = ref<{ value: number, label: string }>(),
   selectedGroupType = ref<IndicatorType>(),
   isFetchingIndicators = ref(false),
-  mainIndicators = ref<IndicatorType[]>([]),
-  indicatorsList = ref<IndicatorGroup[]>([]),
   config = ref<{
     isLoading: boolean,
     indicators: Record<string, boolean>,
@@ -31,7 +30,7 @@ const
 const isOpened = computed(() => props.isVisible)
 
 const getMainIndicators = computed(() => {
-  return mainIndicators.value.filter(i => i.parent_id == null);
+  return theoryOfChangeStore.indicatorTypes.filter(i => i.parent_id == null);
 });
 
 const selectedIndicatorGroups = computed(() => {
@@ -41,7 +40,7 @@ const selectedIndicatorGroups = computed(() => {
     return [];
   }
 
-  return mainIndicators.value.filter(i => i.parent_id == selectedMainIndicatorType.value as unknown as number);
+  return theoryOfChangeStore.indicatorTypes.filter(i => i.parent_id == selectedMainIndicatorType.value as unknown as number);
 });
 
 const groupIndicators = computed(() => {
@@ -49,7 +48,7 @@ const groupIndicators = computed(() => {
     return [];
   }
 
-  return indicatorsList.value.filter(i => i.group_id == selectedGroupType.value?.id);
+  return theoryOfChangeStore.indicatorGroups.filter(i => i.group_id == selectedGroupType.value?.id);
 })
 
 const filterOption = (input: string, option: any) => {
@@ -75,27 +74,10 @@ onMounted(() => {
   buildIndicatorsTree(props.tocItem?.indicators ?? []);
 
   isFetchingIndicators.value = true;
-  Promise.all([
-    ApiRequest.get<IndicatorType[]>("indicators/types")
-      .then((resp) => {
-        console.log(resp)
-        if (resp != null) {
-          mainIndicators.value = resp;
-        }
-      }),
 
-    ApiRequest.get<IndicatorGroup[]>("indicators/")
-      .then((resp) => {
-        console.log(resp)
-
-        if (resp != null) {
-          indicatorsList.value = resp;
-        }
-      })
-  ]).then((resp) => {
+  theoryOfChangeStore.fetchIndicators().then(resp => {
     buildIndicatorsTree(props.tocItem?.indicators ?? [])
-  })
-    .finally(() => isFetchingIndicators.value = false);
+  }).finally(() => isFetchingIndicators.value = false);
 })
 
 
@@ -105,11 +87,11 @@ watch(props, (newProp) => {
   // Update panel with ToC item existing indicator
   const _indicators = newProp.tocItem?.indicators ?? [];
   if (_indicators.length > 0) {
-    const indicator = indicatorsList.value.find(i => i.id == _indicators[0].indicator_id);
-    const indicatorType = mainIndicators.value.find(i => i.id == indicator?.group_id);
+    const indicator = theoryOfChangeStore.indicatorGroups.find(i => i.id == _indicators[0].indicator_id);
+    const indicatorType = theoryOfChangeStore.indicatorTypes.find(i => i.id == indicator?.group_id);
 
     selectedGroupType.value = indicatorType;
-    const _find = mainIndicators.value.find(i => i.id == indicatorType?.parent_id);
+    const _find = theoryOfChangeStore.indicatorTypes.find(i => i.id == indicatorType?.parent_id);
     selectedMainIndicatorType.value = { value: _find?.id ?? 0, label: _find?.name ?? "" }
   }
 }, { deep: true });
@@ -126,15 +108,13 @@ const saveIndicators = async () => {
     return config.value.indicators[i]
   }).filter(i => props.tocItem.indicators.find(ind => ind.indicator_id == +i) == null)
 
-  await ApiRequest.post<TheoryOfChange>(`theory-of-change/${props.tocItem.id}/indicators`, {
-    added: added,
-    removed: removed,
-  }).then(resp => {
-    emit("isSaved", resp);
-    closePanel();
-  }).finally(() => {
-    config.value.isLoading = false;
-  });
+  theoryOfChangeStore.saveIndicators({ tocItemId: props.tocItem.id, added: added, removed: removed })
+    .then(resp => {
+      emit("isSaved", theoryOfChangeStore.theory_of_change);
+      closePanel();
+    }).finally(() => {
+      config.value.isLoading = false;
+    });
 }
 
 </script>

@@ -8,20 +8,20 @@ export class User {
   organisation_id?: number;
 }
 
-export interface IndicatorType {
+export class IndicatorType {
   id: number;
-  name: string;
+  name: string = '';
   parent_id?: number;
 }
 
-export interface IndicatorGroup {
+export class IndicatorGroup {
   id: number;
-  name: string;
+  name: string = "";
   group_id: number;
   // level: string;
-  phrasing: string;
-  purpose: string;
-  link: string;
+  phrasing: string = "";
+  purpose: string = "";
+  link: string = "";
 }
 
 export class TheoryOfChangeItem {

@@ -15,6 +15,7 @@ import { useProjectStore } from '@/stores/projects';
 import { Button, Divider, Form, FormItem, Input, Modal, Space, Spin, Switch, Textarea } from "ant-design-vue";
 import TheoryOfChangeExamplesBrowser from "./TheoryOfChangeExamplesBrowser.vue";
 import { PlusCircleOutlined, RotateRightOutlined, SwapLeftOutlined, SwapOutlined } from "@ant-design/icons-vue";
+import { useTheoryOfChangeStore } from "@/stores/theory_of_change";
 
 const THEORY_OF_CHANGE_TYPES: Record<string, string> = {
   "1": "Input",
@@ -55,7 +56,8 @@ const theoryOfChangeModel = ref<{
     isExamplePanelVisible: false,
   });
 
-const projectStore = useProjectStore()
+const projectStore = useProjectStore(),
+  theoryOfChangeStore = useTheoryOfChangeStore();
 
 const diagramContainer = ref(null);
 const fromNodeId = ref(null);
@@ -332,16 +334,12 @@ const diagram = reactive({
 });
 
 const fetchGraph = async () => {
-  try {
-    config.isLoading = true;
-    const resp = await ApiRequest.get(`theory-of-change/${projectStore.projectId}`);
-
-    diagram.parseGraph(resp);
-  } catch (error) {
-    console.error('Failed to fetch JSON data:', error);
-  } finally {
-    config.isLoading = false;
-  }
+  config.isLoading = true;
+  theoryOfChangeStore.fetchTheoryOfChange()
+    .then(() => {
+      diagram.parseGraph(theoryOfChangeStore.theory_of_change);
+    })
+    .finally(() => config.isLoading = false);
 }
 
 const escapeKeyHandler = (event) => {
@@ -556,270 +554,272 @@ const risksModalConfig = reactive({
 </script>
 
 <template>
-  <div v-if="config.isLoading" id="graph-loader" style="margin-top: auto;">
-    <GridLoader :use-logo="false" :loading="config.isLoading"></GridLoader>
-  </div>
+  <section class="section">
+    <div v-if="config.isLoading" id="graph-loader" style="margin-top: auto;">
+      <GridLoader :use-logo="false" :loading="config.isLoading"></GridLoader>
+    </div>
 
-  <div class="mx-3" v-if="!config.isLoading">
+    <div class="mx-3" v-if="!config.isLoading">
 
-    <!-- Indicator Browser Panel -->
-    <IndicatorBrowserPanel :is-visible="isPanelVisible"
-      @is-closed="isPanelVisible = false; showIndicatorModal = true; useSideNavStore().hide();"
-      :toc-item="theoryOfChangeModel.selectedItem"
-      @is-saved="updateToCModel($event, theoryOfChangeModel.selectedItem?.id)">
-    </IndicatorBrowserPanel>
+      <!-- Indicator Browser Panel -->
+      <IndicatorBrowserPanel :is-visible="isPanelVisible"
+        @is-closed="isPanelVisible = false; showIndicatorModal = true; useSideNavStore().hide();"
+        :toc-item="theoryOfChangeModel.selectedItem"
+        @is-saved="updateToCModel($event, theoryOfChangeModel.selectedItem?.id)">
+      </IndicatorBrowserPanel>
 
-    <!-- Theory of Change examples browser panel -->
-    <TheoryOfChangeExamplesBrowser :is-visible="config.isExamplePanelVisible"
-      @is-closed="config.isExamplePanelVisible = false" v-if="config.isExamplePanelVisible">
-    </TheoryOfChangeExamplesBrowser>
+      <!-- Theory of Change examples browser panel -->
+      <TheoryOfChangeExamplesBrowser :is-visible="config.isExamplePanelVisible"
+        @is-closed="config.isExamplePanelVisible = false" v-if="config.isExamplePanelVisible">
+      </TheoryOfChangeExamplesBrowser>
 
 
-    <div class="level">
-      <div class="level-item has-text-centered">
+      <div class="level">
+        <div class="level-item has-text-centered">
 
-        <Button type="primary" class="mr-6" @click.prevent="newTocItem()">
-          <template #icon>
-            <PlusCircleOutlined />
-          </template>
-          Add Item
-        </Button>
+          <Button type="primary" class="mr-6" @click.prevent="newTocItem()">
+            <template #icon>
+              <PlusCircleOutlined />
+            </template>
+            Add Item
+          </Button>
 
-        <Button type="ghost" shape="round" @click="rotateDiagram()">
-          <template #icon>
-            <RotateRightOutlined />
-          </template>
-          Rotate
-        </Button>
+          <Button type="ghost" shape="round" @click="rotateDiagram()">
+            <template #icon>
+              <RotateRightOutlined />
+            </template>
+            Rotate
+          </Button>
 
-        <Switch v-model:checked="logicModelView" checked-children="Logic Model View" un-checked-children="Normal View"
-          class="ml-3" @change="drawDiagram" />
+          <Switch v-model:checked="logicModelView" checked-children="Logic Model View" un-checked-children="Normal View"
+            class="ml-3" @change="drawDiagram" />
 
+        </div>
+
+        <Space>
+          <span>
+            Need help? <Button style="padding-left; 0px; margin-left: 0px; display: inline" type="link"
+              @click="config.isExamplePanelVisible = true;">Browse theory of change examples</Button>
+          </span>
+        </Space>
       </div>
 
-      <Space>
-        <span>
-          Need help? <Button style="padding-left; 0px; margin-left: 0px; display: inline" type="link"
-            @click="config.isExamplePanelVisible = true;">Browse theory of change examples</Button>
-        </span>
-      </Space>
+      <Divider></Divider>
+
+      <!-- ======== START: Theory of Change Modal ======= -->
+      <Modal v-model:visible="tocItemModalConfig.visible" @ok="closeModal()">
+        <template #footer>
+          <footer style="display: block;">
+            <div class="level">
+              <div class="level-left">
+                <div class="level-item">
+                  <button role="button" class="button is-small is-danger" @click="deleteItem()"
+                    v-if="tocItemModalConfig.isNew == false"
+                    :class="{ 'is-loading disabled': tocItemModalConfig.isDeleting }"
+                    :disabled="tocItemModalConfig.isDeleting">
+                    <span class="icon mr-1">
+                      <i class="fas fa-trash"></i>
+                    </span>
+                    Delete
+                  </button>
+
+                </div>
+              </div>
+
+              <div class="level-right">
+                <div class="level-item">
+                  <button class="button is-primary" :class="{ 'is-loading': tocItemModalConfig.isLoading }"
+                    :disabled="tocItemModalConfig.isLoading" role="button" @click.prevent="saveFormItem()">
+                    {{ tocItemModalConfig.isNew ? 'Save' : 'Update' }}
+                  </button>
+
+                  <button class="button" role="button" @click="closeModal">Cancel</button>
+                </div>
+              </div>
+            </div>
+          </footer>
+        </template>
+
+        <form>
+          <div class="field">
+            <div class="field-body">
+              <div class="field">
+                <div class="control">
+                  <label class="label">Label</label>
+                  <input class="input" type="text" maxlength="80" v-model="tocItemModalConfig.form.name" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="field is-horizontal">
+            <div class="columns field-body">
+
+              <div class="column field">
+                <label class="label">Links From</label>
+
+                <div class="control">
+                  <div class="select is-fullwidth">
+                    <!-- TODO: show list of existing indicators -->
+                    <select v-model="tocItemModalConfig.form.from_id">
+
+                      <option v-for="item in theoryOfChangeModel?.data?.graph" :key="item.id" :value="item.id">
+                        {{ item.name }}
+                      </option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div class="column field">
+                <label class="label">Links To</label>
+
+                <div class="control">
+                  <div class="select is-fullwidth">
+                    <!-- TODO: show list of existing indicators -->
+                    <select v-model="tocItemModalConfig.form.to_id">
+                      <option v-for="item in theoryOfChangeModel?.data?.graph" :key="item.id" :value="item.id">
+                        {{ item.name }}
+                      </option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="field is-horizontal">
+            <div class="columns field-body">
+              <!-- Column 1: SEM Level and Category -->
+              <div class="column field">
+                <label class="label">Logic Model Category</label>
+                <div class="control">
+                  <div class="select is-fullwidth">
+                    <select v-model="tocItemModalConfig.form.type_id">
+                      <option v-for="key in Object.keys(THEORY_OF_CHANGE_TYPES)" :key="key" :value="key">
+                        {{ THEORY_OF_CHANGE_TYPES[key] }}
+                      </option>
+
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Column 2: Audience -->
+              <div class="column field">
+                <label class="label">SEM Level</label>
+
+                <div class="control">
+                  <div class="select is-fullwidth">
+                    <select v-model="tocItemModalConfig.form.sem_id">
+                      <option v-for="key in Object.keys(SEMS)" :key="key" :value="key">
+                        {{ SEMS[key] }}
+                      </option>
+
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="field">
+            <div class="control">
+              <label class="label">
+                Validated
+                <input type="checkbox" class="ml-3" v-model="tocItemModalConfig.form.is_validated" />
+              </label>
+            </div>
+          </div>
+
+
+          <div class="field">
+            <label class="label">Description</label>
+            <div class="control">
+              <textarea class="textarea" rows="4" columns="80" maxlength="999"
+                v-model="tocItemModalConfig.form.description" />
+            </div>
+          </div>
+
+
+          <!-- TODO: implement saving of indicators -->
+          <div class="field">
+            <label class="label">Indicators</label>
+
+            <hr>
+
+            <div class="field is-grouped is-grouped-multiline">
+              <div class="control" v-for="item in theoryOfChangeModel.selectedItem?.indicators" :key="item.id">
+                <div class="tags has-addons">
+                  <a class="tag is-link">{{ item.indicator.name }}</a>
+                  <a class="tag is-delete"></a>
+
+                  <!-- TODO: implement deleting of item -->
+                </div>
+              </div>
+            </div>
+
+            <button class="button is-small" role="button"
+              @click.prevent="isPanelVisible = !isPanelVisible; showIndicatorModal = true; useSideNavStore().hide();">
+              <span class="icon is-small mr-1">
+                <i class="fas fa-plus"></i>
+              </span>
+              Add Indicator
+            </button>
+          </div>
+
+        </form>
+      </Modal>
+      <!-- ======== END: Theory of Change Modal ======= -->
+
+
+      <!-- ======== START: Risks Modal ======= -->
+      <Modal v-model:visible="risksModalConfig.visible" @ok="risksModalConfig.closeModal()">
+
+        <template #title>
+          <span>
+            {{ diagram.edgeLabel(selectedEdge, 'from') }}
+            <SwapOutlined />
+            {{ diagram.edgeLabel(selectedEdge, 'to') }}
+          </span>
+        </template>
+
+        <template #footer>
+          <footer style="display: block;">
+            <Button :disabled="risksModalConfig.isSaving" @click="risksModalConfig.closeModal()">Cancel</Button>
+
+            <Button :loading="risksModalConfig.isSaving" @click="risksModalConfig.saveForm()" type="primary">Save</Button>
+          </footer>
+        </template>
+
+        <Form layout="vertical" :model="risksModalConfig.form">
+          <Spin :spinning="risksModalConfig.isSaving">
+            <FormItem label="Name">
+              <Input v-model:value="risksModalConfig.form.name" placeholder="" />
+            </FormItem>
+
+            <FormItem label="Assumptions">
+              <Textarea v-model:value="risksModalConfig.form.assumptions" placeholder="" />
+            </FormItem>
+
+            <FormItem label="Risks">
+              <Textarea v-model:value="risksModalConfig.form.risks" placeholder="" />
+            </FormItem>
+          </Spin>
+        </Form>
+      </Modal>
+      <!-- ======== END: Risks Modal ======= -->
+
+
+      <!-- TODO: add edge modal -->
+
+
+      <div class="mt-4">
+        <div class="diagram-container" ref="diagramContainer" style="display: flex; width: 100%;"></div>
+      </div>
     </div>
-
-    <Divider></Divider>
-
-    <!-- ======== START: Theory of Change Modal ======= -->
-    <Modal v-model:visible="tocItemModalConfig.visible" @ok="closeModal()">
-      <template #footer>
-        <footer style="display: block;">
-          <div class="level">
-            <div class="level-left">
-              <div class="level-item">
-                <button role="button" class="button is-small is-danger" @click="deleteItem()"
-                  v-if="tocItemModalConfig.isNew == false"
-                  :class="{ 'is-loading disabled': tocItemModalConfig.isDeleting }"
-                  :disabled="tocItemModalConfig.isDeleting">
-                  <span class="icon mr-1">
-                    <i class="fas fa-trash"></i>
-                  </span>
-                  Delete
-                </button>
-
-              </div>
-            </div>
-
-            <div class="level-right">
-              <div class="level-item">
-                <button class="button is-primary" :class="{ 'is-loading': tocItemModalConfig.isLoading }"
-                  :disabled="tocItemModalConfig.isLoading" role="button" @click.prevent="saveFormItem()">
-                  {{ tocItemModalConfig.isNew ? 'Save' : 'Update' }}
-                </button>
-
-                <button class="button" role="button" @click="closeModal">Cancel</button>
-              </div>
-            </div>
-          </div>
-        </footer>
-      </template>
-
-      <form>
-        <div class="field">
-          <div class="field-body">
-            <div class="field">
-              <div class="control">
-                <label class="label">Label</label>
-                <input class="input" type="text" maxlength="80" v-model="tocItemModalConfig.form.name" />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="field is-horizontal">
-          <div class="columns field-body">
-
-            <div class="column field">
-              <label class="label">Links From</label>
-
-              <div class="control">
-                <div class="select is-fullwidth">
-                  <!-- TODO: show list of existing indicators -->
-                  <select v-model="tocItemModalConfig.form.from_id">
-
-                    <option v-for="item in theoryOfChangeModel?.data?.graph" :key="item.id" :value="item.id">
-                      {{ item.name }}
-                    </option>
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            <div class="column field">
-              <label class="label">Links To</label>
-
-              <div class="control">
-                <div class="select is-fullwidth">
-                  <!-- TODO: show list of existing indicators -->
-                  <select v-model="tocItemModalConfig.form.to_id">
-                    <option v-for="item in theoryOfChangeModel?.data?.graph" :key="item.id" :value="item.id">
-                      {{ item.name }}
-                    </option>
-                  </select>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="field is-horizontal">
-          <div class="columns field-body">
-            <!-- Column 1: SEM Level and Category -->
-            <div class="column field">
-              <label class="label">Logic Model Category</label>
-              <div class="control">
-                <div class="select is-fullwidth">
-                  <select v-model="tocItemModalConfig.form.type_id">
-                    <option v-for="key in Object.keys(THEORY_OF_CHANGE_TYPES)" :key="key" :value="key">
-                      {{ THEORY_OF_CHANGE_TYPES[key] }}
-                    </option>
-
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            <!-- Column 2: Audience -->
-            <div class="column field">
-              <label class="label">SEM Level</label>
-
-              <div class="control">
-                <div class="select is-fullwidth">
-                  <select v-model="tocItemModalConfig.form.sem_id">
-                    <option v-for="key in Object.keys(SEMS)" :key="key" :value="key">
-                      {{ SEMS[key] }}
-                    </option>
-
-                  </select>
-                </div>
-              </div>
-            </div>
-
-          </div>
-        </div>
-
-        <div class="field">
-          <div class="control">
-            <label class="label">
-              Validated
-              <input type="checkbox" class="ml-3" v-model="tocItemModalConfig.form.is_validated" />
-            </label>
-          </div>
-        </div>
-
-
-        <div class="field">
-          <label class="label">Description</label>
-          <div class="control">
-            <textarea class="textarea" rows="4" columns="80" maxlength="999"
-              v-model="tocItemModalConfig.form.description" />
-          </div>
-        </div>
-
-
-        <!-- TODO: implement saving of indicators -->
-        <div class="field">
-          <label class="label">Indicators</label>
-
-          <hr>
-
-          <div class="field is-grouped is-grouped-multiline">
-            <div class="control" v-for="item in theoryOfChangeModel.selectedItem?.indicators" :key="item.id">
-              <div class="tags has-addons">
-                <a class="tag is-link">{{ item.indicator.name }}</a>
-                <a class="tag is-delete"></a>
-
-                <!-- TODO: implement deleting of item -->
-              </div>
-            </div>
-          </div>
-
-          <button class="button is-small" role="button"
-            @click.prevent="isPanelVisible = !isPanelVisible; showIndicatorModal = true; useSideNavStore().hide();">
-            <span class="icon is-small mr-1">
-              <i class="fas fa-plus"></i>
-            </span>
-            Add Indicator
-          </button>
-        </div>
-
-      </form>
-    </Modal>
-    <!-- ======== END: Theory of Change Modal ======= -->
-
-
-    <!-- ======== START: Risks Modal ======= -->
-    <Modal v-model:visible="risksModalConfig.visible" @ok="risksModalConfig.closeModal()">
-
-      <template #title>
-        <span>
-          {{ diagram.edgeLabel(selectedEdge, 'from') }}
-          <SwapOutlined />
-          {{ diagram.edgeLabel(selectedEdge, 'to') }}
-        </span>
-      </template>
-
-      <template #footer>
-        <footer style="display: block;">
-          <Button :disabled="risksModalConfig.isSaving" @click="risksModalConfig.closeModal()">Cancel</Button>
-
-          <Button :loading="risksModalConfig.isSaving" @click="risksModalConfig.saveForm()" type="primary">Save</Button>
-        </footer>
-      </template>
-
-      <Form layout="vertical" :model="risksModalConfig.form">
-        <Spin :spinning="risksModalConfig.isSaving">
-          <FormItem label="Name">
-            <Input v-model:value="risksModalConfig.form.name" placeholder="" />
-          </FormItem>
-
-          <FormItem label="Assumptions">
-            <Textarea v-model:value="risksModalConfig.form.assumptions" placeholder="" />
-          </FormItem>
-
-          <FormItem label="Risks">
-            <Textarea v-model:value="risksModalConfig.form.risks" placeholder="" />
-          </FormItem>
-        </Spin>
-      </Form>
-    </Modal>
-    <!-- ======== END: Risks Modal ======= -->
-
-
-    <!-- TODO: add edge modal -->
-
-
-    <div class="mt-4">
-      <div class="diagram-container" ref="diagramContainer" style="display: flex; width: 100%;"></div>
-    </div>
-  </div>
+  </section>
 </template>
 
 <style>
