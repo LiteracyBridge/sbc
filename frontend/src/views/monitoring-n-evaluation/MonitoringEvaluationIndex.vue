@@ -174,15 +174,6 @@ onMounted(() => {
                             {{ record.data_collection_frequency }}
                         </template>
 
-                        <template v-else-if="column.key === 'tags'">
-                            <span>
-                                <Tag v-for="tag in record.tags" :key="tag"
-                                    :color="tag === 'loser' ? 'volcano' : tag.length > 5 ? 'geekblue' : 'green'">
-                                    {{ tag.toUpperCase() }}
-                                </Tag>
-                            </span>
-                        </template>
-
                         <template v-else-if="column.key === 'action'">
                             <span>
                                 <a>Invite 一 {{ record.name }}</a>

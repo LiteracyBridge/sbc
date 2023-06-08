@@ -131,7 +131,7 @@ async function signOut() {
                 Projects
               </RouterLink>
 
-              <RouterLink v-if="projectStore.prj_id" to="/activities" class="navbar-item">
+              <RouterLink v-if="projectStore.prj_id" to="#" class="navbar-item">
                 <span class="icon mr-1">
                   <i class="fas fa-question-circle"></i>
                 </span>

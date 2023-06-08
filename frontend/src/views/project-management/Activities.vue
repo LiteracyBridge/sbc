@@ -9,7 +9,7 @@ import { useParticipantStore } from '@/stores/participants'
 import { useUserStore } from "@/stores/user";
 import { useRouter } from 'vue-router'
 import AddActivityModal from '@/components/AddActivityModal.vue';
-import { Button, Spin, Table, Tag, Typography } from "ant-design-vue";
+import { Button, Space, Spin, Table, Tag, Typography } from "ant-design-vue";
 import { PlusCircleOutlined } from "@ant-design/icons-vue";
 
 const showAddModal = ref(false);
@@ -105,10 +105,11 @@ const columns = [
 
       <template #bodyCell="{ column, record: activity }">
         <template v-if="column.key === 'name'">
-          <a @click="editActivity(activity)">{{ activity.name }}</a>
+          <Space>
+            <a @click="editActivity(activity)">{{ activity.name }}</a>
 
-          <!-- TODO: display subactivities in a modal -->
-          <Tag>sub activities</Tag>
+            <Tag :style="{'border-radius': '10px'}" :color="'#108ee9'">sub activities</Tag>
+          </Space>
         </template>
 
         <template v-if="column.key === 'status'">

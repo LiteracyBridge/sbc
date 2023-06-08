@@ -77,7 +77,7 @@ export const useActivityStore = defineStore({
       activity.editing_user_id = useUserStore().id;
 
       this.$state.isLoading = true;
-      await ApiRequest.post<Activity>("activity", { ...activity })
+      await ApiRequest.post<Activity>("activity/", { ...activity })
         .then((resp) => {
           this.$state.activities = resp;
           message.success("Activity created successfully!");
