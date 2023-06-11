@@ -11,15 +11,10 @@ export class ApiRequest {
       [key: string]: any;
     }
   ): Promise<T[] | null> {
-    const apiName = "sbc-api";
-    // const path = "/users";
     const myInit = {
       headers: headers, // OPTIONAL
       response: false, // OPTIONAL (return the entire Axios response object instead of only response.data)
       queryStringParameters: {},
-      //    {
-      //   name: "param", // OPTIONAL
-      // },
     };
 
     if (params) {
@@ -29,13 +24,8 @@ export class ApiRequest {
     return axios
       .get(`${import.meta.env.VITE_SBC_API_URL}/${path}`, { params })
       .then((response) => {
-        return response.data.data as T;
+        return response.data.data as T[];
         // Add your code here
-      })
-      .catch((error) => {
-        console.error(error.response);
-
-        return null;
       });
 
     // return API.get(apiName, `/${path}`, myInit)
@@ -76,14 +66,9 @@ export class ApiRequest {
 
     return API.del(apiName, `/${path}`, myInit)
       .then((response) => {
-        return response.data as T;
+        return response.data.data as T;
         // Add your code here
       })
-      .catch((error) => {
-        console.error(error.response);
-
-        return null;
-      });
   }
 
   static async post<T>(

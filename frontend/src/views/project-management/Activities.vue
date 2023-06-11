@@ -1,28 +1,24 @@
 <script lang="ts" setup>
-import { onMounted, ref, reactive, watch } from "vue";
+import { onMounted, ref, reactive, } from "vue";
 import { useActivityStore } from "@/stores/activities";
 import { useInterventionStore } from "@/stores/interventions";
 import { useDriverStore } from "@/stores/drivers";
 import { useLookupStore } from "@/stores/lookups";
 import { useProjectStore } from '@/stores/projects'
-import { useParticipantStore } from '@/stores/participants'
-import { useUserStore } from "@/stores/user";
-import { useRouter } from 'vue-router'
 import { Button, Space, Spin, Table, Tag, Typography } from "ant-design-vue";
 import { PlusCircleOutlined } from "@ant-design/icons-vue";
 
 import AddActivityModal from './AddActivityModal.vue';
 import SubActivitiesModal from "./SubActivitiesModal.vue";
+import { Activity } from "@/types";
 
 const showAddModal = ref(false);
 const showEditModal = ref(false);
 
-const userStore = useUserStore();
 const interventionStore = useInterventionStore();
 const driverStore = useDriverStore();
 const lookupStore = useLookupStore();
 const projectStore = useProjectStore();
-const participantStore = useParticipantStore();
 const expandActivity = ref([]);
 
 const config = ref({
@@ -32,10 +28,7 @@ const config = ref({
 
 const activityStore = useActivityStore();
 
-const emptyActivity = reactive({
-  name: '', parent_id: null, intervention_id: null,
-  driver_ids: [], owner_id: null, status_id: 1, notes: '', url: ''
-});
+const emptyActivity = reactive(new Activity());
 
 const draftActivity = ref(null);
 

@@ -14,6 +14,8 @@ import TheoryOfChangeIndex from "@/views/theory-of-change/TheoryOfChangeIndex.vu
 import MonitoringEvaluationIndex from "@/views/monitoring-n-evaluation/MonitoringEvaluationIndex.vue";
 import ProjectManagementIndex from "@/views/project-management/ProjectManagementIndex.vue";
 import Unauthorized from "@/views/Unauthorized.vue";
+import ProjectsIndex from '@/views/projects/ProjectsIndex.vue';
+
 // import { User } from "@/types";
 
 let user;
@@ -118,7 +120,7 @@ const router = createRouter({
     {
       path: "/projects",
       name: "projects",
-      component: Projects,
+      component: ProjectsIndex,
     },
     {
       path: "/forms/:module",
