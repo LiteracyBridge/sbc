@@ -30,7 +30,7 @@ const menuItems = [
   { label: 'Project objectives', name: 'forms', params: { module: 'objectives' } },
   { label: 'Audiences', name: 'forms', params: { module: 'audiences' } },
   { label: 'Behavioral Drivers', path: '/drivers' },
-  { label: 'Approaches', path: '/interventions' },
+  { label: 'SBC Approaches', path: '/interventions' },
   { label: 'Theory of Change', path: '/toc' },
   { label: 'Communications and Messaging', name: 'forms', params: { module: 'communications' } },
   { label: 'Monitoring and Evaluation', path: '/monitoring-and-evaluation', params: { module: 'monitoring' } },

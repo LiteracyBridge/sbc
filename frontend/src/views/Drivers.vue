@@ -55,7 +55,7 @@ const setDriver = function (driver = null) {
   } else {
     if (driver.parent_id == 0) {
         selectedFactor.value = driver;
-    } else if (selectedFactor.value.id != selectedDriver.value.parent_id) {        
+    } else if (selectedFactor.value.id != selectedDriver.value.parent_id) {
         selectedFactor.value = driverStore.luDriverById(driver.parent_id);
     }
     selectedDriver.value = driver;
@@ -68,7 +68,7 @@ function addIntervention(intervention) {
   let driver_ids = [];
   if (selectedPrjDriver.value) {
     driver_ids = [selectedPrjDriver.value.id];
-  } 
+  }
   activityStore.addActivity({ name: intervention.name, driver_ids, intervention_id: intervention.id })
 }
 
@@ -119,7 +119,7 @@ function clearSelection () {
                   :key="driver.id"
                   class="ml-2 my-2 menu-item"
                   >
-                  <div 
+                  <div
                     class="has-tooltip-multiline"
                     :data-tooltip="driver.text_short ? driver.text_short : null"
                   >
@@ -140,7 +140,7 @@ function clearSelection () {
                   <div v-if="selectedFactor==driver">    <!-- driver_filter=='project' ||  -->
                       <div
                       v-for="dimension in driverStore.dimensionsByFactor(driver,driver_filter)"
-                      :key="dimension.id" class="ml-4 my-4 menu-item"  
+                      :key="dimension.id" class="ml-4 my-4 menu-item"
                       >
                       <a
                           href="#"
@@ -170,7 +170,7 @@ function clearSelection () {
               <div class="message-header">
                 <div class="level">
                   <!-- show the icon for the selected factor -- the driver or parent driver if a dimension -->
-                  <img 
+                  <img
                     :src="'/images/' + driverStore.iconFilename(selectedFactor)"
                     class="level-left image is-32x32 mx-4"
                   />
@@ -243,18 +243,18 @@ function clearSelection () {
                 <br />
 
                 <div v-if="driver_filter=='suggested'">
-                  <span class="has-text-weight-bold is-italic is-size-5">Relevance to Project:</span> 
+                  <span class="has-text-weight-bold is-italic is-size-5">Relevance to Project:</span>
                   <br/>
                   <span v-if="selectedDriver">{{driverStore.suggestionExplanation(selectedDriver.id)}}</span>
                   <br/>
                   <br/>
-                  <span class="has-text-weight-bold is-italic is-size-5">Example:</span> 
+                  <span class="has-text-weight-bold is-italic is-size-5">Example:</span>
                   <br/>
                   <span v-if="selectedDriver">{{driverStore.suggestionExample(selectedDriver.id)}}</span>
                 </div>
                 <br/>
                 <br/>
-                <div 
+                <!-- <div
                     class="has-text-weight-bold is-italic is-size-5"
                     v-if="interventionStore.interventionsByDriver(selectedDriver)"
                   >Interventions:
@@ -302,7 +302,7 @@ function clearSelection () {
                   <p>{{ intervention.text_long }}</p>
                   <br />
                   <br />
-                </div>
+                </div> -->
               </div>
             </div>
           </main>
@@ -317,5 +317,5 @@ function clearSelection () {
   margin: 2rem;
 }
 </style>
-<!-- 
+<!--
  -->
