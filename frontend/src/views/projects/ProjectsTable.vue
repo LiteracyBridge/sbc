@@ -1,44 +1,22 @@
 <script lang="ts" setup>
 
-import { onMounted, ref, watch, computed } from "vue";
-import { Multiselect } from 'vue-multiselect'
+import { ref } from "vue";
 import { useLookupStore } from "@/stores/lookups";
 import { useProjectStore } from "@/stores/projects";
-import { useUserStore } from "@/stores/user";
 import { useRouter } from "vue-router";
-import * as api from "@/apis/lambda";
-import { UsersApi } from "@/apis/lambda";
-import axios from "axios";
-import { ApiRequest } from "@/apis/api";
-import { User } from "@/types";
 import {
   Table, Spin, Space, Col, Row,
   Modal, Button, Tag,
   Typography, Form, type FormInstance, FormItem, Input,
-  SelectOption,
   Select,
   message
 } from "ant-design-vue";
 import { FolderOpenOutlined, FolderOutlined, PlusCircleOutlined } from "@ant-design/icons-vue";
 
 const router = useRouter();
-const userStore = useUserStore();
 const lookupStore = useLookupStore();
 const projectStore = useProjectStore();
 
-const projectSelection = ref(projectStore.prj_id);
-const draftingNewProject = ref(false);
-const newPrjName = ref("");
-const newPrjCountryId = ref(null);
-const newPrjNameRef = ref(null);
-const draftingNewUser = ref(false);
-const newUserNameRef = ref(null);
-const newUserAddressAsRef = ref(null);
-const newUserName = ref("");
-const newUserAddressAs = ref("");
-const newUserEmail = ref("");
-const newUserAccessId = ref(null);
-const allUsers = ref([]);
 
 const config = ref({
   loading: false,
@@ -89,7 +67,7 @@ function closeProjectModal() {
 }
 
 function createProject() {
-  projectFormRef.value.validateFields().then((values) => {
+  projectFormRef.value.validateFields().then((_) => {
     const form = config.value.projectModal.form;
     projectStore.add(form.name, form.country_id);
 
