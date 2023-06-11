@@ -74,7 +74,7 @@ const saveForm = () => {
 
       <Row :gutter="6">
         <Col :span="12">
-        <FormItem label="Name" name="name" :rules="[{ required: true, message: 'Please activity name!' }]">
+        <FormItem label="Name" name="name" :rules="[{ required: true, message: 'Please enter activity name!' }]">
           <Input v-model:value="draftActivity.name" />
         </FormItem>
         </Col>
