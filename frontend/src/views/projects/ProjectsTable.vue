@@ -124,7 +124,7 @@ function filterCountry(input: string, option: any) {
         <template v-if="column.key === 'actions'">
           <Space>
             <!-- TODO: open modal for creating project -->
-            <Button type="primary" :ghost="true" v-if="!project.archived" @click="changeProject(project.prj_id)">
+            <Button type="primary" size="small" :ghost="true" v-if="!project.archived" @click="changeProject(project.prj_id)">
               <template #icon>
                 <FolderOpenOutlined />
               </template>
@@ -132,7 +132,7 @@ function filterCountry(input: string, option: any) {
             </Button>
 
             <!-- TODO: show confirmation box for archiving -->
-            <Button type="primary" :ghost="true" :danger="true" v-if="!project.archived"
+            <Button type="primary" size="small" :ghost="true" :danger="true" v-if="!project.archived"
               @click="projectStore.archive(project.prj_id)">
               <template #icon>
                 <FolderOutlined />

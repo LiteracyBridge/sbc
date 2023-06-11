@@ -20,7 +20,7 @@ const lookupStore = useLookupStore();
 const projectStore = useProjectStore();
 const userStore = useUserStore();
 
-const allUsers = ref([]);
+const allUsers = ref<User[]>([]);
 const config = ref({
   loading: false,
   userModal: {
@@ -69,6 +69,7 @@ function saveNewUser() {
 
     projectStore.addUser(user.name ?? 'N/A', form.email, form.role_id, user.address_as);
 
+    message.success(`Added ${user.name} to project ${projectStore.projectName}`);
     closeModal();
   });
 }
@@ -105,7 +106,7 @@ function filterUser(input: string, option: any) {
       <template #title>
         <Row justify="space-between">
           <Col :span="20">
-          <Typography :level="2">Users with access to {{ projectStore.projectName }}</Typography>
+          <Typography :level="3">Users with access to {{ projectStore.projectName }}</Typography>
           </Col>
 
           <Col :span="4">
@@ -135,7 +136,7 @@ function filterUser(input: string, option: any) {
 
         <template v-if="column.key == 'role'">
           <Select :value="user.access_id" @change="projectStore.updateAccess($event, user.id)"
-            v-if="projectStore.userById(userStore.id).access_id == 0">
+            v-if="projectStore.userById(userStore.id).access_id == 0" style="width: 100%;">
             <SelectOption v-for="access in lookupStore.access_types" :value="access.id" :key="access.id">
               {{ access.name }}
             </SelectOption>
@@ -147,7 +148,7 @@ function filterUser(input: string, option: any) {
         </template>
 
         <template v-if="column.key === 'actions'">
-          <Button type="primary" :ghost="true" :danger="true">
+          <Button type="primary" :disabled="true" :ghost="true" :danger="true">
             <template #icon>
               <DeleteOutlined />
             </template>
