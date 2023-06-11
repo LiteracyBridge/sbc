@@ -13,6 +13,8 @@ import { ApiRequest } from "@/apis/api";
 import { User } from "@/types";
 
 import ProjectsTable from './ProjectsTable.vue';
+import { Divider } from "ant-design-vue";
+import ProjectUsers from "./ProjectUsers.vue";
 
 const router = useRouter();
 const userStore = useUserStore();
@@ -129,6 +131,10 @@ function onUserSelected(item, _) {
 
     <!-- Projects table component -->
     <ProjectsTable></ProjectsTable>
+
+    <Divider></Divider>
+
+    <ProjectUsers></ProjectUsers>
 
     <!-- Display the user's projects -->
     <div class="is-size-5 is-bold">Your projects:</div>

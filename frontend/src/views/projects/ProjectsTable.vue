@@ -95,7 +95,7 @@ function filterCountry(input: string, option: any) {
             <template #icon>
               <PlusCircleOutlined />
             </template>
-            Add Activity
+            Add Project
           </Button>
           </Col>
         </Row>
@@ -155,9 +155,9 @@ function filterCountry(input: string, option: any) {
       <span>Create New Project</span>
     </template>
 
-    <Form name="activity-form" ref="projectFormRef" :model="config.projectModal.form" layout="vertical">
+    <Form name="new-project-form" ref="projectFormRef" :model="config.projectModal.form" layout="vertical">
 
-      <FormItem label="Project Name" name="name" :rules="[{ required: true, message: 'Please entity project name!' }]">
+      <FormItem label="Project Name" name="name" :rules="[{ required: true, message: 'Please enter project name!' }]">
         <Input v-model:value="config.projectModal.form.name" />
       </FormItem>
 
