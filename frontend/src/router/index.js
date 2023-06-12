@@ -15,6 +15,7 @@ import MonitoringEvaluationIndex from "@/views/monitoring-n-evaluation/Monitorin
 import ProjectManagementIndex from "@/views/project-management/ProjectManagementIndex.vue";
 import Unauthorized from "@/views/Unauthorized.vue";
 import ProjectsIndex from '@/views/projects/ProjectsIndex.vue';
+import ProjectObjective from '@/views/ProjectObjective.vue';
 
 // import { User } from "@/types";
 
@@ -121,6 +122,11 @@ const router = createRouter({
       path: "/projects",
       name: "projects",
       component: ProjectsIndex,
+    },
+    {
+      path: "/project-objectives",
+      name: "project-objectives",
+      component: ProjectObjective,
     },
     {
       path: "/forms/:module",

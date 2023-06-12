@@ -27,17 +27,19 @@ const projectStore = useProjectStore();
 const menuItems = [
   { label: 'Project Info', name: 'forms', params: { module: 'basic' } },
   { label: 'Background and context', name: 'forms', params: { module: 'background' } },
-  { label: 'Project objectives', name: 'forms', params: { module: 'objectives' } },
+  {
+    label: 'Project Objectives',
+    path: '/project-objectives'
+  },
   { label: 'Audiences', name: 'forms', params: { module: 'audiences' } },
   { label: 'Behavioral Drivers', path: '/drivers' },
   { label: 'SBC Approaches', path: '/interventions' },
   { label: 'Theory of Change', path: '/toc' },
   { label: 'Communications and Messaging', name: 'forms', params: { module: 'communications' } },
-  { label: 'Monitoring and Evaluation', path: '/monitoring-and-evaluation', params: { module: 'monitoring' } },
+  { label: 'Monitoring and Evaluation', path: '/monitoring-and-evaluation' },
   {
     label: 'Project Management',
-    path: '/project-management',
-    params: { module: 'prjmgmt' }
+    path: '/project-management'
   },
   { label: 'Project Documents', name: 'forms', params: { module: 'prjdocs' } },
 ];
