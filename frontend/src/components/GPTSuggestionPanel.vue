@@ -24,7 +24,7 @@ const props = defineProps({
   },
   questionId: {
     type: Number,
-    required: true,
+    required: false,
   },
   isVisible: {
     type: Boolean,
