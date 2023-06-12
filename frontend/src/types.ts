@@ -114,3 +114,15 @@ export class Monitoring {
 
   toc_item_indicator: TheoryOfChangeIndicator;
 }
+
+export class ProjectData {
+  id: number;
+  q_id: number;
+  prj_id: number;
+  editing_user_id: number;
+  toc_item_id: number;
+  data: string;
+  module?: string;
+  name?: string;
+
+}

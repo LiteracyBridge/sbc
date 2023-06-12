@@ -1,11 +1,12 @@
 from typing import List, Optional
 
 from sqlalchemy import text
+from helpers import ToCItemDto, create_toc_item
 
 import models
 from dataclass_wizard import asdict, fromdict
 from fastapi import APIRouter, Depends, HTTPException
-from models import Activity, Project, TheoryOfChangeItem, User
+from models import Activity, Project, ProjectData, TheoryOfChangeItem, User
 from pydantic import BaseModel
 from schema import ApiResponse
 from sqlalchemy.orm import Session, joinedload, subqueryload
@@ -19,6 +20,12 @@ class UpdateProjectDto(BaseModel):
     name: str
     evaluation_strategy: Optional[str]
     feedback_strategy: Optional[str]
+
+
+class ProjectObjectiveDto(BaseModel):
+    editing_user_id: int
+    description: Optional[str]
+    removed_id: Optional[int]
 
 
 @router.put("/{id}", response_model=ApiResponse)
@@ -59,3 +66,43 @@ def get_project_drivers(project_id: int, db: Session = Depends(models.get_db)):
 
     drivers = db.execute(statement, {"project_id": project_id}).all()
     return ApiResponse(data=[row._asdict() for row in drivers])
+
+
+# Project objectives route
+@router.post("/{id}/objectives", response_model=ApiResponse)
+def update_objectives(
+    project_id: int, dto: ProjectObjectiveDto, db: Session = Depends(models.get_db)
+):
+    if dto.removed_id is not None:
+        db.query(ProjectData).filter(
+            ProjectData.id == dto.removed_id and ProjectData.prj_id == project_id
+        ).delete()
+
+    if dto.description is not None:
+        record: ProjectData = ProjectData()
+        record.q_id = 10
+        record.data = dto.description
+        record.module = "objectives"
+        record.name = "specific_objectives"
+        record.prj_id = project_id
+
+        db.add(record)
+        db.commit()
+        db.refresh(record)
+
+        # Create theory of change objective item
+        toc = create_toc_item(
+            ToCItemDto(
+                project_id=project_id,
+                name=dto.description,
+                reference=record,
+                type="objective",
+            )
+        )
+
+        record.toc_item_id = toc.id
+        db.commit()
+
+    return ApiResponse(
+        data=db.query(ProjectData).filter(ProjectData.prj_id == project_id).all()
+    )

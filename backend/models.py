@@ -72,6 +72,33 @@ class Project(Base):
     )
 
 
+class ProjectData(Base):
+    __tablename__ = "project_data"
+
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    # Question id
+    q_id: Mapped[Optional[int]]
+    data: Mapped[Optional[str]]
+
+    """
+    Module of data/question -> driver/objective/background_context
+    """
+    module: Mapped[Optional[str]]
+
+    """
+    Module of data/question -> specific_objectives/behaviour_influence
+    """
+    name: Mapped[Optional[str]]
+
+    prj_id: Mapped[int] = mapped_column(ForeignKey("projects.id"), nullable=True)
+    editing_user_id: Mapped[int] = mapped_column(ForeignKey("project_users.id"))
+    toc_item_id: Mapped[int] = mapped_column(
+        ForeignKey("theories_of_change_item.id"), nullable=True
+    )
+
+    project = relationship("Project")
+
+
 class ProjectUser(Base):
     __tablename__ = "project_users"
 
@@ -212,6 +239,9 @@ class TheoryOfChangeItem(Base):
     sem_id: Mapped[int] = mapped_column(ForeignKey("lu_sem.id"), nullable=True)
     theory_of_change_id: Mapped[int] = mapped_column(
         ForeignKey("theories_of_change.id"), nullable=False
+    )
+    project_data_id: Mapped[Optional[int]] = mapped_column(
+        ForeignKey("project_data.id", ondelete="CASCADE"), nullable=True
     )
 
     # todo: add is_validated

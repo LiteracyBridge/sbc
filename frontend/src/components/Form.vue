@@ -6,7 +6,7 @@ import { useRouter } from "vue-router";
 import * as lambda from "@/apis/lambda";
 import MessageModal from '../components/MessageModal.vue';
 import PulseLoaderVue from "./spinners/PulseLoader.vue";
-import GPTSuggestionPanelVue from "./GPTSuggestionPanel.vue";
+import GPTSuggestionPanel from "./GPTSuggestionPanel.vue";
 
 const showMessageModal = ref(false);
 const userStore = useUserStore();
@@ -147,10 +147,10 @@ async function broadcastPage() {
     </Suspense>
     <br />
 
-    <GPTSuggestionPanelVue :is-visible="suggestionsPanelHandler.isOpened"
+    <GPTSuggestionPanel :is-visible="suggestionsPanelHandler.isOpened"
       @is-closed="suggestionsPanelHandler.isOpened = false;" :question-id="suggestionsPanelHandler.questionId"
       :module="suggestionsPanelHandler.module">
-    </GPTSuggestionPanelVue>
+    </GPTSuggestionPanel>
 
     <div v-for="(q, count) in projectDataStore.questionsForTopic(topic)" :key="q.id" class="columns mx-4 is-vcentered">
 

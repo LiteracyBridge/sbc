@@ -2,6 +2,9 @@ import { defineStore } from "pinia";
 import { useUserStore } from "./user";
 import * as api from "../apis/lambda";
 import { useProjectStore } from "./projects";
+import { ApiRequest } from "@/apis/api";
+import { ProjectData } from "@/types";
+import { message } from "ant-design-vue";
 
 export const useProjectDataStore = defineStore({
   id: "project_data",
@@ -184,21 +187,23 @@ export const useProjectDataStore = defineStore({
     ],
   }),
   getters: {
-    questionsForTopic: (state) => (topic) =>
+    questionsForTopic: (state) => (topic: string) =>
       state.questions.filter((q) => q.topic == topic),
-    countBulbs: (state) => (id, topic) =>
+    countBulbs: (state) => (id: number, topic: string) =>
       state.questions.filter(
         (question) =>
           question.id <= id && question.bulb === true && question.topic == topic
       ).length,
-    answerForQuestionId: (state) => (questionId) =>
+    answerForQuestionId: (state) => (questionId: number) =>
       state.project_data.filter((d) => d.q_id == questionId)[0],
-    getData: (state) => (questionId) =>
+    getData: (state) => (questionId: number) =>
       state.project_data[questionId] ? state.project_data[questionId].data : "",
+    specificObjectives: (state) => state.project_data.filter((d) => d.name == "specific_objectives"),
   },
   actions: {
     clear() {
       for (const property of Object.keys(this.$state)) {
+        // @ts-ignore
         this.$state[property] = [];
       }
     },
@@ -206,15 +211,24 @@ export const useProjectDataStore = defineStore({
     async download() {
       const key_index = 1;
       const filter_clause = "prj_id=" + useProjectStore().prj_id;
-      this.project_data = await api.downloadDictionary(
+      this.project_data = (await api.downloadDictionary(
         "project_data",
-        ["id", "q_id", "editing_user_id", "data"],
+        [
+          "id",
+          "q_id",
+          "editing_user_id",
+          "data",
+          "name",
+          "module",
+          "toc_item_id",
+        ],
         filter_clause,
         key_index
-      );
+      )) as any[];
+      console.warn(this.project_data);
     },
 
-    async setData(q_id, data) {
+    async setData(q_id: number, data: any) {
       if (!(q_id in this.project_data)) {
         this.project_data[q_id] = {};
       }
@@ -233,7 +247,7 @@ export const useProjectDataStore = defineStore({
       }
     },
 
-    async deleteData(id) {
+    async deleteData(id: number) {
       api.remove("project_data", id);
       this.project_data = this.project_data.filter((a) => a.id != id);
     },
@@ -247,6 +261,23 @@ export const useProjectDataStore = defineStore({
         }
       }
       return summary;
+    },
+    async addOrRemoveObjective(value?: string, removed_id?: number) {
+      return ApiRequest.post<ProjectData>(
+        `project/${useProjectStore().prj_id}/objectives`,
+        {
+          editing_user_id: useUserStore().id,
+          description: value,
+          removed_id: removed_id,
+        }
+      )
+        .then((resp) => {
+          this.$state.project_data = resp;
+          message.success("Project objectives added successfully");
+
+          return resp;
+        })
+        .catch((err) => message.error(err.message));
     },
   },
 });
