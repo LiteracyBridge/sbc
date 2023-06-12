@@ -70,6 +70,15 @@ function addDomain() {
     key: Date.now(),
   });
 };
+
+function saveForms() {
+  console.log(dynamicValidateForm)
+  objectivesFormRef.value.validateFields().then((values) => {
+    console.log(values);
+  }).catch((error) => {
+    console.log(error);
+  });
+}
 </script>
 
 <template>
@@ -78,6 +87,9 @@ function addDomain() {
   </GPTSuggestionPanel>
 
   <Card class="section" title="Project Objectives">
+    <template #extra>
+      <Button type="primary" :ghost="true" @click="saveForms()">Save</Button>
+    </template>
 
     <Form layout="vertical">
       <!-- <div class="columns mx-4 is-vcentered"> -->
@@ -85,10 +97,10 @@ function addDomain() {
       <!-- <div class="column is-8"> -->
 
       <!-- <strong>{{ count + 1 }}. {{ q.q2u }} </strong><br />
-  <img v-if="q.bulb" :src="BULB_ICON" ref="iconRefs" @click="submitContextAndPrompt(q.id, topic)"
-    class="image is-32x32" />
-  <textarea @change="updateData($event, q.id)" :value="projectDataStore.getData(q.id)" rows="4" cols="80" /><br />
-  <br /><br /> -->
+      <img v-if="q.bulb" :src="BULB_ICON" ref="iconRefs" @click="submitContextAndPrompt(q.id, topic)"
+        class="image is-32x32" />
+      <textarea @change="updateData($event, q.id)" :value="projectDataStore.getData(q.id)" rows="4" cols="80" /><br />
+      <br /><br /> -->
 
       <FormItem :name="`input-${count + 1}`"
         v-for="(q, count) in projectDataStore.questionsForTopic(config.suggestions.module)" :key="q.id">
@@ -145,9 +157,9 @@ function addDomain() {
       </FormItem>
 
       <!-- <FormItem v-bind="formItemLayoutWithOutLabel">
-        <Button type="primary" html-type="submit" @click="submitForm">Submit</Button>
-        <Button style="margin-left: 10px" @click="resetForm">Reset</Button>
-      </FormItem> -->
+            <Button type="primary" html-type="submit" @click="submitForm">Submit</Button>
+            <Button style="margin-left: 10px" @click="resetForm">Reset</Button>
+          </FormItem> -->
     </Form>
   </Card>
 </template>
