@@ -1,10 +1,9 @@
-from typing import List, Optional
+from typing import List, Optional, Dict
 
 from sqlalchemy import text
 from helpers import ToCItemDto, create_toc_item
 
 import models
-from dataclass_wizard import asdict, fromdict
 from fastapi import APIRouter, Depends, HTTPException
 from models import Activity, Project, ProjectData, TheoryOfChangeItem, User
 from pydantic import BaseModel
@@ -24,8 +23,11 @@ class UpdateProjectDto(BaseModel):
 
 class ProjectObjectiveDto(BaseModel):
     editing_user_id: int
-    description: Optional[str]
-    removed_id: Optional[int]
+    # description: Optional[str]
+
+    updated: List[Dict[str, int]] = []
+    added: Optional[List[str]] = []
+    removed: Optional[List[int]] = []
 
 
 @router.put("/{id}", response_model=ApiResponse)
@@ -69,39 +71,59 @@ def get_project_drivers(project_id: int, db: Session = Depends(models.get_db)):
 
 
 # Project objectives route
-@router.post("/{id}/objectives", response_model=ApiResponse)
+@router.post("/{project_id}/objectives", response_model=ApiResponse)
 def update_objectives(
     project_id: int, dto: ProjectObjectiveDto, db: Session = Depends(models.get_db)
 ):
-    if dto.removed_id is not None:
+    # Remove deleted objectives
+    if len(dto.removed) > 0:
         db.query(ProjectData).filter(
-            ProjectData.id == dto.removed_id and ProjectData.prj_id == project_id
+            ProjectData.id.in_(dto.removed) and ProjectData.prj_id == project_id
         ).delete()
 
-    if dto.description is not None:
-        record: ProjectData = ProjectData()
-        record.q_id = 10
-        record.data = dto.description
-        record.module = "objectives"
-        record.name = "specific_objectives"
-        record.prj_id = project_id
+    # Update existing objectives
+    if len(dto.updated) > 0:
+        print(dto.updated)
 
-        db.add(record)
-        db.commit()
-        db.refresh(record)
+        for item in dto.updated:
+            [value] = item.values()
+            [key] = item.keys()
 
-        # Create theory of change objective item
-        toc = create_toc_item(
-            ToCItemDto(
-                project_id=project_id,
-                name=dto.description,
-                reference=record,
-                type="objective",
+            record = db.query(ProjectData).filter(ProjectData.id == int(key)).first()
+
+            if record is None:
+                continue
+
+            record.data = value
+            db.commit()
+
+    # Create new objectives
+    if len(dto.added) > 0:
+        for item in dto.added:
+            record: ProjectData = ProjectData()
+            record.q_id = 10
+            record.data = item
+            record.module = "objectives"
+            record.name = "specific_objectives"
+            record.prj_id = project_id
+            record.editing_user_id = dto.editing_user_id
+
+            db.add(record)
+            db.commit()
+
+            # Create theory of change objective item
+            toc = create_toc_item(
+                ToCItemDto(
+                    project_id=project_id,
+                    name=item,
+                    reference=record,
+                    type="objective",
+                ),
+                db=db,
             )
-        )
 
-        record.toc_item_id = toc.id
-        db.commit()
+            record.toc_item_id = toc.id
+            db.commit()
 
     return ApiResponse(
         data=db.query(ProjectData).filter(ProjectData.prj_id == project_id).all()

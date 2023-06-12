@@ -1,15 +1,20 @@
 <script setup lang="ts">
 
-import { Card, Form, FormItem, Image, Textarea, type FormInstance, Input, Button, Divider } from 'ant-design-vue';
-import { reactive, ref } from 'vue';
+import { Card, Form, FormItem, Image, Textarea, type FormInstance, Input, Button, Divider, message } from 'ant-design-vue';
+import { onMounted, reactive, ref } from 'vue';
 
 import { useProjectDataStore } from '@/stores/projectData';
 import GPTSuggestionPanel from '@/components/GPTSuggestionPanel.vue';
 import { DeleteOutlined, MinusCircleOutlined, PlusOutlined } from '@ant-design/icons-vue';
+import { ApiRequest } from '@/apis/api';
+import { useProjectStore } from '@/stores/projects';
+import { ProjectData } from '@/types';
+import { useUserStore } from '@/stores/user';
 
 interface Objective {
   value: string;
-  key: number;
+  id: number;
+  is_new?: boolean;
 }
 
 const BULB_ICON = "/images/lightbulb.png"
@@ -21,14 +26,16 @@ const config = ref({
     questionId: null,
     isOpened: false,
     module: "objectives"
-  }
+  },
 });
 
 // Dynamic objectives forms
 const objectivesFormRef = ref<FormInstance>();
-const dynamicValidateForm = reactive<{ objectives: Objective[] }>({
+const dynamicValidateForm = reactive<{ objectives: Objective[], deleted: number[] }>({
   objectives: [],
+  deleted: []
 });
+
 const formItemLayout = {
   // labelCol: {
   //   xs: { span: 24 },
@@ -60,25 +67,53 @@ function updateData(event: any, id: number) {
 function removeDomain(item: Objective) {
   let index = dynamicValidateForm.objectives.indexOf(item);
   if (index !== -1) {
-    dynamicValidateForm.objectives.splice(index, 1);
+    const [el] = dynamicValidateForm.objectives.splice(index, 1);
+
+    console.log(el)
+    if (!el.is_new) {
+      dynamicValidateForm.deleted.push(el.id);
+    }
   }
 }
 
 function addDomain() {
   dynamicValidateForm.objectives.push({
     value: '',
-    key: Date.now(),
+    id: Date.now(),
+    is_new: true
   });
 };
 
 function saveForms() {
   console.log(dynamicValidateForm)
+
   objectivesFormRef.value.validateFields().then((values) => {
-    console.log(values);
-  }).catch((error) => {
-    console.log(error);
+    ApiRequest.post<ProjectData>(`project/${useProjectStore().prj_id}/objectives`, {
+      editing_user_id: useUserStore().id,
+      added: dynamicValidateForm.objectives
+        .filter(i => i.is_new).map(i => i.value),
+      updated: dynamicValidateForm.objectives.filter(i => !i.is_new)
+        .map(i => {
+          const _item: Record<string, any> = {};
+          _item[i.id] = i.value;
+          return _item;
+        }),
+      deleted: dynamicValidateForm.deleted
+    }).then(resp => {
+      projectDataStore.project_data = resp
+    }).catch(err => message.error(err.message))
   });
 }
+
+onMounted(() => {
+  dynamicValidateForm.objectives = projectDataStore.specificObjectives.map(i => {
+    return {
+      value: i.data,
+      id: i.id,
+      is_new: false
+    }
+  })
+})
 </script>
 
 <template>
@@ -88,7 +123,7 @@ function saveForms() {
 
   <Card class="section" title="Project Objectives">
     <template #extra>
-      <Button type="primary" :ghost="true" @click="saveForms()">Save</Button>
+      <Button type="primary" :ghost="true" @click="saveForms()">Save Changes</Button>
     </template>
 
     <Form layout="vertical">
@@ -131,7 +166,7 @@ function saveForms() {
     <Form ref="objectivesFormRef" name="dynamic_form_item" :model="dynamicValidateForm"
       v-bind="formItemLayoutWithOutLabel">
 
-      <FormItem v-for="(objective, index) in dynamicValidateForm.objectives" :key="objective.key"
+      <FormItem v-for="(objective, index) in dynamicValidateForm.objectives" :key="objective.id"
         v-bind="index === 0 ? formItemLayout : {}" label="" :name="['objectives', index, 'value']" :rules="{
           required: true,
           message: 'objective can not be null',

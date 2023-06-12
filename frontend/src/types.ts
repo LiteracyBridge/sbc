@@ -10,7 +10,7 @@ export class User {
 
 export class IndicatorType {
   id: number;
-  name: string = '';
+  name: string = "";
   parent_id?: number;
 }
 
@@ -123,6 +123,5 @@ export class ProjectData {
   toc_item_id: number;
   data: string;
   module?: string;
-  name?: string;
-
+  name?: "specific_objectives";
 }
