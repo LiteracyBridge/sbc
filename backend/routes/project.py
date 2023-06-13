@@ -25,7 +25,7 @@ class ProjectObjectiveDto(BaseModel):
     editing_user_id: int
     # description: Optional[str]
 
-    updated: List[Dict[str, int]] = []
+    updated: List[Dict[str, str]] = []
     added: Optional[List[str]] = []
     removed: Optional[List[int]] = []
 
@@ -71,15 +71,23 @@ def get_project_drivers(project_id: int, db: Session = Depends(models.get_db)):
 
 
 # Project objectives route
+@router.get("/{project_id}/data", response_model=ApiResponse)
+def get_project_data(project_id: int, db: Session = Depends(models.get_db)):
+    return ApiResponse(
+        data=db.query(ProjectData).filter(ProjectData.prj_id == project_id).all()
+    )
+
+
+# Project objectives route
 @router.post("/{project_id}/objectives", response_model=ApiResponse)
 def update_objectives(
     project_id: int, dto: ProjectObjectiveDto, db: Session = Depends(models.get_db)
 ):
     # Remove deleted objectives
     if len(dto.removed) > 0:
-        db.query(ProjectData).filter(
-            ProjectData.id.in_(dto.removed) and ProjectData.prj_id == project_id
-        ).delete()
+        print(dto.removed)
+        print("Removing objectives")
+        db.query(ProjectData).filter(ProjectData.id.in_(dto.removed)).delete()
 
     # Update existing objectives
     if len(dto.updated) > 0:
@@ -89,8 +97,9 @@ def update_objectives(
             [value] = item.values()
             [key] = item.keys()
 
+            print(key, value)
             record = db.query(ProjectData).filter(ProjectData.id == int(key)).first()
-
+            print(record)
             if record is None:
                 continue
 

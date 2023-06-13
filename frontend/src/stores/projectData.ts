@@ -9,6 +9,7 @@ import { message } from "ant-design-vue";
 export const useProjectDataStore = defineStore({
   id: "project_data",
   state: () => ({
+    objectives: [] as ProjectData[],
     questions: [
       {
         id: 0,
@@ -198,7 +199,9 @@ export const useProjectDataStore = defineStore({
       state.project_data.filter((d) => d.q_id == questionId)[0],
     getData: (state) => (questionId: number) =>
       state.project_data[questionId] ? state.project_data[questionId].data : "",
-    specificObjectives: (state) => state.project_data.filter((d) => d.name == "specific_objectives"),
+    // specificObjectives: (state) => {
+    //   return state.project_data.filter((d) => d.name == "specific_objectives");
+    // },
   },
   actions: {
     clear() {
@@ -211,7 +214,7 @@ export const useProjectDataStore = defineStore({
     async download() {
       const key_index = 1;
       const filter_clause = "prj_id=" + useProjectStore().prj_id;
-      this.project_data = (await api.downloadDictionary(
+      const data = await api.downloadDictionary(
         "project_data",
         [
           "id",
@@ -224,8 +227,11 @@ export const useProjectDataStore = defineStore({
         ],
         filter_clause,
         key_index
-      )) as any[];
-      console.warn(this.project_data);
+      );
+      this.$state.project_data = data as any;
+      this.$state.objectives = Object.values(data).filter(
+        (d) => d.name == "specific_objectives"
+      );
     },
 
     async setData(q_id: number, data: any) {
@@ -235,15 +241,16 @@ export const useProjectDataStore = defineStore({
       this.project_data[q_id]["data"] = data;
       const id = this.project_data[q_id].id;
       if (id) {
-        api.update("project_data", id, { q_id, data });
+        return await api.update("project_data", id, { q_id, data });
       } else {
         this.project_data[q_id].q_id = q_id;
         this.project_data[q_id].editing_user_id = useUserStore().id;
         // this.updateProjectData(this.project_data[q_id]);
-        this.project_data[q_id].id = await api.insert("project_data", {
+        const _id = await api.insert("project_data", {
           q_id,
           data,
         });
+        this.project_data[q_id].id = _id;
       }
     },
 

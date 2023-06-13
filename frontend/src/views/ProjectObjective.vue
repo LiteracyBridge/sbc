@@ -1,7 +1,7 @@
 <script setup lang="ts">
 
 import { Card, Form, FormItem, Image, Textarea, type FormInstance, Input, Button, Divider, message } from 'ant-design-vue';
-import { onMounted, reactive, ref } from 'vue';
+import { computed, onMounted, reactive, ref, watch } from 'vue';
 
 import { useProjectDataStore } from '@/stores/projectData';
 import GPTSuggestionPanel from '@/components/GPTSuggestionPanel.vue';
@@ -22,6 +22,8 @@ const BULB_ICON = "/images/lightbulb.png"
 const projectDataStore = useProjectDataStore();
 
 const config = ref({
+  loading: false,
+  projectData: [] as ProjectData[],
   suggestions: {
     questionId: null,
     isOpened: false,
@@ -88,7 +90,9 @@ function saveForms() {
   console.log(dynamicValidateForm)
 
   objectivesFormRef.value.validateFields().then((values) => {
-    ApiRequest.post<ProjectData>(`project/${useProjectStore().prj_id}/objectives`, {
+    config.value.loading = true;
+
+    const body = {
       editing_user_id: useUserStore().id,
       added: dynamicValidateForm.objectives
         .filter(i => i.is_new).map(i => i.value),
@@ -98,22 +102,46 @@ function saveForms() {
           _item[i.id] = i.value;
           return _item;
         }),
-      deleted: dynamicValidateForm.deleted
-    }).then(resp => {
-      projectDataStore.project_data = resp
-    }).catch(err => message.error(err.message))
+      removed: dynamicValidateForm.deleted
+    }
+
+    ApiRequest.post<ProjectData>(`project/${useProjectStore().prj_id}/objectives`, body)
+      .then(resp => {
+        projectDataStore.project_data = resp
+        config.value.projectData = resp;
+
+        message.success("Project objectives updated successfully");
+      })
+      .catch(err => message.error(err.message))
+      .finally(() => config.value.loading = false);
   });
 }
 
-onMounted(() => {
-  dynamicValidateForm.objectives = projectDataStore.specificObjectives.map(i => {
-    return {
-      value: i.data,
-      id: i.id,
-      is_new: false
-    }
+function fetchData() {
+  config.value.loading = true;
+  ApiRequest.get<ProjectData>(`project/${useProjectStore().prj_id}/data`).then((resp) => {
+    config.value.projectData = resp;
+    dynamicValidateForm.objectives = resp
+      .filter(p => p.module == "objectives")
+      .map(i => {
+        return {
+          value: i.data,
+          id: i.id,
+          is_new: false
+        }
+      });
   })
+    .catch(err => message.error(err.message))
+    .finally(() => config.value.loading = false);
+}
+
+onMounted(() => {
+  fetchData();
 })
+
+const getObjectivesData = computed(() => {
+  return config.value.projectData.filter(i => i.module == "objectives");
+});
 </script>
 
 <template>
@@ -121,7 +149,7 @@ onMounted(() => {
     :question-id="config.suggestions.questionId" :module="config.suggestions.module">
   </GPTSuggestionPanel>
 
-  <Card class="section" title="Project Objectives">
+  <Card class="section" title="Project Objectives" :loading="config.loading">
     <template #extra>
       <Button type="primary" :ghost="true" @click="saveForms()">Save Changes</Button>
     </template>

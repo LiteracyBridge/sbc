@@ -122,6 +122,6 @@ export class ProjectData {
   editing_user_id: number;
   toc_item_id: number;
   data: string;
-  module?: string;
+  module?: "objectives";
   name?: "specific_objectives";
 }
