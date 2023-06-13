@@ -25,7 +25,9 @@
 		"[vue]": {
 			"editor.indentSize": "2"
 		},
-		"python.formatting.provider": "none",
+		"[python]": {
+            "editor.defaultFormatter": "ms-python.black-formatter"
+        },
 		"mypy.runUsingActiveInterpreter": false,
 		"mypy.dmypyExecutable": "${workspaceFolder}/backend/venv/bin/dmypy",
 		"mypy.configFile": "backend/pyproject.toml",

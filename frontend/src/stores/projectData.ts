@@ -9,7 +9,7 @@ import { message } from "ant-design-vue";
 export const useProjectDataStore = defineStore({
   id: "project_data",
   state: () => ({
-    objectives: [] as ProjectData[],
+    // objectives: [] as ProjectData[],
     questions: [
       {
         id: 0,
@@ -229,9 +229,10 @@ export const useProjectDataStore = defineStore({
         key_index
       );
       this.$state.project_data = data as any;
-      this.$state.objectives = Object.values(data).filter(
-        (d) => d.name == "specific_objectives"
-      );
+      // this.$state.objectives = Object.values(data).filter(
+      //   (d) => d.name == "specific_objectives"
+      // );
+      // console.error(Object.values(data));
     },
 
     async setData(q_id: number, data: any) {

@@ -5,11 +5,10 @@ from helpers import ToCItemDto, create_toc_item
 
 import models
 from fastapi import APIRouter, Depends, HTTPException
-from models import Activity, Project, ProjectData, TheoryOfChangeItem, User
+from models import ProjectData
 from pydantic import BaseModel
 from schema import ApiResponse
-from sqlalchemy.orm import Session, joinedload, subqueryload
-from fastapi.encoders import jsonable_encoder
+from sqlalchemy.orm import Session
 
 router = APIRouter()
 
@@ -85,21 +84,16 @@ def update_objectives(
 ):
     # Remove deleted objectives
     if len(dto.removed) > 0:
-        print(dto.removed)
-        print("Removing objectives")
         db.query(ProjectData).filter(ProjectData.id.in_(dto.removed)).delete()
 
     # Update existing objectives
     if len(dto.updated) > 0:
-        print(dto.updated)
-
         for item in dto.updated:
             [value] = item.values()
             [key] = item.keys()
 
-            print(key, value)
             record = db.query(ProjectData).filter(ProjectData.id == int(key)).first()
-            print(record)
+
             if record is None:
                 continue
 
