@@ -189,13 +189,15 @@ const getObjectivesData = computed(() => {
     </Form>
 
 
-    <Divider>What specific objective(s) will your project achieve? What changes will your project make happen?</Divider>
+    <!-- <Divider>What specific objective(s) will your project achieve? What changes will your project make happen?</Divider> -->
 
     <Form ref="objectivesFormRef" name="dynamic_form_item" :model="dynamicValidateForm"
-      v-bind="formItemLayoutWithOutLabel">
+      v-bind="formItemLayoutWithOutLabel" layout="vertical">
 
       <FormItem v-for="(objective, index) in dynamicValidateForm.objectives" :key="objective.id"
-        v-bind="index === 0 ? formItemLayout : {}" label="" :name="['objectives', index, 'value']" :rules="{
+        v-bind="index === 0 ? formItemLayout : {}"
+        :label="index != 0 ? '' : 'What specific objective(s) will your project achieve? What changes will your project make happen?'"
+        :name="['objectives', index, 'value']" :rules="{
           required: true,
           message: 'objective can not be null',
           trigger: 'change',
@@ -220,9 +222,9 @@ const getObjectivesData = computed(() => {
       </FormItem>
 
       <!-- <FormItem v-bind="formItemLayoutWithOutLabel">
-            <Button type="primary" html-type="submit" @click="submitForm">Submit</Button>
-            <Button style="margin-left: 10px" @click="resetForm">Reset</Button>
-          </FormItem> -->
+              <Button type="primary" html-type="submit" @click="submitForm">Submit</Button>
+              <Button style="margin-left: 10px" @click="resetForm">Reset</Button>
+            </FormItem> -->
     </Form>
   </Card>
 </template>
