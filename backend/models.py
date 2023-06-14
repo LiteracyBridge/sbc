@@ -1,5 +1,5 @@
 from typing import List, Optional
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
+from sqlalchemy import DateTime, Boolean, Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship, mapped_column
 from sqlalchemy.orm import Mapped
 from sqlalchemy.dialects.postgresql import JSONB
@@ -64,6 +64,9 @@ class Project(Base):
     evaluation_strategy: Mapped[Optional[str]]
     feedback_strategy: Mapped[Optional[str]]
     is_archived: Mapped[bool] = mapped_column(Boolean, default=False)
+    start_date: Mapped[Optional[DateTime]] = mapped_column(DateTime, nullable=True)
+    end_date: Mapped[Optional[DateTime]] = mapped_column(DateTime, nullable=True)
+
     country_id: Mapped[int] = mapped_column(ForeignKey("countries.id"))
     organisation_id: Mapped[int] = mapped_column(ForeignKey("organisations.id"))
 

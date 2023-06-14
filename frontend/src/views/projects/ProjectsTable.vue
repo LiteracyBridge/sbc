@@ -9,9 +9,12 @@ import {
   Modal, Button, Tag,
   Typography, Form, type FormInstance, FormItem, Input,
   Select,
-  message
+  message,
+  DatePicker
 } from "ant-design-vue";
 import { FolderOpenOutlined, FolderOutlined, PlusCircleOutlined } from "@ant-design/icons-vue";
+import { Project } from "@/types";
+import dayjs from 'dayjs';
 
 const router = useRouter();
 const lookupStore = useLookupStore();
@@ -22,10 +25,7 @@ const config = ref({
   loading: false,
   projectModal: {
     visible: false,
-    form: {
-      name: "",
-      country_id: null,
-    }
+    form: new Project()
   }
 });
 const projectFormRef = ref<FormInstance>();
@@ -45,6 +45,10 @@ const columns = [
   {
     title: 'Project',
     key: 'name',
+  },
+  {
+    title: 'Duration',
+    key: 'duration',
   },
   {
     title: 'Country',
@@ -69,7 +73,9 @@ function closeProjectModal() {
 function createProject() {
   projectFormRef.value.validateFields().then((_) => {
     const form = config.value.projectModal.form;
-    projectStore.add(form.name, form.country_id);
+    console.log(form)
+    // return
+    projectStore.add(form.name, form.country_id, form.start_date.toISOString(), form.end_date.toISOString());
 
     closeProjectModal();
   });
@@ -113,6 +119,13 @@ function filterCountry(input: string, option: any) {
           </Tag>
         </template>
 
+        <template v-if="column.key == 'duration'">
+          <span v-if="project.start_date == null">N/A</span>
+          <span v-else>
+            {{ dayjs(project.start_date).format('MMMM D, YYYY') }} - {{ dayjs(project.end_date).format('MMMM D, YYYY') }}
+          </span>
+        </template>
+
         <template v-if="column.key == 'country'">
           {{ lookupStore.lookupNameById("countries", project.country_id) }}
         </template>
@@ -124,7 +137,8 @@ function filterCountry(input: string, option: any) {
         <template v-if="column.key === 'actions'">
           <Space>
             <!-- TODO: open modal for creating project -->
-            <Button type="primary" size="small" :ghost="true" v-if="!project.archived" @click="changeProject(project.prj_id)">
+            <Button type="primary" size="small" :ghost="true" v-if="!project.archived"
+              @click="changeProject(project.prj_id)">
               <template #icon>
                 <FolderOpenOutlined />
               </template>
@@ -169,6 +183,25 @@ function filterCountry(input: string, option: any) {
 
         </Select>
       </FormItem>
+
+      <Row :gutter="6">
+        <Col :span="12">
+        <FormItem name="start_date" label="Start Date" has-feedback
+          :rules="[{ required: true, message: 'Please choose project start date!' }]">
+
+          <DatePicker v-model:value="config.projectModal.form.start_date" />
+        </FormItem>
+        </Col>
+
+        <Col :span="12">
+        <FormItem name="end_date" label="End Date" has-feedback
+          :rules="[{ required: true, message: 'Please choose project end date!' }]">
+
+          <DatePicker v-model:value="config.projectModal.form.end_date" />
+        </FormItem>
+        </Col>
+      </Row>
+
     </Form>
   </Modal>
 </template>

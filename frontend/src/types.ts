@@ -1,3 +1,5 @@
+import type { Dayjs } from 'dayjs';
+
 export class User {
   id: number;
   email: string;
@@ -6,6 +8,14 @@ export class User {
   token?: string;
   last_project_id?: number;
   organisation_id?: number;
+}
+
+export class Project {
+  id: number;
+  name: string;
+  start_date: Dayjs;
+  end_date: Dayjs;
+  country_id?: number;
 }
 
 export class IndicatorType {

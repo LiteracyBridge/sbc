@@ -66,7 +66,7 @@ function updateData(event: any, id: number) {
 }
 
 // Dynamic objectives forms
-function removeDomain(item: Objective) {
+function removeObjective(item: Objective) {
   let index = dynamicValidateForm.objectives.indexOf(item);
   if (index !== -1) {
     const [el] = dynamicValidateForm.objectives.splice(index, 1);
@@ -78,7 +78,7 @@ function removeDomain(item: Objective) {
   }
 }
 
-function addDomain() {
+function addObjective() {
   dynamicValidateForm.objectives.push({
     value: '',
     id: Date.now(),
@@ -206,7 +206,7 @@ const getObjectivesData = computed(() => {
         <Input v-model:value="objective.value" placeholder="please input objective" style="width: 60%;" />
 
         <Button type="ghost" :danger="true" size="small" v-if="dynamicValidateForm.objectives.length > 1" class="ml-2"
-          :disabled="dynamicValidateForm.objectives.length === 1" @click="removeDomain(objective)">
+          :disabled="dynamicValidateForm.objectives.length === 1" @click="removeObjective(objective)">
           <template #icon>
             <DeleteOutlined />
           </template>
@@ -215,7 +215,7 @@ const getObjectivesData = computed(() => {
       </FormItem>
 
       <FormItem v-bind="formItemLayoutWithOutLabel">
-        <Button type="dashed" style="width: 60%" @click="addDomain">
+        <Button type="dashed" style="width: 60%" @click="addObjective">
           <PlusOutlined />
           Add Objective
         </Button>

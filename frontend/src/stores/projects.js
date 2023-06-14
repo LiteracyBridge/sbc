@@ -49,6 +49,8 @@ const init_objects = {
     private_prj: true,
     country_id: null,
     access_id: null,
+    start_date: "",
+    end_date: "",
     archived: true,
   },
 };
@@ -158,13 +160,15 @@ export const useProjectStore = defineStore({
     },
 
     // Adds a new project
-    async add(name, country_id) {
+    async add(name, country_id, start_date, end_date) {
       // create entry in db projects table and get id
       const private_prj = true;
       const prj_id = await api.insert("projects", {
         name,
         country_id,
         private_prj,
+        start_date,
+        end_date,
         organisation_id: useUserStore().organisation_id,
       });
 
@@ -223,6 +227,8 @@ export const useProjectStore = defineStore({
             "country_id",
             "access_id",
             "archived",
+            "start_date",
+            "end_date",
           ],
           "user_id=" + useUserStore().id,
           true
