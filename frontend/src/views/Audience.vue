@@ -5,7 +5,7 @@ import { computed, onMounted, reactive, ref, watch } from 'vue';
 
 import { useProjectDataStore } from '@/stores/projectData';
 import GPTSuggestionPanel from '@/components/GPTSuggestionPanel.vue';
-import { DeleteOutlined, MinusCircleOutlined, PlusOutlined } from '@ant-design/icons-vue';
+import { DeleteOutlined, PlusOutlined } from '@ant-design/icons-vue';
 import { ApiRequest } from '@/apis/api';
 import { useProjectStore } from '@/stores/projects';
 import { ProjectData } from '@/types';
@@ -27,14 +27,14 @@ const config = ref({
   suggestions: {
     questionId: null,
     isOpened: false,
-    module: "objectives"
+    module: "audiences"
   },
 });
 
 // Dynamic objectives forms
-const objectivesFormRef = ref<FormInstance>();
-const dynamicValidateForm = reactive<{ objectives: Objective[], deleted: number[] }>({
-  objectives: [],
+const audienceFormRef = ref<FormInstance>();
+const dynamicValidateForm = reactive<{ audiences: Objective[], deleted: number[] }>({
+  audiences: [],
   deleted: []
 });
 
@@ -66,10 +66,10 @@ function updateData(event: any, id: number) {
 }
 
 // Dynamic objectives forms
-function removeDomain(item: Objective) {
-  let index = dynamicValidateForm.objectives.indexOf(item);
+function removeAudience(item: Objective) {
+  let index = dynamicValidateForm.audiences.indexOf(item);
   if (index !== -1) {
-    const [el] = dynamicValidateForm.objectives.splice(index, 1);
+    const [el] = dynamicValidateForm.audiences.splice(index, 1);
 
     console.log(el)
     if (!el.is_new) {
@@ -78,8 +78,8 @@ function removeDomain(item: Objective) {
   }
 }
 
-function addDomain() {
-  dynamicValidateForm.objectives.push({
+function addAudience() {
+  dynamicValidateForm.audiences.push({
     value: '',
     id: Date.now(),
     is_new: true
@@ -89,14 +89,14 @@ function addDomain() {
 function saveForms() {
   console.log(dynamicValidateForm)
 
-  objectivesFormRef.value.validateFields().then((values) => {
+  audienceFormRef.value.validateFields().then((values) => {
     config.value.loading = true;
 
     const body = {
       editing_user_id: useUserStore().id,
-      added: dynamicValidateForm.objectives
+      added: dynamicValidateForm.audiences
         .filter(i => i.is_new).map(i => i.value),
-      updated: dynamicValidateForm.objectives.filter(i => !i.is_new)
+      updated: dynamicValidateForm.audiences.filter(i => !i.is_new)
         .map(i => {
           const _item: Record<string, any> = {};
           _item[i.id] = i.value;
@@ -105,12 +105,12 @@ function saveForms() {
       removed: dynamicValidateForm.deleted
     }
 
-    ApiRequest.post<ProjectData>(`project/${useProjectStore().prj_id}/objectives`, body)
+    ApiRequest.post<ProjectData>(`project/${useProjectStore().prj_id}/audience`, body)
       .then(resp => {
         projectDataStore.project_data = resp
         config.value.projectData = resp;
 
-        message.success("Project objectives updated successfully");
+        message.success("Project audiences updated successfully");
       })
       .catch(err => message.error(err.message))
       .finally(() => config.value.loading = false);
@@ -121,8 +121,8 @@ function fetchData() {
   config.value.loading = true;
   ApiRequest.get<ProjectData>(`project/${useProjectStore().prj_id}/data`).then((resp) => {
     config.value.projectData = resp;
-    dynamicValidateForm.objectives = resp
-      .filter(p => p.module == "objectives")
+    dynamicValidateForm.audiences = resp
+      .filter(p => p.module == config.value.suggestions.module)
       .map(i => {
         return {
           value: i.data,
@@ -130,6 +130,10 @@ function fetchData() {
           is_new: false
         }
       });
+
+    if (dynamicValidateForm.audiences.length == 0) {
+      addAudience();
+    }
   })
     .catch(err => message.error(err.message))
     .finally(() => config.value.loading = false);
@@ -149,64 +153,44 @@ const getObjectivesData = computed(() => {
     :question-id="config.suggestions.questionId" :module="config.suggestions.module">
   </GPTSuggestionPanel>
 
-  <Card class="section" title="Project Objectives" :loading="config.loading">
+  <Card class="section" title="Project Audiences" :loading="config.loading">
     <template #extra>
       <Button type="primary" :ghost="true" @click="saveForms()">Save Changes</Button>
     </template>
 
     <Form layout="vertical">
-      <!-- <div class="columns mx-4 is-vcentered"> -->
-
-      <!-- <div class="column is-8"> -->
-
-      <!-- <strong>{{ count + 1 }}. {{ q.q2u }} </strong><br />
-      <img v-if="q.bulb" :src="BULB_ICON" ref="iconRefs" @click="submitContextAndPrompt(q.id, topic)"
-        class="image is-32x32" />
-      <textarea @change="updateData($event, q.id)" :value="projectDataStore.getData(q.id)" rows="4" cols="80" /><br />
-      <br /><br /> -->
 
       <FormItem :name="`input-${count + 1}`"
         v-for="(q, count) in projectDataStore.questionsForTopic(config.suggestions.module)" :key="q.id">
         <template #label>
           {{ count + 1 }}. {{ q.q2u }}
         </template>
-        <!-- <label class="label" :for="`input-${count + 1}`">{{ count + 1 }}. {{ q.q2u }}</label> -->
 
-        <!-- <div class="control"> -->
         <img v-if="q.bulb" :src="BULB_ICON" ref="iconRefs" @click="showPanel(q.id)" class="image is-32x32" />
-        <!-- </div> -->
 
-        <!-- <div class="control"> -->
         <Textarea @change="updateData($event, q.id)" :value="projectDataStore.getData(q.id)" :rows="7" :cols="40"
           style="width: 70%;"></Textarea>
 
-        <!-- </div> -->
-
       </FormItem>
-      <!-- </div> -->
 
-      <!-- </div> -->
     </Form>
 
+    <Form ref="audienceFormRef" name="audience-form-item" :model="dynamicValidateForm" layout="vertical"
+      v-bind="formItemLayoutWithOutLabel">
 
-    <!-- <Divider>What specific objective(s) will your project achieve? What changes will your project make happen?</Divider> -->
-
-    <Form ref="objectivesFormRef" name="dynamic_form_item" :model="dynamicValidateForm"
-      v-bind="formItemLayoutWithOutLabel" layout="vertical">
-
-      <FormItem v-for="(objective, index) in dynamicValidateForm.objectives" :key="objective.id"
+      <FormItem v-for="(objective, index) in dynamicValidateForm.audiences" :key="objective.id"
         v-bind="index === 0 ? formItemLayout : {}"
-        :label="index != 0 ? '' : 'What specific objective(s) will your project achieve? What changes will your project make happen?'"
-        :name="['objectives', index, 'value']" :rules="{
+        :label="index != 0 ? '' : 'Who else influences the actions of your main target audience? What other audiences need to be involved? Who else influences the actions of your main target audience? What other audiences need to be involved?'"
+        :name="['audiences', index, 'value']" :rules="{
           required: true,
-          message: 'Objective can not be empty',
+          message: 'Audience can not be empty',
           trigger: 'change',
         }">
 
-        <Input v-model:value="objective.value" placeholder="please input objective" style="width: 60%;" />
+        <Input v-model:value="objective.value" placeholder="please input audience" style="width: 60%;" />
 
-        <Button type="ghost" :danger="true" size="small" v-if="dynamicValidateForm.objectives.length > 1" class="ml-2"
-          :disabled="dynamicValidateForm.objectives.length === 1" @click="removeDomain(objective)">
+        <Button type="ghost" :danger="true" size="small" v-if="dynamicValidateForm.audiences.length > 1" class="ml-2"
+          :disabled="dynamicValidateForm.audiences.length === 1" @click="removeAudience(objective)">
           <template #icon>
             <DeleteOutlined />
           </template>
@@ -215,16 +199,12 @@ const getObjectivesData = computed(() => {
       </FormItem>
 
       <FormItem v-bind="formItemLayoutWithOutLabel">
-        <Button type="dashed" style="width: 60%" @click="addDomain">
+        <Button type="dashed" style="width: 60%" @click="addAudience">
           <PlusOutlined />
-          Add Objective
+          Add Audience
         </Button>
       </FormItem>
 
-      <!-- <FormItem v-bind="formItemLayoutWithOutLabel">
-              <Button type="primary" html-type="submit" @click="submitForm">Submit</Button>
-              <Button style="margin-left: 10px" @click="resetForm">Reset</Button>
-            </FormItem> -->
     </Form>
   </Card>
 </template>

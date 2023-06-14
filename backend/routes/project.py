@@ -21,8 +21,9 @@ class UpdateProjectDto(BaseModel):
 
 
 class ProjectObjectiveDto(BaseModel):
+    # name: str
+    # module: str
     editing_user_id: int
-    # description: Optional[str]
 
     updated: List[Dict[str, str]] = []
     added: Optional[List[str]] = []
@@ -77,16 +78,76 @@ def get_project_data(project_id: int, db: Session = Depends(models.get_db)):
     )
 
 
-# Project objectives route
 @router.post("/{project_id}/objectives", response_model=ApiResponse)
 def update_objectives(
     project_id: int, dto: ProjectObjectiveDto, db: Session = Depends(models.get_db)
 ):
+    """Manage project objectives"""
+
     # Remove deleted objectives
     if len(dto.removed) > 0:
         db.query(ProjectData).filter(ProjectData.id.in_(dto.removed)).delete()
 
     # Update existing objectives
+    if len(dto.updated) > 0:
+        for item in dto.updated:
+            [value] = item.values()
+            [key] = item.keys()
+
+            record = db.query(ProjectData).filter(ProjectData.id == int(key)).first()
+
+            if record is None:
+                continue
+
+            # FIXME: Update corresponding theory of change item
+            record.data = value
+            db.commit()
+
+    # Create new objectives
+    if len(dto.added) > 0:
+        for item in dto.added:
+            record: ProjectData = ProjectData()
+            record.q_id = 10
+            record.data = item
+            record.module = "objectives"
+            record.name = "specific_objectives"
+            record.prj_id = project_id
+            record.editing_user_id = dto.editing_user_id
+
+            db.add(record)
+            db.commit()
+            db.refresh(record)
+
+            # Create theory of change objective item
+            toc = create_toc_item(
+                ToCItemDto(
+                    project_id=project_id,
+                    name=item,
+                    reference=record,
+                    type="objective",
+                ),
+                db=db,
+            )
+
+            record.toc_item_id = toc.id
+            db.commit()
+
+    return ApiResponse(
+        data=db.query(ProjectData).filter(ProjectData.prj_id == project_id).all()
+    )
+
+
+@router.post("/{project_id}/audience", response_model=ApiResponse)
+def update_audience(
+    project_id: int, dto: ProjectObjectiveDto, db: Session = Depends(models.get_db)
+):
+    """Manage project audiences"""
+
+    # Remove deleted audiences
+    if len(dto.removed) > 0:
+        db.query(ProjectData).filter(ProjectData.id.in_(dto.removed)).delete()
+
+    # Update existing audiences
     if len(dto.updated) > 0:
         for item in dto.updated:
             [value] = item.values()
@@ -104,28 +165,14 @@ def update_objectives(
     if len(dto.added) > 0:
         for item in dto.added:
             record: ProjectData = ProjectData()
-            record.q_id = 10
+            record.q_id = 3
             record.data = item
-            record.module = "objectives"
-            record.name = "specific_objectives"
+            record.module = "audiences"
+            record.name = "secondary_audiences"
             record.prj_id = project_id
             record.editing_user_id = dto.editing_user_id
 
             db.add(record)
-            db.commit()
-
-            # Create theory of change objective item
-            toc = create_toc_item(
-                ToCItemDto(
-                    project_id=project_id,
-                    name=item,
-                    reference=record,
-                    type="objective",
-                ),
-                db=db,
-            )
-
-            record.toc_item_id = toc.id
             db.commit()
 
     return ApiResponse(

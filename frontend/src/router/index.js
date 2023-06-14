@@ -16,6 +16,7 @@ import ProjectManagementIndex from "@/views/project-management/ProjectManagement
 import Unauthorized from "@/views/Unauthorized.vue";
 import ProjectsIndex from '@/views/projects/ProjectsIndex.vue';
 import ProjectObjective from '@/views/ProjectObjective.vue';
+import Audience from '@/views/Audience.vue';
 
 // import { User } from "@/types";
 
@@ -127,6 +128,11 @@ const router = createRouter({
       path: "/project-objectives",
       name: "project-objectives",
       component: ProjectObjective,
+    },
+    {
+      path: "/audiences",
+      name: "audiences",
+      component: Audience,
     },
     {
       path: "/forms/:module",

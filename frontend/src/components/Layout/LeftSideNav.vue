@@ -31,7 +31,7 @@ const menuItems = [
     label: 'Project Objectives',
     path: '/project-objectives'
   },
-  { label: 'Audiences', name: 'forms', params: { module: 'audiences' } },
+  { label: 'Audiences', path: '/audiences' },
   { label: 'Behavioral Drivers', path: '/drivers' },
   { label: 'SBC Approaches', path: '/interventions' },
   { label: 'Theory of Change', path: '/toc' },
