@@ -87,6 +87,7 @@ function onInputChange(event: any) {
 </script>
 
 <template>
+  <!-- TODO: change to ant drawer -->
   <VueSidePanel v-model="isOpened" :hide-close-btn="true" :no-close="true" lock-scroll width="80vw"
     transition-name="slide-right">
     <div class="level">
@@ -114,8 +115,8 @@ function onInputChange(event: any) {
     <div class="columns my-3 mx-5">
 
 
-      <div class="column is-4 mt-6">
-        <div class="mt-6">
+      <div class="column is-4 mt-2">
+        <div class="mt-2">
           <!-- Display loading indicator -->
           <div v-if="gptResponse?.isLoading == true">
             <PulseLoaderVue :loading="gptResponse?.isLoading"></PulseLoaderVue>
@@ -123,7 +124,7 @@ function onInputChange(event: any) {
             <span>Getting AI suggestions, please wait...</span>
           </div>
 
-          <p v-else>
+          <p v-else style="white-space: pre-wrap">
             {{ gptResponse?.answer || 'No suggestions available. Click on the light bulb to see suggestions' }}
           </p>
 
