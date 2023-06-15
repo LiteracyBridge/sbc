@@ -162,15 +162,15 @@ class LuDriver(Base):
     description: Mapped[Optional[str]]
 
 
-class IndicatorType(Base):
-    __tablename__ = "lu_indicator_types"
+# class IndicatorType(Base):
+#     __tablename__ = "lu_indicator_types"
 
-    id: Mapped[int] = mapped_column(primary_key=True, index=True)
-    name: Mapped[str]
-    parent_id: Mapped[int] = mapped_column(Integer, ForeignKey("lu_indicator_types.id"))
+#     id: Mapped[int] = mapped_column(primary_key=True, index=True)
+#     name: Mapped[str]
+#     parent_id: Mapped[int] = mapped_column(Integer, ForeignKey("lu_indicator_types.id"))
 
-    parent = relationship("IndicatorType", remote_side=[id], load_on_pending=True)
-    indicators = relationship("Indicator", back_populates="group")
+#     parent = relationship("IndicatorType", remote_side=[id], load_on_pending=True)
+#     indicators = relationship("Indicator", back_populates="group")
 
 
 # TODO: remove this table
@@ -211,7 +211,8 @@ class ProjectDriver(Base):
     editing_user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
 
 
-class TheoryOfChange(Base):
+# TODO: remove this model
+class TheoryOfChangeOld(Base):
     __tablename__ = "theories_of_change"
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)

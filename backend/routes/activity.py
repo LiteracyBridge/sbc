@@ -28,8 +28,8 @@ class ActivityDto(BaseModel):
 
 def get_toc_by_project_id(projectId: int, db: Session = Depends(models.get_db)):
     record = (
-        db.query(models.TheoryOfChange)
-        .filter(models.TheoryOfChange.project_id == projectId)
+        db.query(models.TheoryOfChangeOld)
+        .filter(models.TheoryOfChangeOld.project_id == projectId)
         .first()
     )
     return record

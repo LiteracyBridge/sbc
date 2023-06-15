@@ -1,6 +1,6 @@
 from typing import Optional
 from models import Project
-from lookups import LuIndiKit
+from .lookups import LuIndiKit
 from database import Base, SessionLocal, engine
 from sqlalchemy.orm import relationship, mapped_column
 from sqlalchemy import DateTime, Boolean, Column, ForeignKey, Integer, String
@@ -58,6 +58,8 @@ class TheoryOfChange(Base):
     project_id: Mapped[Optional[int]] = mapped_column(
         ForeignKey("projects.id", ondelete="CASCADE"), nullable=False
     )
+
+    # TODO: add risks
 
     # Related objects
     indicators: Mapped["TheoryOfChangeIndicator"] = relationship(

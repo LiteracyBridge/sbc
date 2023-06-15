@@ -1,6 +1,6 @@
 from typing import Any
 from pydantic import BaseModel
-from models import TheoryOfChange, TheoryOfChangeItem, get_db
+from models import TheoryOfChangeOld, TheoryOfChangeItem, get_db
 from fastapi import Depends
 from sqlalchemy.orm import Session
 
@@ -14,7 +14,7 @@ class ToCItemDto(BaseModel):
 
 def get_toc_by_project_id(projectId: int, db: Session):
     record = (
-        db.query(TheoryOfChange).filter(TheoryOfChange.project_id == projectId).first()
+        db.query(TheoryOfChangeOld).filter(TheoryOfChangeOld.project_id == projectId).first()
     )
     return record
 

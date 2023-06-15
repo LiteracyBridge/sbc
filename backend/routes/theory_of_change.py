@@ -1,4 +1,5 @@
 from typing import List, Optional
+from db_models.project import ProjectIndicators, TheoryOfChange
 from dataclass_wizard import asdict, fromdict
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
@@ -9,7 +10,7 @@ from models import (
     Monitoring,
     Risk,
     TheoryOfChangeIndicator,
-    TheoryOfChange,
+    TheoryOfChangeOld,
     TheoryOfChangeItem,
 )
 import models
@@ -50,12 +51,12 @@ class RisksDto(BaseModel):
 
 def get_toc_by_project_id(projectId: int, db: Session = Depends(models.get_db)):
     record = (
-        db.query(models.TheoryOfChange)
-        .filter(models.TheoryOfChange.project_id == projectId)
+        db.query(TheoryOfChange)
+        .filter(TheoryOfChange.project_id == projectId)
         .options(
-            subqueryload(models.TheoryOfChange.graph)
-            .subqueryload(TheoryOfChangeItem.indicators)
-            .subqueryload(TheoryOfChangeIndicator.indicator),
+            # subqueryload(models.TheoryOfChangeOld.graph)
+            subqueryload(TheoryOfChangeIndicator.indicators)
+            .subqueryload(ProjectIndicators.indi_kit),
             # .options(
             #     subqueryload(models.TheoryOfChangeItem.sem),
             #     subqueryload(models.TheoryOfChangeItem.type),
@@ -69,11 +70,11 @@ def get_toc_by_project_id(projectId: int, db: Session = Depends(models.get_db)):
 
 def get_toc_by_id(id: int, db: Session = Depends(models.get_db)):
     record = (
-        db.query(models.TheoryOfChange)
-        .filter(models.TheoryOfChange.id == id)
+        db.query(models.TheoryOfChangeOld)
+        .filter(models.TheoryOfChangeOld.id == id)
         .options(
-            subqueryload(models.TheoryOfChange.risks),
-            subqueryload(models.TheoryOfChange.graph)
+            subqueryload(models.TheoryOfChangeOld.risks),
+            subqueryload(models.TheoryOfChangeOld.graph)
             .subqueryload(TheoryOfChangeItem.indicators)
             .subqueryload(TheoryOfChangeIndicator.indicator),
             # .options(
@@ -90,15 +91,15 @@ def get_toc_by_id(id: int, db: Session = Depends(models.get_db)):
 
 @router.post("/", response_model=ApiResponse)
 def create(dto: NewTheoryOfChangeDto, db: Session = Depends(models.get_db)):
-    record = models.TheoryOfChange()
+    record = models.TheoryOfChangeOld()
     record.name = dto.name
     record.project_id = dto.project_id
     record.notes = dto.notes
 
     if dto.name is False:
         count = (
-            db.query(models.TheoryOfChange)
-            .filter(models.TheoryOfChange.project_id == dto.project_id)
+            db.query(models.TheoryOfChangeOld)
+            .filter(models.TheoryOfChangeOld.project_id == dto.project_id)
             .count()
         )
         record.name = f"Theory of Change #${count + 1}"

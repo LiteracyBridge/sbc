@@ -1,6 +1,7 @@
 <script lang="ts"  setup>
 // @ts-ignore
-import mermaidAPI from "/node_modules/mermaid/dist/mermaid.esm.mjs";
+// import mermaidAPI from "/node_modules/mermaid/dist/mermaid.esm.mjs";
+import mermaid from 'mermaid';
 
 import { onMounted, onUnmounted, reactive, ref, computed } from "vue";
 import { useSideNavStore } from "@/stores/sideNav";
@@ -86,7 +87,7 @@ const mermaidConfig = {
 };
 
 const drawDiagram = async function () {
-  const { svg } = await mermaidAPI.render("graphDiv", diagram.toMermaid());
+  const { svg } = await mermaid.render("graphDiv", diagram.toMermaid());
   if (diagramContainer.value) {
     diagramContainer.value.innerHTML = "";
     const svgWrapper = document.createElement("div");
@@ -351,7 +352,7 @@ const escapeKeyHandler = (event) => {
 onMounted(() => {
   fetchGraph()
 
-  mermaidAPI.initialize(mermaidConfig);
+  mermaid.initialize(mermaidConfig);
 
   window.addEventListener("keydown", escapeKeyHandler);
 

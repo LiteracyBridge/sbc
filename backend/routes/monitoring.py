@@ -10,7 +10,7 @@ from models import (
     Monitoring,
     Risk,
     TheoryOfChangeIndicator,
-    TheoryOfChange,
+    TheoryOfChangeOld,
     TheoryOfChangeItem,
 )
 import models
