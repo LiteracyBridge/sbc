@@ -15,6 +15,7 @@ import { useProjectDataStore } from "@/stores/projectData";
 import { useProjectStore } from '@/stores/projects';
 import { AutoComplete, Button, Card, Divider, Form, FormItem, Input, Modal, Popover, Row, Space, Spin, Switch, Textarea } from "ant-design-vue";
 import TheoryOfChangeExamplesBrowser from "./TheoryOfChangeExamplesBrowser.vue";
+import CustomIndicatorModal from './CustomIndicatorModal.vue';
 import { PlusCircleOutlined, RotateRightOutlined, SwapLeftOutlined, SwapOutlined } from "@ant-design/icons-vue";
 import { useTheoryOfChangeStore } from "@/stores/theory_of_change";
 
@@ -57,7 +58,7 @@ const config = reactive({
   isLoading: true,
   isExamplePanelVisible: false,
 });
-const customIndicatorModal = ref({
+const customIndicator = ref({
   visible: false,
   customIndicator: ''
 })
@@ -563,9 +564,9 @@ const risksModalConfig = reactive({
 
 const getProjectIndicators = computed(() => {
   return theoryOfChangeStore.project_indicators.map(i => {
-    return { ...i, label: i.id, value: i.id }
+    return { ...i, label: i.name, value: i.id }
   })
-}
+});
 </script>
 
 <template>
@@ -576,12 +577,17 @@ const getProjectIndicators = computed(() => {
 
     <div class="mx-3" v-if="!config.isLoading">
 
-      <!-- Indicator Browser Panel -->
+      <!-- IndiKit Browser Panel -->
       <IndicatorBrowserPanel :is-visible="isPanelVisible"
         @is-closed="isPanelVisible = false; showIndicatorModal = true; useSideNavStore().hide();"
         :toc-item="theoryOfChangeModel.selectedItem"
         @is-saved="updateToCModel($event, theoryOfChangeModel.selectedItem?.id)">
       </IndicatorBrowserPanel>
+
+      <!-- Custom Indicator Modal -->
+      <CustomIndicatorModal :visible="customIndicator.visible" :theory-of-change="theoryOfChangeModel.selectedItem"
+        @closed="customIndicator.visible = false">
+      </CustomIndicatorModal>
 
       <!-- Theory of Change examples browser panel -->
       <TheoryOfChangeExamplesBrowser :is-visible="config.isExamplePanelVisible"
@@ -789,7 +795,7 @@ const getProjectIndicators = computed(() => {
                   <!-- <a-auto-complete v-model:value="value" :options="options" style="width: 200px" placeholder="input here"
                                               :filter-option="filterOption" /> -->
                   <!-- <Popconfirm title="Are you sure delete this task?" ok-text="Yes" cancel-text="No"> -->
-                  <Button size="small" type="primary" :ghost="true" @click="customIndicatorModal.visible = true">
+                  <Button size="small" type="primary" :ghost="true" @click="customIndicator.visible = true">
                     <PlusCircleOutlined /> Add custom indicators
                   </Button>
                   <!-- </Popconfirm> -->
@@ -813,14 +819,14 @@ const getProjectIndicators = computed(() => {
       <!-- ======== END: Theory of Change Modal ======= -->
 
       <!-- ===== START: Customer Indicators Modal ==== -->
-      <!-- ===== END: Customer Indicators Modal ==== -->
-      <Modal v-model:visible="customIndicatorModal.visible" title="Add Indicator">
+      <!-- <Modal v-model:visible="customIndicatorModal.visible" title="Add Indicator">
         <Row>
           <AutoComplete v-model:value="customIndicatorModal.customIndicator" :options="getProjectIndicators" size="small"
             placeholder="Add indicator" style="width: 100%;">
           </AutoComplete>
         </Row>
-      </Modal>
+      </Modal> -->
+      <!-- ===== END: Customer Indicators Modal ==== -->
 
       <!-- ======== START: Risks Modal ======= -->
       <Modal v-model:visible="risksModalConfig.visible" @ok="risksModalConfig.closeModal()">
