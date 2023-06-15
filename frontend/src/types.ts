@@ -18,6 +18,7 @@ export class Project {
   country_id?: number;
 }
 
+
 export class LuIndiKit {
   id: number;
   name: string;
@@ -30,6 +31,15 @@ export class LuIndiKit {
   sector: string;
   sub_sector?: string;
   indicator_level: string[];
+}
+
+export class ProjectIndicator {
+  id: number;
+  name: string;
+  indi_kit_id: number;
+  project_id: number;
+
+  indi_kit?: LuIndiKit;
 }
 
 /*

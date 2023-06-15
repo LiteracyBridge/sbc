@@ -7,6 +7,7 @@ import {
   IndicatorGroup,
   IndicatorType,
   LuIndiKit,
+  ProjectIndicator,
 } from "@/types";
 import { useProjectStore } from "./projects";
 import { message } from "ant-design-vue";
@@ -15,6 +16,7 @@ export const useTheoryOfChangeStore = defineStore({
   id: "theory_of_change",
   state: () => ({
     theory_of_change: [] as TheoryOfChange[],
+    project_indicators: [] as ProjectIndicator[],
     indicator_groups: [] as IndicatorGroup[],
     indicator_types: [] as IndicatorType[],
     isLoading: false,
@@ -27,10 +29,19 @@ export const useTheoryOfChangeStore = defineStore({
     clear() {
       this.$state.theory_of_change = [] as TheoryOfChange[];
     },
-    async fetchIndicators() {
+    async fetchIndiKit() {
       this.$state.isLoading = true;
       return await ApiRequest.get<LuIndiKit>("lu/indi-kit")
         .then((resp) => (this.$state.indicator_types = resp))
+        .catch((err) => message.error(err.message))
+        .finally(() => (this.$state.isLoading = false));
+    },
+    async fetchIndicators() {
+      this.$state.isLoading = true;
+      return await ApiRequest.get<ProjectIndicator>(
+        `theory-of-change/${useProjectStore().prj_id}/indicators`
+      )
+        .then((resp) => (this.$state.project_indicators = resp))
         .catch((err) => message.error(err.message))
         .finally(() => (this.$state.isLoading = false));
     },
@@ -65,6 +76,7 @@ export const useTheoryOfChangeStore = defineStore({
       return await Promise.all([
         this.fetchIndicators(),
         this.fetchTheoryOfChange(),
+        this.fetchIndiKit(),
       ]);
     },
   },

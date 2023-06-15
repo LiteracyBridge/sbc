@@ -1,6 +1,7 @@
 from typing import List, Optional, Dict
 
 from sqlalchemy import text
+from db_models.project import ProjectIndicators
 from helpers import ToCItemDto, create_toc_item
 
 import models
@@ -76,7 +77,6 @@ def get_project_data(project_id: int, db: Session = Depends(models.get_db)):
     return ApiResponse(
         data=db.query(ProjectData).filter(ProjectData.prj_id == project_id).all()
     )
-
 
 @router.post("/{project_id}/objectives", response_model=ApiResponse)
 def update_objectives(

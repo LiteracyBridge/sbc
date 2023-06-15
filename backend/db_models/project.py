@@ -12,7 +12,7 @@ class ProjectIndicators(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
     name: Mapped[str]
-    indi_kit_id: Mapped[int] = mapped_column(ForeignKey("lu_indi_kit.id"))
+    indi_kit_id: Mapped[Optional[int]] = mapped_column(ForeignKey("lu_indi_kit.id"), nullable=True)
     project_id: Mapped[int] = mapped_column(ForeignKey("projects.id"))
 
     indi_kit: Mapped["LuIndiKit"] = relationship("LuIndiKit")

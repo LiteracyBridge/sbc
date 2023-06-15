@@ -13,7 +13,7 @@ import { Risk, TheoryOfChange, TheoryOfChangeItem } from "@/types";
 import GridLoader from "@/components/spinners/GridLoader.vue";
 import { useProjectDataStore } from "@/stores/projectData";
 import { useProjectStore } from '@/stores/projects';
-import { Button, Divider, Form, FormItem, Input, Modal, Space, Spin, Switch, Textarea } from "ant-design-vue";
+import { AutoComplete, Button, Card, Divider, Form, FormItem, Input, Modal, Popover, Row, Space, Spin, Switch, Textarea } from "ant-design-vue";
 import TheoryOfChangeExamplesBrowser from "./TheoryOfChangeExamplesBrowser.vue";
 import { PlusCircleOutlined, RotateRightOutlined, SwapLeftOutlined, SwapOutlined } from "@ant-design/icons-vue";
 import { useTheoryOfChangeStore } from "@/stores/theory_of_change";
@@ -42,21 +42,25 @@ const theoryOfChangeModel = ref<{
 }>({
   data: [],
   selectedItem: new TheoryOfChange()
-}),
-  tocItemModalConfig = ref({
-    visible: false,
-    itemId: null,
-    data: {},
-    isNew: false,
-    theoryOfChangeId: null,
-    isLoading: false,
-    isDeleting: false,
-    form: new TheoryOfChange()
-  }),
-  config = reactive({
-    isLoading: true,
-    isExamplePanelVisible: false,
-  });
+})
+const tocItemModalConfig = ref({
+  visible: false,
+  itemId: null,
+  data: {},
+  isNew: false,
+  theoryOfChangeId: null,
+  isLoading: false,
+  isDeleting: false,
+  form: new TheoryOfChange()
+})
+const config = reactive({
+  isLoading: true,
+  isExamplePanelVisible: false,
+});
+const customIndicatorModal = ref({
+  visible: false,
+  customIndicator: ''
+})
 
 const projectStore = useProjectStore(),
   theoryOfChangeStore = useTheoryOfChangeStore();
@@ -339,7 +343,7 @@ const diagram = reactive({
 
 const fetchGraph = async () => {
   config.isLoading = true;
-  theoryOfChangeStore.fetchTheoryOfChange()
+  theoryOfChangeStore.download()
     .then(() => {
       diagram.parseGraph(theoryOfChangeStore.theory_of_change);
     })
@@ -556,10 +560,16 @@ const risksModalConfig = reactive({
   }
 });
 // === END: Risks Modal functions
+
+const getProjectIndicators = computed(() => {
+  return theoryOfChangeStore.project_indicators.map(i => {
+    return { ...i, label: i.id, value: i.id }
+  })
+}
 </script>
 
 <template>
-  <section class="section">
+  <Card>
     <div v-if="config.isLoading" id="graph-loader" style="margin-top: auto;">
       <GridLoader :use-logo="false" :loading="config.isLoading"></GridLoader>
     </div>
@@ -577,7 +587,6 @@ const risksModalConfig = reactive({
       <TheoryOfChangeExamplesBrowser :is-visible="config.isExamplePanelVisible"
         @is-closed="config.isExamplePanelVisible = false" v-if="config.isExamplePanelVisible">
       </TheoryOfChangeExamplesBrowser>
-
 
       <div class="level">
         <div class="level-item has-text-centered">
@@ -645,7 +654,7 @@ const risksModalConfig = reactive({
           </footer>
         </template>
 
-        <form>
+        <Form>
           <div class="field">
             <div class="field-body">
               <div class="field">
@@ -770,14 +779,48 @@ const risksModalConfig = reactive({
               <span class="icon is-small mr-1">
                 <i class="fas fa-plus"></i>
               </span>
+              <!-- TODO: Add popover -->
               Add Indicator
             </button>
+
+            <Popover>
+              <template #content>
+                <Space gutter="12">
+                  <!-- <a-auto-complete v-model:value="value" :options="options" style="width: 200px" placeholder="input here"
+                                              :filter-option="filterOption" /> -->
+                  <!-- <Popconfirm title="Are you sure delete this task?" ok-text="Yes" cancel-text="No"> -->
+                  <Button size="small" type="primary" :ghost="true" @click="customIndicatorModal.visible = true">
+                    <PlusCircleOutlined /> Add custom indicators
+                  </Button>
+                  <!-- </Popconfirm> -->
+
+
+
+                  <Button size="small" type="dashed"
+                    @click.prevent="isPanelVisible = !isPanelVisible; showIndicatorModal = true; useSideNavStore().hide();">
+                    <PlusCircleOutlined /> Add from library
+                  </Button>
+                </Space>
+
+                <!-- <p>Content</p> -->
+              </template>
+              <Button type="primary">Add Indicator</Button>
+            </Popover>
           </div>
 
-        </form>
+        </Form>
       </Modal>
       <!-- ======== END: Theory of Change Modal ======= -->
 
+      <!-- ===== START: Customer Indicators Modal ==== -->
+      <!-- ===== END: Customer Indicators Modal ==== -->
+      <Modal v-model:visible="customIndicatorModal.visible" title="Add Indicator">
+        <Row>
+          <AutoComplete v-model:value="customIndicatorModal.customIndicator" :options="getProjectIndicators" size="small"
+            placeholder="Add indicator" style="width: 100%;">
+          </AutoComplete>
+        </Row>
+      </Modal>
 
       <!-- ======== START: Risks Modal ======= -->
       <Modal v-model:visible="risksModalConfig.visible" @ok="risksModalConfig.closeModal()">
@@ -819,12 +862,11 @@ const risksModalConfig = reactive({
 
       <!-- TODO: add edge modal -->
 
-
       <div class="mt-4">
         <div class="diagram-container" ref="diagramContainer" style="display: flex; width: 100%;"></div>
       </div>
     </div>
-  </section>
+  </Card>
 </template>
 
 <style>

@@ -89,6 +89,14 @@ def get_toc_by_id(id: int, db: Session = Depends(models.get_db)):
     return ApiResponse(data=[record])
 
 
+@router.get("/{project_id}/indicators", response_model=ApiResponse)
+def get_project_indicators(project_id: int, db: Session = Depends(models.get_db)):
+    return ApiResponse(
+        data=db.query(ProjectIndicators)
+        .filter(ProjectIndicators.project_id == project_id)
+        .all()
+    )
+
 @router.post("/", response_model=ApiResponse)
 def create(dto: NewTheoryOfChangeDto, db: Session = Depends(models.get_db)):
     record = models.TheoryOfChangeOld()

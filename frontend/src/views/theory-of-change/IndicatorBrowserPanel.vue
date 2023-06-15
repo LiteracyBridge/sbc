@@ -75,7 +75,7 @@ onMounted(() => {
 
   isFetchingIndicators.value = true;
 
-  theoryOfChangeStore.fetchIndicators().then(resp => {
+  theoryOfChangeStore.fetchIndiKit().then(resp => {
     buildIndicatorsTree(props.tocItem?.indicators ?? [])
   }).finally(() => isFetchingIndicators.value = false);
 })
