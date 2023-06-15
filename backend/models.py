@@ -109,6 +109,8 @@ class ProjectUser(Base):
     prj_id: Mapped[int] = mapped_column(ForeignKey("projects.id"))
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     editing_user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+
+    project = relationship("Project")
     # TODO: add access_id
 
 
@@ -171,6 +173,7 @@ class IndicatorType(Base):
     indicators = relationship("Indicator", back_populates="group")
 
 
+# TODO: remove this table
 class Indicator(Base):
     __tablename__ = "lu_indicators"
 
@@ -225,6 +228,7 @@ class TheoryOfChange(Base):
     risks = relationship("Risk", load_on_pending=True)
 
 
+# TODO: remove this model
 class TheoryOfChangeItem(Base):
     __tablename__ = "theories_of_change_item"
 
@@ -274,6 +278,7 @@ class TheoryOfChangeItem(Base):
     # )
 
 
+# TODO: remove this model
 class TheoryOfChangeIndicator(Base):
     __tablename__ = "theory_of_change_indicators"
 
@@ -287,6 +292,7 @@ class TheoryOfChangeIndicator(Base):
     )
 
 
+# TODO: remove this model
 class TheoryOfChangeType(Base):
     __tablename__ = "lu_toc_types"
 
