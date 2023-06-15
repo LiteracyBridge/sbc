@@ -37,10 +37,11 @@ const SEMS: Record<string, string> = {
 const isPanelVisible = ref(false);
 const showIndicatorModal = ref(false);
 const theoryOfChangeModel = ref<{
-  data: TheoryOfChange, selectedItem: TheoryOfChangeItem
+  data: TheoryOfChange[],
+  selectedItem: TheoryOfChange
 }>({
-  data: new TheoryOfChange(),
-  selectedItem: new TheoryOfChangeItem()
+  data: [],
+  selectedItem: new TheoryOfChange()
 }),
   tocItemModalConfig = ref({
     visible: false,
@@ -50,7 +51,7 @@ const theoryOfChangeModel = ref<{
     theoryOfChangeId: null,
     isLoading: false,
     isDeleting: false,
-    form: new TheoryOfChangeItem()
+    form: new TheoryOfChange()
   }),
   config = reactive({
     isLoading: true,
@@ -226,12 +227,13 @@ const diagram = reactive({
     this.orientationIndex++;
     if (this.orientationIndex == 4) this.orientationIndex = 0;
   },
-  parseGraph: function (data) {
-    if (Array.isArray(data)) data = data[0]
+  parseGraph: function (data: TheoryOfChange[]) {
+    console.log(data)
+    // if (Array.isArray(data)) data = data[0]
 
     theoryOfChangeModel.value.data = data;
 
-    const graph = data.graph.map((r: TheoryOfChangeItem) => {
+    const graph = data.map((r: TheoryOfChange) => {
       return {
         id: r.id,
         label: r.name,
@@ -259,7 +261,7 @@ const diagram = reactive({
       risks: any;
     }[] = [];
 
-    for (const r of data.graph) {
+    for (const r of data) {
       edges.push({
         fromId: r.id,
         toId: r.to_id,
@@ -303,6 +305,7 @@ const diagram = reactive({
       const mergedEdge = Object.assign({}, this.defaultEdge, newEdge);
       this.edges.push(mergedEdge);
       this.edgeSet.add(key);
+
       if (draw) {
         drawDiagram();
       }
@@ -369,7 +372,7 @@ onMounted(() => {
     selectedNodeId.value = nodeId;
     selectedNode.value = diagram.nodes[nodeId];
 
-    theoryOfChangeModel.value.selectedItem = theoryOfChangeModel.value.data.graph.find((item: any) => item.id == nodeId);
+    theoryOfChangeModel.value.selectedItem = theoryOfChangeModel.value.data.find((item: any) => item.id == nodeId);
 
     const selectedItem = theoryOfChangeModel.value.selectedItem as any;
     if (selectedItem != null) {
@@ -418,7 +421,7 @@ function rotateDiagram() {
 //=== START: Theory of Change Item Modal functions
 const newTocItem = () => {
 
-  tocItemModalConfig.value.form = new TheoryOfChangeItem()
+  tocItemModalConfig.value.form = new TheoryOfChange()
   tocItemModalConfig.value.isNew = true;
   tocItemModalConfig.value.theoryOfChangeId = 1;
   tocItemModalConfig.value.visible = true;
@@ -431,7 +434,7 @@ const closeModal = (redraw = true) => {
   showIndicatorModal.value = false;
 
   tocItemModalConfig.value.visible = false;
-  tocItemModalConfig.value.form = new TheoryOfChangeItem();
+  tocItemModalConfig.value.form = new TheoryOfChange();
 
   // useSideNavStore().show();
   if (redraw) {
@@ -442,7 +445,7 @@ const closeModal = (redraw = true) => {
 const saveFormItem = async () => {
   // TODO: send response as callback to close the form
   const fields = tocItemModalConfig.value.form,
-    tocId = theoryOfChangeModel.value.data.id;
+    tocId = theoryOfChangeModel.value.data;
 
   const data = {
     name: fields.name,
@@ -457,7 +460,7 @@ const saveFormItem = async () => {
   tocItemModalConfig.value.isLoading = true;
   if (tocItemModalConfig.value.itemId != null || !tocItemModalConfig.value.isNew) {
     // Update item
-    await ApiRequest.put(`theory-of-change/${tocId}/item/${tocItemModalConfig.value.itemId}`, data)
+    await ApiRequest.put<TheoryOfChange>(`theory-of-change/${projectStore.prj_id}/item/${tocItemModalConfig.value.itemId}`, data)
       .then(resp => {
         diagram.parseGraph(resp);
         closeModal(false);
@@ -466,13 +469,14 @@ const saveFormItem = async () => {
       });
   } else {
     //  Create item
-    await ApiRequest.post(`theory-of-change/${tocId}/item`, data).then(resp => {
-      diagram.parseGraph(resp);
+    await ApiRequest.post<TheoryOfChange>(`theory-of-change/${projectStore.prj_id}/item`, data)
+      .then(resp => {
+        diagram.parseGraph(resp);
 
-      closeModal(false);
-    }).finally(() => {
-      tocItemModalConfig.value.isLoading = false;
-    });
+        closeModal(false);
+      }).finally(() => {
+        tocItemModalConfig.value.isLoading = false;
+      });
   }
 
 }

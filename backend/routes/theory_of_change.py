@@ -54,15 +54,16 @@ def get_toc_by_project_id(projectId: int, db: Session = Depends(models.get_db)):
         .filter(TheoryOfChange.project_id == projectId)
         .options(
             # subqueryload(models.TheoryOfChangeOld.graph)
-            subqueryload(TheoryOfChangeIndicator.indicators)
-            .subqueryload(ProjectIndicators.indi_kit),
+            subqueryload(TheoryOfChange.indicators).subqueryload(
+                TheoryOfChangeIndicator.indicator
+            ),
             # .options(
             #     subqueryload(models.TheoryOfChangeItem.sem),
             #     subqueryload(models.TheoryOfChangeItem.type),
             # )
         )
         # .options(joinedload(models.TheoryOfChange.graph))
-        .first()
+        .all()
     )
     return record
 
@@ -112,21 +113,21 @@ def create(dto: NewTheoryOfChangeDto, db: Session = Depends(models.get_db)):
 
 @router.get("/{projectId}", response_model=ApiResponse)
 def get_by_project_id(projectId: int, db: Session = Depends(models.get_db)):
-    return ApiResponse(data=[get_toc_by_project_id(projectId, db)])
+    return ApiResponse(data=get_toc_by_project_id(projectId, db))
 
 
-@router.post("/{id}/item", response_model=ApiResponse)
+@router.post("/{project_id}/item", response_model=ApiResponse)
 def create_item(
-    id: int, dto: TheoryOfChangeItemDto, db: Session = Depends(models.get_db)
+    project_id: int, dto: TheoryOfChangeItemDto, db: Session = Depends(models.get_db)
 ):
-    record = models.TheoryOfChangeItem()
+    record = TheoryOfChange()
     record.name = dto.name
     record.type_id = dto.type_id
     record.from_id = dto.from_id
     record.to_id = dto.to_id
     record.sem_id = dto.sem_id
     record.description = dto.description
-    record.theory_of_change_id = id
+    record.project_id = project_id
 
     db.add(record)
     db.commit()
@@ -147,12 +148,12 @@ def create_item(
 
     # db.refresh(record)
 
-    return get_toc_by_id(id, db)
+    return get_toc_by_id(project_id, db)
 
 
-@router.put("/{id}/item/{itemId}", response_model=ApiResponse)
+@router.put("/{project_id}/item/{itemId}", response_model=ApiResponse)
 def update_item(
-    id: int,
+    project_id: int,
     itemId: int,
     dto: TheoryOfChangeItemDto,
     db: Session = Depends(models.get_db),
@@ -176,7 +177,7 @@ def update_item(
 
     db.commit()
 
-    return get_toc_by_id(id, db)
+    return get_toc_by_id(project_id, db)
 
 
 @router.delete("/{id}/item/{itemId}", response_model=ApiResponse)
@@ -185,24 +186,20 @@ def delete_item(
     itemId: int,
     db: Session = Depends(models.get_db),
 ):
-    record = (
-        db.query(TheoryOfChange)
-        .filter(TheoryOfChange.id == itemId)
-        .first()
-    )
+    record = db.query(TheoryOfChange).filter(TheoryOfChange.id == itemId).first()
 
     if record is None:
         raise HTTPException(status_code=404, detail="Item not found")
 
     # Reset all the from_id
-    db.query(TheoryOfChange).filter(
-        TheoryOfChange.from_id == record.id
-    ).update({"from_id": None})
+    db.query(TheoryOfChange).filter(TheoryOfChange.from_id == record.id).update(
+        {"from_id": None}
+    )
 
     # Reset all the to_id
-    db.query(TheoryOfChange).filter(
-        TheoryOfChange.to_id == record.id
-    ).update({"to_id": None})
+    db.query(TheoryOfChange).filter(TheoryOfChange.to_id == record.id).update(
+        {"to_id": None}
+    )
 
     # Delete the record
     db.delete(record)

@@ -14,7 +14,7 @@ import { message } from "ant-design-vue";
 export const useTheoryOfChangeStore = defineStore({
   id: "theory_of_change",
   state: () => ({
-    theory_of_change: {} as TheoryOfChange,
+    theory_of_change: [] as TheoryOfChange[],
     indicator_groups: [] as IndicatorGroup[],
     indicator_types: [] as IndicatorType[],
     isLoading: false,
@@ -25,7 +25,7 @@ export const useTheoryOfChangeStore = defineStore({
   },
   actions: {
     clear() {
-      this.$state.theory_of_change = {} as TheoryOfChange;
+      this.$state.theory_of_change = [] as TheoryOfChange[];
     },
     async fetchIndicators() {
       this.$state.isLoading = true;
@@ -45,7 +45,7 @@ export const useTheoryOfChangeStore = defineStore({
         { added: opts.added, removed: opts.removed }
       )
         .then((resp) => {
-          this.theory_of_change = resp[0];
+          this.theory_of_change = resp;
         })
         .finally(() => (this.$state.isLoading = false));
     },
@@ -56,9 +56,7 @@ export const useTheoryOfChangeStore = defineStore({
       )
         .then((resp) => {
           console.log(resp);
-          if (resp.length > 0) {
-            this.$state.theory_of_change = resp[0];
-          }
+          this.$state.theory_of_change = resp;
         })
         .catch((err) => message.error(err.message))
         .finally(() => (this.$state.isLoading = false));

@@ -1,4 +1,4 @@
-import type { Dayjs } from 'dayjs';
+import type { Dayjs } from "dayjs";
 
 export class User {
   id: number;
@@ -19,22 +19,22 @@ export class Project {
 }
 
 export class LuIndiKit {
-    id: number;
-    name: string;
-    wording_english: string;
-    wording_french: string;
-    wording_portuguese: string;
-    wording_czech: string;
-    guidance: string;
-    section: string;
-    sector: string;
-    sub_sector?: string;
-    indicator_level: string[];
+  id: number;
+  name: string;
+  wording_english: string;
+  wording_french: string;
+  wording_portuguese: string;
+  wording_czech: string;
+  guidance: string;
+  section: string;
+  sector: string;
+  sub_sector?: string;
+  indicator_level: string[];
 }
 
 /*
-* @deprecated
-*/
+ * @deprecated
+ */
 export class IndicatorType {
   id: number;
   name: string = "";
@@ -42,8 +42,8 @@ export class IndicatorType {
 }
 
 /*
-* @deprecated
-*/
+ * @deprecated
+ */
 export class IndicatorGroup {
   id: number;
   name: string = "";
@@ -54,6 +54,9 @@ export class IndicatorGroup {
   link: string = "";
 }
 
+/**
+ * @deprecated
+ */
 export class TheoryOfChangeItem {
   id: number = undefined;
   name: string = "";
@@ -68,14 +71,16 @@ export class TheoryOfChangeItem {
   indicators: Array<TheoryOfChangeIndicator> = [];
 }
 
-class TheoryOfChangeIndicator {
-  id: number;
-  toc_item_id: number;
-  indicator_id: number;
-  indicator: IndicatorGroup;
 
-  toc_item: TheoryOfChangeItem;
-}
+// class TheoryOfChangeIndicator {
+//   id: number;
+//   toc_item_id: number;
+//   indicator_id: number;
+//   indicator: IndicatorGroup;
+
+//   toc_item: TheoryOfChangeItem;
+// }
+
 
 export class Risk {
   id: number = undefined;
@@ -90,11 +95,36 @@ export class Risk {
   theory_of_change_id?: number = null;
 }
 
+
 export class TheoryOfChange {
+  id: number;
+  name: string = "";
+  assumptions: string = "";
+  description: string = "";
+  type_id: number = undefined;
+  from_id?: number = undefined;
+  to_id?: number = undefined;
+  sem_id?: number;
+  project_id: number;
+  is_validated: boolean = false;
+
+  indicators: Array<TheoryOfChangeIndicator> = [];
   graph: Array<TheoryOfChangeItem> = [];
-  id: string = null;
   risks: Risk[] = [];
   // indicators: any[] = [];
+}
+
+
+export class TheoryOfChangeIndicator {
+  id: number;
+  indicator_id: number;
+  theories_of_change_id: number;
+  project_id: number;
+  activity_id: number;
+
+  // indicator: IndicatorGroup;
+  project: Project;
+  theories_of_change: TheoryOfChange;
 }
 
 export class Activity {
