@@ -3,7 +3,8 @@ from typing import List, Optional
 import models
 from dataclass_wizard import asdict, fromdict
 from fastapi import APIRouter, Depends, HTTPException
-from models import Activity, TheoryOfChangeItem
+from models import Activity
+from db_models.project import TheoryOfChange
 from pydantic import BaseModel
 from schema import ApiResponse
 from sqlalchemy.orm import Session, joinedload, subqueryload
@@ -82,8 +83,9 @@ def create(dto: ActivityDto, db: Session = Depends(models.get_db)):
     db.refresh(new_activity)
 
     # Create a new record in the toc graph table
-    toc_item = TheoryOfChangeItem()
+    toc_item = TheoryOfChange()
     toc_item.name = dto.name
+    toc_item.project_id = dto.prj_id
     # TODO: make this optional
     toc_item.type_id = 2  # id of the activity type
     toc_item.from_id = None
@@ -91,7 +93,7 @@ def create(dto: ActivityDto, db: Session = Depends(models.get_db)):
     # TODO: make this optional
     toc_item.sem_id = 1  # id of the sem type.
     toc_item.description = dto.notes
-    toc_item.theory_of_change_id = get_toc_by_project_id(dto.prj_id, db).id
+    # toc_item.theory_of_change_id = get_toc_by_project_id(dto.prj_id, db).id
 
     db.add(toc_item)
     db.commit()

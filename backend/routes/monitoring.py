@@ -6,13 +6,8 @@ from pydantic import BaseModel
 
 from sqlalchemy.orm import Session, joinedload, subqueryload
 from schema import ApiResponse
-from models import (
-    Monitoring,
-    Risk,
-    TheoryOfChangeIndicator,
-    TheoryOfChangeOld,
-    TheoryOfChangeItem,
-)
+from db_models.project import TheoryOfChangeIndicator, TheoryOfChange
+from models import Monitoring
 import models
 
 router = APIRouter()

@@ -1,5 +1,5 @@
 from typing import List, Optional
-from db_models.project import ProjectIndicators, TheoryOfChange
+from db_models.project import ProjectIndicators, TheoryOfChange, TheoryOfChangeIndicator
 from dataclass_wizard import asdict, fromdict
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
@@ -9,9 +9,8 @@ from schema import ApiResponse
 from models import (
     Monitoring,
     Risk,
-    TheoryOfChangeIndicator,
     TheoryOfChangeOld,
-    TheoryOfChangeItem,
+    # TheoryOfChangeItem,
 )
 import models
 
@@ -187,8 +186,8 @@ def delete_item(
     db: Session = Depends(models.get_db),
 ):
     record = (
-        db.query(models.TheoryOfChangeItem)
-        .filter(models.TheoryOfChangeItem.id == itemId)
+        db.query(TheoryOfChange)
+        .filter(TheoryOfChange.id == itemId)
         .first()
     )
 
@@ -196,13 +195,13 @@ def delete_item(
         raise HTTPException(status_code=404, detail="Item not found")
 
     # Reset all the from_id
-    db.query(models.TheoryOfChangeItem).filter(
-        models.TheoryOfChangeItem.from_id == record.id
+    db.query(TheoryOfChange).filter(
+        TheoryOfChange.from_id == record.id
     ).update({"from_id": None})
 
     # Reset all the to_id
-    db.query(models.TheoryOfChangeItem).filter(
-        models.TheoryOfChangeItem.to_id == record.id
+    db.query(TheoryOfChange).filter(
+        TheoryOfChange.to_id == record.id
     ).update({"to_id": None})
 
     # Delete the record
@@ -216,7 +215,8 @@ def delete_item(
 def update_indicators(
     itemId: int, dto: IndicatorDto, db: Session = Depends(models.get_db)
 ):
-    db.query(models.TheoryOfChangeIndicator).filter(
+    # TODO: Add to project indicators first
+    db.query(TheoryOfChangeIndicator).filter(
         TheoryOfChangeIndicator.toc_item_id == itemId,
         TheoryOfChangeIndicator.indicator_id.in_(dto.removed),
     ).delete()
@@ -224,7 +224,7 @@ def update_indicators(
     # Add all indicators
     new_indicators = []
     for i in dto.added:
-        record = models.TheoryOfChangeIndicator()
+        record = TheoryOfChangeIndicator()
         record.toc_item_id = itemId
         record.indicator_id = i
 

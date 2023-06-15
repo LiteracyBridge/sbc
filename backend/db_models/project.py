@@ -1,6 +1,6 @@
 from typing import Optional
-from models import Project
-from .lookups import LuIndiKit
+from models import LuSem, Project
+from .lookups import LuIndiKit, LuTheoryOfChangeType
 from database import Base, SessionLocal, engine
 from sqlalchemy.orm import relationship, mapped_column
 from sqlalchemy import DateTime, Boolean, Column, ForeignKey, Integer, String
@@ -15,7 +15,7 @@ class ProjectIndicators(Base):
     indi_kit_id: Mapped[int] = mapped_column(ForeignKey("lu_indi_kit.id"))
     project_id: Mapped[int] = mapped_column(ForeignKey("projects.id"))
 
-    indi_kit: Mapped["LuIndiKit"] = relationship("Indicator")
+    indi_kit: Mapped["LuIndiKit"] = relationship("LuIndiKit")
     project: Mapped["Project"] = relationship("Project")
 
 
@@ -37,8 +37,10 @@ class TheoryOfChangeIndicator(Base):
         ForeignKey("activities.id", ondelete="CASCADE")
     )
 
-    indicator: Mapped["ProjectIndicators"] = relationship("project_indicators")
-    theory_of_change: Mapped["TheoryOfChange"] = relationship("TheoryOfChange")
+    indicator: Mapped["ProjectIndicators"] = relationship("ProjectIndicators")
+    theory_of_change: Mapped["TheoryOfChange"] = relationship(
+        "TheoryOfChange", back_populates="indicators"
+    )
     project: Mapped["Project"] = relationship("Project")
 
 
@@ -63,10 +65,11 @@ class TheoryOfChange(Base):
 
     # Related objects
     indicators: Mapped["TheoryOfChangeIndicator"] = relationship(
-        "TheoryOfChangeIndicator",
+        "TheoryOfChangeIndicator", back_populates="theory_of_change"
     )
-    sem = relationship("LuSem")
-    type = relationship("TheoryOfChangeType")
+    sem: Mapped["LuSem"] = relationship("LuSem")
+    type: Mapped["LuTheoryOfChangeType"] = relationship("LuTheoryOfChangeType")
+
     # from_item = relationship(
     #     "TheoryOfChangeItem",
     #     remote_side=[to_id],

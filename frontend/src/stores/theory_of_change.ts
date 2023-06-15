@@ -6,6 +6,7 @@ import {
   TheoryOfChange,
   IndicatorGroup,
   IndicatorType,
+  LuIndiKit,
 } from "@/types";
 import { useProjectStore } from "./projects";
 import { message } from "ant-design-vue";
@@ -28,15 +29,8 @@ export const useTheoryOfChangeStore = defineStore({
     },
     async fetchIndicators() {
       this.$state.isLoading = true;
-      return Promise.all([
-        ApiRequest.get<IndicatorType>("indicators/types").then(
-          (resp) => (this.$state.indicator_types = resp)
-        ),
-
-        ApiRequest.get<IndicatorGroup>("indicators/").then(
-          (resp) => (this.$state.indicator_groups = resp)
-        ),
-      ])
+      return await ApiRequest.get<LuIndiKit>("lu/indi-kit")
+        .then((resp) => (this.$state.indicator_types = resp))
         .catch((err) => message.error(err.message))
         .finally(() => (this.$state.isLoading = false));
     },
@@ -61,6 +55,7 @@ export const useTheoryOfChangeStore = defineStore({
         `theory-of-change/${useProjectStore().projectId}`
       )
         .then((resp) => {
+          console.log(resp);
           if (resp.length > 0) {
             this.$state.theory_of_change = resp[0];
           }

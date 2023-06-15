@@ -18,12 +18,32 @@ export class Project {
   country_id?: number;
 }
 
+export class LuIndiKit {
+    id: number;
+    name: string;
+    wording_english: string;
+    wording_french: string;
+    wording_portuguese: string;
+    wording_czech: string;
+    guidance: string;
+    section: string;
+    sector: string;
+    sub_sector?: string;
+    indicator_level: string[];
+}
+
+/*
+* @deprecated
+*/
 export class IndicatorType {
   id: number;
   name: string = "";
   parent_id?: number;
 }
 
+/*
+* @deprecated
+*/
 export class IndicatorGroup {
   id: number;
   name: string = "";
