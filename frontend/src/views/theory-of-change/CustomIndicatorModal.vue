@@ -31,6 +31,7 @@ const closeModal = (redraw = true) => {
 };
 
 const onIndicatorSelected = (label: string, option: ProjectIndicator) => {
+ config.value.selectedIndicator = option;
   console.log(label, option);
 }
 
@@ -39,10 +40,21 @@ const getProjectIndicators = computed(() => {
     return { ...i, label: i.name, value: i.name }
   })
 });
+
+function saveIndicator(){
+  let indicator = theoryOfChangeStore.project_indicators.find(i => i.name?.toLowerCase() == config.value.customIndicator);
+
+  // TODO: create indicator if not exists
+  if (indicator == null) {
+    indicator = config.value.selectedIndicator;
+  }
+
+  // let indicator = config.value.selectedIndicator;
+}
 </script>
 
 <template>
-  <Modal v-model:visible="config.visible" title="Add Indicator" @cancel="closeModal()">
+  <Modal v-model:visible="config.visible" title="Add Indicator" @cancel="closeModal()" @ok="saveIndicator()">
     <Row>
       <AutoComplete v-model:value="config.customIndicator" :options="getProjectIndicators" size="small"
         placeholder="Add indicator" style="width: 100%;" @select="onIndicatorSelected">

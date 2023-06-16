@@ -93,7 +93,7 @@ const saveForm = () => {
       <Row :gutter="6">
         <Col :span="12">
         <FormItem name="parent_id" label="Group Parent" has-feedback
-          :rules="[{ required: true, message: 'Please select a group parent!' }]">
+          :rules="[{ required: false, message: 'Please select a group parent!' }]">
 
           <Select v-model:value="draftActivity.parent_id" placeholder="Select group" :show-search="true">
             <SelectOption :value="null">Not part of a group</SelectOption>
