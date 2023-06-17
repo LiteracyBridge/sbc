@@ -1,19 +1,25 @@
 Today:
-    ✔ filter projects by organisation @done(23-06-07 14:09)
-    ✔ show an error page for users without organisation setup on sign in @done(23-06-07 14:09)
-    ✔ approaches grouping redesign @done(23-06-08 11:07)
+    Theory of Change:
+        ☐ Add modal forms validation
+        ☐ Indicator UI redesign
+        ☐ implement adding & removing of indicators
+        ☐ add customizing of indikit indicators
+        ☐ add indikit footer to indicators panel
     ☐ connect live url & test all modules
 
-    Bugs:
-        ☐
 
     Monitoring & Evaluation:
         ☐ Save evaluation strategy
-        ✔ creating new indicator on m&E module @done(23-06-15 06:13)
-        ✔ change 'progress' tag cololor @done(23-06-08 11:48)
 
 Frontend:
     Theory of Change:
-        ✔ Graph re-render error @done(23-06-07 12:37)
-        ✔ Toc template @done(23-06-07 12:37)
         ☐ Toc examples browser
+
+Archive:
+  ✔ filter projects by organisation @done(23-06-07 14:09) @project(Today)
+  ✔ show an error page for users without organisation setup on sign in @done(23-06-07 14:09) @project(Today)
+  ✔ approaches grouping redesign @done(23-06-08 11:07) @project(Today)
+  ✔ creating new indicator on m&E module @done(23-06-15 06:13) @project(Today.Monitoring & Evaluation)
+  ✔ change 'progress' tag cololor @done(23-06-08 11:48) @project(Today.Monitoring & Evaluation)
+  ✔ Graph re-render error @done(23-06-07 12:37) @project(Frontend.Theory of Change)
+  ✔ Toc template @done(23-06-07 12:37) @project(Frontend.Theory of Change)

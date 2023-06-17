@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 
 import { ref, onMounted, computed, watch } from "vue";
-import { Collapse, CollapsePanel, Empty, Drawer, Space, Divider, TypographyTitle, Select } from "ant-design-vue";
+import { Collapse, CollapsePanel, Empty, Row, Col, Form, Drawer, Button, Space, Divider, TypographyTitle, Select, FormItem, Input, Typography } from "ant-design-vue";
 import { useTheoryOfChangeStore } from "@/stores/theory_of_change";
 import { IndicatorType, TheoryOfChange, TheoryOfChangeItem } from "@/types";
 
@@ -120,24 +120,41 @@ const saveIndicators = async () => {
 </script>
 
 <template>
-  <!-- <VueSidePanel v-model="isOpened" :hide-close-btn="true" :no-close="true" lock-scroll width="80vw"
-    transition-name="slide-right"> -->
-
   <Drawer width="70vw" title="Indicators Browser" :visible="isOpened" :body-style="{ paddingBottom: '80px' }"
     :footer-style="{ textAlign: 'right' }" @close="closePanel()">
 
     <template #extra>
       <Space>
-        <button class="button mr-2 is-primary" :class="{ 'is-loading': config.isLoading }" :disabled="config.isLoading"
-          @click.prevent="saveIndicators">
+        <Button type="primary" :loading="config.isLoading" :disabled="config.isLoading" @click="saveIndicators">
           Save
-        </button>
+        </Button>
 
-        <button class="button mr-2" @click.prevent="closePanel">
+        <Button @click="closePanel">
           Cancel
-        </button>
+        </Button>
       </Space>
     </template>
+
+    <Form layout="vertical">
+      <Row>
+        <Col :span="12">
+        <FormItem label="Can't find indicator in library? Add you own">
+          <Input placeholder="Enter indicator name" />
+        </FormItem>
+        </Col>
+
+        <Col :span="4">
+        <Button type="primary" style="margin-top: 28px; margin-left: 10px;" :ghost="true">Add</Button>
+        </Col>
+
+        <!-- TODO: display list of indicators pending to be saved -->
+
+      </Row>
+    </Form>
+
+    <Divider>
+      <Typography.Paragraph>INDICATOR LIBRARY</Typography.Paragraph>
+    </Divider>
 
     <div class="columns">
       <div class="column is-one-fifth mr-5 mb-5">
