@@ -17,6 +17,8 @@ export const useTheoryOfChangeStore = defineStore({
   state: () => ({
     theory_of_change: [] as TheoryOfChange[],
     project_indicators: [] as ProjectIndicator[],
+    indi_kit_library: [] as LuIndiKit[],
+
     indicator_groups: [] as IndicatorGroup[],
     indicator_types: [] as IndicatorType[],
     isLoading: false,
@@ -24,15 +26,39 @@ export const useTheoryOfChangeStore = defineStore({
   getters: {
     indicatorTypes: (state) => state.indicator_types,
     indicatorGroups: (state) => state.indicator_groups,
+
+    // IndiKit Helpers
+    getIndiKitItemById: (state) => {
+      return (id: number) => state.indi_kit_library.find((i) => i.id == id);
+    },
+    indiKitSubSectors: (state) => {
+      return (sector?: string | number): LuIndiKit[] => {
+        if (sector == null) return [];
+
+        if (isNaN(+sector)) {
+          return state.indi_kit_library.filter((i) => i.sector == sector);
+        }
+
+        return state.indi_kit_library.filter((i) => i.id == +sector);
+      };
+    },
+    indiKitSubSectorIndicators: (state) => {
+      return (sector?: string | number): LuIndiKit[] => {
+        if (sector == null) return [];
+
+        if (isNaN(+sector)) {
+          return state.indi_kit_library.filter((i) => i.sub_sector == sector);
+        }
+
+        return state.indi_kit_library.filter((i) => i.id == +sector);
+      };
+    },
   },
   actions: {
-    clear() {
-      this.$state.theory_of_change = [] as TheoryOfChange[];
-    },
     async fetchIndiKit() {
       this.$state.isLoading = true;
       return await ApiRequest.get<LuIndiKit>("lu/indi-kit")
-        .then((resp) => (this.$state.indicator_types = resp))
+        .then((resp) => (this.$state.indi_kit_library = resp))
         .catch((err) => message.error(err.message))
         .finally(() => (this.$state.isLoading = false));
     },

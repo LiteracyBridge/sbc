@@ -31,6 +31,9 @@ export class LuIndiKit {
   sector: string;
   sub_sector?: string;
   indicator_level: string[];
+
+  // TODO: To be provided by Petr
+  purpose: string;
 }
 
 export class ProjectIndicator {

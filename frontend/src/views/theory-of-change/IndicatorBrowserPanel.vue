@@ -16,7 +16,7 @@ const theoryOfChangeStore = useTheoryOfChangeStore();
 
 const
   collapseKey = ref<string[]>([]),
-  selectedMainIndicatorType = ref<{ value: number, label: string }>(),
+  selectedMainIndicatorType = ref<number>(null),
   selectedGroupType = ref<IndicatorType>(),
   isFetchingIndicators = ref(false),
   config = ref<{
@@ -29,7 +29,7 @@ const
 
 const isOpened = computed(() => props.isVisible)
 
-const getMainIndicators = computed(() => {
+const getMainSectors = computed(() => {
   return theoryOfChangeStore.indicatorTypes.filter(i => i.parent_id == null);
 });
 
@@ -48,11 +48,12 @@ const groupIndicators = computed(() => {
     return [];
   }
 
-  return theoryOfChangeStore.indicatorGroups.filter(i => i.group_id == selectedGroupType.value?.id);
+  return theoryOfChangeStore.indiKitSubSectorIndicators(selectedGroupType.value?.id);
+  // return theoryOfChangeStore.indicatorGroups.filter(i => i.group_id == selectedGroupType.value?.id);
 })
 
-const filterOption = (input: string, option: any) => {
-  return option.name.toLowerCase().indexOf(input?.toLowerCase() ?? '') >= 0;
+const filterIndicatorSectors = (input: string, option: any) => {
+  return option.sector.toLowerCase().indexOf(input?.toLowerCase() ?? '') >= 0;
 };
 
 const closePanel = () => {
@@ -92,7 +93,7 @@ watch(props, (newProp) => {
 
     selectedGroupType.value = indicatorType;
     const _find = theoryOfChangeStore.indicatorTypes.find(i => i.id == indicatorType?.parent_id);
-    selectedMainIndicatorType.value = { value: _find?.id ?? 0, label: _find?.name ?? "" }
+    selectedMainIndicatorType.value =  _find?.id
   }
 }, { deep: true });
 
@@ -160,25 +161,32 @@ const saveIndicators = async () => {
       <div class="column is-one-fifth mr-5 mb-5">
 
         <!-- TODO: add label -->
-        <label class="label">Select Indicator</label>
+        <label class="label"></label>
+        <FormItem label="Select Indicator Sector">
+          <Select v-model:value="selectedMainIndicatorType" show-search placeholder="Select an indicator sector"
+            style="width: 200px" :allow-clear="true" :options="theoryOfChangeStore.indi_kit_library"
+            :field-names="{ label: 'sector', value: 'id' }" :filter-option="filterIndicatorSectors">
+          </Select>
+        </FormItem>
 
-        <!-- <Multiselect v-model="selectedMainIndicatorType" :options="getMainIndicators" :close-on-select="true"
-          :clear-on-select="false" placeholder="Select indicator" label="name" track-by="value" /> -->
+        <Divider></Divider>
 
-        <Select v-model:value="selectedMainIndicatorType" show-search placeholder="Select an indicator"
-          style="width: 200px" :allow-clear="true" :options="getMainIndicators"
-          :field-names="{ label: 'name', value: 'id' }" :filter-option="filterOption">
-        </Select>
-        <hr>
 
         <aside class="menu">
           <p class="menu-label">
-            {{ selectedMainIndicatorType?.label || 'No indicatory type selected' }}
+            <span v-if="selectedMainIndicatorType != null">
+              {{ theoryOfChangeStore.getIndiKitItemById(selectedMainIndicatorType)?.name }}
+            </span>
+
+            <span v-else>
+              <!-- TODO: use alert component -->
+              No indicatory sector selected!
+            </span>
           </p>
 
           <ul class="menu-list">
-            <li v-for="indicator in selectedIndicatorGroups" :key="indicator.id">
-              <a @click.prevent="selectedGroupType = indicator">{{ indicator.name }}</a>
+            <li v-for="indicator in theoryOfChangeStore.indiKitSubSectors(selectedMainIndicatorType)" :key="indicator.id">
+              <a @click.prevent="selectedGroupType = indicator">{{ indicator.sub_sector }}</a>
             </li>
           </ul>
         </aside>
@@ -205,7 +213,7 @@ const saveIndicators = async () => {
                     <strong>Indicator Phrasing</strong>
                   </div>
                   <div class="column">
-                    <p>{{ item.phrasing }}</p>
+                    <p>{{ item.wording_english }}</p>
                   </div>
                 </div>
                 <hr>
@@ -216,7 +224,7 @@ const saveIndicators = async () => {
                   </div>
                   <div class="column">
                     <p>{{ item.purpose }}</p>
-                    <a :href="item.link" target="_blank">Click to learn more about learn more the indicatory</a>
+                    <a :href="item.guidance" target="_blank">Click to learn more about learn more the indicatory</a>
                   </div>
                 </div>
               </div>
