@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 
 import { ref, onMounted, computed, watch } from "vue";
-import { Collapse, CollapsePanel, Empty, Row, Col, Form, Drawer, Button, Space, Divider, TypographyTitle, Select, FormItem, Input, Typography } from "ant-design-vue";
 import { useTheoryOfChangeStore } from "@/stores/theory_of_change";
 import { IndicatorType, TheoryOfChange, TheoryOfChangeItem } from "@/types";
 
@@ -136,6 +135,10 @@ const saveIndicators = async () => {
       </Space>
     </template>
 
+    <template #footer>
+      <p>Indicator library is powered by IndiKit {add ref}</p>
+    </template>
+
     <Form layout="vertical">
       <Row>
         <Col :span="12">
@@ -154,7 +157,7 @@ const saveIndicators = async () => {
     </Form>
 
     <Divider>
-      <Typography.Paragraph>INDICATOR LIBRARY</Typography.Paragraph>
+      <Typography.Title :level="5">or browse our library</Typography.Title>
     </Divider>
 
     <div class="columns">
