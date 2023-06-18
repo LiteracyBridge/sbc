@@ -9,7 +9,7 @@ import { Button, Space, Spin, Table, Tag, Typography } from "ant-design-vue";
 import { PlusCircleOutlined } from "@ant-design/icons-vue";
 
 import AddActivityModal from './AddActivityModal.vue';
-import SubActivitiesModal from "./SubActivitiesModal.vue";
+import SubActivitiesDrawer from "./SubActivitiesDrawer.vue";
 import { Activity } from "@/types";
 
 const showAddModal = ref(false);
@@ -75,9 +75,9 @@ const columns = [
 </script>
 
 <template>
-  <SubActivitiesModal :visible="config.subActivityModal.visible"
+  <SubActivitiesDrawer :visible="config.subActivityModal.visible"
     @is-closed="config.selectedActivity = null; config.subActivityModal.visible = false"
-    :activity="config.selectedActivity" v-if="config.selectedActivity != null"></SubActivitiesModal>
+    :activity="config.selectedActivity" v-if="config.selectedActivity != null"></SubActivitiesDrawer>
 
   <Spin :spinning="activityStore.isLoading">
     <Table :columns="columns" :data-source="activityStore.topLevelActivities" bordered>
@@ -110,9 +110,9 @@ const columns = [
           <Space>
             <a @click="editActivity(activity)">{{ activity.name }}</a>
 
-            <Tag :style="{ 'border-radius': '10px' }" :color="'#108ee9'" v-if="expandActivity.includes(activity.id)"
+            <Tag :style="{ 'border-radius': '10px' }" :color="'#108ee9'"
               @click="config.selectedActivity = activity; config.subActivityModal.visible = true">
-              sub activities
+              view tasks
             </Tag>
           </Space>
         </template>

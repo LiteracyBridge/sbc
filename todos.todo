@@ -1,10 +1,14 @@
 Today:
+    Activies:
+        ☐ add tasks modal
+        ☐ implemenet adding new task
+        ☐ implement removing task
     Theory of Change:
         ☐ Add modal forms validation
-        ☐ Indicator UI redesign
+        ✔ Indicator UI redesign @done(23-06-18 11:27)
         ☐ implement adding & removing of indicators
         ☐ add customizing of indikit indicators
-        ☐ add indikit footer to indicators panel
+        ✔ add indikit footer to indicators panel @done(23-06-18 11:27)
     ☐ connect live url & test all modules
 
 

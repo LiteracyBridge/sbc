@@ -7,7 +7,7 @@ import { useLookupStore } from "@/stores/lookups";
 import { useProjectStore } from '@/stores/projects'
 import { useParticipantStore } from '@/stores/participants'
 import { useUserStore } from "@/stores/user";
-import { Button, Modal, Space, Spin, Table, Tag, Typography } from "ant-design-vue";
+import { Button, Drawer, Space, Spin, Table, Tag, Typography } from "ant-design-vue";
 import { Activity } from "@/types";
 
 
@@ -75,9 +75,14 @@ const columns = [
 </script>
 
 <template>
-  <Modal title="Sub Activities" v-model:visible="config.visible" @cancel="closeModal()" @ok="closeModal()">
+  <Drawer title="Activity Tasks" v-model:visible="config.visible" :mask-closable="false" width="1000px">
+    <template #extra>
+      <Button @click="closeModal()">
+        Close
+      </Button>
+    </template>
 
-    <Table :columns="columns" :data-source="activityStore.subActivitiesByActivityId(activity.id)" bordered>
+    <Table :columns="columns" :data-source="activityStore.subActivitiesByActivityId(props.activity.id)" bordered>
       <template #bodyCell="{ column, record: activity }">
         <template v-if="column.key === 'name'">
           <Space>
@@ -114,7 +119,7 @@ const columns = [
         </template>
       </template>
     </Table>
-  </Modal>
+  </Drawer>
 
 
   <!-- <table class="table">
