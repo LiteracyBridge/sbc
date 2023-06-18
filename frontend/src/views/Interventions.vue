@@ -2,7 +2,7 @@
 import { useActivityStore } from "../stores/activities";
 import { useInterventionStore } from "../stores/interventions";
 import { ref, computed, onMounted } from "vue";
-import { Button, Collapse, CollapsePanel, Spin, TabPane, Tabs } from "ant-design-vue";
+import { Button, Collapse, CollapsePanel, Empty, Spin, TabPane, Tabs } from "ant-design-vue";
 import { CheckCircleOutlined, DeleteOutlined, PlusCircleOutlined } from "@ant-design/icons-vue";
 import { groupBy } from 'lodash-es'
 
@@ -64,7 +64,17 @@ onMounted(() => {
 <template>
   <section class="section">
     <Spin :spinning="interventionStore.loading || activityStore.isLoading">
-      <Tabs v-model:activeKey="config.activeTab" tab-position="left" type="card">
+      <Empty v-if="drivers.length == 0">
+        <template #description>
+          <span>No intervention found!</span> <br>
+
+          <RouterLink to="/drivers">
+            Click to choose driver(s) to add interventions
+          </RouterLink>
+        </template>
+      </Empty>
+
+      <Tabs v-else v-model:activeKey="config.activeTab" tab-position="left" type="card">
 
         <TabPane v-for="driver in drivers" :key="driver.name" :tab="driver.name">
 
@@ -102,33 +112,5 @@ onMounted(() => {
       </Tabs>
     </Spin>
 
-    <!-- <Collapse v-model:activeKey="config.activePanel">
-
-      <CollapsePanel v-for="intervention in getInterventions" :key="intervention.key" :header="intervention.name">
-        <template #extra>
-          <Button v-if="!interventionStore.activityIds(intervention.id).length" @click="addIntervention(intervention)"
-            type="primary" size="small" :ghost="true">
-            <template #icon>
-              <CheckCircleOutlined />
-            </template>
-            Add
-          </Button>
-
-          <Button v-if="interventionStore.activityIds(intervention.id).length"
-            @click="activityStore.deleteIntervention(intervention.id)" type="ghost" :danger="true" size="small">
-            <template #icon>
-              <DeleteOutlined />
-            </template>
-            Remove
-          </Button>
-
-        </template>
-
-        <p class="is-italic">{{ intervention.text_short }}</p>
-        <br />
-        <p>{{ intervention.text_long }}</p>
-      </CollapsePanel>
-
-    </Collapse> -->
   </section>
 </template>
