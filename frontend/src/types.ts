@@ -143,13 +143,18 @@ export class Activity {
   intervention_id: number;
   parent_id: number;
   editing_user_id: number;
-  toc_indicator_id: number;
+  theory_of_change_id: number;
   owner_id: number;
   status_id: number;
   notes: string = "";
   url: string = "";
-
   driver_ids: number[] = [];
+
+  // FIXME: REMOVE THIS
+  /**
+   * @deprecated
+   */
+  toc_indicator_id: number;
 }
 
 export class Schedule {

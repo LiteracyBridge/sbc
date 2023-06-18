@@ -1,4 +1,5 @@
 from typing import List, Optional
+from helpers import ToCItemDto, create_toc_item
 
 import models
 from dataclass_wizard import asdict, fromdict
@@ -25,6 +26,7 @@ class ActivityDto(BaseModel):
     owner_id: Optional[int]
     status_id: Optional[int]
     driver_ids: Optional[List[int]]
+    is_task: Optional[bool] = False
 
 
 def get_toc_by_project_id(projectId: int, db: Session = Depends(models.get_db)):
@@ -67,7 +69,7 @@ def create(dto: ActivityDto, db: Session = Depends(models.get_db)):
     new_activity.notes = dto.notes
     new_activity.prj_id = dto.prj_id
     new_activity.editing_user_id = dto.editing_user_id
-    new_activity.toc_item_id = dto.toc_indicator_id
+    new_activity.theory_of_change_id = dto.toc_indicator_id
     new_activity.intervention_id = dto.intervention_id
     new_activity.owner_id = dto.owner_id
     new_activity.parent_id = dto.parent_id
@@ -82,25 +84,37 @@ def create(dto: ActivityDto, db: Session = Depends(models.get_db)):
     db.commit()
     db.refresh(new_activity)
 
-    # Create a new record in the toc graph table
-    toc_item = TheoryOfChange()
-    toc_item.name = dto.name
-    toc_item.project_id = dto.prj_id
-    # TODO: make this optional
-    toc_item.type_id = 2  # id of the activity type
-    toc_item.from_id = None
-    toc_item.to_id = None
-    # TODO: make this optional
-    toc_item.sem_id = 1  # id of the sem type.
-    toc_item.description = dto.notes
-    # toc_item.theory_of_change_id = get_toc_by_project_id(dto.prj_id, db).id
+    if not dto.is_task:
+        create_toc_item(
+            dto=ToCItemDto(
+                project_id=dto.prj_id,
+                type="activity",
+                name=dto.name,
+                reference=new_activity,
+            ),
+            db=db,
+        )
+        # new_activity.toc_item_id = theory_of_change.id
 
-    db.add(toc_item)
-    db.commit()
+    # # Create a new record in the toc graph table
+    # toc_item = TheoryOfChange()
+    # toc_item.name = dto.name
+    # toc_item.project_id = dto.prj_id
+    # # TODO: make this optional
+    # toc_item.type_id = 2  # id of the activity type
+    # toc_item.from_id = None
+    # toc_item.to_id = None
+    # # TODO: make this optional
+    # toc_item.sem_id = 1  # id of the sem type.
+    # toc_item.description = dto.notes
+    # # toc_item.theory_of_change_id = get_toc_by_project_id(dto.prj_id, db).id
 
-    # Update the activity with the toc_item id
-    new_activity.toc_item_id = toc_item.id
-    db.commit()
+    # db.add(toc_item)
+    # db.commit()
+
+    # # Update the activity with the toc_item id
+    # new_activity.toc_item_id = toc_item.id
+    # db.commit()
 
     # return ApiResponse(data=[record])
     return get_project_activities(new_activity.prj_id, db)

@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Optional
 from pydantic import BaseModel
 from db_models.project import TheoryOfChange
 from fastapi import Depends
@@ -9,7 +9,7 @@ class ToCItemDto(BaseModel):
     project_id: int
     type: str
     name: str
-    reference: Any
+    reference: Optional[Any]
 
 
 def get_toc_by_project_id(projectId: int, db: Session):
@@ -40,7 +40,8 @@ def create_toc_item(dto: ToCItemDto, db: Session):
     db.refresh(toc_item)
 
     # Update the activity with the toc_item id
-    dto.reference.toc_item_id = toc_item.id
-    db.commit()
+    if dto.reference is not None:
+        dto.reference.theory_of_change_id = toc_item.id
+        db.commit()
 
     return toc_item
