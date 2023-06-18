@@ -9,6 +9,7 @@ import { message } from "ant-design-vue";
 export const useProjectDataStore = defineStore({
   id: "project_data",
   state: () => ({
+    new_project_data: [] as ProjectData[],
     // objectives: [] as ProjectData[],
     questions: [
       {
@@ -202,6 +203,20 @@ export const useProjectDataStore = defineStore({
     // specificObjectives: (state) => {
     //   return state.project_data.filter((d) => d.name == "specific_objectives");
     // },
+
+    // Project Objectives
+    specificObjectives: (state) => {
+      return state.new_project_data.filter(
+        (d) => d.name == "specific_objectives"
+      );
+    },
+
+    // Audiences
+    secondaryAudiences: (state) => {
+      return state.new_project_data.filter(
+        (d) => d.name == "secondary_audiences"
+      );
+    },
   },
   actions: {
     clear() {
@@ -212,6 +227,7 @@ export const useProjectDataStore = defineStore({
     },
 
     async download() {
+      // TODO: Remove this query
       const key_index = 1;
       const filter_clause = "prj_id=" + useProjectStore().prj_id;
       const data = await api.downloadDictionary(
@@ -233,6 +249,13 @@ export const useProjectDataStore = defineStore({
       //   (d) => d.name == "specific_objectives"
       // );
       // console.error(Object.values(data));
+
+      // Download project data
+      ApiRequest.get<ProjectData>(`project/${useProjectStore().prj_id}/data`)
+        .then((resp) => {
+          this.$state.new_project_data = resp;
+        })
+        .catch((err) => message.error(err.message));
     },
 
     async setData(q_id: number, data: any) {

@@ -18,7 +18,6 @@ export class Project {
   country_id?: number;
 }
 
-
 export class LuIndiKit {
   id: number;
   name: string;
@@ -84,7 +83,6 @@ export class TheoryOfChangeItem {
   indicators: Array<TheoryOfChangeIndicator> = [];
 }
 
-
 // class TheoryOfChangeIndicator {
 //   id: number;
 //   toc_item_id: number;
@@ -93,7 +91,6 @@ export class TheoryOfChangeItem {
 
 //   toc_item: TheoryOfChangeItem;
 // }
-
 
 export class Risk {
   id: number = undefined;
@@ -107,7 +104,6 @@ export class Risk {
   toc_to_id?: number = null;
   theory_of_change_id?: number = null;
 }
-
 
 export class TheoryOfChange {
   id: number;
@@ -126,7 +122,6 @@ export class TheoryOfChange {
   risks: Risk[] = [];
   // indicators: any[] = [];
 }
-
 
 export class TheoryOfChangeIndicator {
   id: number;
@@ -195,6 +190,8 @@ export class ProjectData {
   editing_user_id: number;
   toc_item_id: number;
   data: string;
-  module?: "objectives";
-  name?: "specific_objectives";
+  module?: "objectives" | "audiences";
+  name?: "specific_objectives" | "secondary_audiences";
 }
+
+export class Communications {}
