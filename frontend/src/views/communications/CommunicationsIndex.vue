@@ -1,30 +1,66 @@
 <script setup lang="ts">
-import { Card, CollapsePanel, Collapse, Descriptions, DescriptionsItem } from 'ant-design-vue';
+
 import { ref } from 'vue';
 
+import { PlusOutlined } from '@ant-design/icons-vue';
+import { Card, CollapsePanel, Collapse, Descriptions, DescriptionsItem, Button, Modal, Form, type FormInstance } from 'ant-design-vue';
+
 const config = ref({
-    loading: false,
-    collapseKey: ''
+  loading: false,
+  collapseKey: '',
+  modal: {
+    visible: false
+  }
 })
 
 </script>
 
 <template>
-    <Card title="Communications and Messaging">
-        <Collapse v-model:activeKey="config.collapseKey">
-            <CollapsePanel key="1" header="This is panel header 1">
+  <Card title="Communications and Messaging">
+    <template #extra>
+      <Button type="primary" @click="config.modal.visible = true">
+        <template #icon>
+          <PlusOutlined />
+        </template>
+        Add
+      </Button>
 
-                <Descriptions :column="2" bordered>
-                    <DescriptionsItem :labelStyle="{ 'font-weight': 'bold' }" label="Product">Cloud Database
-                    </DescriptionsItem>
-                    <DescriptionsItem :labelStyle="{ 'font-weight': 'bold' }" label="Product">Cloud Database
-                    </DescriptionsItem>
-                    <DescriptionsItem :labelStyle="{ 'font-weight': 'bold' }" label="Product">Cloud Database
-                    </DescriptionsItem>
-                </Descriptions>
+    </template>
+    <Collapse v-model:activeKey="config.collapseKey">
+      <CollapsePanel key="1" header="This is panel header 1">
 
-            </CollapsePanel>
-        </Collapse>
+        <Descriptions :column="2" bordered>
+          <DescriptionsItem :labelStyle="{ 'font-weight': 'bold' }" label="Target project objective(s)">Cloud Database
+          </DescriptionsItem>
 
-    </Card>
+          <DescriptionsItem :labelStyle="{ 'font-weight': 'bold' }" label="Related indicator(s)">Cloud Database
+          </DescriptionsItem>
+
+          <DescriptionsItem :labelStyle="{ 'font-weight': 'bold' }" label="Target audience(s)">Cloud Database
+          </DescriptionsItem>
+
+          <DescriptionsItem :labelStyle="{ 'font-weight': 'bold' }" label="Target behavioral driver(s)">Cloud Database
+          </DescriptionsItem>
+
+          <DescriptionsItem :labelStyle="{ 'font-weight': 'bold' }" label="Message objective(s)">Cloud Database
+          </DescriptionsItem>
+
+          <DescriptionsItem :labelStyle="{ 'font-weight': 'bold' }" label="Message delivery platform(s)">Cloud Database
+          </DescriptionsItem>
+
+          <DescriptionsItem :labelStyle="{ 'font-weight': 'bold' }" label="Message format">Cloud Database
+          </DescriptionsItem>
+
+          <DescriptionsItem :labelStyle="{ 'font-weight': 'bold' }" label="Key points">Cloud Database
+          </DescriptionsItem>
+
+          <DescriptionsItem :labelStyle="{ 'font-weight': 'bold' }" label="Message content">Cloud Database
+          </DescriptionsItem>
+
+        </Descriptions>
+
+      </CollapsePanel>
+    </Collapse>
+  </Card>
+
 </template>
