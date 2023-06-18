@@ -8,7 +8,7 @@ import { useProjectStore } from '@/stores/projects'
 import { Button, Space, Spin, Table, Tag, Typography } from "ant-design-vue";
 import { PlusCircleOutlined } from "@ant-design/icons-vue";
 
-import AddActivityModal from './AddActivityModal.vue';
+// import AddActivityModal from './AddActivityModal.vue';
 import SubActivitiesDrawer from "./SubActivitiesDrawer.vue";
 import { Activity } from "@/types";
 
@@ -32,7 +32,7 @@ const emptyActivity = reactive(new Activity());
 
 const draftActivity = ref(null);
 
-function editActivity(activity) {
+function editActivity(activity: Activity) {
   draftActivity.value = JSON.parse(JSON.stringify(activity));
   showEditModal.value = true;
 }
@@ -80,6 +80,7 @@ const columns = [
     :activity="config.selectedActivity" v-if="config.selectedActivity != null"></SubActivitiesDrawer>
 
   <Spin :spinning="activityStore.isLoading">
+
     <Table :columns="columns" :data-source="activityStore.topLevelActivities" bordered>
       <template #title>
         <div class="level">
@@ -170,11 +171,12 @@ const columns = [
   <!-- <button class="button" @click.prevent = "showEditModal = true">
     <span v-if="!showEditModal">Edit Activity</span>
   </button> -->
-  <AddActivityModal v-if="showAddModal" :draft-activity="emptyActivity" v-model="showAddModal" />
+
+  <!-- <AddActivityModal v-if="showAddModal" :draft-activity="emptyActivity" v-model="showAddModal" /> -->
 
   <!-- TODO: fix this -->
-  <AddActivityModal v-if="showEditModal" @update:model-value="showEditModal = $event" v-model="showEditModal"
-    :draft-activity="emptyActivity" />
+  <!-- <AddActivityModal v-if="showEditModal" @update:model-value="showEditModal = $event" v-model="showEditModal"
+    :draft-activity="emptyActivity" /> -->
 
   <!-- <table class="table">
     <thead>

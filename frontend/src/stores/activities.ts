@@ -72,26 +72,35 @@ export const useActivityStore = defineStore({
 
       // api.downloadObjects(init_objects, this, "", true);
     },
-    async addActivity(activity: Activity) {
+    async addActivity(activity: Activity): Promise<Activity | null> {
       activity.prj_id ??= useProjectStore().prj_id;
       activity.editing_user_id = useUserStore().id;
 
       this.$state.isLoading = true;
-      await ApiRequest.post<Activity>("activity/", { ...activity })
+      return await ApiRequest.post<Activity>("activity/", {
+        ...activity,
+        is_task: activity.parent_id != null,
+      })
         .then((resp) => {
           this.$state.activities = resp;
           message.success("Activity created successfully!");
+          return resp;
         })
-        .catch((err) => message.error(err.message))
+        .catch((err) => {
+          message.error(err.message);
+          return null;
+        })
         .finally(() => (this.$state.isLoading = false));
     },
 
-    updateActivity(activity: Partial<Activity>) {
+    async updateActivity(activity: Partial<Activity>) {
       // console.log(activity);
       // TODO: implement updating activity via api
       let idx = this.activities.findIndex((a) => a.id == activity.id);
       api.update("activities", activity.id, { ...activity });
       this.activities.splice(idx, 1, activity as any);
+
+      return activity;
     },
 
     async deleteActivity(activityId: number, deleteChildren: boolean = false) {

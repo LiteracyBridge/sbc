@@ -9,7 +9,9 @@ import { useParticipantStore } from '@/stores/participants'
 import { useUserStore } from "@/stores/user";
 import { Button, Drawer, Space, Spin, Table, Tag, Typography } from "ant-design-vue";
 import { Activity } from "@/types";
+import { PlusCircleOutlined } from "@ant-design/icons-vue";
 
+import AddSubActivityModal from './AddSubActivityModal.vue';
 
 const interventionStore = useInterventionStore();
 const driverStore = useDriverStore();
@@ -21,15 +23,25 @@ const emit = defineEmits<{
 }>()
 const props = defineProps<{ activity: Activity, visible: boolean }>()
 
-const config = ref({ visible: false })
+const config = ref({
+  visible: false,
+  modal: {
+    visible: false,
+    editing: false,
+    task: null as Activity | null,
+  }
+})
 
 const activityStore = useActivityStore();
 
 
-// function editActivity(activity) {
-//   draftActivity.value = JSON.parse(JSON.stringify(activity));
-//   showEditModal.value = true;
-// }
+function editActivity(activity: Activity) {
+  // TODO: implement activity editing
+
+  // draftActivity.value = JSON.parse(JSON.stringify(activity));
+  // showEditModal.value = true;
+}
+
 
 watch(props, (newProps) => {
   config.value.visible = newProps.visible
@@ -75,7 +87,11 @@ const columns = [
 </script>
 
 <template>
-  <Drawer title="Activity Tasks" v-model:visible="config.visible" :mask-closable="false" width="1000px">
+  <AddSubActivityModal v-if="config.modal.visible" :parent-activity="props.activity" :draft-activity="config.modal.task"
+    :visible="config.modal.visible" @closed="config.modal.visible = false">
+  </AddSubActivityModal>
+
+  <Drawer title="Activity Tasks" v-model:visible="config.visible" :mask-closable="false" width="70vw">
     <template #extra>
       <Button @click="closeModal()">
         Close
@@ -83,13 +99,15 @@ const columns = [
     </template>
 
     <Table :columns="columns" :data-source="activityStore.subActivitiesByActivityId(props.activity.id)" bordered>
+      <template #title>
+        <Button type="primary" @click="config.modal.visible = true; config.modal.task = new Activity()">
+          <PlusCircleOutlined /> Add Task
+        </Button>
+      </template>
+
       <template #bodyCell="{ column, record: activity }">
         <template v-if="column.key === 'name'">
-          <Space>
-            <a @click="editActivity(activity)">{{ activity.name }}</a>
-
-            <Tag :style="{ 'border-radius': '10px' }" :color="'#108ee9'">sub activities</Tag>
-          </Space>
+          <Button type="text" @click="editActivity(activity)">{{ activity.name }}</Button>
         </template>
 
         <template v-if="column.key === 'status'">

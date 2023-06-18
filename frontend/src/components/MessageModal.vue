@@ -33,10 +33,10 @@ onBeforeUnmount(() => {
 //   await messageStore.getLatestMessages(props.topic);
 // }
 
-const emit = defineEmits(["update:modelValue", "save"]);
+const emit = defineEmits(["closed", "save"]);
 
 const closeButton = () => {
-  emit("update:modelValue", false);
+  emit("closed", false);
 };
 
 async function refreshButton() {
