@@ -3,6 +3,8 @@
 import { ref, onMounted, computed, watch } from "vue";
 import { useTheoryOfChangeStore } from "@/stores/theory_of_change";
 import { IndicatorType, TheoryOfChange, TheoryOfChangeItem } from "@/types";
+import { Collapse, CollapsePanel, Empty, Row, Col, Form, Drawer, Button, Space, Divider, TypographyTitle, Select, FormItem, Input, Typography, Avatar } from "ant-design-vue";
+import { PlusOutlined, DeleteOutlined } from "@ant-design/icons-vue";
 
 const emit = defineEmits<{
   (e: 'isClosed', status: boolean): boolean
@@ -92,7 +94,7 @@ watch(props, (newProp) => {
 
     selectedGroupType.value = indicatorType;
     const _find = theoryOfChangeStore.indicatorTypes.find(i => i.id == indicatorType?.parent_id);
-    selectedMainIndicatorType.value =  _find?.id
+    selectedMainIndicatorType.value = _find?.id
   }
 }, { deep: true });
 
@@ -136,7 +138,11 @@ const saveIndicators = async () => {
     </template>
 
     <template #footer>
-      <p>Indicator library is powered by IndiKit {add ref}</p>
+      <p>Indicator library is powered by
+        <Avatar src="https://www.indikit.net/favicon/android-chrome-192x192.png" />
+        <a target="_blank" href="https://www.indikit.net">IndiKit</a>, guidance on SMART indicators for relief and
+        development projects.
+      </p>
     </template>
 
     <Form layout="vertical">
@@ -160,99 +166,102 @@ const saveIndicators = async () => {
       <Typography.Title :level="5">or browse our library</Typography.Title>
     </Divider>
 
-    <div class="columns">
-      <div class="column is-one-fifth mr-5 mb-5">
+    <Row :gutter="7">
+      <Col :span="8">
 
-        <!-- TODO: add label -->
-        <label class="label"></label>
-        <FormItem label="Select Indicator Sector">
-          <Select v-model:value="selectedMainIndicatorType" show-search placeholder="Select an indicator sector"
-            style="width: 200px" :allow-clear="true" :options="theoryOfChangeStore.indi_kit_library"
-            :field-names="{ label: 'sector', value: 'id' }" :filter-option="filterIndicatorSectors">
-          </Select>
-        </FormItem>
+      <FormItem label="Select Indicator Sector" layout="vertical" :required="true">
+        <Select v-model:value="selectedMainIndicatorType" show-search placeholder="Select an indicator sector"
+          style="width: 200px" :allow-clear="true" :options="theoryOfChangeStore.indi_kit_library"
+          :field-names="{ label: 'sector', value: 'id' }" :filter-option="filterIndicatorSectors">
+        </Select>
+      </FormItem>
 
-        <Divider></Divider>
+      <Divider></Divider>
 
 
-        <aside class="menu">
-          <p class="menu-label">
-            <span v-if="selectedMainIndicatorType != null">
-              {{ theoryOfChangeStore.getIndiKitItemById(selectedMainIndicatorType)?.name }}
-            </span>
+      <aside class="menu">
+        <p class="menu-label">
+          <span v-if="selectedMainIndicatorType != null">
+            {{ theoryOfChangeStore.getIndiKitItemById(selectedMainIndicatorType)?.name }}
+          </span>
 
-            <span v-else>
-              <!-- TODO: use alert component -->
-              No indicatory sector selected!
-            </span>
-          </p>
+          <span v-else>
+            <!-- TODO: use alert component -->
+            No indicatory sector selected!
+          </span>
+        </p>
 
-          <ul class="menu-list">
-            <li v-for="indicator in theoryOfChangeStore.indiKitSubSectors(selectedMainIndicatorType)" :key="indicator.id">
-              <a @click.prevent="selectedGroupType = indicator">{{ indicator.sub_sector }}</a>
-            </li>
-          </ul>
-        </aside>
+        <ul class="menu-list">
+          <li v-for="indicator in theoryOfChangeStore.indiKitSubSectors(selectedMainIndicatorType)" :key="indicator.id">
+            <a @click.prevent="selectedGroupType = indicator">{{ indicator.sub_sector }}</a>
+          </li>
+        </ul>
+      </aside>
 
+      </Col>
+
+      <Col :span="16">
+      <!-- <TypographyTitle :level="4">
+          {{ selectedGroupType?.name || '' }}
+        </TypographyTitle> -->
+
+      <!-- <Divider></Divider> -->
+
+      <div v-if="groupIndicators?.length == 0" style="margin-top: auto; position: fixed; top: 50%; left: 55%;">
+        <Empty description="Choose indicator from the dropdown list"></Empty>
       </div>
 
-      <div class="column mb-5">
-        <TypographyTitle :level="4">
-          {{ selectedGroupType?.name || '' }}
-        </TypographyTitle>
-
-        <Divider></Divider>
-
-        <div v-if="groupIndicators?.length == 0" style="margin-top: auto; position: fixed; top: 50%; left: 55%;">
-          <Empty description="Choose indicator from the dropdown list"></Empty>
-        </div>
-
-        <Collapse v-model:activeKey="collapseKey" v-else>
-          <CollapsePanel v-for="item in groupIndicators" :key="item.id" :header="item.name">
-            <div class="card is-shadowless is-small">
-              <div class="card-content">
-                <div class="columns">
-                  <div class="column is-2">
-                    <strong>Indicator Phrasing</strong>
-                  </div>
-                  <div class="column">
-                    <p>{{ item.wording_english }}</p>
-                  </div>
+      <Collapse v-model:activeKey="collapseKey" v-else>
+        <CollapsePanel v-for="item in groupIndicators" :key="item.id" :header="item.name">
+          <div class="card is-shadowless is-small">
+            <div class="card-content">
+              <div class="columns">
+                <div class="column is-2">
+                  <strong>Indicator Phrasing</strong>
                 </div>
-                <hr>
-
-                <div class="columns">
-                  <div class="column is-2">
-                    <strong>What is its purpose?</strong>
-                  </div>
-                  <div class="column">
-                    <p>{{ item.purpose }}</p>
-                    <a :href="item.guidance" target="_blank">Click to learn more about learn more the indicatory</a>
-                  </div>
+                <div class="column">
+                  <p>{{ item.wording_english }}</p>
                 </div>
               </div>
+              <hr>
 
-              <footer class="card-footer">
-                <p class="card-footer-item">
-                  <button class="button"
-                    :class="{ 'is-danger': config.indicators[`${item.id}`], 'is-primary': !config.indicators[`${item.id}`] }"
-                    @click.prevent="config.indicators[`${item.id}`] = !config.indicators[`${item.id}`]">
-                    <span class="icon mr-1">
-                      <i class="fas"
-                        :class="{ 'fa-trash': config.indicators[`${item.id}`], 'fa-plus': !config.indicators[`${item.id}`] }"></i>
-                    </span>
-                    {{ config.indicators[`${item.id}`] ? 'Remove ' : 'Add ' }} Indicator
-                  </button>
-                </p>
-              </footer>
+              <div class="columns">
+                <div class="column is-2">
+                  <strong>What is its purpose?</strong>
+                </div>
+                <div class="column">
+                  <p>{{ item.purpose }}</p>
+                  <a :href="item.guidance" target="_blank">Click to learn more about learn more the indicatory</a>
+                </div>
+              </div>
             </div>
-          </CollapsePanel>
 
-        </Collapse>
+            <footer class="card-footer">
+              <p class="card-footer-item">
+                <Button :danger="config.indicators[`${item.id}`]" type="primary"
+                  @click="config.indicators[`${item.id}`] = !config.indicators[`${item.id}`]">
+                  <!-- <span class="icon mr-1">
+                    <i class="fas"
+                      :class="{ 'fa-trash': config.indicators[`${item.id}`], 'fa-plus': !config.indicators[`${item.id}`] }"></i>
+                  </span>
+                   -->
+                  <template #icon>
+                    <DeleteOutlined v-if="config.indicators[`${item.id}`]" />
+                    <PlusOutlined v-else />
+                  </template>
 
-      </div>
+                  {{ config.indicators[`${item.id}`] ? 'Remove ' : 'Add ' }} Indicator
+                </Button>
+              </p>
+            </footer>
+          </div>
+        </CollapsePanel>
 
-    </div>
+      </Collapse>
+
+      </Col>
+
+    </Row>
 
   </Drawer>
 </template>
