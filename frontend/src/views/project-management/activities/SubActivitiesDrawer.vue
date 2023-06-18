@@ -73,16 +73,16 @@ const columns = [
     dataIndex: 'duration',
     key: 'duration',
   },
-  {
-    title: 'Intervention',
-    dataIndex: 'intervention',
-    key: 'intervention',
-  },
-  {
-    title: 'Drivers',
-    dataIndex: 'drivers',
-    key: 'drivers',
-  },
+  // {
+  //   title: 'Intervention',
+  //   dataIndex: 'intervention',
+  //   key: 'intervention',
+  // },
+  // {
+  //   title: 'Drivers',
+  //   dataIndex: 'drivers',
+  //   key: 'drivers',
+  // },
 ]
 </script>
 
@@ -122,7 +122,7 @@ const columns = [
           {{ activityStore.fromDate(activity.id) }} - {{ activityStore.toDate(activity.id) }}
         </template>
 
-        <template v-if="column.key === 'intervention'">
+        <!-- <template v-if="column.key === 'intervention'">
           {{ interventionStore.interventionNameById(activity.intervention_id) }}
         </template>
 
@@ -134,7 +134,7 @@ const columns = [
           <span v-else>
             <i>0 drivers</i>
           </span>
-        </template>
+        </template> -->
       </template>
     </Table>
   </Drawer>

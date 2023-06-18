@@ -108,8 +108,8 @@ watch(props, (newProps) => {
           </Col>
         </Row>
 
-        <Row :gutter="6">
-          <!-- <Col :span="12">
+        <!-- <Row :gutter="6"> -->
+        <!-- <Col :span="12">
         <FormItem name="parent_id" label="Group Parent" has-feedback
           :rules="[{ required: false, message: 'Please select a group parent!' }]">
 
@@ -124,7 +124,7 @@ watch(props, (newProps) => {
 
         </FormItem>
         </Col> -->
-
+        <!--
           <Col :span="12">
           <FormItem name="driverValues" label="Supported Drivers" has-feedback :rules="[{ required: false }]">
 
@@ -135,9 +135,9 @@ watch(props, (newProps) => {
 
             </Select>
           </FormItem>
-          </Col>
+          </Col> -->
 
-          <Col :span="12">
+        <!-- <Col :span="12">
           <FormItem name="intervention_id" label="Supported Intervention" has-feedback
             :rules="[{ required: false, message: 'Please select an intervention!' }]">
 
@@ -151,9 +151,8 @@ watch(props, (newProps) => {
 
             </Select>
           </FormItem>
-          </Col>
-        </Row>
-
+          </Col> -->
+        <!-- </Row> -->
 
         <Row :gutter="6">
           <Col :span="12">
@@ -170,12 +169,12 @@ watch(props, (newProps) => {
           </FormItem>
           </Col>
 
-          <Col :span="12">
+          <!-- <Col :span="12">
           <FormItem name="url" label="URL" has-feedback :rules="[{ required: false }]">
 
             <Input type="url" v-model:value="draftActivity.url"></Input>
           </FormItem>
-          </Col>
+          </Col> -->
         </Row>
 
 
