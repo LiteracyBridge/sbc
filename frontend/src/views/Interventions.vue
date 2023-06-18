@@ -2,8 +2,8 @@
 import { useActivityStore } from "../stores/activities";
 import { useInterventionStore } from "../stores/interventions";
 import { ref, computed, onMounted } from "vue";
-import { Button, Collapse, CollapsePanel, Empty, Spin, TabPane, Tabs } from "ant-design-vue";
-import { CheckCircleOutlined, DeleteOutlined, PlusCircleOutlined } from "@ant-design/icons-vue";
+import { Button, Collapse, CollapsePanel, Empty, Spin, TabPane, Tabs, Typography, Card } from "ant-design-vue";
+import { DeleteOutlined, PlusCircleOutlined } from "@ant-design/icons-vue";
 import { groupBy } from 'lodash-es'
 
 const config = ref({
@@ -26,13 +26,6 @@ function addIntervention(intervention: { name: string, id: number }) {
     name: intervention.name, driver_ids, intervention_id: intervention.id
   })
 }
-
-const getInterventions = computed(() => {
-
-  return interventionStore.interventions.filter((i) => {
-    return i.name != 'Social movements';
-  })
-})
 
 const drivers = computed(() => {
   const data = groupBy(interventionStore.project_drivers.map(d => {
@@ -62,7 +55,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <section class="section">
+  <Card title="SBC Approaches">
     <Spin :spinning="interventionStore.loading || activityStore.isLoading">
       <Empty v-if="drivers.length == 0">
         <template #description>
@@ -74,43 +67,48 @@ onMounted(() => {
         </template>
       </Empty>
 
-      <Tabs v-else v-model:activeKey="config.activeTab" tab-position="left" type="card">
+      <div v-else>
+        <Typography.Title :level="5">Project Behavior Drivers</Typography.Title>
 
-        <TabPane v-for="driver in drivers" :key="driver.name" :tab="driver.name">
+        <Tabs v-model:activeKey="config.activeTab" tab-position="left" type="card" tab="sldfsdlfk">
 
-          <Collapse v-model:activeKey="config.activePanel">
+          <TabPane v-for="driver in drivers" :key="driver.name" :tab="driver.name">
 
-            <CollapsePanel v-for="intervention in driver.interventions" :key="intervention.key"
-              :header="intervention.name">
-              <template #extra>
-                <Button v-if="!interventionStore.activityIds(intervention.id).length"
-                  @click="addIntervention(intervention)" type="primary" :ghost="true">
-                  <template #icon>
-                    <PlusCircleOutlined />
-                  </template>
-                  Add
-                </Button>
+            <Collapse v-model:activeKey="config.activePanel">
 
-                <Button v-if="interventionStore.activityIds(intervention.id).length"
-                  @click="activityStore.deleteIntervention(intervention.id)" type="ghost" :danger="true" size="small">
-                  <template #icon>
-                    <DeleteOutlined />
-                  </template>
-                  Remove
-                </Button>
+              <CollapsePanel v-for="intervention in driver.interventions" :key="intervention.key"
+                :header="intervention.name">
+                <template #extra>
+                  <Button v-if="!interventionStore.activityIds(intervention.id).length"
+                    @click="addIntervention(intervention)" type="primary" :ghost="true">
+                    <template #icon>
+                      <PlusCircleOutlined />
+                    </template>
+                    Add
+                  </Button>
 
-              </template>
+                  <Button v-if="interventionStore.activityIds(intervention.id).length"
+                    @click="activityStore.deleteIntervention(intervention.id)" type="ghost" :danger="true" size="small">
+                    <template #icon>
+                      <DeleteOutlined />
+                    </template>
+                    Remove
+                  </Button>
 
-              <p class="is-italic">{{ intervention.text_short }}</p>
-              <br />
-              <p>{{ intervention.text_long }}</p>
-            </CollapsePanel>
+                </template>
 
-          </Collapse>
-        </TabPane>
+                <p class="is-italic">{{ intervention.text_short }}</p>
+                <br />
+                <p>{{ intervention.text_long }}</p>
+              </CollapsePanel>
 
-      </Tabs>
+            </Collapse>
+          </TabPane>
+
+        </Tabs>
+      </div>
+
     </Spin>
 
-  </section>
+  </Card>
 </template>
