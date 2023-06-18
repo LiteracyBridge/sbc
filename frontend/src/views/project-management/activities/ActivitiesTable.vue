@@ -19,7 +19,6 @@ const interventionStore = useInterventionStore();
 const driverStore = useDriverStore();
 const lookupStore = useLookupStore();
 const projectStore = useProjectStore();
-const expandActivity = ref([]);
 
 const config = ref({
   selectedActivity: null,
@@ -27,9 +26,6 @@ const config = ref({
 });
 
 const activityStore = useActivityStore();
-
-const emptyActivity = reactive(new Activity());
-
 const draftActivity = ref(null);
 
 function editActivity(activity: Activity) {
@@ -83,27 +79,7 @@ const columns = [
 
     <Table :columns="columns" :data-source="activityStore.topLevelActivities" bordered>
       <template #title>
-        <div class="level">
-          <div class="level-left">
-            <Typography :level="3">Project Activities</Typography>
-          </div>
-
-          <div class="level-right">
-            <Button type="primary" @click="showAddModal = true">
-              <template #icon>
-                <PlusCircleOutlined />
-              </template>
-              Add Activity
-            </Button>
-
-            <!-- <Button type="ghost" @click="config.settingsModal.visible = true">
-                <template #icon>
-                  <SettingOutlined />
-                </template>
-                Settings
-              </Button> -->
-          </div>
-        </div>
+        Project Activities
       </template>
 
       <template #bodyCell="{ column, record: activity }">
