@@ -14,9 +14,10 @@ import TheoryOfChangeIndex from "@/views/theory-of-change/TheoryOfChangeIndex.vu
 import MonitoringEvaluationIndex from "@/views/monitoring-n-evaluation/MonitoringEvaluationIndex.vue";
 import ProjectManagementIndex from "@/views/project-management/ProjectManagementIndex.vue";
 import Unauthorized from "@/views/Unauthorized.vue";
-import ProjectsIndex from '@/views/projects/ProjectsIndex.vue';
-import ProjectObjective from '@/views/ProjectObjective.vue';
-import Audience from '@/views/Audience.vue';
+import ProjectsIndex from "@/views/projects/ProjectsIndex.vue";
+import ProjectObjective from "@/views/ProjectObjective.vue";
+import Audience from "@/views/Audience.vue";
+import CommunicationsIndex from "@/views/communications/CommunicationsIndex.vue";
 
 // import { User } from "@/types";
 
@@ -143,6 +144,11 @@ const router = createRouter({
       path: "/toc",
       name: "toc",
       component: TheoryOfChangeIndex,
+    },
+    {
+      path: "/communications-and-messaging",
+      name: "communications-and-messaging",
+      component: CommunicationsIndex,
     },
     {
       path: "/monitoring-and-evaluation",

@@ -35,7 +35,7 @@ const menuItems = [
   { label: 'Behavioral Drivers', path: '/drivers' },
   { label: 'SBC Approaches', path: '/interventions' },
   { label: 'Theory of Change', path: '/toc' },
-  { label: 'Communications and Messaging', name: 'forms', params: { module: 'communications' } },
+  { label: 'Communications and Messaging', path: '/communications-and-messaging' },
   { label: 'Monitoring and Evaluation', path: '/monitoring-and-evaluation' },
   {
     label: 'Project Management',
