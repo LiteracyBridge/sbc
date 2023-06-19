@@ -87,8 +87,6 @@ function addAudience() {
 };
 
 function saveForms() {
-  console.log(dynamicValidateForm)
-
   audienceFormRef.value.validateFields().then((values) => {
     config.value.loading = true;
 
@@ -180,7 +178,7 @@ const getObjectivesData = computed(() => {
 
       <FormItem v-for="(objective, index) in dynamicValidateForm.audiences" :key="objective.id"
         v-bind="index === 0 ? formItemLayout : {}"
-        :label="index != 0 ? '' : 'Who else influences the actions of your main target audience? What other audiences need to be involved? Who else influences the actions of your main target audience? What other audiences need to be involved?'"
+        :label="index != 0 ? '' : '3. Who else influences the actions of your main target audience? What other audiences need to be involved? Who else influences the actions of your main target audience? What other audiences need to be involved?'"
         :name="['audiences', index, 'value']" :rules="{
           required: true,
           message: 'Audience can not be empty',

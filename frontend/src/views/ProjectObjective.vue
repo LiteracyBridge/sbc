@@ -130,6 +130,10 @@ function fetchData() {
           is_new: false
         }
       });
+
+    if (dynamicValidateForm.objectives.length == 0) {
+      addObjective();
+    }
   })
     .catch(err => message.error(err.message))
     .finally(() => config.value.loading = false);
@@ -196,7 +200,7 @@ const getObjectivesData = computed(() => {
 
       <FormItem v-for="(objective, index) in dynamicValidateForm.objectives" :key="objective.id"
         v-bind="index === 0 ? formItemLayout : {}"
-        :label="index != 0 ? '' : 'What specific objective(s) will your project achieve? What changes will your project make happen?'"
+        :label="index != 0 ? '' : '3. What specific objective(s) will your project achieve? What changes will your project make happen?'"
         :name="['objectives', index, 'value']" :rules="{
           required: true,
           message: 'Objective can not be empty',
