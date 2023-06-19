@@ -25,7 +25,7 @@ const isExactActive = (item) => {
 
 const projectStore = useProjectStore();
 const menuItems = [
-  { label: 'Project Info', name: 'forms', params: { module: 'basic' } },
+  { label: 'Project Info', path: '/project-info' },
   { label: 'Background and context', name: 'forms', params: { module: 'background' } },
   {
     label: 'Project Objectives',

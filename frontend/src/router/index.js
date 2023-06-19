@@ -18,8 +18,8 @@ import ProjectsIndex from "@/views/projects/ProjectsIndex.vue";
 import ProjectObjective from "@/views/ProjectObjective.vue";
 import Audience from "@/views/Audience.vue";
 import CommunicationsIndex from "@/views/communications/CommunicationsIndex.vue";
+import ProjectInfo from "@/views/ProjectInfo.vue";
 
-// import { User } from "@/types";
 
 let user;
 
@@ -114,6 +114,11 @@ const router = createRouter({
       path: "/drivers",
       name: "drivers",
       component: Drivers,
+    },
+    {
+      path: "/project-info",
+      name: "project-info",
+      component: ProjectInfo,
     },
     {
       path: "/interventions",
