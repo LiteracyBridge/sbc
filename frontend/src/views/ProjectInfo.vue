@@ -139,9 +139,6 @@ onMounted(() => {
   fetchData();
 })
 
-const getObjectivesData = computed(() => {
-  return config.value.projectData.filter(i => i.module == "objectives");
-});
 </script>
 
 <template>
@@ -183,6 +180,8 @@ const getObjectivesData = computed(() => {
         <!-- </div> -->
 
       </FormItem>
+
+
       <!-- </div> -->
 
       <!-- </div> -->
@@ -190,11 +189,11 @@ const getObjectivesData = computed(() => {
 
 
     <!-- <Divider>What specific objective(s) will your project achieve? What changes will your project make happen?</Divider> -->
-
+    <!--
     <Form ref="objectivesFormRef" name="dynamic_form_item" :model="dynamicValidateForm"
-      v-bind="formItemLayoutWithOutLabel" layout="vertical">
+      v-bind="formItemLayoutWithOutLabel" layout="vertical"> -->
 
-      <FormItem v-for="(objective, index) in dynamicValidateForm.objectives" :key="objective.id"
+    <!-- <FormItem v-for="(objective, index) in dynamicValidateForm.objectives" :key="objective.id"
         v-bind="index === 0 ? formItemLayout : {}"
         :label="index != 0 ? '' : 'What specific objective(s) will your project achieve? What changes will your project make happen?'"
         :name="['objectives', index, 'value']" :rules="{
@@ -219,12 +218,12 @@ const getObjectivesData = computed(() => {
           <PlusOutlined />
           Add Objective
         </Button>
-      </FormItem>
+      </FormItem> -->
 
-      <!-- <FormItem v-bind="formItemLayoutWithOutLabel">
+    <!-- <FormItem v-bind="formItemLayoutWithOutLabel">
               <Button type="primary" html-type="submit" @click="submitForm">Submit</Button>
               <Button style="margin-left: 10px" @click="resetForm">Reset</Button>
             </FormItem> -->
-    </Form>
+    <!-- </Form> -->
   </Card>
 </template>

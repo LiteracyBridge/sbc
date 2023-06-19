@@ -95,8 +95,8 @@ class ProjectData(Base):
 
     prj_id: Mapped[int] = mapped_column(ForeignKey("projects.id"), nullable=True)
     editing_user_id: Mapped[int] = mapped_column(ForeignKey("project_users.id"))
-    toc_item_id: Mapped[int] = mapped_column(
-        ForeignKey("theory_of_change_item.id"), nullable=True
+    theory_of_change_id: Mapped[int] = mapped_column(
+        ForeignKey("theory_of_change.id"), nullable=True
     )
 
     project = relationship("Project")

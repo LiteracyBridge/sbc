@@ -129,7 +129,7 @@ def update_objectives(
                 db=db,
             )
 
-            record.toc_item_id = toc.id
+            record.theory_of_change_id = toc.id
             db.commit()
 
     return ApiResponse(
