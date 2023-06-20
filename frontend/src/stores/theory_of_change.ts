@@ -27,6 +27,23 @@ export const useTheoryOfChangeStore = defineStore({
     indicatorTypes: (state) => state.indicator_types,
     indicatorGroups: (state) => state.indicator_groups,
 
+    tocIndicators(state) {
+      return (tocId: number) => {
+        if (state.theory_of_change.length == 0) return [];
+
+        if(tocId == null) return [];
+
+        return (
+          state.theory_of_change.find((i) => i.id == tocId)?.indicators ?? []
+        ).flatMap((i) => {
+          return {
+            id: i.id,
+            name: i.indicator?.name ?? i.indicator?.indi_kit?.name ?? "",
+            indi_kit_id: i.indicator?.indi_kit_id,
+          };
+        });
+      };
+    },
     // IndiKit Helpers
     getIndiKitItemById: (state) => {
       return (id: number) => state.indi_kit_library.find((i) => i.id == id);
@@ -97,7 +114,8 @@ export const useTheoryOfChangeStore = defineStore({
         { ...opts.data }
       )
         .then((resp) => {
-          this.theory_of_change = resp;
+          this.$state.theory_of_change = resp;
+          message.success("Indicators saved");
         })
         .finally(() => (this.$state.isLoading = false));
     },

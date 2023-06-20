@@ -163,9 +163,9 @@ const getProjectIndicators = computed(() => {
   })
 });
 
-const makeIndicatorAsDeleted = (name: string, customIn?: number, indi_kit_id?: number) => {
+const makeIndicatorAsDeleted = (name: string, customId?: number, indi_kit_id?: number) => {
   // If id is not provided, it means it's a new custom indicator
-  if (customIn == null) {
+  if (customId == null) {
     const _temp = config.value.reqBody.added
     const index = _temp.findIndex(i => i.id == null && i.name == name);
 
@@ -180,7 +180,8 @@ const makeIndicatorAsDeleted = (name: string, customIn?: number, indi_kit_id?: n
   }
 
 
-  config.value.reqBody.removed_custom = [...config.value.reqBody.removed_custom, customIn];
+  // config.value.reqBody.removed_custom = [...config.value.reqBody.removed_custom, customId];
+  config.value.reqBody.removed = [...config.value.reqBody.removed, customId];
 }
 
 const isIndicatorDeleted = computed(() => {
@@ -204,7 +205,7 @@ const onProjectIndicatorSelected = (label: string, option: ProjectIndicator) => 
   // if true, add it to the toc indicators list
   const exits = theoryOfChangeStore.project_indicators.find(i => i.name.trim() == label);
   if (exits != null) {
-    config.value.reqBody.added = [...config.value.reqBody.added, { id: exits.id, name: exits.name, id: null, indi_kit_id: null}];
+    config.value.reqBody.added = [...config.value.reqBody.added, { id: exits.id, name: exits.name, id: null, indi_kit_id: null }];
     return;
   }
 
@@ -218,7 +219,7 @@ const addIndiKitIndicator = (item: LuIndiKit) => {
 
   if (exists != null) return;
 
-  config.value.reqBody.added = [...config.value.reqBody.added, { name: item.name, indi_kit_id: item.id, id:null }];
+  config.value.reqBody.added = [...config.value.reqBody.added, { name: item.name, indi_kit_id: item.id, id: null }];
 }
 
 </script>

@@ -3,7 +3,7 @@ from models import LuSem, Project
 from .lookups import LuIndiKit, LuTheoryOfChangeType
 from database import Base, SessionLocal, engine
 from sqlalchemy.orm import relationship, mapped_column
-from sqlalchemy import DateTime, Boolean, Column, ForeignKey, Integer, String
+from sqlalchemy import ARRAY, DateTime, Boolean, Column, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped
 
 
@@ -64,7 +64,7 @@ class TheoryOfChange(Base):
     # TODO: add risks
 
     # Related objects
-    indicators: Mapped["TheoryOfChangeIndicator"] = relationship(
+    indicators: Mapped[ARRAY["TheoryOfChangeIndicator"]] = relationship(
         "TheoryOfChangeIndicator", back_populates="theory_of_change"
     )
     sem: Mapped["LuSem"] = relationship("LuSem")

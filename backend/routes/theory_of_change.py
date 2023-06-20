@@ -82,9 +82,10 @@ def get_toc_by_id(id: int, db: Session = Depends(models.get_db)):
         .filter(models.TheoryOfChangeOld.id == id)
         .options(
             subqueryload(models.TheoryOfChangeOld.risks),
-            subqueryload(models.TheoryOfChangeOld.graph)
-            .subqueryload(TheoryOfChangeItem.indicators)
-            .subqueryload(TheoryOfChangeIndicator.indicator),
+            subqueryload(models.TheoryOfChangeOld.graph).subqueryload(
+                TheoryOfChangeIndicator.indicators
+            )
+            # .subqueryload(TheoryOfChangeIndicator.indicator),
             # .options(
             #     subqueryload(models.TheoryOfChangeItem.sem),
             #     subqueryload(models.TheoryOfChangeItem.type),
@@ -156,7 +157,7 @@ def create_item(
 
     # db.refresh(record)
 
-    return get_toc_by_id(project_id, db)
+    return ApiResponse(data=get_by_project_id(project_id, db))
 
 
 @router.put("/{project_id}/item/{itemId}", response_model=ApiResponse)
@@ -185,7 +186,7 @@ def update_item(
 
     db.commit()
 
-    return get_toc_by_id(project_id, db)
+    return ApiResponse(data=get_by_project_id(project_id, db))
 
 
 @router.delete("/{id}/item/{itemId}", response_model=ApiResponse)
@@ -213,7 +214,7 @@ def delete_item(
     db.delete(record)
     db.commit()
 
-    return get_toc_by_id(id, db)
+    return ApiResponse(data=get_by_project_id(id, db))
 
 
 # ======== INDICATORS ========= #
@@ -247,7 +248,14 @@ def update_indicators(
 
     # Add new indikit indicators to project indicators
     if dto.added is not None:
-        new_toc_indicators = list(filter(lambda x: x["id"] is not None, dto.added))
+        print(dto.added)
+        new_toc_indicators = list(
+            map(
+                lambda x: x["id"],
+                list(filter(lambda x: x["id"] is not None, dto.added)),
+            )
+        )
+        print(new_toc_indicators)
 
         existing_project_indicators = (
             db.query(ProjectIndicators)
@@ -344,7 +352,7 @@ def update_indicators(
     # db.add_all(monitoring_indicators)
     # db.commit()
 
-    return get_toc_by_project_id(theory_of_change.project_id, db)
+    return ApiResponse(data=get_toc_by_project_id(theory_of_change.project_id, db))
 
 
 @router.get("/", response_model=ApiResponse)
@@ -356,6 +364,7 @@ def get_indicator(db: Session = Depends(models.get_db)):
 
 @router.post("/{tocId}/risks", response_model=ApiResponse)
 def risks(tocId: int, dto: RisksDto, db: Session = Depends(models.get_db)):
+    toc = db.query(TheoryOfChange).filter(TheoryOfChange.id == tocId).first()
     risk = Risk()
 
     risk.name = dto.name
@@ -369,4 +378,4 @@ def risks(tocId: int, dto: RisksDto, db: Session = Depends(models.get_db)):
     db.add(risk)
     db.commit()
 
-    return get_toc_by_id(tocId, db)
+    return ApiResponse(data=get_by_project_id(toc.project_id, db))

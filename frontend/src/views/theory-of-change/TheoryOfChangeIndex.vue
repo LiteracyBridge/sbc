@@ -498,14 +498,14 @@ function deleteItem() {
     });
 }
 
-function updateToCModel(resp: TheoryOfChange | TheoryOfChange[], itemId?: number) {
-  if (Array.isArray(resp)) {
-    resp = resp[0];
-  }
+function updateToCModel(resp: TheoryOfChange[], itemId?: number) {
+  // if (Array.isArray(resp)) {
+  //   resp = resp[0];
+  // }
 
   theoryOfChangeModel.value.data = resp;
   if (itemId != null) {
-    theoryOfChangeModel.value.selectedItem = resp.graph.find(i => i.id == itemId);
+    theoryOfChangeModel.value.selectedItem = resp.find(i => i.id == itemId);
   }
 }
 //=== END: Theory of Change Item Modal functions
@@ -576,8 +576,7 @@ const getProjectIndicators = computed(() => {
     <div v-if="!config.isLoading">
 
       <!-- IndiKit Browser Panel -->
-      <IndicatorBrowserPanel :is-visible="isPanelVisible"
-        @is-closed="isPanelVisible = false; showIndicatorModal = true;"
+      <IndicatorBrowserPanel :is-visible="isPanelVisible" @is-closed="isPanelVisible = false; showIndicatorModal = true;"
         :toc-item="theoryOfChangeModel.selectedItem"
         @is-saved="updateToCModel($event, theoryOfChangeModel.selectedItem?.id)">
       </IndicatorBrowserPanel>
@@ -764,13 +763,14 @@ const getProjectIndicators = computed(() => {
           <div class="field">
             <label class="label">Indicators</label>
 
-            <hr>
+            <Divider></Divider>
 
             <div class="field is-grouped is-grouped-multiline">
-              <div class="control" v-for="item in theoryOfChangeModel.selectedItem?.indicators" :key="item.id">
+              <div class="control" v-for="item in theoryOfChangeStore.tocIndicators(theoryOfChangeModel.selectedItem.id)"
+                :key="item.id">
                 <div class="tags has-addons">
-                  <a class="tag is-link">{{ item.indicator.name }}</a>
-                  <a class="tag is-delete"></a>
+                  <a class="tag is-link">{{ item.name }}</a>
+                  <!-- <a class="tag is-delete"></a> -->
 
                   <!-- TODO: implement deleting of item -->
                 </div>
