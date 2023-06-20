@@ -21,6 +21,7 @@ router = APIRouter()
 class IndicatorDto(BaseModel):
     # TODO: remove these
     removed: List[int]
+    # removed_indi_kit: List[int]
     # added: List[int]
 
     # added_indi_kit: Optional[List[Dict]]
@@ -61,9 +62,9 @@ def get_toc_by_project_id(projectId: int, db: Session = Depends(models.get_db)):
         .filter(TheoryOfChange.project_id == projectId)
         .options(
             # subqueryload(models.TheoryOfChangeOld.graph)
-            subqueryload(TheoryOfChange.indicators).subqueryload(
-                TheoryOfChangeIndicator.indicator
-            ),
+            subqueryload(TheoryOfChange.indicators)
+            .subqueryload(TheoryOfChangeIndicator.indicator)
+            .options(subqueryload(ProjectIndicators.indi_kit)),
             # .options(
             #     subqueryload(models.TheoryOfChangeItem.sem),
             #     subqueryload(models.TheoryOfChangeItem.type),
@@ -232,7 +233,7 @@ def update_indicators(
     # TODO: Add to project indicators first
 
     # Remove deleted indicators
-    if dto.removed_indi_kit is not None:
+    if dto.removed is not None:
         db.query(TheoryOfChangeIndicator).filter(
             TheoryOfChangeIndicator.theory_of_change_id == item_id,
             TheoryOfChangeIndicator.indicator_id.in_(dto.removed),

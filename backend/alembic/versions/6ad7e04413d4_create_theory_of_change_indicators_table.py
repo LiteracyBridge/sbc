@@ -28,7 +28,7 @@ def upgrade():
         ),
         sa.ForeignKeyConstraint(
             ["indicator_id"],
-            ["lu_indicators.id"],
+            ["project_indicators.id"],
         ),
         sa.PrimaryKeyConstraint("id"),
     )

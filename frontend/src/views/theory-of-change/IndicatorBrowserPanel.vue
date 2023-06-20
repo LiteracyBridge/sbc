@@ -23,7 +23,7 @@ const
   isFetchingIndicators = ref(false),
   config = ref<{
     isLoading: boolean,
-    indicators: Record<string, boolean>,
+    selectedIndiKit: Record<string, boolean>,
     customIndicator: string,
     selectedIndicator: ProjectIndicator | null,
     reqBody: {
@@ -34,7 +34,7 @@ const
     // newCustomIndicators: Array<{ name: string, id?: number }>,
   }>({
     isLoading: false,
-    indicators: {},
+    selectedIndiKit: {},
     customIndicator: '',
     selectedIndicator: null,
     reqBody: {
@@ -75,18 +75,21 @@ const filterIndicatorSectors = (input: string, option: any) => {
 };
 
 const closePanel = () => {
-  config.value.indicators = {};
+  config.value.selectedIndiKit = {};
   emit("isClosed", true);
 };
 
-const buildIndicatorsTree = (indicators: any[]) => {
+const buildIndicatorsTree = (indicators?: any[]) => {
+  console.log(props.tocItem?.indicators)
+
+  indicators ??= [];
   const tree: Record<string, boolean> = {};
 
   for (const item of indicators) {
     tree[`${item.indicator_id}`] = true
   }
 
-  config.value.indicators = tree;
+  config.value.selectedIndiKit = tree;
 }
 
 onMounted(() => {
@@ -119,13 +122,13 @@ watch(props, (newProp) => {
 const saveIndicators = async () => {
   config.value.isLoading = true;
 
-  const removed = Object.keys(config.value.indicators).filter(i => {
-    return !config.value.indicators[i]
-  })
+  // const removed = Object.keys(config.value.selectedIndiKit).filter(i => {
+  //   return !config.value.selectedIndiKit[i]
+  // })
 
-  const added = Object.keys(config.value.indicators).filter(i => {
-    return config.value.indicators[i]
-  }).filter(i => props.tocItem.indicators.find(ind => ind.indicator_id == +i) == null)
+  // const added = Object.keys(config.value.selectedIndiKit).filter(i => {
+  //   return config.value.selectedIndiKit[i]
+  // }).filter(i => props.tocItem.indicators.find(ind => ind.indicator_id == +i) == null)
 
   theoryOfChangeStore.saveIndicators({ tocId: props.tocItem.id, data: config.value.reqBody })
     .then(resp => {
@@ -137,7 +140,7 @@ const saveIndicators = async () => {
 }
 
 const getTocIndicators = computed(() => {
-  const _temp = props.tocItem.indicators.flatMap(i => {
+  const _temp = (props.tocItem.indicators ?? []).flatMap(i => {
     return { id: i.id, name: i.indicator?.name ?? i.indicator?.indi_kit?.name ?? '', indi_kit_id: i.indicator?.indi_kit_id };
   });
 
@@ -189,7 +192,7 @@ const isIndicatorDeleted = computed(() => {
 
 const removeIndicator = (indicator: ProjectIndicator) => {
   config.value.reqBody.removed = [...config.value.reqBody.removed, indicator.id];
-  config.value.indicators[`${indicator.id}`] = false;
+  config.value.selectedIndiKit[`${indicator.id}`] = false;
 }
 
 const onProjectIndicatorSelected = (label: string, option: ProjectIndicator) => {
@@ -201,18 +204,21 @@ const onProjectIndicatorSelected = (label: string, option: ProjectIndicator) => 
   // if true, add it to the toc indicators list
   const exits = theoryOfChangeStore.project_indicators.find(i => i.name.trim() == label);
   if (exits != null) {
-    config.value.reqBody.added = [...config.value.reqBody.added, { id: exits.id, name: exits.name }];
-
-    config.value.indicators[`${exits.id}`] = true;
+    config.value.reqBody.added = [...config.value.reqBody.added, { id: exits.id, name: exits.name, id: null, indi_kit_id: null}];
     return;
   }
 
   // 2. If not, add it to the project indicators list and then add it to the toc indicators list
-  config.value.reqBody.added = [...config.value.reqBody.added, { name: label, id: null }];
+  config.value.reqBody.added = [...config.value.reqBody.added, { name: label, id: null, indi_kit_id: null }];
 }
 
 const addIndiKitIndicator = (item: LuIndiKit) => {
-  config.value.reqBody.added = [...config.value.reqBody.added, { name: item.name, indi_kit_id: item.id }];
+  console.log("adding")
+  const exists = config.value.reqBody.added.find(i => i.indi_kit_id == item.id);
+
+  if (exists != null) return;
+
+  config.value.reqBody.added = [...config.value.reqBody.added, { name: item.name, indi_kit_id: item.id, id:null }];
 }
 
 </script>
@@ -352,19 +358,19 @@ const addIndiKitIndicator = (item: LuIndiKit) => {
             <footer class="card-footer">
               <p class="card-footer-item">
                 <!-- TODO: add function for adding indicators -->
-                <Button :danger="!isIndicatorDeleted(item.id)" type="primary"
-                  @click="isIndicatorDeleted(item.id) ? addIndiKitIndicator(item) : makeIndicatorAsDeleted(item.name, undefined, item.id)">
+                <Button :danger="config.selectedIndiKit[`${item.id}`]" type="primary"
+                  @click="config.selectedIndiKit[`${item.id}`] = !config.selectedIndiKit[`${item.id}`]; addIndiKitIndicator(item)">
                   <!-- <span class="icon mr-1">
                     <i class="fas"
                       :class="{ 'fa-trash': config.indicators[`${item.id}`], 'fa-plus': !config.indicators[`${item.id}`] }"></i>
                   </span>
                    -->
                   <template #icon>
-                    <DeleteOutlined v-if="config.indicators[`${item.id}`]" />
+                    <DeleteOutlined v-if="config.selectedIndiKit[`${item.id}`]" />
                     <PlusOutlined v-else />
                   </template>
 
-                  {{ config.indicators[`${item.id}`] ? 'Remove ' : 'Add ' }} Indicator
+                  {{ config.selectedIndiKit[`${item.id}`] ? 'Remove ' : 'Add ' }} Indicator
                 </Button>
               </p>
             </footer>
