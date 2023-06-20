@@ -13,7 +13,7 @@ import { Risk, TheoryOfChange, TheoryOfChangeItem } from "@/types";
 import GridLoader from "@/components/spinners/GridLoader.vue";
 import { useProjectDataStore } from "@/stores/projectData";
 import { useProjectStore } from '@/stores/projects';
-import { AutoComplete, Button, Card, Divider, Form, FormItem, Input, Modal, Popover, Row, Space, Spin, Switch, Textarea } from "ant-design-vue";
+import { AutoComplete, Button, Card, Col, Divider, Form, FormItem, Input, Modal, Popover, Row, Select, SelectOption, Space, Spin, Switch, Textarea, message } from "ant-design-vue";
 import TheoryOfChangeExamplesBrowser from "./TheoryOfChangeExamplesBrowser.vue";
 import CustomIndicatorModal from './CustomIndicatorModal.vue';
 import { DeleteOutlined, PlusCircleOutlined, RotateRightOutlined, SwapLeftOutlined, SwapOutlined } from "@ant-design/icons-vue";
@@ -467,6 +467,8 @@ const saveFormItem = async () => {
       .then(resp => {
         diagram.parseGraph(resp);
         closeModal(false);
+
+        message.success("Item updated successfully");
       }).finally(() => {
         tocItemModalConfig.value.isLoading = false;
       });
@@ -477,6 +479,7 @@ const saveFormItem = async () => {
         diagram.parseGraph(resp);
 
         closeModal(false);
+        message.success("Item created successfully");
       }).finally(() => {
         tocItemModalConfig.value.isLoading = false;
       });
@@ -649,14 +652,14 @@ const getProjectIndicators = computed(() => {
                     {{ tocItemModalConfig.isNew ? 'Save' : 'Update' }}
                   </Button>
 
-                  <Button role="button" @click="closeModal">Cancel</Button>
+                  <Button role="button" @click="closeModal(false)">Cancel</Button>
                 </div>
               </div>
             </div>
           </footer>
         </template>
 
-        <Form>
+        <Form layout="vertical">
           <div class="field">
             <div class="field-body">
               <div class="field">
@@ -668,41 +671,33 @@ const getProjectIndicators = computed(() => {
             </div>
           </div>
 
-          <div class="field is-horizontal">
-            <div class="columns field-body">
+          <Row :gutter="4">
+            <Col :span="12">
+            <FormItem label="Links From">
 
-              <div class="column field">
-                <label class="label">Links From</label>
+              <!-- TODO: show list of existing indicators -->
+              <Select v-model:value="tocItemModalConfig.form.from_id">
 
-                <div class="control">
-                  <div class="select is-fullwidth">
-                    <!-- TODO: show list of existing indicators -->
-                    <select v-model="tocItemModalConfig.form.from_id">
+                <SelectOption v-for="item in theoryOfChangeModel?.data" :key="item.id" :value="item.id">
+                  {{ item.name }}
+                </SelectOption>
+              </Select>
+            </FormItem>
 
-                      <option v-for="item in theoryOfChangeModel?.data?.graph" :key="item.id" :value="item.id">
-                        {{ item.name }}
-                      </option>
-                    </select>
-                  </div>
-                </div>
-              </div>
+            </Col>
 
-              <div class="column field">
-                <label class="label">Links To</label>
+            <Col :span="12">
+            <FormItem label="Links To">
 
-                <div class="control">
-                  <div class="select is-fullwidth">
-                    <!-- TODO: show list of existing indicators -->
-                    <select v-model="tocItemModalConfig.form.to_id">
-                      <option v-for="item in theoryOfChangeModel?.data?.graph" :key="item.id" :value="item.id">
-                        {{ item.name }}
-                      </option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+              <!-- TODO: show list of existing indicators -->
+              <Select v-model:value="tocItemModalConfig.form.to_id">
+                <SelectOption v-for="item in theoryOfChangeModel?.data" :key="item.id" :value="item.id">
+                  {{ item.name }}
+                </SelectOption>
+              </Select>
+            </FormItem>
+            </Col>
+          </Row>
 
           <div class="field is-horizontal">
             <div class="columns field-body">

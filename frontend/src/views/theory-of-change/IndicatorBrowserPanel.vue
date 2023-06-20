@@ -196,10 +196,13 @@ const removeIndicator = (indicator: ProjectIndicator) => {
   config.value.selectedIndiKit[`${indicator.id}`] = false;
 }
 
-const onProjectIndicatorSelected = (label: string, option: ProjectIndicator) => {
-  label = label.trim();
-  config.value.selectedIndicator = option;
+const onProjectIndicatorSelected = (label: string, option?: ProjectIndicator) => {
   console.log(label, option);
+
+  label = label.trim();
+  if (option != null) {
+    config.value.selectedIndicator = option;
+  }
 
   // 1. Check if indicator already exists in project indicators
   // if true, add it to the toc indicators list
@@ -260,27 +263,32 @@ const addIndiKitIndicator = (item: LuIndiKit) => {
         </Col>
 
         <Col :span="4">
-        <Button type="primary" style="margin-top: 28px; margin-left: 10px;" :ghost="true">Add</Button>
+        <Button type="primary" style="margin-top: 28px; margin-left: 10px;" :ghost="true"
+          @click="onProjectIndicatorSelected(config.customIndicator)">Add</Button>
         </Col>
 
-        <!-- TODO: display list of indicators pending to be saved -->
-
-        <List item-layout="horizontal">
-          <ListItem v-for="indicator in getTocIndicators" :key="indicator.id">
-            {{ indicator.name }}
-
-            <template #actions>
-              <Button size="small" type="primary" :ghost="true" :danger="true"
-                @click="makeIndicatorAsDeleted(indicator.name, indicator.id, indicator.indi_kit_id)">
-                <DeleteOutlined /> Remove
-              </Button>
-            </template>
-
-          </ListItem>
-        </List>
-
       </Row>
+
+
     </Form>
+    <!-- Display list of project indicators -->
+    <Row>
+      <Col :span="14">
+      <List item-layout="horizontal">
+        <ListItem v-for="indicator in getTocIndicators" :key="indicator.id">
+          {{ indicator.name }}
+
+          <template #actions>
+            <Button size="small" type="primary" :ghost="true" :danger="true"
+              @click="makeIndicatorAsDeleted(indicator.name, indicator.id, indicator.indi_kit_id)">
+              <DeleteOutlined /> Remove
+            </Button>
+          </template>
+
+        </ListItem>
+      </List>
+      </Col>
+    </Row>
 
     <Divider>
       <Typography.Title :level="5">or browse our library</Typography.Title>

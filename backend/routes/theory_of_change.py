@@ -76,26 +76,26 @@ def get_toc_by_project_id(projectId: int, db: Session = Depends(models.get_db)):
     return record
 
 
-def get_toc_by_id(id: int, db: Session = Depends(models.get_db)):
-    record = (
-        db.query(models.TheoryOfChangeOld)
-        .filter(models.TheoryOfChangeOld.id == id)
-        .options(
-            subqueryload(models.TheoryOfChangeOld.risks),
-            subqueryload(models.TheoryOfChangeOld.graph).subqueryload(
-                TheoryOfChangeIndicator.indicators
-            )
-            # .subqueryload(TheoryOfChangeIndicator.indicator),
-            # .options(
-            #     subqueryload(models.TheoryOfChangeItem.sem),
-            #     subqueryload(models.TheoryOfChangeItem.type),
-            # )
-        )
-        # .options(joinedload(models.TheoryOfChange.graph))
-        .first()
-    )
+# def get_toc_by_id(id: int, db: Session = Depends(models.get_db)):
+#     record = (
+#         db.query(models.TheoryOfChangeOld)
+#         .filter(models.TheoryOfChangeOld.id == id)
+#         .options(
+#             subqueryload(models.TheoryOfChangeOld.risks),
+#             subqueryload(models.TheoryOfChangeOld.graph).subqueryload(
+#                 TheoryOfChangeIndicator.indicators
+#             )
+#             # .subqueryload(TheoryOfChangeIndicator.indicator),
+#             # .options(
+#             #     subqueryload(models.TheoryOfChangeItem.sem),
+#             #     subqueryload(models.TheoryOfChangeItem.type),
+#             # )
+#         )
+#         # .options(joinedload(models.TheoryOfChange.graph))
+#         .first()
+#     )
 
-    return ApiResponse(data=[record])
+#     return ApiResponse(data=[record])
 
 
 @router.post("/", response_model=ApiResponse)
@@ -157,7 +157,7 @@ def create_item(
 
     # db.refresh(record)
 
-    return ApiResponse(data=get_by_project_id(project_id, db))
+    return ApiResponse(data=get_toc_by_project_id(project_id, db))
 
 
 @router.put("/{project_id}/item/{itemId}", response_model=ApiResponse)
@@ -168,8 +168,8 @@ def update_item(
     db: Session = Depends(models.get_db),
 ):
     record = (
-        db.query(models.TheoryOfChangeItem)
-        .filter(models.TheoryOfChangeItem.id == itemId)
+        db.query(TheoryOfChange)
+        .filter(TheoryOfChange.id == itemId)
         .first()
     )
 
