@@ -118,6 +118,10 @@ export class TheoryOfChange {
   is_validated: boolean = false;
 
   indicators: Array<TheoryOfChangeIndicator> = [];
+
+  /**
+   * @deprecated
+   */
   graph: Array<TheoryOfChangeItem> = [];
   risks: Risk[] = [];
   // indicators: any[] = [];
@@ -130,9 +134,10 @@ export class TheoryOfChangeIndicator {
   project_id: number;
   activity_id: number;
 
-  // indicator: IndicatorGroup;
-  project: Project;
-  theories_of_change: TheoryOfChange;
+  indicator?: ProjectIndicator;
+
+  project?: Project;
+  theories_of_change?: TheoryOfChange;
 }
 
 export class Activity {

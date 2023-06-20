@@ -2,16 +2,17 @@
 
 import { ref, onMounted, computed, watch } from "vue";
 import { useTheoryOfChangeStore } from "@/stores/theory_of_change";
-import { IndicatorType, TheoryOfChange, TheoryOfChangeItem } from "@/types";
-import { Collapse, CollapsePanel, Empty, Row, Col, Form, Drawer, Button, Space, Divider, TypographyTitle, Select, FormItem, Input, Typography, Avatar } from "ant-design-vue";
+import { IndicatorType, LuIndiKit, ProjectIndicator, TheoryOfChange, TheoryOfChangeItem } from "@/types";
+import { Collapse, CollapsePanel, Empty, Row, Col, Form, Drawer, Button, Space, Divider, AutoComplete, Select, FormItem, Input, Typography, Avatar, List, ListItem, ListItemMeta } from "ant-design-vue";
 import { PlusOutlined, DeleteOutlined } from "@ant-design/icons-vue";
+import { markAsUntransferable } from "worker_threads";
 
 const emit = defineEmits<{
   (e: 'isClosed', status: boolean): boolean
   (e: 'isSaved', resp: TheoryOfChange | TheoryOfChange[]): TheoryOfChange
 }>()
 
-const props = defineProps<{ tocItem: TheoryOfChangeItem, isVisible: boolean }>();
+const props = defineProps<{ tocItem: TheoryOfChange, isVisible: boolean }>();
 
 const theoryOfChangeStore = useTheoryOfChangeStore();
 
@@ -23,9 +24,25 @@ const
   config = ref<{
     isLoading: boolean,
     indicators: Record<string, boolean>,
+    customIndicator: string,
+    selectedIndicator: ProjectIndicator | null,
+    reqBody: {
+      removed: number[],
+      removed_custom: number[],
+      added: Array<{ id?: number, name: string, indi_kit_id?: number }>,
+    },
+    // newCustomIndicators: Array<{ name: string, id?: number }>,
   }>({
     isLoading: false,
     indicators: {},
+    customIndicator: '',
+    selectedIndicator: null,
+    reqBody: {
+      removed: [],
+      removed_custom: [],
+      added: [],
+    },
+    // newCustomIndicators: [],
   });
 
 const isOpened = computed(() => props.isVisible)
@@ -110,13 +127,92 @@ const saveIndicators = async () => {
     return config.value.indicators[i]
   }).filter(i => props.tocItem.indicators.find(ind => ind.indicator_id == +i) == null)
 
-  theoryOfChangeStore.saveIndicators({ tocItemId: props.tocItem.id, added: added, removed: removed })
+  theoryOfChangeStore.saveIndicators({ tocId: props.tocItem.id, data: config.value.reqBody })
     .then(resp => {
       emit("isSaved", theoryOfChangeStore.theory_of_change);
       closePanel();
     }).finally(() => {
       config.value.isLoading = false;
     });
+}
+
+const getTocIndicators = computed(() => {
+  const _temp = props.tocItem.indicators.flatMap(i => {
+    return { id: i.id, name: i.indicator?.name ?? i.indicator?.indi_kit?.name ?? '', indi_kit_id: i.indicator?.indi_kit_id };
+  });
+
+  const all = config.value.reqBody.added.concat(_temp);
+
+  // Filter out removed indicators
+  return all.filter(i => {
+    return config.value.reqBody.removed.find(r => r == i.id) == null
+  });
+  // return theoryOfChangeStore.project_indicators.map(i => {
+  //   return { ...i, label: i.name, value: i.name }
+  // })
+});
+
+
+// Custom indicator handlers
+const getProjectIndicators = computed(() => {
+  return theoryOfChangeStore.project_indicators.map(i => {
+    return { ...i, label: i.name, value: i.name }
+  })
+});
+
+const makeIndicatorAsDeleted = (name: string, customIn?: number, indi_kit_id?: number) => {
+  // If id is not provided, it means it's a new custom indicator
+  if (customIn == null) {
+    const _temp = config.value.reqBody.added
+    const index = _temp.findIndex(i => i.id == null && i.name == name);
+
+    _temp.splice(index, 1);
+    config.value.reqBody.added = _temp;
+    return;
+  }
+
+  if (indi_kit_id != null) {
+    config.value.reqBody.removed = [...config.value.reqBody.removed, indi_kit_id];
+    return;
+  }
+
+
+  config.value.reqBody.removed_custom = [...config.value.reqBody.removed_custom, customIn];
+}
+
+const isIndicatorDeleted = computed(() => {
+  return (indiKitId: number) => {
+    return getTocIndicators.value.indexOf((i: { id?: number; name: string; indi_kit_id?: number; }
+    ) => i.indi_kit_id == indiKitId) < 0
+  };
+})
+
+const removeIndicator = (indicator: ProjectIndicator) => {
+  config.value.reqBody.removed = [...config.value.reqBody.removed, indicator.id];
+  config.value.indicators[`${indicator.id}`] = false;
+}
+
+const onProjectIndicatorSelected = (label: string, option: ProjectIndicator) => {
+  label = label.trim();
+  config.value.selectedIndicator = option;
+  console.log(label, option);
+
+  // 1. Check if indicator already exists in project indicators
+  // if true, add it to the toc indicators list
+  const exits = theoryOfChangeStore.project_indicators.find(i => i.name.trim() == label);
+  if (exits != null) {
+    config.value.reqBody.added = [...config.value.reqBody.added, { id: exits.id, name: exits.name }];
+
+    config.value.indicators[`${exits.id}`] = true;
+    return;
+  }
+
+  // 2. If not, add it to the project indicators list and then add it to the toc indicators list
+  config.value.reqBody.added = [...config.value.reqBody.added, { name: label, id: null }];
+}
+
+const addIndiKitIndicator = (item: LuIndiKit) => {
+  config.value.reqBody.added = [...config.value.reqBody.added, { name: item.name, indi_kit_id: item.id }];
 }
 
 </script>
@@ -149,7 +245,10 @@ const saveIndicators = async () => {
       <Row>
         <Col :span="12">
         <FormItem label="Can't find indicator in library? Add you own">
-          <Input placeholder="Enter indicator name" />
+          <AutoComplete v-model:value="config.customIndicator" :options="getProjectIndicators" size="small"
+            placeholder="Enter indicator name" style="width: 100%;" @select="onProjectIndicatorSelected">
+          </AutoComplete>
+          <!-- <Input placeholder="Enter indicator name" /> -->
         </FormItem>
         </Col>
 
@@ -158,6 +257,20 @@ const saveIndicators = async () => {
         </Col>
 
         <!-- TODO: display list of indicators pending to be saved -->
+
+        <List item-layout="horizontal">
+          <ListItem v-for="indicator in getTocIndicators" :key="indicator.id">
+            {{ indicator.name }}
+
+            <template #actions>
+              <Button size="small" type="primary" :ghost="true" :danger="true"
+                @click="makeIndicatorAsDeleted(indicator.name, indicator.id, indicator.indi_kit_id)">
+                <DeleteOutlined /> Remove
+              </Button>
+            </template>
+
+          </ListItem>
+        </List>
 
       </Row>
     </Form>
@@ -238,8 +351,9 @@ const saveIndicators = async () => {
 
             <footer class="card-footer">
               <p class="card-footer-item">
-                <Button :danger="config.indicators[`${item.id}`]" type="primary"
-                  @click="config.indicators[`${item.id}`] = !config.indicators[`${item.id}`]">
+                <!-- TODO: add function for adding indicators -->
+                <Button :danger="!isIndicatorDeleted(item.id)" type="primary"
+                  @click="isIndicatorDeleted(item.id) ? addIndiKitIndicator(item) : makeIndicatorAsDeleted(item.name, undefined, item.id)">
                   <!-- <span class="icon mr-1">
                     <i class="fas"
                       :class="{ 'fa-trash': config.indicators[`${item.id}`], 'fa-plus': !config.indicators[`${item.id}`] }"></i>

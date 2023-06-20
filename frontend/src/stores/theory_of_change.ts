@@ -72,14 +72,29 @@ export const useTheoryOfChangeStore = defineStore({
         .finally(() => (this.$state.isLoading = false));
     },
     async saveIndicators(opts: {
-      tocItemId: number;
-      added: number[] | string[];
-      removed: number[] | string[];
+      tocId: number;
+      data: {
+        removed: number[];
+        removed_custom: number[];
+        added: Array<{ id?: number; name: string; indi_kit_id?: number }>;
+      };
+      // newCustomIndicators: Array<{ name: string; id?: number }>;
+
+      // removed: number[] | string[];
+
+      // added: number[] | string[];
+      // removed: number[] | string[];
     }) {
       this.$state.isLoading = true;
+
+      // if(opts.newCustomIndicators.length > 0) {
+      //   // Create new custom indicators
+
+      // }
+
       return ApiRequest.post<TheoryOfChange>(
-        `theory-of-change/${opts.tocItemId}/indicators`,
-        { added: opts.added, removed: opts.removed }
+        `theory-of-change/${opts.tocId}/indicators`,
+        { ...opts.data }
       )
         .then((resp) => {
           this.theory_of_change = resp;

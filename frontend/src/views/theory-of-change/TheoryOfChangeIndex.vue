@@ -16,7 +16,7 @@ import { useProjectStore } from '@/stores/projects';
 import { AutoComplete, Button, Card, Divider, Form, FormItem, Input, Modal, Popover, Row, Space, Spin, Switch, Textarea } from "ant-design-vue";
 import TheoryOfChangeExamplesBrowser from "./TheoryOfChangeExamplesBrowser.vue";
 import CustomIndicatorModal from './CustomIndicatorModal.vue';
-import { PlusCircleOutlined, RotateRightOutlined, SwapLeftOutlined, SwapOutlined } from "@ant-design/icons-vue";
+import { DeleteOutlined, PlusCircleOutlined, RotateRightOutlined, SwapLeftOutlined, SwapOutlined } from "@ant-design/icons-vue";
 import { useTheoryOfChangeStore } from "@/stores/theory_of_change";
 
 const THEORY_OF_CHANGE_TYPES: Record<string, string> = {
@@ -425,12 +425,10 @@ function rotateDiagram() {
 
 //=== START: Theory of Change Item Modal functions
 const newTocItem = () => {
-
   tocItemModalConfig.value.form = new TheoryOfChange()
   tocItemModalConfig.value.isNew = true;
   tocItemModalConfig.value.theoryOfChangeId = 1;
   tocItemModalConfig.value.visible = true;
-  useSideNavStore().hide();
 }
 
 const closeModal = (redraw = true) => {
@@ -570,16 +568,16 @@ const getProjectIndicators = computed(() => {
 </script>
 
 <template>
-  <Card>
+  <Card title="Theory of Change">
     <div v-if="config.isLoading" id="graph-loader" style="margin-top: auto;">
       <GridLoader :use-logo="false" :loading="config.isLoading"></GridLoader>
     </div>
 
-    <div class="mx-3" v-if="!config.isLoading">
+    <div v-if="!config.isLoading">
 
       <!-- IndiKit Browser Panel -->
       <IndicatorBrowserPanel :is-visible="isPanelVisible"
-        @is-closed="isPanelVisible = false; showIndicatorModal = true; useSideNavStore().hide();"
+        @is-closed="isPanelVisible = false; showIndicatorModal = true;"
         :toc-item="theoryOfChangeModel.selectedItem"
         @is-saved="updateToCModel($event, theoryOfChangeModel.selectedItem?.id)">
       </IndicatorBrowserPanel>
@@ -633,27 +631,26 @@ const getProjectIndicators = computed(() => {
             <div class="level">
               <div class="level-left">
                 <div class="level-item">
-                  <button role="button" class="button is-small is-danger" @click="deleteItem()"
+                  <Button role="button" type="primary" :danger="true" @click="deleteItem()"
                     v-if="tocItemModalConfig.isNew == false"
                     :class="{ 'is-loading disabled': tocItemModalConfig.isDeleting }"
                     :disabled="tocItemModalConfig.isDeleting">
-                    <span class="icon mr-1">
-                      <i class="fas fa-trash"></i>
-                    </span>
+
+                    <DeleteOutlined />
                     Delete
-                  </button>
+                  </Button>
 
                 </div>
               </div>
 
               <div class="level-right">
                 <div class="level-item">
-                  <button class="button is-primary" :class="{ 'is-loading': tocItemModalConfig.isLoading }"
+                  <Button type="primary" :class="{ 'is-loading': tocItemModalConfig.isLoading }"
                     :disabled="tocItemModalConfig.isLoading" role="button" @click.prevent="saveFormItem()">
                     {{ tocItemModalConfig.isNew ? 'Save' : 'Update' }}
-                  </button>
+                  </Button>
 
-                  <button class="button" role="button" @click="closeModal">Cancel</button>
+                  <Button role="button" @click="closeModal">Cancel</Button>
                 </div>
               </div>
             </div>
@@ -780,38 +777,11 @@ const getProjectIndicators = computed(() => {
               </div>
             </div>
 
-            <button class="button is-small" role="button"
-              @click.prevent="isPanelVisible = !isPanelVisible; showIndicatorModal = true; useSideNavStore().hide();">
-              <span class="icon is-small mr-1">
-                <i class="fas fa-plus"></i>
-              </span>
-              <!-- TODO: Add popover -->
+            <Button size="small" role="button" @click="isPanelVisible = !isPanelVisible; showIndicatorModal = true">
+              <PlusCircleOutlined />
               Add Indicator
-            </button>
+            </Button>
 
-            <Popover>
-              <template #content>
-                <Space gutter="12">
-                  <!-- <a-auto-complete v-model:value="value" :options="options" style="width: 200px" placeholder="input here"
-                                              :filter-option="filterOption" /> -->
-                  <!-- <Popconfirm title="Are you sure delete this task?" ok-text="Yes" cancel-text="No"> -->
-                  <Button size="small" type="primary" :ghost="true" @click="customIndicator.visible = true">
-                    <PlusCircleOutlined /> Add custom indicators
-                  </Button>
-                  <!-- </Popconfirm> -->
-
-
-
-                  <Button size="small" type="dashed"
-                    @click.prevent="isPanelVisible = !isPanelVisible; showIndicatorModal = true; useSideNavStore().hide();">
-                    <PlusCircleOutlined /> Add from library
-                  </Button>
-                </Space>
-
-                <!-- <p>Content</p> -->
-              </template>
-              <Button type="primary">Add Indicator</Button>
-            </Popover>
           </div>
 
         </Form>
