@@ -2,10 +2,9 @@
 
 import { ref, onMounted, computed, watch } from "vue";
 import { useTheoryOfChangeStore } from "@/stores/theory_of_change";
-import { IndicatorType, LuIndiKit, ProjectIndicator, TheoryOfChange, TheoryOfChangeItem } from "@/types";
+import { IndicatorType, LuIndiKit, ProjectIndicator, TheoryOfChange } from "@/types";
 import { Collapse, CollapsePanel, Empty, Row, Col, Form, Drawer, Button, Space, Divider, AutoComplete, Select, FormItem, Input, Typography, Avatar, List, ListItem, ListItemMeta } from "ant-design-vue";
 import { PlusOutlined, DeleteOutlined } from "@ant-design/icons-vue";
-import { markAsUntransferable } from "worker_threads";
 
 const emit = defineEmits<{
   (e: 'isClosed', status: boolean): boolean
@@ -31,7 +30,6 @@ const
       removed_custom: number[],
       added: Array<{ id?: number, name: string, indi_kit_id?: number }>,
     },
-    // newCustomIndicators: Array<{ name: string, id?: number }>,
   }>({
     isLoading: false,
     selectedIndiKit: {},
@@ -42,24 +40,9 @@ const
       removed_custom: [],
       added: [],
     },
-    // newCustomIndicators: [],
   });
 
 const isOpened = computed(() => props.isVisible)
-
-const getMainSectors = computed(() => {
-  return theoryOfChangeStore.indicatorTypes.filter(i => i.parent_id == null);
-});
-
-const selectedIndicatorGroups = computed(() => {
-  console.log(selectedMainIndicatorType.value);
-
-  if (selectedMainIndicatorType?.value == null) {
-    return [];
-  }
-
-  return theoryOfChangeStore.indicatorTypes.filter(i => i.parent_id == selectedMainIndicatorType.value as unknown as number);
-});
 
 const groupIndicators = computed(() => {
   if (selectedGroupType.value?.id == null) {
@@ -184,18 +167,6 @@ const makeIndicatorAsDeleted = (name: string, customId?: number, indi_kit_id?: n
   config.value.reqBody.removed = [...config.value.reqBody.removed, customId];
 }
 
-const isIndicatorDeleted = computed(() => {
-  return (indiKitId: number) => {
-    return getTocIndicators.value.indexOf((i: { id?: number; name: string; indi_kit_id?: number; }
-    ) => i.indi_kit_id == indiKitId) < 0
-  };
-})
-
-const removeIndicator = (indicator: ProjectIndicator) => {
-  config.value.reqBody.removed = [...config.value.reqBody.removed, indicator.id];
-  config.value.selectedIndiKit[`${indicator.id}`] = false;
-}
-
 const onProjectIndicatorSelected = (label: string, option?: ProjectIndicator) => {
   console.log(label, option);
 
@@ -208,7 +179,7 @@ const onProjectIndicatorSelected = (label: string, option?: ProjectIndicator) =>
   // if true, add it to the toc indicators list
   const exits = theoryOfChangeStore.project_indicators.find(i => i.name.trim() == label);
   if (exits != null) {
-    config.value.reqBody.added = [...config.value.reqBody.added, { id: exits.id, name: exits.name, id: null, indi_kit_id: null }];
+    config.value.reqBody.added = [...config.value.reqBody.added, { id: exits.id, name: exits.name, indi_kit_id: null }];
     return;
   }
 
