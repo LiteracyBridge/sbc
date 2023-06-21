@@ -1,5 +1,5 @@
 from typing import Dict, List, Optional
-from db_models.project import ProjectIndicators, TheoryOfChange, TheoryOfChangeIndicator
+from models import ProjectIndicators, TheoryOfChange, TheoryOfChangeIndicator
 from dataclass_wizard import asdict, fromdict
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel

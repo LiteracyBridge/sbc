@@ -1,11 +1,37 @@
 from typing import List, Optional
-from sqlalchemy import DateTime, Boolean, Column, ForeignKey, Integer, String
+from sqlalchemy import ARRAY, DateTime, Boolean, Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship, mapped_column
 from sqlalchemy.orm import Mapped
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.mutable import MutableDict
+from sqlalchemy.sql import func
 
 from database import Base, SessionLocal, engine
+
+
+class LuIndiKit(Base):
+    __tablename__ = "lu_indi_kit"
+
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    name: Mapped[str]
+    wording_english: Mapped[str]
+    wording_french: Mapped[Optional[str]]
+    wording_portuguese: Mapped[Optional[str]]
+    wording_czech: Mapped[Optional[str]]
+    guidance: Mapped[Optional[str]]
+
+    section: Mapped[Optional[str]]
+    sector: Mapped[str]
+    sub_sector: Mapped[Optional[str]]
+    indicator_level: Mapped[ARRAY[str]] = mapped_column(ARRAY(String))
+
+
+class LuTheoryOfChangeType(Base):
+    __tablename__ = "lu_toc_types"
+
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    name: Mapped[str]
+    description: Mapped[Optional[str]]
 
 
 class LuCountries(Base):
@@ -67,7 +93,7 @@ class Project(Base):
     start_date: Mapped[Optional[DateTime]] = mapped_column(DateTime, nullable=True)
     end_date: Mapped[Optional[DateTime]] = mapped_column(DateTime, nullable=True)
 
-    country_id: Mapped[int] = mapped_column(ForeignKey("countries.id"))
+    country_id: Mapped[int] = mapped_column(ForeignKey("lu_countries.id"))
     organisation_id: Mapped[int] = mapped_column(ForeignKey("organisations.id"))
 
     # theories_of_change = relationship(
@@ -211,6 +237,33 @@ class ProjectDriver(Base):
     editing_user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
 
 
+class TheoryOfChange(Base):
+    __tablename__ = "theory_of_change"
+
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    name: Mapped[str]
+    description: Mapped[Optional[str]]
+    is_validated: Mapped[bool] = mapped_column(Boolean, default=False)
+    type_id: Mapped[int] = mapped_column(ForeignKey("lu_toc_types.id"), nullable=True)
+    from_id: Mapped[int] = mapped_column(
+        ForeignKey("theory_of_change.id"), nullable=True
+    )
+    to_id: Mapped[int] = mapped_column(ForeignKey("theory_of_change.id"), nullable=True)
+    sem_id: Mapped[int] = mapped_column(ForeignKey("lu_sem.id"), nullable=True)
+    project_id: Mapped[Optional[int]] = mapped_column(
+        ForeignKey("projects.id", ondelete="CASCADE"), nullable=False
+    )
+
+    # TODO: add risks
+
+    # Related objects
+    indicators: Mapped[ARRAY["TheoryOfChangeIndicator"]] = relationship(
+        "TheoryOfChangeIndicator", back_populates="theory_of_change"
+    )
+    sem: Mapped["LuSem"] = relationship("LuSem")
+    type: Mapped["LuTheoryOfChangeType"] = relationship("LuTheoryOfChangeType")
+
+
 # TODO: remove this model
 class TheoryOfChangeOld(Base):
     __tablename__ = "theories_of_change"
@@ -293,6 +346,45 @@ class TheoryOfChangeOld(Base):
 #     )
 
 
+class ProjectIndicators(Base):
+    __tablename__ = "project_indicators"
+
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    name: Mapped[str]
+    indi_kit_id: Mapped[Optional[int]] = mapped_column(
+        ForeignKey("lu_indi_kit.id"), nullable=True
+    )
+    project_id: Mapped[int] = mapped_column(ForeignKey("projects.id"))
+
+    indi_kit: Mapped["LuIndiKit"] = relationship("LuIndiKit")
+    project: Mapped["Project"] = relationship("Project")
+
+
+class TheoryOfChangeIndicator(Base):
+    __tablename__ = "theory_of_change_indicators"
+
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+
+    indicator_id: Mapped[int] = mapped_column(
+        ForeignKey("project_indicators.id", ondelete="CASCADE")
+    )
+    theory_of_change_id: Mapped[int] = mapped_column(
+        ForeignKey("theory_of_change.id", ondelete="CASCADE")
+    )
+    project_id: Mapped[int] = mapped_column(
+        ForeignKey("projects.id", ondelete="CASCADE")
+    )
+    activity_id: Mapped[int] = mapped_column(
+        ForeignKey("activities.id", ondelete="CASCADE")
+    )
+
+    indicator: Mapped["ProjectIndicators"] = relationship("ProjectIndicators")
+    theory_of_change: Mapped["TheoryOfChange"] = relationship(
+        "TheoryOfChange", back_populates="indicators"
+    )
+    project: Mapped["Project"] = relationship("Project")
+
+
 # TODO: remove this model
 # class TheoryOfChangeType(Base):
 #     __tablename__ = "lu_toc_types"
@@ -319,10 +411,10 @@ class Risk(Base):
         ForeignKey("theories_of_change.id"), nullable=True
     )
     toc_from_id: Mapped[int] = mapped_column(
-        ForeignKey("theories_of_change_item.id"), nullable=True
+        ForeignKey("theories_of_change.id"), nullable=True
     )
     toc_to_id: Mapped[int] = mapped_column(
-        ForeignKey("theories_of_change_item.id"), nullable=True
+        ForeignKey("theories_of_change.id"), nullable=True
     )
 
 
@@ -370,6 +462,82 @@ class Monitoring(Base):
     project_id: Mapped[int] = mapped_column(ForeignKey("projects.id"), nullable=False)
 
     toc_item_indicator = relationship("TheoryOfChangeIndicator")
+
+
+class Communications(Base):
+    __tablename__ = "communications"
+
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    message_objectives: Mapped[str]
+    delivery_platforms: Mapped[Optional[str]]
+    format: Mapped[Optional[str]]
+    key_points: Mapped[Optional[str]]
+    contents: Mapped[Optional[str]]
+    created_at: Mapped[DateTime] = mapped_column(
+        DateTime(timezone=True), default=func.now()
+    )
+    updated_at: Mapped[DateTime] = mapped_column(
+        DateTime(timezone=True), onupdate=func.now()
+    )
+    deleted_at: Mapped[Optional[DateTime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+
+    project_id: Mapped[Optional[int]] = mapped_column(
+        ForeignKey("projects.id", ondelete="CASCADE"), nullable=False
+    )
+
+    project_data: Mapped["CommunicationProjectData"] = relationship(
+        "CommunicationProjectData"
+    )
+    indicators: Mapped["CommunicationIndicators"] = relationship(
+        "CommunicationIndicators"
+    )
+
+
+class CommunicationProjectData(Base):
+    __tablename__ = "communication_project_data"
+
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    communication_id: Mapped[int] = mapped_column(
+        ForeignKey("communications.id", ondelete="CASCADE")
+    )
+    objective_id: Mapped[int] = mapped_column(
+        ForeignKey("project_data.id", ondelete="CASCADE")
+    )
+    audience_id: Mapped[int] = mapped_column(
+        ForeignKey("project_data.id", ondelete="CASCADE")
+    )
+
+
+class CommunicationIndicators(Base):
+    __tablename__ = "communication_indicators"
+
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    communication_id: Mapped[int] = mapped_column(
+        ForeignKey("communications.id", ondelete="CASCADE")
+    )
+    indicator_id: Mapped[int] = mapped_column(
+        ForeignKey("theory_of_change_indicators.id", ondelete="CASCADE")
+    )
+
+
+class AccessRequest(Base):
+    __tablename__ = "access_requests"
+
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    email: Mapped[str]
+    name: Mapped[str]
+    notes: Mapped[str]
+    created_at: Mapped[DateTime] = mapped_column(
+        DateTime(timezone=True), default=func.now()
+    )
+    updated_at: Mapped[DateTime] = mapped_column(
+        DateTime(timezone=True), default=func.now()
+    )
+    deleted_at: Mapped[DateTime] = mapped_column(
+        DateTime(timezone=True), default=func.now()
+    )
 
 
 Base.metadata.create_all(bind=engine)

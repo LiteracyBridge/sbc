@@ -2,7 +2,7 @@ from typing import Optional
 
 import models
 from fastapi import APIRouter, Depends
-from db_models.organisation import AccessRequest
+from models import AccessRequest
 from pydantic import BaseModel
 from schema import ApiResponse
 from sqlalchemy.orm import Session
