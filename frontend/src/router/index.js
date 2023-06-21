@@ -13,7 +13,7 @@ import { ApiRequest } from "@/apis/api";
 import TheoryOfChangeIndex from "@/views/theory-of-change/TheoryOfChangeIndex.vue";
 import MonitoringEvaluationIndex from "@/views/monitoring-n-evaluation/MonitoringEvaluationIndex.vue";
 import ProjectManagementIndex from "@/views/project-management/ProjectManagementIndex.vue";
-import Unauthorized from "@/views/Unauthorized.vue";
+import AccessRequest from "@/views/AccessRequest.vue";
 import ProjectsIndex from "@/views/projects/ProjectsIndex.vue";
 import ProjectObjective from "@/views/ProjectObjective.vue";
 import Audience from "@/views/Audience.vue";
@@ -65,7 +65,7 @@ Hub.listen("auth", async (data) => {
       if (user?.authorized) {
         router.push({ path: "/" });
       } else {
-        router.push({ path: "/unauthorized" });
+        router.push({ path: "/request-access" });
       }
       // router.push({ path: "/" });
       break;
@@ -166,9 +166,9 @@ const router = createRouter({
       component: ProjectManagementIndex,
     },
     {
-      path: "/unauthorized",
-      name: "unauthorized",
-      component: Unauthorized,
+      path: "/request-access",
+      name: "request-access",
+      component: AccessRequest,
     },
   ],
 });

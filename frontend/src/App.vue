@@ -1,17 +1,11 @@
 <script setup>
-// Importing required Vue and external libraries
 import { onMounted, computed } from "vue";
-import { RouterView } from "vue-router";
 import { useLookupStore } from "./stores/lookups";
-import NavBar from "@/components/Layout/NavBar.vue";
-import LeftSideNav from "@/components/Layout/LeftSideNav.vue";
 import "@aws-amplify/ui-vue/styles.css";
-import { Amplify } from "aws-amplify";
-import awsconfig from "./aws-exports";
 import { useSideNavStore } from "@/stores/sideNav";
 import { useUserStore } from '@/stores/user';
 import { AppStore } from "./stores/app.store";
-import GridLoader from "./components/spinners/GridLoader.vue";
+import AccessRequest from "@/views/AccessRequest.vue";
 
 const userStore = useUserStore();
 const appStore = AppStore()
@@ -40,31 +34,11 @@ onMounted(() => {
 </script>
 
 <template>
-  <div v-if="appStore.isLoading" id="app-loader" style="margin-top: auto">
-    <figure class="image is-128x128">
-      <img src="@/assets/logo-color.png" />
-    </figure>
-    <!-- <GridLoader :loading="appStore.isLoading"></GridLoader> -->
-  </div>
-
-  <div class="app-wrapper" v-else>
-    <!-- Render the navigation bar -->
-    <NavBar v-if="userStore.loggedIn" />
-    <div class="left-side-nav-container">
-      <!-- Render the left side navigation if it should be visible -->
-      <LeftSideNav v-if="showSideNav" v-model="showSideNav" />
-      <div class="container is-max-desktop px-2 py-4 custom-container mt-6"
-        :class="{ 'has-left-side-nav': showSideNav, 'main-content': !showSideNav }">
-
-
-        <!-- Render the router view using the current route's fullPath as a key -->
-        <router-view :key="$route.fullPath"></router-view>
-      </div>
-    </div>
-  </div>
+  <AccessRequest></AccessRequest>
 </template>
 
 <style>
+
 /* Importing required CSS libraries */
 @import "bulma/css/bulma.min.css";
 @import "@creativebulma/bulma-tooltip";

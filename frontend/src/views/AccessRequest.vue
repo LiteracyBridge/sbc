@@ -20,8 +20,6 @@ function save() {
 
     ApiRequest.post("organisation/access-request", config.value.form)
       .then((_) => {
-        // message.success("Access request sent successfully");
-
         Modal.success({
           title: 'Access Request Received',
           content: h('p', 'Thank you for your interest in the SBC Platform. We have received your request and will get back to you as soon as possible.'),
@@ -35,13 +33,8 @@ function save() {
 </script>
 
 <template>
-  <!-- Create a contact form for users to request access to the system -->
-  <!-- <Row>
-    <Col :span="8">
-    </Col>
-    <Col :span="8"> -->
   <Space direction="horizontal" style="width: 100%; justify-content: center">
-    <Card title="Request Access" class="" style="width: 40em;">
+    <Card title="Request Access" class="" style="width: 40em; margin-top: 60px;">
       <TypographyParagraph>
         If you would like to request access to the system, please fill out the form below and we will get back to you as
         soon as possible. <br>
@@ -73,19 +66,6 @@ function save() {
       </Form>
     </Card>
   </Space>
-
-  <!-- </Col>
-    <Col :span="8">
-    </Col>
-  </Row> -->
-
-  <!-- <Result status="403" title="403" sub-title="Sorry, you are not authorized to access this page.">
-    <template #extra>
-      <RouterLink to="/login">
-        <Button type="primary">Back Home</Button>
-      </RouterLink>
-    </template>
-  </Result> -->
 </template>
 
 <style>
