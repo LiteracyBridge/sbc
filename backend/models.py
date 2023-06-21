@@ -279,7 +279,7 @@ class TheoryOfChangeOld(Base):
     # graph = relationship(
     #     "TheoryOfChangeItem", back_populates="theory_of_change", load_on_pending=True
     # )
-    risks = relationship("Risk", load_on_pending=True)
+    # risks = relationship("Risk", load_on_pending=True)
 
 
 # TODO: remove this model
@@ -535,9 +535,7 @@ class AccessRequest(Base):
     updated_at: Mapped[DateTime] = mapped_column(
         DateTime(timezone=True), default=func.now()
     )
-    deleted_at: Mapped[DateTime] = mapped_column(
-        DateTime(timezone=True), default=func.now()
-    )
+    deleted_at: Mapped[Optional[DateTime]] = mapped_column(DateTime(timezone=True))
 
 
 Base.metadata.create_all(bind=engine)

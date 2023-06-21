@@ -1,6 +1,6 @@
 from typing import Any, Optional
 from pydantic import BaseModel
-from db_models.project import TheoryOfChange
+from models import TheoryOfChange
 from fastapi import Depends
 from sqlalchemy.orm import Session
 

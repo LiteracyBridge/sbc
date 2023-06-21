@@ -1,7 +1,7 @@
 from typing import List, Optional, Dict
 
 from sqlalchemy import text
-from db_models.project import ProjectIndicators
+from models import ProjectIndicators
 from helpers import ToCItemDto, create_toc_item
 
 import models

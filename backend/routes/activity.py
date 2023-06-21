@@ -5,7 +5,7 @@ import models
 from dataclass_wizard import asdict, fromdict
 from fastapi import APIRouter, Depends, HTTPException
 from models import Activity
-from db_models.project import TheoryOfChange
+from models import TheoryOfChange
 from pydantic import BaseModel
 from schema import ApiResponse
 from sqlalchemy.orm import Session, joinedload, subqueryload

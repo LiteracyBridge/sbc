@@ -1,11 +1,9 @@
-from db_models.lookups import LuIndiKit
+import models
 from dataclass_wizard import asdict, fromdict
 from fastapi import APIRouter, Depends, HTTPException
-
-from sqlalchemy.orm import Session
+from models import LuIndiKit
 from schema import ApiResponse
-import models
-
+from sqlalchemy.orm import Session
 
 router = APIRouter()
 

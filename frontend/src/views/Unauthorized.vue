@@ -1,13 +1,37 @@
 <script setup lang="ts">
-import { Button, Card, Result, FormItem, Form, Input, Textarea, Row, Col, Space, TypographyParagraph } from 'ant-design-vue';
-import { ref } from 'vue';
+import { ApiRequest } from '@/apis/api';
+import { Button, Card, Result, FormItem, Form, Input, Textarea, Row, Col, Space, TypographyParagraph, type FormInstance, message, Modal } from 'ant-design-vue';
+import { h, ref } from 'vue';
 
 
 const config = ref({
   form: {
-    organisation: null,
-  }
-})
+    notes: null,
+    name: null,
+    email: null
+  },
+  loading: false
+});
+const accessForm = ref<FormInstance>();
+
+function save() {
+  accessForm.value.validate().then(() => {
+    config.value.loading = true;
+
+    ApiRequest.post("organisation/access-request", config.value.form)
+      .then((_) => {
+        // message.success("Access request sent successfully");
+
+        Modal.success({
+          title: 'Access Request Received',
+          content: h('p', 'Thank you for your interest in the SBC Platform. We have received your request and will get back to you as soon as possible.'),
+        });
+      })
+      .finally(() => {
+        config.value.loading = false;
+      });
+  });
+}
 </script>
 
 <template>
@@ -26,29 +50,26 @@ const config = ref({
 
         <br><br>
       </TypographyParagraph>
-      <!-- <p>
-        You can also contact us on <a href="mailto:support@amplio.org">support@amplio.org</a>
-      </p> -->
 
-      <Form layout="vertical">
+      <Form layout="vertical" ref="accessForm" name="access-form" :model="config.form">
         <FormItem label="Organisation Name" name="name" has-feedback
           :rules="[{ required: true, message: 'Please enter organisation name!' }]">
-          <Input type="text" />
+          <Input type="text" v-model:value="config.form.name" />
         </FormItem>
 
         <FormItem label="Email" name="email" has-feedback
-          :rules="[{ required: true, message: 'Please enter a valid email!' }]">
-          <Input type="email" />
+          :rules="[{ email: true, required: true, message: 'Please enter a valid email!' }]">
+          <Input type="email" v-model:value="config.form.email" />
         </FormItem>
 
-        <FormItem label="Tell us about what you do and your use case of the SBC Platform" name="description" has-feedback
+        <FormItem label="Tell us about what you do and your use case of the SBC Platform" name="notes" has-feedback
           :rules="[{ required: true, message: 'Please tell us about your organisation and why you think we can help you' }]">
 
-          <Textarea :rows="10"></Textarea>
+          <Textarea :rows="10" v-model:value="config.form.notes"></Textarea>
         </FormItem>
 
 
-        <Button type="primary">Request Access</Button>
+        <Button type="primary" @click="save()" :loading="config.loading">Request Access</Button>
       </Form>
     </Card>
   </Space>

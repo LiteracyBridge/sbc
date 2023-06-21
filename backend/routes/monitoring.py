@@ -6,7 +6,7 @@ from pydantic import BaseModel
 
 from sqlalchemy.orm import Session, joinedload, subqueryload
 from schema import ApiResponse
-from db_models.project import TheoryOfChangeIndicator, TheoryOfChange
+from models import TheoryOfChangeIndicator, TheoryOfChange
 from models import Monitoring
 import models
 
