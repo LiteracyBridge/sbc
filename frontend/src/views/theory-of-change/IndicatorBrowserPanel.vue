@@ -326,11 +326,11 @@ const addIndiKitIndicator = (item: LuIndiKit) => {
 
               <div class="columns">
                 <div class="column is-2">
-                  <strong>What is its purpose?</strong>
+                  <strong>Guidance</strong>
                 </div>
                 <div class="column">
-                  <p>{{ item.purpose }}</p>
-                  <a :href="item.guidance" target="_blank">Click to learn more about learn more the indicatory</a>
+                  <!-- <p>{{ item.guidance }}</p> -->
+                  <a :href="item.guidance" target="_blank">Click to learn more about learn more the indicator on IndiKit</a>
                 </div>
               </div>
             </div>
