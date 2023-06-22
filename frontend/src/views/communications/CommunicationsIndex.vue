@@ -76,38 +76,52 @@ onMounted(() => {
       <Collapse v-model:activeKey="config.collapseKey">
         <CollapsePanel v-for="item in store.data" :key="item.id" :header="item.title">
 
-          <Descriptions :column="2" bordered>
-            <DescriptionsItem :span="24" :labelStyle="{ 'font-weight': 'bold' }" label="Target Project Objectives">{{
+          <template #extra>
+            <Space>
+              <Button type="primary">
+                Edit
+              </Button>
+
+              <Button type="primary" danger>
+                Delete
+              </Button>
+            </Space>
+          </template>
+
+          <Descriptions :column="2" size="small" bordered>
+            <DescriptionsItem label="Target Project Objectives">{{
               store.projectObjectives(item.id)?.map((obj) => obj.data).join(', ') ?? '' }}
             </DescriptionsItem>
 
             <!-- TODO: Implement related indicators -->
-            <DescriptionsItem :labelStyle="{ 'font-weight': 'bold' }" label="Related indicator(s)">Cloud Database
+            <DescriptionsItem label="Related indicator(s)">Cloud Database
             </DescriptionsItem>
 
-            <DescriptionsItem :labelStyle="{ 'font-weight': 'bold' }" label="Target audience(s)">{{
+            <DescriptionsItem label="Target audience(s)">{{
               store.targetAudiences(item.id)?.map((obj) => obj.data).join(', ') ?? '' }}
             </DescriptionsItem>
 
             <!-- TODO: Implement related indicators -->
-            <DescriptionsItem :labelStyle="{ 'font-weight': 'bold' }" label="Target Behavioral Driver(s)">Cloud Database
+            <DescriptionsItem label="Target Behavioral Driver(s)">Cloud Database
             </DescriptionsItem>
 
-            <DescriptionsItem :labelStyle="{ 'font-weight': 'bold' }" label="Message Objectives"> {{
-              item.message_objectives }}
+            <DescriptionsItem :span="24" label="Message Objectives">
+              <span class="preserve-whitespace">
+                {{ item.message_objectives }}
+              </span>
             </DescriptionsItem>
 
-            <DescriptionsItem :labelStyle="{ 'font-weight': 'bold' }" label="Message Delivery Platform">{{
+            <DescriptionsItem :span="24" label="Message Delivery Platform">{{
               item.delivery_platforms }}
             </DescriptionsItem>
 
-            <DescriptionsItem :labelStyle="{ 'font-weight': 'bold' }" label="Message format">{{ item.format }}
+            <DescriptionsItem :span="24" label="Message format">{{ item.format }}
             </DescriptionsItem>
 
-            <DescriptionsItem :labelStyle="{ 'font-weight': 'bold' }" label="Key Points"> {{ item.key_points }}
+            <DescriptionsItem :span="24" label="Key Points"> {{ item.key_points }}
             </DescriptionsItem>
 
-            <DescriptionsItem :labelStyle="{ 'font-weight': 'bold' }" label="Message content">{{ item.contents }}
+            <DescriptionsItem :span="24" label="Message content">{{ item.contents }}
             </DescriptionsItem>
 
           </Descriptions>
