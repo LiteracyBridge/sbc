@@ -204,4 +204,33 @@ export class ProjectData {
   name?: "specific_objectives" | "secondary_audiences" | "primary_audiences";
 }
 
-export class Communications {}
+export class Communication {
+  id: number;
+  project_id: number;
+  title: string;
+  delivery_platforms?: string;
+  format?: string;
+  key_points?: string;
+  contents?: string;
+  created_at: Date;
+  updated_at: Date;
+  deleted_at?: Date;
+
+  indicators: Array<{
+    id: number;
+    communication_id: number;
+    indicator_id: number;
+  }> = [];
+
+  project_objectives: Array<{
+    id: number;
+    communication_id: number;
+    objective_id: number;
+  }> = [];
+
+  audiences: Array<{
+    id: number;
+    communication_id: number;
+    audience_id: number;
+  }> = [];
+}

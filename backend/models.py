@@ -464,12 +464,13 @@ class Monitoring(Base):
     toc_item_indicator = relationship("TheoryOfChangeIndicator")
 
 
-class Communications(Base):
+class Communication(Base):
     __tablename__ = "communications"
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
-    message_objectives: Mapped[str]
+    title: Mapped[str]
     delivery_platforms: Mapped[Optional[str]]
+    message_objectives: Mapped[Optional[str]]
     format: Mapped[Optional[str]]
     key_points: Mapped[Optional[str]]
     contents: Mapped[Optional[str]]
@@ -487,16 +488,19 @@ class Communications(Base):
         ForeignKey("projects.id", ondelete="CASCADE"), nullable=False
     )
 
-    project_data: Mapped["CommunicationProjectData"] = relationship(
-        "CommunicationProjectData"
+    target_audiences: Mapped[ARRAY["CommunicationAudience"]] = relationship(
+        "CommunicationAudience"
     )
-    indicators: Mapped["CommunicationIndicators"] = relationship(
-        "CommunicationIndicators"
+    indicators: Mapped[ARRAY["CommunicationIndicator"]] = relationship(
+        "CommunicationIndicator"
+    )
+    project_objectives: Mapped[ARRAY["CommunicationObjective"]] = relationship(
+        "CommunicationObjective"
     )
 
 
-class CommunicationProjectData(Base):
-    __tablename__ = "communication_project_data"
+class CommunicationObjective(Base):
+    __tablename__ = "communication_objectives"
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
     communication_id: Mapped[int] = mapped_column(
@@ -505,12 +509,21 @@ class CommunicationProjectData(Base):
     objective_id: Mapped[int] = mapped_column(
         ForeignKey("project_data.id", ondelete="CASCADE")
     )
+
+
+class CommunicationAudience(Base):
+    __tablename__ = "communication_audiences"
+
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    communication_id: Mapped[int] = mapped_column(
+        ForeignKey("communications.id", ondelete="CASCADE")
+    )
     audience_id: Mapped[int] = mapped_column(
         ForeignKey("project_data.id", ondelete="CASCADE")
     )
 
 
-class CommunicationIndicators(Base):
+class CommunicationIndicator(Base):
     __tablename__ = "communication_indicators"
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
@@ -535,7 +548,9 @@ class AccessRequest(Base):
     updated_at: Mapped[DateTime] = mapped_column(
         DateTime(timezone=True), default=func.now()
     )
-    deleted_at: Mapped[Optional[DateTime]] = mapped_column(DateTime(timezone=True))
+    deleted_at: Mapped[Optional[DateTime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
 
 
 Base.metadata.create_all(bind=engine)

@@ -26,14 +26,15 @@ const config = ref({
     visible: false,
     form: {
       project_objectives: [] as number[],
-      related_indicators: [] as number[],
+      indicators: [] as number[],
       target_audiences: [] as number[],
       behavioral_drivers: [] as number[],
-      objectives: '',
+      message_objectives: '',
       delivery_platforms: '',
       format: '',
       key_points: '',
       content: '',
+      title: '',
     }
   }
 });
@@ -48,7 +49,11 @@ function saveForm() {
   communicationFormRef.value.validateFields().then((values) => {
     console.log(values);
 
-    closeModal();
+    store.create(config.value.modal.form).then((response) => {
+      console.log(response);
+
+      closeModal();
+    });
   }).catch((error) => {
     console.log(error);
   })
@@ -71,41 +76,44 @@ onMounted(() => {
 
     </template>
 
-    <Collapse v-model:activeKey="config.collapseKey">
-      <CollapsePanel key="1" header="This is panel header 1">
+    <Spin :spinning="store.loading">
+      <Collapse v-model:activeKey="config.collapseKey">
+        <CollapsePanel key="1" header="This is panel header 1">
 
-        <Descriptions :column="2" bordered>
-          <DescriptionsItem :labelStyle="{ 'font-weight': 'bold' }" label="Target project objective(s)">Cloud Database
-          </DescriptionsItem>
+          <Descriptions :column="2" bordered>
+            <DescriptionsItem :labelStyle="{ 'font-weight': 'bold' }" label="Target project objective(s)">Cloud Database
+            </DescriptionsItem>
 
-          <DescriptionsItem :labelStyle="{ 'font-weight': 'bold' }" label="Related indicator(s)">Cloud Database
-          </DescriptionsItem>
+            <DescriptionsItem :labelStyle="{ 'font-weight': 'bold' }" label="Related indicator(s)">Cloud Database
+            </DescriptionsItem>
 
-          <DescriptionsItem :labelStyle="{ 'font-weight': 'bold' }" label="Target audience(s)">Cloud Database
-          </DescriptionsItem>
+            <DescriptionsItem :labelStyle="{ 'font-weight': 'bold' }" label="Target audience(s)">Cloud Database
+            </DescriptionsItem>
 
-          <DescriptionsItem :labelStyle="{ 'font-weight': 'bold' }" label="Target behavioral driver(s)">Cloud Database
-          </DescriptionsItem>
+            <DescriptionsItem :labelStyle="{ 'font-weight': 'bold' }" label="Target behavioral driver(s)">Cloud Database
+            </DescriptionsItem>
 
-          <DescriptionsItem :labelStyle="{ 'font-weight': 'bold' }" label="Message objective(s)">Cloud Database
-          </DescriptionsItem>
+            <DescriptionsItem :labelStyle="{ 'font-weight': 'bold' }" label="Message objective(s)">Cloud Database
+            </DescriptionsItem>
 
-          <DescriptionsItem :labelStyle="{ 'font-weight': 'bold' }" label="Message delivery platform(s)">Cloud Database
-          </DescriptionsItem>
+            <DescriptionsItem :labelStyle="{ 'font-weight': 'bold' }" label="Message delivery platform(s)">Cloud Database
+            </DescriptionsItem>
 
-          <DescriptionsItem :labelStyle="{ 'font-weight': 'bold' }" label="Message format">Cloud Database
-          </DescriptionsItem>
+            <DescriptionsItem :labelStyle="{ 'font-weight': 'bold' }" label="Message format">Cloud Database
+            </DescriptionsItem>
 
-          <DescriptionsItem :labelStyle="{ 'font-weight': 'bold' }" label="Key points">Cloud Database
-          </DescriptionsItem>
+            <DescriptionsItem :labelStyle="{ 'font-weight': 'bold' }" label="Key points">Cloud Database
+            </DescriptionsItem>
 
-          <DescriptionsItem :labelStyle="{ 'font-weight': 'bold' }" label="Message content">Cloud Database
-          </DescriptionsItem>
+            <DescriptionsItem :labelStyle="{ 'font-weight': 'bold' }" label="Message content">Cloud Database
+            </DescriptionsItem>
 
-        </Descriptions>
+          </Descriptions>
 
-      </CollapsePanel>
-    </Collapse>
+        </CollapsePanel>
+      </Collapse>
+    </Spin>
+
   </Card>
 
   <Drawer v-model:visible="config.modal.visible" width="600px" title="Add Communication" :mask-closable="false">
@@ -121,6 +129,13 @@ onMounted(() => {
     <Spin :spinning="store.loading">
       <Form name="communications-form" ref="communicationFormRef" :model="config.modal.form" layout="vertical">
 
+        <FormItem name="title" label="Message Title" has-feedback
+          :rules="[{ required: true, message: 'Please enter message title' }]">
+
+          <Input v-model:value="config.modal.form.title"> </Input>
+        </FormItem>
+
+
         <FormItem name="project_objectives" label="Project objectives" has-feedback
           :rules="[{ required: true, message: 'Please select project objectives!' }]">
           <Select v-model:value="config.modal.form.project_objectives" placeholder="Select project objectives"
@@ -130,9 +145,9 @@ onMounted(() => {
           </Select>
         </FormItem>
 
-        <FormItem name="related_indicators" label="Related Indicators" has-feedback
+        <FormItem name="indicators" label="Related Indicators" has-feedback
           :rules="[{ required: false, message: 'Please select related indicators!' }]">
-          <Select v-model:value="config.modal.form.related_indicators" placeholder="Select related indicators"
+          <Select v-model:value="config.modal.form.indicators" placeholder="Select related indicators"
             mode="multiple" :show-search="true">
             <SelectOption v-for="obj in tocStore.project_indicators" :value="obj.id" :key="obj.id">{{ obj.name }}
             </SelectOption>
@@ -150,10 +165,10 @@ onMounted(() => {
 
         <!-- FIXME: Add target behaviour drivers -->
 
-        <FormItem name="objectives" label="Message Objectives" has-feedback
+        <FormItem name="message_objectives" label="Message Objectives" has-feedback
           :rules="[{ required: true, message: 'Please enter message objectives' }]">
 
-          <Textarea v-model:value="config.modal.form.objectives"> </Textarea>
+          <Textarea v-model:value="config.modal.form.message_objectives"> </Textarea>
         </FormItem>
 
         <FormItem name="delivery_platforms" label="Message Delivery Platforms" has-feedback
