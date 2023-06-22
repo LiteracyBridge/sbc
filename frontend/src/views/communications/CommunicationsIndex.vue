@@ -9,7 +9,7 @@ import {
   Button, Space, Form, type FormInstance,
   FormItem, Input, Textarea,
   Select, SelectOption,
-  Drawer, Spin, Popconfirm
+  Drawer, Spin, Popconfirm, Empty
 } from 'ant-design-vue';
 import { useProjectDataStore } from '@/stores/projectData';
 import { useTheoryOfChangeStore } from '@/stores/theory_of_change';
@@ -46,6 +46,19 @@ const communicationFormRef = ref<FormInstance>();
 
 function closeModal() {
   config.value.modal.visible = false;
+  config.value.modal.form = {
+    id: null,
+    project_objectives: [] as number[],
+    drivers: [] as number[],
+    indicators: [] as number[],
+    target_audiences: [] as number[],
+    message_objectives: '',
+    delivery_platforms: '',
+    format: '',
+    key_points: '',
+    contents: '',
+    title: '',
+  };
   communicationFormRef.value.resetFields();
 }
 
@@ -84,12 +97,14 @@ onMounted(() => {
         <template #icon>
           <PlusOutlined />
         </template>
-        Add
+        New Communication Message
       </Button>
 
     </template>
 
     <Spin :spinning="store.loading">
+      <Empty v-if="store.data.length === 0"></Empty>
+
       <Collapse v-model:activeKey="config.collapseKey">
         <CollapsePanel v-for="item in store.data" :key="item.id" :header="item.title">
 
@@ -110,20 +125,20 @@ onMounted(() => {
           </template>
 
           <Descriptions :column="24" size="small" bordered>
-            <DescriptionsItem :span="12" label="Target Project Objectives">{{
+            <DescriptionsItem :content-style="{ 'max-width': '50px' }" :span="24" label="Target Project Objectives">{{
               store.projectObjectives(item.id)?.map((obj) => obj.data).join(', ') ?? '' }}
             </DescriptionsItem>
 
             <!-- TODO: Implement related indicators -->
-            <DescriptionsItem :span="12" label="Related indicator(s)">Cloud Database
+            <DescriptionsItem :span="24" label="Related indicator(s)">Cloud Database
             </DescriptionsItem>
 
-            <DescriptionsItem :span="12" label="Target audience(s)">{{
+            <DescriptionsItem :span="24" label="Target audience(s)">{{
               store.targetAudiences(item.id)?.map((obj) => obj.data).join(', ') ?? '' }}
             </DescriptionsItem>
 
             <!-- TODO: Implement related indicators -->
-            <DescriptionsItem :span="12" label="Target Behavioral Driver(s)">
+            <DescriptionsItem :span="24" label="Target Behavioral Driver(s)">
               {{
                 store.behavioralDrivers(item.id)?.map((obj) => obj.name).join(', ') ?? '' }}
             </DescriptionsItem>
@@ -166,7 +181,11 @@ onMounted(() => {
 
   </Card>
 
-  <Drawer v-model:visible="config.modal.visible" width="600px" title="Add Communication" :mask-closable="false">
+  <Drawer v-model:visible="config.modal.visible" width="650px" :mask-closable="false"
+    @close="closeModal">
+    <template #title>
+      {{ config.modal.form?.id != null ? 'Update' : 'New' }} Communication
+    </template>
 
     <template #extra>
       <Space>
