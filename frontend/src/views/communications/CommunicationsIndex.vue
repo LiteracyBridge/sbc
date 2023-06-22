@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 
 import { PlusOutlined } from '@ant-design/icons-vue';
 import {
@@ -9,13 +9,15 @@ import {
   Button, Space, Form, type FormInstance,
   FormItem, Input, Textarea,
   Select, SelectOption,
-  Drawer,
+  Drawer, Spin
 } from 'ant-design-vue';
 import { useProjectDataStore } from '@/stores/projectData';
 import { useTheoryOfChangeStore } from '@/stores/theory_of_change';
+import { useCommunicationStore } from '@/stores/communication.store';
 
 const projectDataStore = useProjectDataStore(),
-  tocStore = useTheoryOfChangeStore();
+  tocStore = useTheoryOfChangeStore(),
+  store = useCommunicationStore();
 
 const config = ref({
   loading: false,
@@ -27,11 +29,11 @@ const config = ref({
       related_indicators: [] as number[],
       target_audiences: [] as number[],
       behavioral_drivers: [] as number[],
-      message_objectives: '',
+      objectives: '',
       delivery_platforms: '',
-      message_format: '',
+      format: '',
       key_points: '',
-      message_content: '',
+      content: '',
     }
   }
 });
@@ -51,6 +53,10 @@ function saveForm() {
     console.log(error);
   })
 }
+
+onMounted(() => {
+  store.download();
+})
 </script>
 
 <template>
@@ -112,67 +118,69 @@ function saveForm() {
       </Space>
     </template>
 
-    <Form name="communications-form" ref="communicationFormRef" :model="config.modal.form" layout="vertical">
+    <Spin :spinning="store.loading">
+      <Form name="communications-form" ref="communicationFormRef" :model="config.modal.form" layout="vertical">
 
-      <FormItem name="project_objectives" label="Project objectives" has-feedback
-        :rules="[{ required: true, message: 'Please select project objectives!' }]">
-        <Select v-model:value="config.modal.form.project_objectives" placeholder="Select project objectives"
-          mode="multiple" :show-search="true">
-          <SelectOption v-for="obj in projectDataStore.specificObjectives" :value="obj.id" :key="obj.id">{{
-            obj.name }}</SelectOption>
-        </Select>
-      </FormItem>
+        <FormItem name="project_objectives" label="Project objectives" has-feedback
+          :rules="[{ required: true, message: 'Please select project objectives!' }]">
+          <Select v-model:value="config.modal.form.project_objectives" placeholder="Select project objectives"
+            mode="multiple" :show-search="true">
+            <SelectOption v-for="obj in projectDataStore.specificObjectives" :value="obj.id" :key="obj.id">{{
+              obj.data }}</SelectOption>
+          </Select>
+        </FormItem>
 
-      <FormItem name="related_indicators" label="Related Indicators" has-feedback
-        :rules="[{ required: false, message: 'Please select related indicators!' }]">
-        <Select v-model:value="config.modal.form.related_indicators" placeholder="Select related indicators"
-          mode="multiple" :show-search="true">
-          <SelectOption v-for="obj in tocStore.project_indicators" :value="obj.id" :key="obj.id">{{ obj.name }}
-          </SelectOption>
-        </Select>
-      </FormItem>
+        <FormItem name="related_indicators" label="Related Indicators" has-feedback
+          :rules="[{ required: false, message: 'Please select related indicators!' }]">
+          <Select v-model:value="config.modal.form.related_indicators" placeholder="Select related indicators"
+            mode="multiple" :show-search="true">
+            <SelectOption v-for="obj in tocStore.project_indicators" :value="obj.id" :key="obj.id">{{ obj.name }}
+            </SelectOption>
+          </Select>
+        </FormItem>
 
-      <FormItem name="target_audiences" label="Target Audiences" has-feedback
-        :rules="[{ required: true, message: 'Please select target audiences!' }]">
-        <Select v-model:value="config.modal.form.target_audiences" placeholder="Select target audiences" mode="multiple"
-          :show-search="true">
-          <SelectOption v-for="obj in projectDataStore.specificObjectives" :value="obj.id" :key="obj.id">{{ obj.name }}
-          </SelectOption>
-        </Select>
-      </FormItem>
+        <FormItem name="target_audiences" label="Target Audiences" has-feedback
+          :rules="[{ required: true, message: 'Please select target audiences!' }]">
+          <Select v-model:value="config.modal.form.target_audiences" placeholder="Select target audiences" mode="multiple"
+            :show-search="true">
+            <SelectOption v-for="obj in projectDataStore.specificObjectives" :value="obj.id" :key="obj.id">{{ obj.data }}
+            </SelectOption>
+          </Select>
+        </FormItem>
 
-      <!-- FIXME: Add target behaviour drivers -->
+        <!-- FIXME: Add target behaviour drivers -->
 
-      <FormItem name="message_objectives" label="Message Objectives" has-feedback
-        :rules="[{ required: true, message: 'Please enter message objectives' }]">
+        <FormItem name="objectives" label="Message Objectives" has-feedback
+          :rules="[{ required: true, message: 'Please enter message objectives' }]">
 
-        <Textarea v-model:value="config.modal.form.message_objectives"> </Textarea>
-      </FormItem>
+          <Textarea v-model:value="config.modal.form.objectives"> </Textarea>
+        </FormItem>
 
-      <FormItem name="delivery_platforms" label="Message Delivery Platforms" has-feedback
-        :rules="[{ required: true, message: 'Please enter message delivery platforms' }]">
+        <FormItem name="delivery_platforms" label="Message Delivery Platforms" has-feedback
+          :rules="[{ required: true, message: 'Please enter message delivery platforms' }]">
 
-        <Textarea v-model:value="config.modal.form.delivery_platforms"> </Textarea>
-      </FormItem>
+          <Textarea v-model:value="config.modal.form.delivery_platforms"> </Textarea>
+        </FormItem>
 
-      <FormItem name="message_format" label="Message Format" has-feedback
-        :rules="[{ required: true, message: 'Please enter message format!' }]">
+        <FormItem name="format" label="Message Format" has-feedback
+          :rules="[{ required: true, message: 'Please enter message format!' }]">
 
-        <Textarea v-model:value="config.modal.form.message_format"></Textarea>
-      </FormItem>
+          <Textarea v-model:value="config.modal.form.format"></Textarea>
+        </FormItem>
 
-      <FormItem name="key_points" label="Message Key Points" has-feedback
-        :rules="[{ required: true, message: 'Please enter message key points!' }]">
+        <FormItem name="key_points" label="Message Key Points" has-feedback
+          :rules="[{ required: true, message: 'Please enter message key points!' }]">
 
-        <Textarea v-model:value="config.modal.form.key_points"></Textarea>
-      </FormItem>
+          <Textarea v-model:value="config.modal.form.key_points" name="key_points"></Textarea>
+        </FormItem>
 
-      <FormItem name="content" label="Message Contents" has-feedback
-        :rules="[{ required: true, message: 'Please enter message content!' }]">
+        <FormItem name="content" label="Message Contents" has-feedback
+          :rules="[{ required: true, message: 'Please enter message content!' }]">
 
-        <Textarea v-model:value="config.modal.form.message_content"></Textarea>
-      </FormItem>
+          <Textarea v-model:value="config.modal.form.content" name="content"></Textarea>
+        </FormItem>
+      </Form>
 
-    </Form>
+    </Spin>
   </Drawer>
 </template>

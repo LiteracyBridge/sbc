@@ -198,10 +198,10 @@ export class ProjectData {
   q_id: number;
   prj_id: number;
   editing_user_id: number;
-  toc_item_id: number;
+  theory_of_change_id: number;
   data: string;
   module?: "objectives" | "audiences";
-  name?: "specific_objectives" | "secondary_audiences";
+  name?: "specific_objectives" | "secondary_audiences" | "primary_audiences";
 }
 
 export class Communications {}

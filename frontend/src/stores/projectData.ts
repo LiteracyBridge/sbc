@@ -217,6 +217,9 @@ export const useProjectDataStore = defineStore({
         (d) => d.name == "secondary_audiences"
       );
     },
+    primaryAudience: (state) => {
+      return state.new_project_data.filter((d) => d.name == "primary_audiences");
+    },
   },
   actions: {
     clear() {
@@ -239,7 +242,7 @@ export const useProjectDataStore = defineStore({
           "data",
           "name",
           "module",
-          "toc_item_id",
+          "theory_of_change_id",
         ],
         filter_clause,
         key_index
