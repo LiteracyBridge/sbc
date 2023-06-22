@@ -33,7 +33,7 @@ const config = ref({
       delivery_platforms: '',
       format: '',
       key_points: '',
-      content: '',
+      contents: '',
       title: '',
     }
   }
@@ -47,11 +47,7 @@ function closeModal() {
 
 function saveForm() {
   communicationFormRef.value.validateFields().then((values) => {
-    console.log(values);
-
     store.create(config.value.modal.form).then((response) => {
-      console.log(response);
-
       closeModal();
     });
   }).catch((error) => {
@@ -78,34 +74,40 @@ onMounted(() => {
 
     <Spin :spinning="store.loading">
       <Collapse v-model:activeKey="config.collapseKey">
-        <CollapsePanel key="1" header="This is panel header 1">
+        <CollapsePanel v-for="item in store.data" :key="item.id" :header="item.title">
 
           <Descriptions :column="2" bordered>
-            <DescriptionsItem :labelStyle="{ 'font-weight': 'bold' }" label="Target project objective(s)">Cloud Database
+            <DescriptionsItem :span="24" :labelStyle="{ 'font-weight': 'bold' }" label="Target Project Objectives">{{
+              store.projectObjectives(item.id)?.map((obj) => obj.data).join(', ') ?? '' }}
             </DescriptionsItem>
 
+            <!-- TODO: Implement related indicators -->
             <DescriptionsItem :labelStyle="{ 'font-weight': 'bold' }" label="Related indicator(s)">Cloud Database
             </DescriptionsItem>
 
-            <DescriptionsItem :labelStyle="{ 'font-weight': 'bold' }" label="Target audience(s)">Cloud Database
+            <DescriptionsItem :labelStyle="{ 'font-weight': 'bold' }" label="Target audience(s)">{{
+              store.targetAudiences(item.id)?.map((obj) => obj.data).join(', ') ?? '' }}
             </DescriptionsItem>
 
-            <DescriptionsItem :labelStyle="{ 'font-weight': 'bold' }" label="Target behavioral driver(s)">Cloud Database
+            <!-- TODO: Implement related indicators -->
+            <DescriptionsItem :labelStyle="{ 'font-weight': 'bold' }" label="Target Behavioral Driver(s)">Cloud Database
             </DescriptionsItem>
 
-            <DescriptionsItem :labelStyle="{ 'font-weight': 'bold' }" label="Message objective(s)">Cloud Database
+            <DescriptionsItem :labelStyle="{ 'font-weight': 'bold' }" label="Message Objectives"> {{
+              item.message_objectives }}
             </DescriptionsItem>
 
-            <DescriptionsItem :labelStyle="{ 'font-weight': 'bold' }" label="Message delivery platform(s)">Cloud Database
+            <DescriptionsItem :labelStyle="{ 'font-weight': 'bold' }" label="Message Delivery Platform">{{
+              item.delivery_platforms }}
             </DescriptionsItem>
 
-            <DescriptionsItem :labelStyle="{ 'font-weight': 'bold' }" label="Message format">Cloud Database
+            <DescriptionsItem :labelStyle="{ 'font-weight': 'bold' }" label="Message format">{{ item.format }}
             </DescriptionsItem>
 
-            <DescriptionsItem :labelStyle="{ 'font-weight': 'bold' }" label="Key points">Cloud Database
+            <DescriptionsItem :labelStyle="{ 'font-weight': 'bold' }" label="Key Points"> {{ item.key_points }}
             </DescriptionsItem>
 
-            <DescriptionsItem :labelStyle="{ 'font-weight': 'bold' }" label="Message content">Cloud Database
+            <DescriptionsItem :labelStyle="{ 'font-weight': 'bold' }" label="Message content">{{ item.contents }}
             </DescriptionsItem>
 
           </Descriptions>
@@ -147,8 +149,8 @@ onMounted(() => {
 
         <FormItem name="indicators" label="Related Indicators" has-feedback
           :rules="[{ required: false, message: 'Please select related indicators!' }]">
-          <Select v-model:value="config.modal.form.indicators" placeholder="Select related indicators"
-            mode="multiple" :show-search="true">
+          <Select v-model:value="config.modal.form.indicators" placeholder="Select related indicators" mode="multiple"
+            :show-search="true">
             <SelectOption v-for="obj in tocStore.project_indicators" :value="obj.id" :key="obj.id">{{ obj.name }}
             </SelectOption>
           </Select>
@@ -189,10 +191,10 @@ onMounted(() => {
           <Textarea v-model:value="config.modal.form.key_points" name="key_points"></Textarea>
         </FormItem>
 
-        <FormItem name="content" label="Message Contents" has-feedback
+        <FormItem name="contents" label="Message Contents" has-feedback
           :rules="[{ required: true, message: 'Please enter message content!' }]">
 
-          <Textarea v-model:value="config.modal.form.content" name="content"></Textarea>
+          <Textarea v-model:value="config.modal.form.contents" name="contents"></Textarea>
         </FormItem>
       </Form>
 

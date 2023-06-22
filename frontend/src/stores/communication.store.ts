@@ -5,6 +5,7 @@ import { useProjectStore } from "./projects";
 import { ApiRequest } from "@/apis/api";
 import { Communication, ProjectData } from "@/types";
 import { message } from "ant-design-vue";
+import { useProjectDataStore } from "./projectData";
 
 export const useCommunicationStore = defineStore({
   id: "communications",
@@ -12,7 +13,31 @@ export const useCommunicationStore = defineStore({
     loading: false,
     data: [] as Communication[],
   }),
-  getters: {},
+  getters: {
+    projectObjectives: (state) => {
+      return (communicationId: number): ProjectData[] => {
+        const comm = state.data.filter((c) => c.id == communicationId);
+
+        return useProjectDataStore().specificObjectives.filter((o) =>
+          comm.some((c) =>
+            c.project_objectives.some((p) => p.objective_id == o.id)
+          )
+        );
+      };
+    },
+    targetAudiences: (state) => {
+      return (communicationId: number): ProjectData[] => {
+        const comm = state.data.filter((c) => c.id == communicationId);
+
+        return useProjectDataStore().audiences.filter((o) =>
+          comm.some((c) =>
+            c.target_audiences.some((p) => p.audience_id == o.id)
+          )
+        );
+      };
+    },
+
+  },
   actions: {
     async create(form: any) {
       this.$state.loading = true;

@@ -218,7 +218,14 @@ export const useProjectDataStore = defineStore({
       );
     },
     primaryAudience: (state) => {
-      return state.new_project_data.filter((d) => d.name == "primary_audiences");
+      return state.new_project_data.filter(
+        (d) => d.name == "primary_audiences"
+      );
+    },
+    audiences: (state) => {
+      return state.new_project_data.filter(
+        (d) => d.name == "primary_audiences" || d.name == "secondary_audiences"
+      );
     },
   },
   actions: {

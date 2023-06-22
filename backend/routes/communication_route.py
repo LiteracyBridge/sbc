@@ -21,11 +21,12 @@ class CommunicationDto(BaseModel):
     message_objectives: Optional[str]
     delivery_platforms: Optional[str]
     format: Optional[str]
+    contents: str
     key_points: Optional[str]
-    contents: Optional[str]
     target_audiences: List[int]
     indicators: List[int]
     project_objectives: List[int]
+
 
 
 @router.get("/{project_id}", response_model=ApiResponse)
@@ -36,6 +37,7 @@ def find_all(project_id: int, db: Session = Depends(models.get_db)):
         .options(
             subqueryload(Communication.target_audiences),
             subqueryload(Communication.indicators),
+            subqueryload(Communication.project_objectives),
         )
         .all()
     )
@@ -91,8 +93,4 @@ def create(
     db.add_all(indicators)
     db.commit()
 
-    return ApiResponse(
-        data=db.query(Communication)
-        .filter(Communication.project_id == project_id)
-        .all()
-    )
+    return find_all(project_id, db)

@@ -208,6 +208,7 @@ export class Communication {
   id: number;
   project_id: number;
   title: string;
+  message_objectives: string;
   delivery_platforms?: string;
   format?: string;
   key_points?: string;
@@ -228,7 +229,7 @@ export class Communication {
     objective_id: number;
   }> = [];
 
-  audiences: Array<{
+  target_audiences: Array<{
     id: number;
     communication_id: number;
     audience_id: number;
