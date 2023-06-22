@@ -78,11 +78,11 @@ onMounted(() => {
 
           <template #extra>
             <Space>
-              <Button type="primary">
+              <Button type="primary" size="small" role="button">
                 Edit
               </Button>
 
-              <Button type="primary" danger>
+              <Button type="primary" danger size="small">
                 Delete
               </Button>
             </Space>
@@ -111,17 +111,28 @@ onMounted(() => {
               </span>
             </DescriptionsItem>
 
-            <DescriptionsItem :span="24" label="Message Delivery Platform">{{
-              item.delivery_platforms }}
+            <DescriptionsItem :span="24" label="Message Delivery Platform">
+              <span class="preserve-whitespace">
+                {{ item.delivery_platforms }}
+              </span>
             </DescriptionsItem>
 
-            <DescriptionsItem :span="24" label="Message format">{{ item.format }}
+            <DescriptionsItem :span="24" label="Message format">
+              <span class="preserve-whitespace">
+                {{ item.format }}
+              </span>
             </DescriptionsItem>
 
-            <DescriptionsItem :span="24" label="Key Points"> {{ item.key_points }}
+            <DescriptionsItem :span="24" label="Key Points">
+              <span class="preserve-whitespace">
+                {{ item.key_points }}
+              </span>
             </DescriptionsItem>
 
-            <DescriptionsItem :span="24" label="Message content">{{ item.contents }}
+            <DescriptionsItem :span="24" label="Message content">
+              <span class="preserve-whitespace">
+                {{ item.contents }}
+              </span>
             </DescriptionsItem>
 
           </Descriptions>
