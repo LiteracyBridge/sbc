@@ -488,6 +488,7 @@ class Communication(Base):
         ForeignKey("projects.id", ondelete="CASCADE"), nullable=False
     )
 
+    drivers: Mapped[ARRAY["CommunicationDriver"]] = relationship("CommunicationDriver")
     target_audiences: Mapped[ARRAY["CommunicationAudience"]] = relationship(
         "CommunicationAudience"
     )
@@ -532,6 +533,18 @@ class CommunicationIndicator(Base):
     )
     indicator_id: Mapped[int] = mapped_column(
         ForeignKey("theory_of_change_indicators.id", ondelete="CASCADE")
+    )
+
+
+class CommunicationDriver(Base):
+    __tablename__ = "communication_drivers"
+
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    communication_id: Mapped[int] = mapped_column(
+        ForeignKey("communications.id", ondelete="CASCADE")
+    )
+    driver_id: Mapped[int] = mapped_column(
+        ForeignKey("drivers_in_prj.id", ondelete="CASCADE")
     )
 
 

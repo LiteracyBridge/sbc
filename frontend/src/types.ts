@@ -209,10 +209,10 @@ export class Communication {
   project_id: number;
   title: string;
   message_objectives: string;
-  delivery_platforms?: string;
-  format?: string;
-  key_points?: string;
-  contents?: string;
+  delivery_platforms: string;
+  format: string;
+  key_points: string;
+  contents: string;
   created_at: Date;
   updated_at: Date;
   deleted_at?: Date;
@@ -233,5 +233,11 @@ export class Communication {
     id: number;
     communication_id: number;
     audience_id: number;
+  }> = [];
+
+  drivers: Array<{
+    id: number;
+    communication_id: number;
+    driver_id: number;
   }> = [];
 }

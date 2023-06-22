@@ -6,6 +6,7 @@ import { ApiRequest } from "@/apis/api";
 import { Communication, ProjectData } from "@/types";
 import { message } from "ant-design-vue";
 import { useProjectDataStore } from "./projectData";
+import { useDriverStore } from "./drivers";
 
 export const useCommunicationStore = defineStore({
   id: "communications",
@@ -16,27 +17,31 @@ export const useCommunicationStore = defineStore({
   getters: {
     projectObjectives: (state) => {
       return (communicationId: number): ProjectData[] => {
-        const comm = state.data.filter((c) => c.id == communicationId);
+        const comm = state.data.find((c) => c.id == communicationId);
 
         return useProjectDataStore().specificObjectives.filter((o) =>
-          comm.some((c) =>
-            c.project_objectives.some((p) => p.objective_id == o.id)
-          )
+          comm.project_objectives.some((p) => p.objective_id == o.id)
         );
       };
     },
     targetAudiences: (state) => {
       return (communicationId: number): ProjectData[] => {
-        const comm = state.data.filter((c) => c.id == communicationId);
+        const comm = state.data.find((c) => c.id == communicationId);
 
         return useProjectDataStore().audiences.filter((o) =>
-          comm.some((c) =>
-            c.target_audiences.some((p) => p.audience_id == o.id)
-          )
+          comm.target_audiences.some((p) => p.audience_id == o.id)
         );
       };
     },
+    behavioralDrivers: (state) => {
+      return (communicationId: number): Array<{ id: number; name: string }> => {
+        const comm = state.data.find((c) => c.id == communicationId);
 
+        return useDriverStore().driversInProject.filter((o) =>
+          comm.drivers.some((p) => p.driver_id == o.id)
+        );
+      };
+    },
   },
   actions: {
     async create(form: any) {
@@ -48,7 +53,11 @@ export const useCommunicationStore = defineStore({
         .then((resp) => {
           this.$state.data = resp;
 
-          message.success("Communication created successfully!");
+          message.success(
+            `Communication ${
+              form.id == null ? "created" : "updated"
+            } successfully!`
+          );
           return resp;
         })
         .catch((err) => {
@@ -87,6 +96,6 @@ export const useCommunicationStore = defineStore({
           throw err;
         })
         .finally(() => (this.$state.loading = false));
-    }
+    },
   },
 });

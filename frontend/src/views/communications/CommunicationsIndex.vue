@@ -14,6 +14,8 @@ import {
 import { useProjectDataStore } from '@/stores/projectData';
 import { useTheoryOfChangeStore } from '@/stores/theory_of_change';
 import { useCommunicationStore } from '@/stores/communication.store';
+import { Communication } from '@/types';
+import { useDriverStore } from '@/stores/drivers';
 
 const projectDataStore = useProjectDataStore(),
   tocStore = useTheoryOfChangeStore(),
@@ -22,13 +24,15 @@ const projectDataStore = useProjectDataStore(),
 const config = ref({
   loading: false,
   collapseKey: '',
+  selectedItem: {} as Communication,
   modal: {
     visible: false,
     form: {
+      id: null,
       project_objectives: [] as number[],
+      drivers: [] as number[],
       indicators: [] as number[],
       target_audiences: [] as number[],
-      behavioral_drivers: [] as number[],
       message_objectives: '',
       delivery_platforms: '',
       format: '',
@@ -55,6 +59,19 @@ function saveForm() {
   })
 }
 
+function onEditClick(item: Communication) {
+  communicationFormRef.value?.resetFields();
+
+  config.value.modal.form = {
+    ...item,
+    project_objectives: item.project_objectives.map((obj) => obj.objective_id),
+    indicators: item.indicators.map((obj) => obj.indicator_id),
+    target_audiences: item.target_audiences.map((obj) => obj.audience_id),
+    drivers: item.drivers.map((obj) => obj.driver_id),
+  };
+  config.value.modal.visible = true;
+}
+
 onMounted(() => {
   store.download();
 })
@@ -78,7 +95,7 @@ onMounted(() => {
 
           <template #extra>
             <Space>
-              <Button type="primary" size="small" role="button">
+              <Button type="primary" :ghost="true" size="small" role="button" @click.prevent="onEditClick(item)">
                 Edit
               </Button>
 
@@ -92,21 +109,23 @@ onMounted(() => {
             </Space>
           </template>
 
-          <Descriptions :column="2" size="small" bordered>
-            <DescriptionsItem label="Target Project Objectives">{{
+          <Descriptions :column="24" size="small" bordered>
+            <DescriptionsItem :span="12" label="Target Project Objectives">{{
               store.projectObjectives(item.id)?.map((obj) => obj.data).join(', ') ?? '' }}
             </DescriptionsItem>
 
             <!-- TODO: Implement related indicators -->
-            <DescriptionsItem label="Related indicator(s)">Cloud Database
+            <DescriptionsItem :span="12" label="Related indicator(s)">Cloud Database
             </DescriptionsItem>
 
-            <DescriptionsItem label="Target audience(s)">{{
+            <DescriptionsItem :span="12" label="Target audience(s)">{{
               store.targetAudiences(item.id)?.map((obj) => obj.data).join(', ') ?? '' }}
             </DescriptionsItem>
 
             <!-- TODO: Implement related indicators -->
-            <DescriptionsItem label="Target Behavioral Driver(s)">Cloud Database
+            <DescriptionsItem :span="12" label="Target Behavioral Driver(s)">
+              {{
+                store.behavioralDrivers(item.id)?.map((obj) => obj.name).join(', ') ?? '' }}
             </DescriptionsItem>
 
             <DescriptionsItem :span="24" label="Message Objectives">
@@ -151,7 +170,9 @@ onMounted(() => {
 
     <template #extra>
       <Space>
-        <Button type="primary" @click="saveForm">Save</Button>
+        <Button type="primary" @click="saveForm">
+          {{ config.modal.form?.id != null ? 'Update' : 'Save' }}
+        </Button>
 
         <Button @click="closeModal">Cancel</Button>
       </Space>
@@ -173,6 +194,17 @@ onMounted(() => {
             mode="multiple" :show-search="true">
             <SelectOption v-for="obj in projectDataStore.specificObjectives" :value="obj.id" :key="obj.id">{{
               obj.data }}</SelectOption>
+          </Select>
+        </FormItem>
+
+        <FormItem name="drivers" label="Target Behavioral Drivers" has-feedback
+          :rules="[{ required: true, message: 'Please select target drivers!' }]">
+
+          <Select v-model:value="config.modal.form.drivers" placeholder="Select target drivers" mode="multiple"
+            :show-search="true">
+            <SelectOption v-for="obj in useDriverStore().driversInProject" :value="obj.id" :key="obj.id">{{
+              obj.name }}
+            </SelectOption>
           </Select>
         </FormItem>
 
