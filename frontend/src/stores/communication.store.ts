@@ -72,5 +72,21 @@ export const useCommunicationStore = defineStore({
         })
         .finally(() => (this.$state.loading = false));
     },
+    async delete(communicationId: number) {
+      this.$state.loading = true;
+      return ApiRequest.delete<Communication>(
+        `communications/${useProjectStore().prj_id}/${communicationId}`
+      )
+        .then((resp) => {
+          this.$state.data = resp;
+          message.success("Communication deleted successfully!");
+          return resp;
+        })
+        .catch((err) => {
+          message.error(err.message);
+          throw err;
+        })
+        .finally(() => (this.$state.loading = false));
+    }
   },
 });

@@ -28,7 +28,6 @@ class CommunicationDto(BaseModel):
     project_objectives: List[int]
 
 
-
 @router.get("/{project_id}", response_model=ApiResponse)
 def find_all(project_id: int, db: Session = Depends(models.get_db)):
     results = (
@@ -43,6 +42,16 @@ def find_all(project_id: int, db: Session = Depends(models.get_db)):
     )
 
     return ApiResponse(data=results)
+
+
+@router.delete("/{project_id}/{id}", response_model=ApiResponse)
+def delete(project_id: int, id: int, db: Session = Depends(models.get_db)):
+    db.query(Communication).filter(
+        Communication.id == id and Communication.project_id == project_id
+    ).delete()
+    db.commit()
+
+    return find_all(project_id, db)
 
 
 @router.post("/{project_id}", response_model=ApiResponse)

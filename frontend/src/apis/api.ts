@@ -48,7 +48,7 @@ export class ApiRequest {
     headers?: {
       [key: string]: any;
     }
-  ): Promise<T | null> {
+  ): Promise<T[] | null> {
     const apiName = "sbc-api";
     // const path = "/users";
     const myInit = {
@@ -64,11 +64,18 @@ export class ApiRequest {
       myInit.queryStringParameters = params;
     }
 
-    return API.del(apiName, `/${path}`, myInit)
+    // return axios.del(apiName, `/${path}`, myInit)
+    //   .then((response) => {
+    //     return response.data.data as T;
+    //     // Add your code here
+    //   })
+
+    return axios
+      .delete(`${import.meta.env.VITE_SBC_API_URL}/${path}`, { params })
       .then((response) => {
-        return response.data.data as T;
+        return response.data.data as T[];
         // Add your code here
-      })
+      });
   }
 
   static async post<T>(

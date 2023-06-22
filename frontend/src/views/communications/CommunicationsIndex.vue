@@ -9,7 +9,7 @@ import {
   Button, Space, Form, type FormInstance,
   FormItem, Input, Textarea,
   Select, SelectOption,
-  Drawer, Spin
+  Drawer, Spin, Popconfirm
 } from 'ant-design-vue';
 import { useProjectDataStore } from '@/stores/projectData';
 import { useTheoryOfChangeStore } from '@/stores/theory_of_change';
@@ -82,9 +82,13 @@ onMounted(() => {
                 Edit
               </Button>
 
-              <Button type="primary" danger size="small">
-                Delete
-              </Button>
+              <Popconfirm title="Are you sure delete this message?" ok-text="Yes" cancel-text="No"
+                @confirm="store.delete(item.id)">
+
+                <Button type="primary" :ghost="true" danger size="small">
+                  Delete
+                </Button>
+              </Popconfirm>
             </Space>
           </template>
 
