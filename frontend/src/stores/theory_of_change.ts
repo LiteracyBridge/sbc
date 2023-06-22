@@ -27,11 +27,11 @@ export const useTheoryOfChangeStore = defineStore({
     indicatorTypes: (state) => state.indicator_types,
     indicatorGroups: (state) => state.indicator_groups,
 
-    tocIndicators(state) {
+    theoryOfChangeItemIndicators: (state) => {
       return (tocId: number) => {
         if (state.theory_of_change.length == 0) return [];
 
-        if(tocId == null) return [];
+        if (tocId == null) return [];
 
         return (
           state.theory_of_change.find((i) => i.id == tocId)?.indicators ?? []
@@ -43,6 +43,17 @@ export const useTheoryOfChangeStore = defineStore({
           };
         });
       };
+    },
+    allTocIndicators: (state) => {
+      return state.theory_of_change.flatMap((toc) => {
+        return toc.indicators.flatMap((i) => {
+          return {
+            id: i.id,
+            name: i.indicator?.name ?? i.indicator?.indi_kit?.name ?? "",
+            indi_kit_id: i.indicator?.indi_kit_id,
+          };
+        });
+      });
     },
     // IndiKit Helpers
     getIndiKitItemById: (state) => {

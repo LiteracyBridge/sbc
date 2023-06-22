@@ -761,7 +761,7 @@ const getProjectIndicators = computed(() => {
             <Divider></Divider>
 
             <div class="field is-grouped is-grouped-multiline">
-              <div class="control" v-for="item in theoryOfChangeStore.tocIndicators(theoryOfChangeModel.selectedItem.id)"
+              <div class="control" v-for="item in theoryOfChangeStore.theoryOfChangeItemIndicators(theoryOfChangeModel.selectedItem.id)"
                 :key="item.id">
                 <div class="tags has-addons">
                   <a class="tag is-link">{{ item.name }}</a>

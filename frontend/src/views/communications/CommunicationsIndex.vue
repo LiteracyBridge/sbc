@@ -130,7 +130,8 @@ onMounted(() => {
             </DescriptionsItem>
 
             <!-- TODO: Implement related indicators -->
-            <DescriptionsItem :span="24" label="Related indicator(s)">N/A
+            <DescriptionsItem :span="24" label="Related indicator(s)">{{
+              store.indicators(item.id)?.map((obj) => obj.name).join(', ') ?? '' }}
             </DescriptionsItem>
 
             <DescriptionsItem :span="24" label="Target audience(s)">{{
@@ -180,8 +181,7 @@ onMounted(() => {
 
   </Card>
 
-  <Drawer v-model:visible="config.modal.visible" width="650px" :mask-closable="false"
-    @close="closeModal">
+  <Drawer v-model:visible="config.modal.visible" width="650px" :mask-closable="false" @close="closeModal">
     <template #title>
       {{ config.modal.form?.id != null ? 'Update' : 'New' }} Communication
     </template>
@@ -230,7 +230,8 @@ onMounted(() => {
           :rules="[{ required: false, message: 'Please select related indicators!' }]">
           <Select v-model:value="config.modal.form.indicators" placeholder="Select related indicators" mode="multiple"
             :show-search="true">
-            <SelectOption v-for="obj in tocStore.project_indicators" :value="obj.id" :key="obj.id">{{ obj.name }}
+            <SelectOption v-for="obj in useTheoryOfChangeStore().allTocIndicators" :value="obj.id" :key="obj.id">{{
+              obj.name }}
             </SelectOption>
           </Select>
         </FormItem>
@@ -239,7 +240,7 @@ onMounted(() => {
           :rules="[{ required: true, message: 'Please select target audiences!' }]">
           <Select v-model:value="config.modal.form.target_audiences" placeholder="Select target audiences" mode="multiple"
             :show-search="true">
-            <SelectOption v-for="obj in projectDataStore.specificObjectives" :value="obj.id" :key="obj.id">{{ obj.data }}
+            <SelectOption v-for="obj in useProjectDataStore().audiences" :value="obj.id" :key="obj.id">{{ obj.data }}
             </SelectOption>
           </Select>
         </FormItem>

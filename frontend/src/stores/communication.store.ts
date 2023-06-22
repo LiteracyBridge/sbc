@@ -7,6 +7,7 @@ import { Communication, ProjectData } from "@/types";
 import { message } from "ant-design-vue";
 import { useProjectDataStore } from "./projectData";
 import { useDriverStore } from "./drivers";
+import { useTheoryOfChangeStore } from "./theory_of_change";
 
 export const useCommunicationStore = defineStore({
   id: "communications",
@@ -39,6 +40,15 @@ export const useCommunicationStore = defineStore({
 
         return useDriverStore().driversInProject.filter((o) =>
           comm.drivers.some((p) => p.driver_id == o.id)
+        );
+      };
+    },
+    indicators: (state) => {
+      return (communicationId: number): Array<{ id: number; name: string }> => {
+        const comm = state.data.find((c) => c.id == communicationId);
+
+        return useTheoryOfChangeStore().allTocIndicators.filter((o) =>
+          comm.indicators.some((p) => p.indicator_id == o.id)
         );
       };
     },

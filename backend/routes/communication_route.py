@@ -105,7 +105,7 @@ def update_or_create(
     audiences: List[CommunicationIndicator] = []
     for id in dto.target_audiences:
         if not any(d.id == id for d in comm.target_audiences):
-            audience = CommunicationAudience()
+            audience: CommunicationAudience = CommunicationAudience()
             audience.communication_id = comm.id
             audience.audience_id = id
 
@@ -158,6 +158,7 @@ def update_or_create(
 
     db.add_all(objectives)
     db.add_all(audiences)
+    db.add_all(indicators)
     db.add_all(drivers)
     db.commit()
 
