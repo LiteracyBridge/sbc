@@ -130,14 +130,13 @@ onMounted(() => {
             </DescriptionsItem>
 
             <!-- TODO: Implement related indicators -->
-            <DescriptionsItem :span="24" label="Related indicator(s)">Cloud Database
+            <DescriptionsItem :span="24" label="Related indicator(s)">N/A
             </DescriptionsItem>
 
             <DescriptionsItem :span="24" label="Target audience(s)">{{
               store.targetAudiences(item.id)?.map((obj) => obj.data).join(', ') ?? '' }}
             </DescriptionsItem>
 
-            <!-- TODO: Implement related indicators -->
             <DescriptionsItem :span="24" label="Target Behavioral Driver(s)">
               {{
                 store.behavioralDrivers(item.id)?.map((obj) => obj.name).join(', ') ?? '' }}
