@@ -9,7 +9,7 @@ import { ref, watch } from 'vue';
 const props = defineProps<{ visible: boolean }>();
 const emit = defineEmits<{
   (e: 'isClosed', status: boolean): boolean,
-  (e: 'isUpdated', status: boolean): void,
+  // (e: 'isUpdated', status: boolean): void,
 }>()
 
 const theoryOfChangeStore = useTheoryOfChangeStore();
@@ -39,20 +39,22 @@ function save() {
   newIndicatorFormRef.value
     .validateFields()
     .then(_ => {
-      theoryOfChangeStore.saveIndicators({
-        tocItemId: config.value.form.toc_item_id,
-        added: [config.value.form.indicator_id],
-        removed: [],
-      })
-        .then((_resp) => {
-          message.success('Indicator added successfully!');
-          emit('isUpdated', true);
+      // TODO: rewrite adding monitoring item
 
-          closeModal();
-        })
-        .catch((error) => {
-          message.error(error.message);
-        });
+      // theoryOfChangeStore.saveIndicators({
+      //   tocItemId: config.value.form.toc_item_id,
+      //   added: [config.value.form.indicator_id],
+      //   removed: [],
+      // })
+      //   .then((_resp) => {
+      //     message.success('Indicator added successfully!');
+      //     emit('isUpdated', true);
+
+      //     closeModal();
+      //   })
+      //   .catch((error) => {
+      //     message.error(error.message);
+      //   });
     });
 }
 
@@ -72,8 +74,7 @@ function save() {
           :rules="[{ required: true, message: 'Please select theory of change item!' }]">
           <Select v-model:value="config.form.toc_item_id" placeholder="Please theory of change item" :show-search="true"
             :allow-clear="true">
-            <SelectOption v-for="i in theoryOfChangeStore.theory_of_change.graph" :value="i.id"
-              :key="i.id">{{ i.name }}
+            <SelectOption v-for="i in theoryOfChangeStore.theory_of_change" :value="i.id" :key="i.id">{{ i.name }}
             </SelectOption>
           </Select>
         </FormItem>

@@ -3,6 +3,7 @@
 // TODO: add button for capturing progress in a modal
 
 import { ApiRequest } from '@/apis/api';
+import { useMonitoringStore } from '@/stores/monitoring.store';
 import { Monitoring } from '@/types';
 import { Modal, Form, FormItem, Input, Select, SelectOption, Spin, type FormInstance, message } from 'ant-design-vue';
 import { computed, h, ref, watch } from 'vue';
@@ -11,13 +12,12 @@ import { computed, h, ref, watch } from 'vue';
 const props = defineProps<{ visible: boolean, record: Monitoring }>();
 const emit = defineEmits<{
   (e: 'isClosed', status: boolean): boolean,
-  (e: 'isUpdated', data: Monitoring[]): void,
 }>()
 
+const store = useMonitoringStore();
 const progressTrackingFormRef = ref<FormInstance>(),
   config = ref({
     visible: props.visible,
-    isLoading: false,
     form: {
       value: '',
       period: ''
@@ -50,20 +50,10 @@ function recordProgress() {
   progressTrackingFormRef.value
     .validateFields()
     .then(values => {
-      config.value.isLoading = true;
-
-      ApiRequest.post<Monitoring>(`monitoring/${props.record.id}/evaluation`, config.value.form)
+      store.recordProgress(props.record.id, config.value.form.value)
         .then((resp) => {
-          message.success('Progress recorded successfully!');
-          emit('isUpdated', resp);
-
           closeModal();
-        })
-        .catch((error) => {
-          console.error(error);
-          message.error(error.message);
-        })
-        .finally(() => config.value.isLoading = false)
+        });
     });
 }
 
@@ -114,7 +104,7 @@ const generatePeriods = computed(() => {
   <Modal v-model:visible="config.visible" title="Record Progress" ok-text="Update" cancel-text="Cancel"
     @cancel="closeModal()" :mask-closable="false" @ok="recordProgress">
 
-    <Spin :spinning="config.isLoading">
+    <Spin :spinning="store.loading">
 
       <Form layout="vertical" :model="config.form" name="progress_tracking_form" ref="progressTrackingFormRef">
 

@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 
 import { ApiRequest } from '@/apis/api';
+import { useMonitoringStore } from '@/stores/monitoring.store';
 import type { Monitoring } from '@/types';
 import {
   Modal, FormItem, Form, type FormInstance, Input,
@@ -13,13 +14,13 @@ import { ref, watch } from 'vue';
 const props = defineProps<{ visible: boolean, form: Monitoring }>();
 const emit = defineEmits<{
   (e: 'isClosed', status: boolean): boolean,
-  (e: 'isUpdated', data: Monitoring[]): void,
 }>()
+
+const store = useMonitoringStore();
 
 const monitorEditFormRef = ref<FormInstance>(),
   config = ref({
     visible: props.visible,
-    isLoading: false,
   });
 
 
@@ -38,23 +39,11 @@ function saveForm() {
   monitorEditFormRef.value
     .validateFields()
     .then(values => {
-      config.value.isLoading = true;
+      store.update(props.form.id, values).then((response) => {
+        message.success('Monitoring record updated successfully!');
 
-      ApiRequest.put<Monitoring>(`monitoring/${props.form.id}`, values)
-        .then((response) => {
-          message.success('Monitoring record updated successfully!');
-          emit('isUpdated', response);
-
-          closeModal();
-        })
-        .catch((error) => {
-          message.error(error.message);
-
-          console.log(error);
-        })
-        .finally(() => {
-          config.value.isLoading = false;
-        });
+        closeModal();
+      })
     });
 }
 
@@ -64,7 +53,7 @@ function saveForm() {
   <Modal v-model:visible="config.visible" title="Update Indicator Monitoring" ok-text="Update" cancel-text="Cancel"
     @cancel="closeModal()" :mask-closable="false" @ok="saveForm">
 
-    <Spin :spinning="config.isLoading">
+    <Spin :spinning="store.loading">
       <Form layout="vertical" ref="monitorEditFormRef" name="monitoring_edit" :model="props.form">
 
         <!-- TODO: exclude already tracked periods from dropdown -->
