@@ -25,6 +25,12 @@ export const useMonitoringStore = defineStore({
         indicator.toc_indicator?.theory_of_change_id
       );
     },
+    getRecentProgress: (state) => (monitoring: Monitoring) => {
+      const count = (monitoring.evaluation ?? []).length;
+      if (count == 0) return 0;
+
+      return monitoring.evaluation[count - 1].value;
+    },
   },
   actions: {
     async create(tocId: number, form: any) {

@@ -51,8 +51,7 @@ const config = ref({
 
 const columns = [
   {
-    title: 'Theory of Change Item',
-    dataIndex: 'tocItem',
+    title: 'Theory of Change',
     key: 'tocItem',
   },
   {
@@ -97,6 +96,10 @@ const columns = [
   //     title: 'Q2',
   //     key: 'q2',
   // },
+  {
+    title: 'Recent Progress',
+    key: 'recent',
+  },
   {
     title: '% Progress',
     key: 'progress_rate',
@@ -201,6 +204,10 @@ onMounted(() => {
 
             <template v-else-if="column.key === 'baseline'">
               {{ record.baseline }}
+            </template>
+
+            <template v-else-if="column.key === 'recent'">
+              {{ store.getRecentProgress(record) }}
             </template>
 
             <template v-else-if="column.key === 'progress_rate'">
