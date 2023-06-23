@@ -26,7 +26,12 @@ export const useTheoryOfChangeStore = defineStore({
   getters: {
     indicatorTypes: (state) => state.indicator_types,
     indicatorGroups: (state) => state.indicator_groups,
+    // Theory of Change
+    getByTocId: (state) => {
+      return (id: number) => state.theory_of_change.find((i) => i.id == id);
+    },
 
+    // Project Indicator
     theoryOfChangeItemIndicators: (state) => {
       return (tocId: number) => {
         if (state.theory_of_change.length == 0) return [];

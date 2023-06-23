@@ -163,11 +163,11 @@ onMounted(() => {
 
           <template #bodyCell="{ column, record }">
             <template v-if="column.key === 'tocItem'">
-              {{ record.toc_item_indicator.toc_item.name }}
+              {{ store.getTheoryOfChange(record.id)?.name ?? 'N/A' }}
             </template>
 
             <template v-if="column.key === 'indicator'">
-              {{ record.toc_item_indicator.indicator.name }}
+              {{ store.getIndicatorName(record.id) }}
             </template>
 
             <template v-if="column.key === 'relatedResults'">

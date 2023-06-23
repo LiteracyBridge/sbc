@@ -3,6 +3,7 @@ Today:
         ✔ add tasks modal @done(23-06-18 12:08)
         ✔ implemenet adding new task @done(23-06-18 12:08)
         ☐ implement removing task
+        ☐
     Theory of Change:
         ☐ Add modal forms validation
         ✔ Indicator UI redesign @done(23-06-18 11:27)
@@ -13,11 +14,16 @@ Today:
 
 
     Monitoring & Evaluation:
+        ☐ Types refactoring
+        ☐
         ☐ Save evaluation strategy
 
 Frontend:
     Theory of Change:
         ☐ Toc examples browser
+
+Backend:
+    ☐ copy indikit label to project_indicators when added
 
 Archive:
   ✔ filter projects by organisation @done(23-06-07 14:09) @project(Today)

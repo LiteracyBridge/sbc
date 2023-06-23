@@ -1,12 +1,8 @@
 import { defineStore } from "pinia";
-import { useUserStore } from "./user";
-import * as api from "../apis/lambda";
 import { useProjectStore } from "./projects";
 import { ApiRequest } from "@/apis/api";
-import { Communication, Monitoring, ProjectData } from "@/types";
+import { Monitoring } from "@/types";
 import { message } from "ant-design-vue";
-import { useProjectDataStore } from "./projectData";
-import { useDriverStore } from "./drivers";
 import { useTheoryOfChangeStore } from "./theory_of_change";
 
 export const useMonitoringStore = defineStore({
@@ -15,7 +11,21 @@ export const useMonitoringStore = defineStore({
     loading: false,
     data: [] as Monitoring[],
   }),
-  getters: {},
+  getters: {
+    getIndicatorName: (state) => (monitoringId: number) => {
+      const indicator = state.data.find((i) => i.id === monitoringId);
+      return indicator ? indicator.toc_indicator?.indicator?.name : "";
+    },
+    getTheoryOfChange: (state) => (monitoringId: number) => {
+      const indicator = state.data.find((i) => i.id === monitoringId);
+
+      if (indicator == null) return null;
+
+      return useTheoryOfChangeStore().getByTocId(
+        indicator.toc_indicator?.theory_of_change_id
+      );
+    },
+  },
   actions: {
     async create(tocId: number, form: any) {
       this.$state.loading = true;

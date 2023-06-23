@@ -456,12 +456,12 @@ class Monitoring(Base):
     evaluation_period: Mapped[Optional[str]]
     evaluation = mapped_column(MutableDict.as_mutable(JSONB), nullable=True, default={})
 
-    toc_item_indicator_id: Mapped[int] = mapped_column(
+    toc_indicator_id: Mapped[int] = mapped_column(
         ForeignKey("theory_of_change_indicators.id"), nullable=True
     )
     project_id: Mapped[int] = mapped_column(ForeignKey("projects.id"), nullable=False)
 
-    toc_item_indicator = relationship("TheoryOfChangeIndicator")
+    toc_indicator = relationship("TheoryOfChangeIndicator")
 
 
 class Communication(Base):

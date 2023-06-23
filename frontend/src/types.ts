@@ -130,7 +130,7 @@ export class TheoryOfChange {
 export class TheoryOfChangeIndicator {
   id: number;
   indicator_id: number;
-  theories_of_change_id: number;
+  theory_of_change_id: number;
   project_id: number;
   activity_id: number;
 
@@ -190,7 +190,7 @@ export class Monitoring {
   toc_item_indicator_id?: number;
   project_id?: number;
 
-  toc_item_indicator: TheoryOfChangeIndicator;
+  toc_indicator: TheoryOfChangeIndicator;
 }
 
 export class ProjectData {
