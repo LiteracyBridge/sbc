@@ -1,6 +1,5 @@
 from typing import Dict, List, Optional
 from models import ProjectIndicators, TheoryOfChange, TheoryOfChangeIndicator
-from dataclass_wizard import asdict, fromdict
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
@@ -167,11 +166,7 @@ def update_item(
     dto: TheoryOfChangeItemDto,
     db: Session = Depends(models.get_db),
 ):
-    record = (
-        db.query(TheoryOfChange)
-        .filter(TheoryOfChange.id == itemId)
-        .first()
-    )
+    record = db.query(TheoryOfChange).filter(TheoryOfChange.id == itemId).first()
 
     if record is None:
         raise HTTPException(status_code=404, detail="Item not found")
@@ -248,14 +243,12 @@ def update_indicators(
 
     # Add new indikit indicators to project indicators
     if dto.added is not None:
-        print(dto.added)
         new_toc_indicators = list(
             map(
                 lambda x: x["id"],
                 list(filter(lambda x: x["id"] is not None, dto.added)),
             )
         )
-        print(new_toc_indicators)
 
         existing_project_indicators = (
             db.query(ProjectIndicators)
@@ -263,7 +256,6 @@ def update_indicators(
             .with_entities(ProjectIndicators.id)
             .all()
         )
-        print(existing_project_indicators)
 
         # 1. Add to project indicators for new items
         new_project_indicators = list(
@@ -289,7 +281,7 @@ def update_indicators(
         # Update theory of change indicators
         monitoring_indicators = []
         for i in new_toc_indicators:
-            record = TheoryOfChangeIndicator()
+            record: TheoryOfChangeIndicator = TheoryOfChangeIndicator()
             record.indicator_id = i
             record.theory_of_change_id = item_id
             record.project_id = theory_of_change.project_id
@@ -301,56 +293,13 @@ def update_indicators(
             monitoring_indicators.append(record.id)
 
         # Create monitoring items
-        monitoring_items = []
         for i in monitoring_indicators:
-            record = Monitoring()
-            record.toc_item_indicator_id = i
+            record: Monitoring = Monitoring()
+            record.toc_indicator_id = i
             record.project_id = theory_of_change.project_id
 
-            monitoring_items.append(record)
-
-        db.add_all(monitoring_items)
-        db.commit()
-    # # Add all indicators
-    # new_indicators = []
-    # for i in dto.added:
-    #     record = TheoryOfChangeIndicator()
-    #     record.toc_item_id = item_id
-    #     record.indicator_id = i
-
-    #     new_indicators.append(record)
-
-    # db.add_all(new_indicators)
-    # db.commit()
-
-    # Fetch theory of change
-    # toc_item = (
-    #     db.query(models.TheoryOfChangeItem)
-    #     .filter(models.TheoryOfChangeItem.id == item_id)
-    #     .first()
-    # )
-    # toc = get_toc_by_id(toc_item.theory_of_change_id, db)
-
-    # # Create monitoring item
-    # toc_indicators = (
-    #     db.query(models.TheoryOfChangeIndicator)
-    #     .filter(
-    #         TheoryOfChangeIndicator.toc_item_id == item_id,
-    #         TheoryOfChangeIndicator.indicator_id.in_(dto.added),
-    #     )
-    #     .all()
-    # )
-
-    # monitoring_indicators = []
-    # for i in toc_indicators:
-    #     record = Monitoring()
-    #     record.toc_item_indicator_id = i.id
-    #     record.project_id = toc.data[0].project_id
-
-    #     monitoring_indicators.append(record)
-
-    # db.add_all(monitoring_indicators)
-    # db.commit()
+            db.add(record)
+            db.commit()
 
     return ApiResponse(data=get_toc_by_project_id(theory_of_change.project_id, db))
 
