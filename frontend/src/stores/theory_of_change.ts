@@ -11,6 +11,7 @@ import {
 } from "@/types";
 import { useProjectStore } from "./projects";
 import { message } from "ant-design-vue";
+import { uniqBy } from "lodash-es";
 
 export const useTheoryOfChangeStore = defineStore({
   id: "theory_of_change",
@@ -63,6 +64,9 @@ export const useTheoryOfChangeStore = defineStore({
     // IndiKit Helpers
     getIndiKitItemById: (state) => {
       return (id: number) => state.indi_kit_library.find((i) => i.id == id);
+    },
+    getIndiKitSectors: (state): string[] => {
+      return uniqBy(state.indi_kit_library, "sector").flatMap((i) => i.sector);
     },
     indiKitSubSectors: (state) => {
       return (sector?: string | number): LuIndiKit[] => {

@@ -202,8 +202,8 @@ export class ProjectData {
   editing_user_id: number;
   theory_of_change_id: number;
   data: string;
-  module?: "objectives" | "audiences";
-  name?: "specific_objectives" | "secondary_audiences" | "primary_audiences";
+  module?: "objectives" | "audiences" | "project_info";
+  name?: "specific_objectives" | "secondary_audiences" | "primary_audiences" | "sector";
 }
 
 export class Communication {

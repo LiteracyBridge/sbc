@@ -278,8 +278,6 @@ export const useProjectStore = defineStore({
       }
 
       // Download current project data
-      console.log(this.prj_id);
-      console.log(this.projectId);
       if (this.projectId) {
         this.$state.loading = true;
         await ApiRequest.get<Project>(`project/${this.projectId}`)

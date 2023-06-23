@@ -2308,7 +2308,7 @@
   dependencies:
     "@types/lodash" "*"
 
-"@types/lodash@*", "@types/lodash@^4.14.195":
+"@types/lodash@*":
   version "4.14.195"
   resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.195.tgz#bafc975b252eb6cea78882ce8a7b6bf22a6de632"
   integrity sha512-Hwx9EUgdwf2GLarOjQp5ZH8ZmblzcbTBC2wtQWNKARBSxM9ezRIAUpeDTgoQRAFB0+8CNWXVA9+MaSOzOF3nPg==
@@ -4940,11 +4940,6 @@ vue-types@^3.0.0:
   integrity sha512-IwUC0Aq2zwaXqy74h4WCvFCUtoV0iSWr0snWnE9TnU18S66GAQyqQbRf2qfJtUuiFsBf6qp0MEwdonlwznlcrw==
   dependencies:
     is-plain-object "3.0.1"
-
-vue3-rich-accordion@^0.0.7:
-  version "0.0.7"
-  resolved "https://registry.yarnpkg.com/vue3-rich-accordion/-/vue3-rich-accordion-0.0.7.tgz#db9bdc11e878fb7af18ac396cf9567f7e17b7e91"
-  integrity sha512-DWq5PHx3vbohgOVLAqxi2JxX3zSPB6ka73ypesy6XxH5btZQs4fnCN5sNOidj6SoBT6fDS5OivevY5ZA+oYWhA==
 
 vue3-side-panel@^1.2.0:
   version "1.2.0"

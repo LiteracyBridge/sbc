@@ -187,6 +187,9 @@ export const useProjectDataStore = defineStore({
       { id: 7, sequence: 9, value: "prjmgmt", label: "Project Management" },
       { id: 8, sequence: 9, value: "prjdocs", label: "Project Documents" },
     ],
+
+    // Project Info
+    sector: {} as ProjectData,
   }),
   getters: {
     questionsForTopic: (state) => (topic: string) =>
@@ -261,21 +264,35 @@ export const useProjectDataStore = defineStore({
       // console.error(Object.values(data));
 
       // Download project data
-      ApiRequest.get<ProjectData>(`project/${useProjectStore().prj_id}/data`)
+      await ApiRequest.get<ProjectData>(
+        `project/${useProjectStore().prj_id}/data`
+      )
         .then((resp) => {
           this.$state.new_project_data = resp;
+
+          // Update sector
+          this.$state.sector =
+            resp.find((i) => i.name == "sector") ?? new ProjectData();
+          this.$state.sector.name ??= "sector";
+          this.$state.sector.module ??= "project_info";
+          this.$state.sector.data ??= "";
+          this.$state.sector.q_id ??= 1;
+
+          return resp;
         })
         .catch((err) => message.error(err.message));
     },
 
     async setData(q_id: number, data: any) {
+      const name = q_id == 1 ? "sector" : null;
+
       if (!(q_id in this.project_data)) {
         this.project_data[q_id] = {};
       }
       this.project_data[q_id]["data"] = data;
       const id = this.project_data[q_id].id;
       if (id) {
-        return await api.update("project_data", id, { q_id, data });
+        return await api.update("project_data", id, { q_id, data, name });
       } else {
         this.project_data[q_id].q_id = q_id;
         this.project_data[q_id].editing_user_id = useUserStore().id;
@@ -283,6 +300,7 @@ export const useProjectDataStore = defineStore({
         const _id = await api.insert("project_data", {
           q_id,
           data,
+          name,
         });
         this.project_data[q_id].id = _id;
       }
