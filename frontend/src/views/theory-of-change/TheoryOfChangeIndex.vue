@@ -562,12 +562,6 @@ const risksModalConfig = reactive({
   }
 });
 // === END: Risks Modal functions
-
-const getProjectIndicators = computed(() => {
-  return theoryOfChangeStore.project_indicators.map(i => {
-    return { ...i, label: i.name, value: i.id }
-  })
-});
 </script>
 
 <template>

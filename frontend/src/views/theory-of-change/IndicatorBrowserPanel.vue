@@ -21,6 +21,7 @@ const
   selectedGroupType = ref<IndicatorType>(),
   isFetchingIndicators = ref(false),
   config = ref<{
+    visible: boolean,
     isLoading: boolean,
     selectedIndiKit: Record<string, boolean>,
     customIndicator: string,
@@ -31,6 +32,7 @@ const
       added: Array<{ id?: number, name: string, indi_kit_id?: number }>,
     },
   }>({
+    visible: props.isVisible,
     isLoading: false,
     selectedIndiKit: {},
     customIndicator: '',
@@ -41,8 +43,6 @@ const
       added: [],
     },
   });
-
-const isOpened = computed(() => props.isVisible)
 
 const groupIndicators = computed(() => {
   if (selectedGroupType.value?.id == null) {
@@ -59,6 +59,7 @@ const filterIndicatorSectors = (input: string, option: any) => {
 
 const closePanel = () => {
   config.value.selectedIndiKit = {};
+  config.value.visible = false;
   emit("isClosed", true);
 };
 
@@ -87,10 +88,12 @@ onMounted(() => {
 
 
 watch(props, (newProp) => {
-  buildIndicatorsTree(newProp.tocItem.indicators)
+  config.value.visible = newProp.isVisible;
 
   // Update panel with ToC item existing indicator
   const _indicators = newProp.tocItem?.indicators ?? [];
+  buildIndicatorsTree(_indicators)
+
   if (_indicators.length > 0) {
     const indicator = theoryOfChangeStore.indicatorGroups.find(i => i.id == _indicators[0].indicator_id);
     const indicatorType = theoryOfChangeStore.indicatorTypes.find(i => i.id == indicator?.group_id);
@@ -199,7 +202,7 @@ const addIndiKitIndicator = (item: LuIndiKit) => {
 </script>
 
 <template>
-  <Drawer width="70vw" title="Indicators Browser" :visible="isOpened" :body-style="{ paddingBottom: '80px' }"
+  <Drawer width="70vw" title="Indicators Browser" :visible="config.visible" :body-style="{ paddingBottom: '80px' }"
     :footer-style="{ textAlign: 'right' }" @close="closePanel()">
 
     <template #extra>
@@ -330,7 +333,8 @@ const addIndiKitIndicator = (item: LuIndiKit) => {
                 </div>
                 <div class="column">
                   <!-- <p>{{ item.guidance }}</p> -->
-                  <a :href="item.guidance" target="_blank">Click to learn more about learn more the indicator on IndiKit</a>
+                  <a :href="item.guidance" target="_blank">Click to learn more about learn more the indicator on
+                    IndiKit</a>
                 </div>
               </div>
             </div>

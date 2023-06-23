@@ -2,8 +2,10 @@
 
 import { useTheoryOfChangeStore } from '@/stores/theory_of_change';
 import { Monitoring } from '@/types';
-import { Modal, Form, FormItem, Input, Select, SelectOption, Spin, type FormInstance, message } from 'ant-design-vue';
+import { Modal, Form, FormItem, Button, Select, SelectOption, Spin, type FormInstance, message, Space } from 'ant-design-vue';
 import { ref, watch } from 'vue';
+import IndicatorBrowserPanel from '@/views/theory-of-change/IndicatorBrowserPanel.vue'
+import { useCommunicationStore } from '@/stores/communication.store';
 
 
 const props = defineProps<{ visible: boolean }>();
@@ -12,14 +14,20 @@ const emit = defineEmits<{
   // (e: 'isUpdated', status: boolean): void,
 }>()
 
-const theoryOfChangeStore = useTheoryOfChangeStore();
+
+const theoryOfChangeStore = useTheoryOfChangeStore(),
+  store = useCommunicationStore();
+
 const newIndicatorFormRef = ref<FormInstance>(),
   config = ref({
     visible: props.visible,
-    isLoading: false,
     form: {
       toc_item_id: null,
       indicator_id: null,
+    },
+    browser: {
+      visible: false,
+      theoryOfChange: null,
     }
   });
 
@@ -33,6 +41,26 @@ function closeModal() {
   config.value.visible = false;
 
   emit('isClosed', true);
+}
+
+function onPanelClosed() {
+  config.value.browser.visible = false;
+  config.value.browser.theoryOfChange = null;
+  store.download();
+
+  closeModal();
+}
+
+const onTheoryOfChangeSelected = (value: number, _option: any) => {
+
+  const item = useTheoryOfChangeStore().getByTocId(+value);
+
+  if (item == undefined) {
+    message.error('An error occurred while fetching theory of change item');
+    return;
+  }
+
+  config.value.browser.theoryOfChange = item;
 }
 
 function save() {
@@ -62,24 +90,36 @@ function save() {
 </script>
 
 <template>
-  <Modal v-model:visible="config.visible" title="Add New Indicator" ok-text="Save Indicator" cancel-text="Cancel"
-    @cancel="closeModal()" :mask-closable="false" @ok="save">
+  <Modal v-model:visible="config.visible" title="Add New Indicator" @cancel="closeModal()" :mask-closable="false">
 
-    <Spin :spinning="config.isLoading || theoryOfChangeStore.isLoading">
+    <!-- IndiKit Browser Panel -->
+    <IndicatorBrowserPanel v-if="config.browser.theoryOfChange != null" :is-visible="config.browser.visible"
+      @is-closed="onPanelClosed()" :toc-item="config.browser.theoryOfChange">
+    </IndicatorBrowserPanel>
+
+    <template #footer>
+      <Space>
+        <Button @click="closeModal()">Cancel</Button>
+        <Button type="primary" @click="config.browser.visible = true"
+          :disabled="config.browser.theoryOfChange == null || config.form.toc_item_id == null">Next</Button>
+      </Space>
+    </template>
+
+    <Spin :spinning="theoryOfChangeStore.isLoading">
 
       <Form layout="vertical" :model="config.form" name="progress_tracking_form" ref="newIndicatorFormRef">
 
         <!-- TODO: exclude already tracked periods from dropdown -->
         <FormItem name="toc_item_id" label="Select theory of change item" has-feedback
-          :rules="[{ required: true, message: 'Please select theory of change item!' }]">
+          :rules="[{ required: true, message: 'Please select theory of change!' }]">
           <Select v-model:value="config.form.toc_item_id" placeholder="Please theory of change item" :show-search="true"
-            :allow-clear="true">
+            :allow-clear="true" @change="onTheoryOfChangeSelected">
             <SelectOption v-for="i in theoryOfChangeStore.theory_of_change" :value="i.id" :key="i.id">{{ i.name }}
             </SelectOption>
           </Select>
         </FormItem>
 
-        <FormItem name="indicator_id" label="Select indicator" has-feedback
+        <!-- <FormItem name="indicator_id" label="Select indicator" has-feedback
           :rules="[{ required: true, message: 'Please select indicator!' }]">
           <Select v-model:value="config.form.indicator_id" placeholder="Please indicator" :show-search="true"
             :allow-clear="true">
@@ -87,7 +127,7 @@ function save() {
               i.name }}
             </SelectOption>
           </Select>
-        </FormItem>
+        </FormItem> -->
       </Form>
 
     </Spin>
