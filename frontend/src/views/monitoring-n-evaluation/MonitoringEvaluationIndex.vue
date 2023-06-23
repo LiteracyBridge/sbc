@@ -1,25 +1,17 @@
 <script lang="ts" setup>
-// TODO: add button for viewing progress in a modal
-// TODO: add button for capturing progress in a modal
 
-import { ApiRequest } from '@/apis/api';
-import { useProjectStore } from '@/stores/projects';
-import { Monitoring } from '@/types';
 import { SmileOutlined, DownOutlined, PlusCircleOutlined, SettingOutlined } from '@ant-design/icons-vue';
 import { Tag, Table, Divider, Button, Space, Typography, ButtonGroup, Modal, DescriptionsItem, Descriptions, Form, FormItem, Input, Select, SelectOption, Tabs, TabPane, Textarea, Spin, message } from 'ant-design-vue';
 import { onMounted, ref } from 'vue';
 
-import { useTheoryOfChangeStore } from '@/stores/theory_of_change';
 import MonitoringEditModal from './MonitoringEditModal.vue';
 import ProgressTrackingModal from './ProgressTrackingModal.vue';
 import AddMonitoringIndicatorModal from './AddMonitoringIndicatorModal.vue';
+import EvaluationStrategy from './EvaluationStrategy.vue';
 import { useMonitoringStore } from '@/stores/monitoring.store';
 
-const projectStore = useProjectStore(),
-  theoryOfChangeStore = useTheoryOfChangeStore(),
-  store = useMonitoringStore();
+const store = useMonitoringStore();
 
-// const monitoringData = ref<Array<Monitoring>>([]);
 const config = ref({
   activeTab: '1',
   isLoading: false,
@@ -109,18 +101,6 @@ const columns = [
     key: 'actions',
   },
 ];
-
-
-// function fetchData() {
-//   config.value.isLoading = true;
-
-//   ApiRequest.get<Monitoring>(`monitoring/${projectStore.prj_id}`)
-//     .then((resp) => {
-//       monitoringData.value = resp;
-//     })
-//     .catch(err => message.error(err.message))
-//     .finally(() => config.value.isLoading = false)
-// }
 
 onMounted(() => {
   store.download();
@@ -233,27 +213,7 @@ onMounted(() => {
       </TabPane>
 
       <TabPane key="2" tab="Project Evaluation Strategy">
-
-        <Form class="mx-6" layout="vertical" name="evaluation_strategy_form">
-          <!-- TODO: Implement saving of form -->
-
-          <FormItem label="How will you evaluate the impact of our project? (evaluation strategy narrative)"
-            name="evaluation_strategy" :rules="[{ required: true, message: 'Please input your evaluation strategy!' }]">
-            <Textarea v-model:value="config.evaluationForm.evaluation_strategy" :rows="8"></Textarea>
-          </FormItem>
-
-          <FormItem label="How will you gather and respond to feedback from participants and stakeholders?"
-            name="feedback_strategy" :rules="[{ required: true, message: 'Please input your feedback strategy!' }]">
-            <Textarea v-model:value="config.evaluationForm.feedback_strategy" :rows="8"></Textarea>
-          </FormItem>
-
-          <FormItem>
-            <!-- TODO: center button -->
-            <Space>
-              <Button type="primary" html-type="submit">Submit</Button>
-            </Space>
-          </FormItem>
-        </Form>
+        <EvaluationStrategy></EvaluationStrategy>
 
       </TabPane>
     </Tabs>

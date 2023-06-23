@@ -8,6 +8,9 @@ import { useParticipantStore } from "./participants";
 import router from "@/router";
 import { useLookupStore } from "./lookups";
 import { useProjectDataStore } from "./projectData";
+import { Project } from "@/types";
+import { ApiRequest } from "@/apis/api";
+import { message } from "ant-design-vue";
 
 // projectStores returns all the stores that have project-specific data
 const projectStores = () => [
@@ -36,18 +39,25 @@ function downloadAllProjectStores() {
 const init_objects = {
   // below are SQL Views; so updates/inserts/deletes require the projects or project_users tables
   users_in_project: {
+    // @ts-ignore
     id: null,
+    // @ts-ignore
     user_id: null,
     email: "",
     name: "",
+    // @ts-ignore
     access_id: null,
     address_as: "",
   },
   user_projects: {
+    // @ts-ignore
     prj_id: null,
     name: "",
+    // @ts-ignore
     private_prj: true,
+    // @ts-ignore
     country_id: null,
+    // @ts-ignore
     access_id: null,
     start_date: "",
     end_date: "",
@@ -58,18 +68,20 @@ const init_objects = {
 export const useProjectStore = defineStore({
   id: "projects",
   state: () => ({
+    loading: false,
     prj_id: null,
     users_in_project: [],
     user_projects: [],
+    current_project: {} as Project,
   }),
   getters: {
     projects:
       (state) =>
       (archived = false) =>
         state.user_projects.filter((p) => p.archived == archived),
-    userById: (state) => (userId) =>
+    userById: (state) => (userId: number) =>
       state.users_in_project.find((u) => u.user_id == userId),
-    userName: (state) => (userId) => {
+    userName: (state) => (userId: number) => {
       let user = state.users_in_project.find((u) => u.user_id == userId);
       let name = "";
       if (user != null) {
@@ -115,7 +127,7 @@ export const useProjectStore = defineStore({
   },
   actions: {
     // Archives a project by updating its archived status
-    async archive(prj_id) {
+    async archive(prj_id: number) {
       this.user_projects.find((p) => p.prj_id == prj_id).archived = true;
       api.update("projects", prj_id, { archived: true });
       if (prj_id == this.prj_id) {
@@ -124,14 +136,19 @@ export const useProjectStore = defineStore({
     },
 
     // Updates a user's access in a project
-    async updateAccess(event, uip_id) {
+    async updateAccess(event: any, uip_id: number) {
       const access_id = parseInt(event.target.value);
       this.users_in_project.find((u) => u.id == uip_id).access_id = access_id;
       api.update("project_users", uip_id, { access_id });
     },
 
     // Adds a user to a project
-    async addUser(name, email, access_id, address_as = "") {
+    async addUser(
+      name: string,
+      email: string,
+      access_id: number,
+      address_as: string = ""
+    ) {
       if (this.users_in_project.map((p) => p.email).includes(email)) {
         console.log("user already exists in project");
         return;
@@ -160,7 +177,12 @@ export const useProjectStore = defineStore({
     },
 
     // Adds a new project
-    async add(name, country_id, start_date, end_date) {
+    async add(
+      name: string,
+      country_id: number,
+      start_date: string,
+      end_date: string
+    ) {
       // create entry in db projects table and get id
       const private_prj = true;
       const prj_id = await api.insert("projects", {
@@ -192,8 +214,9 @@ export const useProjectStore = defineStore({
     },
 
     // Sets a project as active
-    setPrj(id, newProject = false) {
+    setPrj(id: number, newProject: boolean = false) {
       this.prj_id = id;
+
       useProjectStore().download();
       if (id && !newProject) {
         downloadAllProjectStores();
@@ -206,6 +229,24 @@ export const useProjectStore = defineStore({
       }
     },
 
+    // Update project strategy
+    async updateStrategy() {
+      this.$state.loading = true;
+      return await ApiRequest.put<Project>(`project/${this.$state.prj_id}`, {
+        evaluation_strategy: this.$state.current_project.evaluation_strategy,
+        feedback_strategy: this.$state.current_project.feedback_strategy,
+      })
+        .then((response) => {
+          this.$state.current_project = response[0];
+          message.success("Project strategy updated");
+          return response;
+        })
+        .catch((error) => {
+          message.error(error.message);
+          throw error;
+        })
+        .finally(() => (this.$state.loading = false));
+    },
     // Downloads project data
     async download() {
       if (this.prj_id) {
@@ -235,7 +276,27 @@ export const useProjectStore = defineStore({
         );
         this.user_projects = response;
       }
-      return
+
+      // Download current project data
+      console.log(this.prj_id);
+      console.log(this.projectId);
+      if (this.projectId) {
+        this.$state.loading = true;
+        await ApiRequest.get<Project>(`project/${this.projectId}`)
+          .then((response) => {
+            if (response.length > 0) {
+              this.$state.current_project = response[0] as Project;
+            }
+            return response;
+          })
+          .catch((error) => {
+            message.error(error.message);
+            throw error;
+          })
+          .finally(() => (this.$state.loading = false));
+      }
+
+      return;
     },
   },
 });

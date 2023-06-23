@@ -16,7 +16,7 @@ router = APIRouter()
 
 # Types
 class UpdateProjectDto(BaseModel):
-    name: str
+    # name: str
     evaluation_strategy: Optional[str]
     feedback_strategy: Optional[str]
 
@@ -31,14 +31,26 @@ class ProjectObjectiveDto(BaseModel):
     removed: Optional[List[int]] = []
 
 
-@router.put("/{id}", response_model=ApiResponse)
-def update_strategy(dto: UpdateProjectDto, db: Session = Depends(models.get_db)):
-    record = db.query(models.Project).filter(models.Project.id == dto.id).first()
+@router.get("/{id}", response_model=ApiResponse)
+def find_project(id: int, db: Session = Depends(models.get_db)):
+    record = db.query(models.Project).filter(models.Project.id == id).first()
 
     if record is None:
         raise HTTPException(status_code=404, detail="Project not found")
 
-    record.name = dto.name
+    return ApiResponse(data=[record])
+
+
+@router.put("/{id}", response_model=ApiResponse)
+def update_strategy(
+    id: int, dto: UpdateProjectDto, db: Session = Depends(models.get_db)
+):
+    record = db.query(models.Project).filter(models.Project.id == id).first()
+
+    if record is None:
+        raise HTTPException(status_code=404, detail="Project not found")
+
+    # record.name = dto.name
     record.evaluation_strategy = dto.evaluation_strategy
     record.feedback_strategy = dto.feedback_strategy
 
@@ -77,6 +89,7 @@ def get_project_data(project_id: int, db: Session = Depends(models.get_db)):
     return ApiResponse(
         data=db.query(ProjectData).filter(ProjectData.prj_id == project_id).all()
     )
+
 
 @router.post("/{project_id}/objectives", response_model=ApiResponse)
 def update_objectives(

@@ -16,6 +16,8 @@ export class Project {
   start_date: Dayjs;
   end_date: Dayjs;
   country_id?: number;
+  evaluation_strategy?: string;
+  feedback_strategy?: string;
 }
 
 export class LuIndiKit {
