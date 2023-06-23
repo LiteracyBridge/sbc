@@ -1,0 +1,30 @@
+// @ts-check
+
+import { defineStore } from "pinia";
+import { useTheoryOfChangeStore } from "./theory_of_change";
+import { useProjectStore } from "./projects";
+import { useLookupStore } from "./lookups";
+
+export const AppStore = defineStore({
+  id: "app_store",
+  state: () => ({
+    is_loading: true,
+  }),
+  getters: {
+    isLoading: (state) => state.is_loading,
+  },
+  actions: {
+    setLoading(loading: boolean) {
+      this.$state.is_loading = loading;
+    },
+    async downloadObjects() {
+      this.setLoading(true);
+
+      await useProjectStore()
+        .download()
+        .then(async () => await useLookupStore().download())
+        .then(async () => await useTheoryOfChangeStore().download())
+        .finally(() => this.setLoading(false));
+    },
+  },
+});

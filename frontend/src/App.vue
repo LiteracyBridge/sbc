@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 // Importing required Vue and external libraries
 import { onMounted, computed } from "vue";
 import { RouterView } from "vue-router";
@@ -20,7 +20,7 @@ const appStore = AppStore()
 const ONLINE = true;
 
 // Initialize the lookup store and side navigation store
-const lookupStore = useLookupStore();
+// const lookupStore = useLookupStore();
 const sideNavStore = useSideNavStore();
 
 // Computed property for determining if the side navigation should be visible
@@ -31,11 +31,12 @@ const showSideNav = computed(() => sideNavStore.visible);
 
 // On component mount, download the lookup data if online
 onMounted(() => {
-  if (ONLINE) {
-    lookupStore.download().then(() => appStore.setLoading(false))
-  } else {
-    appStore.setLoading(false)
-  }
+  appStore.downloadObjects()
+  // if (ONLINE) {
+  //   lookupStore.download().then(() => appStore.setLoading(false))
+  // } else {
+  //   appStore.setLoading(false)
+  // }
 });
 </script>
 

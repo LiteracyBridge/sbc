@@ -235,6 +235,7 @@ export const useProjectStore = defineStore({
         );
         this.user_projects = response;
       }
+      return
     },
   },
 });
