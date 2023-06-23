@@ -7,7 +7,7 @@ import { useInterventionStore } from "@/stores/interventions";
 import { useDriverStore } from "@/stores/drivers";
 import { useLookupStore } from "@/stores/lookups";
 import { useProjectStore } from '@/stores/projects'
-import { Button, Drawer, Table } from "ant-design-vue";
+import { Button, Tag, Drawer, Table } from "ant-design-vue";
 import { Activity } from "@/types";
 import { PlusCircleOutlined } from "@ant-design/icons-vue";
 
@@ -34,6 +34,29 @@ const config = ref({
 
 const activityStore = useActivityStore();
 
+function getStatusColor(status_id: number) {
+  const status = lookupStore.lookupNameById('activity_status', status_id);
+  let color = "blue";
+
+  switch (status) {
+    case "planned":
+      color = "blue";
+      break;
+    case "in progress":
+      color = "brown";
+      break;
+    case "completed":
+      color = "green";
+      break;
+    case "proposed":
+      color = "orange";
+      break;
+    default:
+      color = "ash";
+  }
+
+  return { color, status }
+}
 
 function editActivity(activity: Activity) {
   // TODO: implement activity editing
@@ -57,11 +80,6 @@ const columns = [
     title: 'Name',
     dataIndex: 'name',
     key: 'name',
-  },
-  {
-    title: 'Status',
-    dataIndex: 'status',
-    key: 'status',
   },
   {
     title: 'Owner',
@@ -108,10 +126,10 @@ const columns = [
       <template #bodyCell="{ column, record: activity }">
         <template v-if="column.key === 'name'">
           <Button type="text" @click="editActivity(activity)">{{ activity.name }}</Button>
-        </template>
 
-        <template v-if="column.key === 'status'">
-          {{ lookupStore.lookupNameById('activity_status', activity.status_id) }}
+          <Tag class="is-rounded" :color="getStatusColor(activity.status_id).color">
+            {{ getStatusColor(activity.status_id).status }}
+          </Tag>
         </template>
 
         <template v-if="column.key === 'owner'">
