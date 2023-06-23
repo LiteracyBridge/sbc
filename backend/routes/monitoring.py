@@ -1,6 +1,5 @@
 from functools import reduce
 from typing import List, Optional
-from dataclass_wizard import asdict, fromdict
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
@@ -84,11 +83,20 @@ def record_progress(
 
     evaluation = record.evaluation
     if evaluation is None:
-        evaluation = {}
+        evaluation = []
 
-    evaluation[dto.period] = dto.value
+    progress = {"period": dto.period, "value": dto.value}
+    evaluation.append(progress)
+    # record[dto.period] = dto.value
     record.evaluation = evaluation
-    record.progress = (sum(evaluation.values()) / record.target) * 100
+    # record.progress = (sum(evaluation.values()) / record.target) * 100
+
+    # Computer total progress
+    total_progress = 0
+    for i in evaluation:
+        total_progress += i["value"]
+
+    record.progress = (total_progress / record.target) * 100
 
     db.commit()
 

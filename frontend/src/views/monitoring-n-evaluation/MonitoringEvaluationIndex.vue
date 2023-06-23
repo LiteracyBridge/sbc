@@ -133,7 +133,7 @@ onMounted(() => {
   <AddMonitoringIndicatorModal :visible="config.indicatorModalVisible" @is-closed="config.indicatorModalVisible = false">
   </AddMonitoringIndicatorModal>
 
-  <ProgressTrackingModal v-if="config.selectedRow != null" :visible="config.progressTrackingModal.visible"
+  <ProgressTrackingModal :visible="config.progressTrackingModal.visible"
     @is-closed="config.progressTrackingModal.visible = true" :record="config.selectedRow">
   </ProgressTrackingModal>
 
@@ -258,8 +258,8 @@ onMounted(() => {
     <template #footer></template>
 
     <Descriptions size="small" :label-style="{ 'fontWeight': 'bold' }">
-      <DescriptionsItem v-for="period in Object.keys(config.selectedRow.evaluation || {})" :label="period"> {{
-        config.selectedRow.evaluation[period] }}</DescriptionsItem>
+      <DescriptionsItem v-for="item in (config.selectedRow.evaluation || [])" :label="item.period"> {{ item.value }}
+      </DescriptionsItem>
     </Descriptions>
   </Modal>
 </template>

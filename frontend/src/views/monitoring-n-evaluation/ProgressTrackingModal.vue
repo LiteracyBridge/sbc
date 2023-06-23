@@ -50,7 +50,7 @@ function recordProgress() {
   progressTrackingFormRef.value
     .validateFields()
     .then(values => {
-      store.recordProgress(props.record.id, config.value.form.value)
+      store.recordProgress(props.record.id, config.value.form)
         .then((resp) => {
           closeModal();
         });
@@ -58,9 +58,14 @@ function recordProgress() {
 }
 
 const generatePeriods = computed(() => {
-  const recorded_periods = Object.keys(props.record.evaluation);
+  const recorded_periods = (props.record.evaluation ?? []).flatMap((evaluation) => evaluation.period)
+  const period = props.record.evaluation_period ?? "monthly"
 
-  if (props.record.evaluation_period == 'monthly') {
+  // (props.record.evaluation ?? []).forEach((evaluation) => {
+  //   recorded_periods[evaluation.period] = evaluation.value;
+  // });
+
+  if (period == 'monthly') {
     return Array(12).fill(0).map((_, i) => {
       const period = `Month ${i + 1}`,
         disabled = recorded_periods.includes(period);
@@ -71,7 +76,7 @@ const generatePeriods = computed(() => {
       }
     });
   }
-  if (props.record.evaluation_period == "quarterly") {
+  if (period == "quarterly") {
     return Array(4).fill(0).map((_, i) => {
       const period = `Quarter ${i + 1}`,
         disabled = recorded_periods.includes(period);
@@ -83,7 +88,7 @@ const generatePeriods = computed(() => {
     });
   }
 
-  if (props.record.evaluation_period == "weekly") {
+  if (period == "weekly") {
     return Array(53).fill(0).map((_, i) => {
       const period = `Week ${i + 1}`,
         disabled = recorded_periods.includes(period);

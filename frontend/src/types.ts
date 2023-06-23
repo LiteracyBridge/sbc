@@ -184,7 +184,7 @@ export class Monitoring {
   baseline?: number;
   data_collection_method?: string;
   data_collection_frequency?: string;
-  evaluation: { [key: string]: number } = {};
+  evaluation: Array<{ value: number; period: string }> = [];
   evaluation_period?: "monthly" | "weekly" | "quarterly";
 
   toc_item_indicator_id?: number;

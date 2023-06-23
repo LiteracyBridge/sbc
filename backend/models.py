@@ -1,5 +1,14 @@
-from typing import List, Optional
-from sqlalchemy import ARRAY, DateTime, Boolean, Column, ForeignKey, Integer, String
+from typing import Dict, List, Optional
+from sqlalchemy import (
+    ARRAY,
+    JSON,
+    DateTime,
+    Boolean,
+    Column,
+    ForeignKey,
+    Integer,
+    String,
+)
 from sqlalchemy.orm import relationship, mapped_column
 from sqlalchemy.orm import Mapped
 from sqlalchemy.dialects.postgresql import JSONB
@@ -454,7 +463,7 @@ class Monitoring(Base):
     data_collection_method: Mapped[Optional[str]]
     data_collection_frequency: Mapped[Optional[str]]
     evaluation_period: Mapped[Optional[str]]
-    evaluation = mapped_column(MutableDict.as_mutable(JSONB), nullable=True, default={})
+    evaluation: Mapped[ARRAY] = mapped_column(JSON, nullable=True, default=[])
 
     toc_indicator_id: Mapped[int] = mapped_column(
         ForeignKey("theory_of_change_indicators.id"), nullable=True
