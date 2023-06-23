@@ -60,12 +60,12 @@ const columns = [
     dataIndex: 'indicator',
     key: 'indicator',
   },
-  {
-    title: 'Related Results',
-    name: 'Related Results',
-    dataIndex: 'relatedResults',
-    key: 'relatedResults',
-  },
+  // {
+  //   title: 'Related Results',
+  //   name: 'Related Results',
+  //   dataIndex: 'relatedResults',
+  //   key: 'relatedResults',
+  // },
   {
     title: 'Date Collection Method',
     name: 'Date Collection Method',
@@ -173,9 +173,9 @@ onMounted(() => {
               {{ store.getIndicatorName(record.id) }}
             </template>
 
-            <template v-if="column.key === 'relatedResults'">
+            <!-- <template v-if="column.key === 'relatedResults'">
               {{ record.name }}
-            </template>
+            </template> -->
 
             <template v-if="column.key === 'data_collection_method'">
               {{ record.data_collection_method }}
