@@ -1,17 +1,17 @@
 Today:
-    Activies:
-        ✔ add tasks modal @done(23-06-18 12:08)
-        ✔ implemenet adding new task @done(23-06-18 12:08)
+    ☐ dynamic primary audiences
+    ☐
+
+
+    Activities:
         ☐ implement removing task
-        ☐
+        ☐ implement activity update
+
     Theory of Change:
         ☐ Add modal forms validation
-        ✔ Indicator UI redesign @done(23-06-18 11:27)
         ☐ implement adding & removing of indicators
         ☐ add customizing of indikit indicators
-        ✔ add indikit footer to indicators panel @done(23-06-18 11:27)
     ☐ connect live url & test all modules
-
 
     Monitoring & Evaluation:
         ☐ Types refactoring
@@ -26,6 +26,10 @@ Backend:
     ☐ copy indikit label to project_indicators when added
 
 Archive:
+  ✔ add tasks modal @done(23-06-18 12:08) @project(Today.Activies)
+  ✔ implemenet adding new task @done(23-06-18 12:08) @project(Today.Activies)
+  ✔ Indicator UI redesign @done(23-06-18 11:27) @project(Today.Theory of Change)
+  ✔ add indikit footer to indicators panel @done(23-06-18 11:27) @project(Today.Theory of Change)
   ✔ filter projects by organisation @done(23-06-07 14:09) @project(Today)
   ✔ show an error page for users without organisation setup on sign in @done(23-06-07 14:09) @project(Today)
   ✔ approaches grouping redesign @done(23-06-08 11:07) @project(Today)

@@ -156,7 +156,7 @@ def create_item(
 
     # db.refresh(record)
 
-    return ApiResponse(data=get_toc_by_project_id(project_id, db))
+    return get_toc_by_project_id(project_id, db)
 
 
 @router.put("/{project_id}/item/{itemId}", response_model=ApiResponse)
@@ -181,7 +181,7 @@ def update_item(
 
     db.commit()
 
-    return ApiResponse(data=get_by_project_id(project_id, db))
+    return get_by_project_id(project_id, db)
 
 
 @router.delete("/{id}/item/{itemId}", response_model=ApiResponse)
@@ -209,7 +209,7 @@ def delete_item(
     db.delete(record)
     db.commit()
 
-    return ApiResponse(data=get_by_project_id(id, db))
+    return get_by_project_id(id, db)
 
 
 # ======== INDICATORS ========= #
@@ -327,4 +327,4 @@ def risks(tocId: int, dto: RisksDto, db: Session = Depends(models.get_db)):
     db.add(risk)
     db.commit()
 
-    return ApiResponse(data=get_by_project_id(toc.project_id, db))
+    return get_by_project_id(toc.project_id, db)

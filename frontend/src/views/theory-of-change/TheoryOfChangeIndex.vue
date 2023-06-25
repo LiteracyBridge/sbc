@@ -13,7 +13,7 @@ import { Risk, TheoryOfChange, TheoryOfChangeItem } from "@/types";
 import GridLoader from "@/components/spinners/GridLoader.vue";
 import { useProjectDataStore } from "@/stores/projectData";
 import { useProjectStore } from '@/stores/projects';
-import { AutoComplete, Button, Card, Col, Divider, Form, FormItem, Input, Modal, Popover, Row, Select, SelectOption, Space, Spin, Switch, Textarea, message } from "ant-design-vue";
+import { Checkbox, Button, Card, Col, Divider, Form, FormItem, Input, Modal, Popover, Row, Select, SelectOption, Space, Spin, Switch, Textarea, message, Empty } from "ant-design-vue";
 import TheoryOfChangeExamplesBrowser from "./TheoryOfChangeExamplesBrowser.vue";
 import CustomIndicatorModal from './CustomIndicatorModal.vue';
 import { DeleteOutlined, PlusCircleOutlined, RotateRightOutlined, SwapLeftOutlined, SwapOutlined } from "@ant-design/icons-vue";
@@ -379,7 +379,7 @@ onMounted(() => {
 
     theoryOfChangeModel.value.selectedItem = theoryOfChangeModel.value.data.find((item: any) => item.id == nodeId);
 
-    const selectedItem = theoryOfChangeModel.value.selectedItem as any;
+    const selectedItem = theoryOfChangeModel.value.selectedItem;
     if (selectedItem != null) {
       tocItemModalConfig.value.isNew = false;
       tocItemModalConfig.value.form = selectedItem;
@@ -511,6 +511,10 @@ function updateToCModel(resp: TheoryOfChange[], itemId?: number) {
     theoryOfChangeModel.value.selectedItem = resp.find(i => i.id == itemId);
   }
 }
+
+const getTocItemIndicators = computed(() => {
+  return theoryOfChangeStore.theoryOfChangeItemIndicators(theoryOfChangeModel.value.selectedItem?.id) ?? [];
+})
 //=== END: Theory of Change Item Modal functions
 
 
@@ -653,8 +657,8 @@ const risksModalConfig = reactive({
           </footer>
         </template>
 
-        <Form layout="vertical">
-          <div class="field">
+        <Form layout="vertical" :model="tocItemModalConfig.form">
+          <!-- <div class="field">
             <div class="field-body">
               <div class="field">
                 <div class="control">
@@ -663,11 +667,16 @@ const risksModalConfig = reactive({
                 </div>
               </div>
             </div>
-          </div>
+          </div> -->
+
+          <FormItem name="name" label="Label" has-feedback
+            :rules="[{ required: true, message: 'Please enter theory of change label!' }]">
+            <Input v-model:value="tocItemModalConfig.form.name" placeholder="Enter label" />
+          </FormItem>
 
           <Row :gutter="4">
             <Col :span="12">
-            <FormItem label="Links From">
+            <FormItem label="Links From" name="from_id">
 
               <!-- TODO: show list of existing indicators -->
               <Select v-model:value="tocItemModalConfig.form.from_id">
@@ -681,7 +690,7 @@ const risksModalConfig = reactive({
             </Col>
 
             <Col :span="12">
-            <FormItem label="Links To">
+            <FormItem label="Links To" name="to_id">
 
               <!-- TODO: show list of existing indicators -->
               <Select v-model:value="tocItemModalConfig.form.to_id">
@@ -693,9 +702,36 @@ const risksModalConfig = reactive({
             </Col>
           </Row>
 
-          <div class="field is-horizontal">
+          <Row :gutter="4">
+
+            <Col :span="12">
+            <FormItem name="type_id" label="Logic Model Category" has-feedback
+              :rules="[{ required: true, message: 'Please select a category model!' }]">
+              <Select v-model:value="tocItemModalConfig.form.type_id">
+                <SelectOption v-for="key in Object.keys(THEORY_OF_CHANGE_TYPES)" :key="key"
+                  :value="+key">
+                  {{ THEORY_OF_CHANGE_TYPES[key] }}
+                </SelectOption>
+
+              </Select>
+            </FormItem>
+            </Col>
+
+            <Col :span="12">
+            <FormItem name="sem_id" label="SEM Level" has-feedback
+              :rules="[{ required: true, message: 'Please select SEM level!' }]">
+              <Select v-model:value="tocItemModalConfig.form.sem_id">
+                <SelectOption v-for="key in Object.keys(SEMS)" :key="key" :value="+key">
+                  {{ SEMS[key] }}
+                </SelectOption>
+
+              </Select>
+            </FormItem>
+            </Col>
+          </Row>
+
+          <!-- <div class="field is-horizontal">
             <div class="columns field-body">
-              <!-- Column 1: SEM Level and Category -->
               <div class="column field">
                 <label class="label">Logic Model Category</label>
                 <div class="control">
@@ -710,7 +746,6 @@ const risksModalConfig = reactive({
                 </div>
               </div>
 
-              <!-- Column 2: Audience -->
               <div class="column field">
                 <label class="label">SEM Level</label>
 
@@ -727,35 +762,50 @@ const risksModalConfig = reactive({
               </div>
 
             </div>
-          </div>
+          </div> -->
 
-          <div class="field">
+          <FormItem name="is_validated" label="" has-feedback :rules="[{ required: false }]">
+            <Checkbox v-model:checked="tocItemModalConfig.form.is_validated">Validated</Checkbox>
+          </FormItem>
+
+          <!-- <div class="field">
             <div class="control">
               <label class="label">
                 Validated
                 <input type="checkbox" class="ml-3" v-model="tocItemModalConfig.form.is_validated" />
               </label>
             </div>
-          </div>
+          </div> -->
 
 
-          <div class="field">
+          <FormItem name="description" label="Description" has-feedback :rules="[{ required: false }]">
+            <Textarea v-model:value="tocItemModalConfig.form.description">
+    </Textarea>
+          </FormItem>
+
+
+          <!-- <div class="field">
             <label class="label">Description</label>
             <div class="control">
               <textarea class="textarea" rows="4" columns="80" maxlength="999"
                 v-model="tocItemModalConfig.form.description" />
             </div>
-          </div>
+          </div> -->
 
 
           <!-- TODO: implement saving of indicators -->
-          <div class="field">
-            <label class="label">Indicators</label>
 
-            <Divider></Divider>
+          <!-- Indicators -->
+          <div v-if="theoryOfChangeModel.selectedItem?.id != null">
+            <!-- <div class="field"> -->
+            <Divider>Indicators</Divider>
 
-            <div class="field is-grouped is-grouped-multiline">
-              <div class="control" v-for="item in theoryOfChangeStore.theoryOfChangeItemIndicators(theoryOfChangeModel.selectedItem.id)"
+            <!-- <Divider></Divider> -->
+            <Empty description="No indicators added yet." v-if="getTocItemIndicators?.length == 0"></Empty>
+
+            <div v-else class="field is-grouped is-grouped-multiline">
+              <div class="control"
+                v-for="item in theoryOfChangeStore.theoryOfChangeItemIndicators(theoryOfChangeModel.selectedItem.id)"
                 :key="item.id">
                 <div class="tags has-addons">
                   <a class="tag is-link">{{ item.name }}</a>
@@ -772,6 +822,7 @@ const risksModalConfig = reactive({
             </Button>
 
           </div>
+          <!-- </div> -->
 
         </Form>
       </Modal>
