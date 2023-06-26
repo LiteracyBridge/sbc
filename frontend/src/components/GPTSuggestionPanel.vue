@@ -4,17 +4,9 @@ import { ref, reactive, onMounted, onBeforeUnmount, computed, watch } from "vue"
 import { useProjectDataStore } from "@/stores/projectData";
 import * as lambda from "@/apis/lambda";
 import PulseLoaderVue from "./spinners/PulseLoader.vue";
+import { Drawer, Button, Space } from "ant-design-vue";
 
-const formInput = ref("");
-
-const projectStore = useProjectDataStore();
 const emit = defineEmits(['isClosed']);
-
-const gptResponse = ref({ answer: null, isLoading: false });
-const iconRefs = ref();
-
-const HOURGLASS_ICON = "/images/hourglass.svg"
-const BULB_ICON = "/images/lightbulb.png"
 
 
 const props = defineProps({
@@ -31,6 +23,14 @@ const props = defineProps({
     required: true,
   }
 });
+
+const projectStore = useProjectDataStore();
+
+const gptResponse = ref({ answer: null, isLoading: false });
+const formInput = ref("");
+const config = ref({
+  visible: props.isVisible
+})
 
 const moduleQuestion = computed(() => {
   return projectStore.questionsForTopic(props.module).find(i => i.id == props.questionId);
@@ -63,8 +63,6 @@ async function submitContextAndPrompt() {
   gptResponse.value.isLoading = false;
 }
 
-const isOpened = computed(() => props.isVisible)
-
 const closeButton = () => {
   gptResponse.value.answer = null;
   formInput.value = "";
@@ -73,6 +71,8 @@ const closeButton = () => {
 };
 
 watch(props, (newProps) => {
+  config.value.visible = newProps.isVisible;
+
   submitContextAndPrompt();
 
   formInput.value = projectStore.getData(newProps.questionId);
@@ -88,29 +88,33 @@ function onInputChange(event: any) {
 
 <template>
   <!-- TODO: change to ant drawer -->
-  <VueSidePanel v-model="isOpened" :hide-close-btn="true" :no-close="true" lock-scroll width="80vw"
-    transition-name="slide-right">
-    <div class="level">
+  <Drawer :visible="config.visible" :mask-closable="false" width="80vw" transition-name="slide-right" @close="closeButton">
+    <!-- <div class="level">
       <div class="level-left"></div>
-      <div class="level-right mt-2 mr-4">
+      <div class="level-right mt-2 mr-4"> -->
 
-        <button class="button is-primary mr-3"
-          @click.prevent="projectStore.setData(props.questionId, formInput); closeButton()">
-          <span class="icon mr-1">
-            <i class="fas fa-save"></i>
-          </span>
+    <template #extra>
+      <Space>
+
+        <Button type="primary" @click="projectStore.setData(props.questionId, formInput); closeButton()">
+          <!-- <span class="icon mr-1">
+                <i class="fas fa-save"></i>
+              </span> -->
 
           Save and Close
-        </button>
+        </Button>
 
-        <button class="button is-close" @click.prevent="closeButton">
-          <span class="icon mr-1">
-            <i class="fas fa-times"></i>
-          </span>
+        <Button @click="closeButton">
+          <!-- <span class="icon mr-1">
+                <i class="fas fa-times"></i>
+              </span> -->
           Cancel
-        </button>
+        </Button>
+      </Space>
+    </template>
+    <!--
       </div>
-    </div>
+    </div> -->
 
     <div class="columns my-3 mx-5">
 
@@ -131,7 +135,7 @@ function onInputChange(event: any) {
           <div class="field is-grouped mt-3">
             <div class="control">
               <!-- FIXME: hide this button if chatgpt throws error -->
-              <button class="button is-small is-dark" @click="formInput = formInput + '\n\n' + gptResponse?.answer;"
+              <Button type="primary" @click="formInput = formInput + '\n\n' + gptResponse?.answer;"
                 :class="{ 'disabled': gptResponse.isLoading || gptResponse?.answer == undefined }"
                 :disabled="gptResponse.isLoading || gptResponse?.answer == undefined">
                 <span class="icon is-small mr-1">
@@ -139,14 +143,14 @@ function onInputChange(event: any) {
                 </span>
 
                 Accept
-              </button>
+              </Button>
             </div>
 
             <div class="control">
-              <button class="button is-outlined is-small" @click="submitContextAndPrompt()"
-                :class="{ 'is-loading disabled': gptResponse.isLoading }" :disabled="gptResponse.isLoading">
+              <Button @click="submitContextAndPrompt()" :class="{ 'is-loading disabled': gptResponse.isLoading }"
+                :disabled="gptResponse.isLoading">
                 Refresh
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -164,5 +168,5 @@ function onInputChange(event: any) {
 
     </div>
 
-  </VueSidePanel>
+  </Drawer>
 </template>

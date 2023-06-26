@@ -105,7 +105,7 @@ watch(projectSelected, (newVal) => {
           <router-link v-if="item.path && !(isActive(item) && isExactActive(item))" :to="item.path">
             {{ item.label }}
           </router-link>
-          <router-link to="item.path" v-if="isActive(item) && isExactActive(item)">
+          <router-link :to="item.path" v-if="isActive(item) && isExactActive(item)">
             <strong>
               {{ item.label }}
             </strong>
