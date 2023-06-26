@@ -64,7 +64,7 @@ const customIndicator = ref({
 })
 
 const projectStore = useProjectStore(),
-  theoryOfChangeStore = useTheoryOfChangeStore();
+  store = useTheoryOfChangeStore();
 
 const diagramContainer = ref(null);
 const fromNodeId = ref(null);
@@ -344,9 +344,9 @@ const diagram = reactive({
 
 const fetchGraph = async () => {
   config.isLoading = true;
-  theoryOfChangeStore.download()
+  store.download()
     .then(() => {
-      diagram.parseGraph(theoryOfChangeStore.theory_of_change);
+      diagram.parseGraph(store.theory_of_change);
     })
     .finally(() => config.isLoading = false);
 }
@@ -381,6 +381,7 @@ onMounted(() => {
 
     const selectedItem = theoryOfChangeModel.value.selectedItem;
     if (selectedItem != null) {
+      console.log(selectedItem)
       tocItemModalConfig.value.isNew = false;
       tocItemModalConfig.value.form = selectedItem;
       tocItemModalConfig.value.itemId = selectedItem.id;
@@ -513,7 +514,7 @@ function updateToCModel(resp: TheoryOfChange[], itemId?: number) {
 }
 
 const getTocItemIndicators = computed(() => {
-  return theoryOfChangeStore.theoryOfChangeItemIndicators(theoryOfChangeModel.value.selectedItem?.id) ?? [];
+  return store.theoryOfChangeItemIndicators(theoryOfChangeModel.value.selectedItem?.id) ?? [];
 })
 //=== END: Theory of Change Item Modal functions
 
@@ -542,10 +543,10 @@ const risksModalConfig = reactive({
     risksModalConfig.form = new Risk();
   },
   saveForm: async () => {
-    const tocId = theoryOfChangeModel.value?.data?.id;
-    if (tocId == null) {
-      return;
-    }
+    // const tocId = theoryOfChangeModel.value?.data?.id;
+    // if (tocId == null) {
+    //   return;
+    // }
 
     const data = {
       name: risksModalConfig.form.name,
@@ -556,7 +557,7 @@ const risksModalConfig = reactive({
     };
 
     risksModalConfig.isSaving = true;
-    await ApiRequest.post(`theory-of-change/${tocId}/risks`, data)
+    store.saveRisk(data)
       .then(resp => {
         diagram.parseGraph(resp);
         risksModalConfig.closeModal();
@@ -569,11 +570,7 @@ const risksModalConfig = reactive({
 </script>
 
 <template>
-  <Card title="Theory of Change">
-    <div v-if="config.isLoading" id="graph-loader" style="margin-top: auto;">
-      <GridLoader :use-logo="false" :loading="config.isLoading"></GridLoader>
-    </div>
-
+  <Card title="Theory of Change" :loading="config.isLoading">
     <div v-if="!config.isLoading">
 
       <!-- IndiKit Browser Panel -->
@@ -708,8 +705,7 @@ const risksModalConfig = reactive({
             <FormItem name="type_id" label="Logic Model Category" has-feedback
               :rules="[{ required: true, message: 'Please select a category model!' }]">
               <Select v-model:value="tocItemModalConfig.form.type_id">
-                <SelectOption v-for="key in Object.keys(THEORY_OF_CHANGE_TYPES)" :key="key"
-                  :value="+key">
+                <SelectOption v-for="key in Object.keys(THEORY_OF_CHANGE_TYPES)" :key="key" :value="+key">
                   {{ THEORY_OF_CHANGE_TYPES[key] }}
                 </SelectOption>
 
@@ -780,7 +776,7 @@ const risksModalConfig = reactive({
 
           <FormItem name="description" label="Description" has-feedback :rules="[{ required: false }]">
             <Textarea v-model:value="tocItemModalConfig.form.description">
-    </Textarea>
+                </Textarea>
           </FormItem>
 
 
@@ -804,8 +800,7 @@ const risksModalConfig = reactive({
             <Empty description="No indicators added yet." v-if="getTocItemIndicators?.length == 0"></Empty>
 
             <div v-else class="field is-grouped is-grouped-multiline">
-              <div class="control"
-                v-for="item in theoryOfChangeStore.theoryOfChangeItemIndicators(theoryOfChangeModel.selectedItem.id)"
+              <div class="control" v-for="item in store.theoryOfChangeItemIndicators(theoryOfChangeModel.selectedItem.id)"
                 :key="item.id">
                 <div class="tags has-addons">
                   <a class="tag is-link">{{ item.name }}</a>
@@ -850,25 +845,25 @@ const risksModalConfig = reactive({
         </template>
 
         <template #footer>
-          <footer style="display: block;">
+          <Space>
             <Button :disabled="risksModalConfig.isSaving" @click="risksModalConfig.closeModal()">Cancel</Button>
 
             <Button :loading="risksModalConfig.isSaving" @click="risksModalConfig.saveForm()" type="primary">Save</Button>
-          </footer>
+          </Space>
         </template>
 
         <Form layout="vertical" :model="risksModalConfig.form">
           <Spin :spinning="risksModalConfig.isSaving">
-            <FormItem label="Name">
+            <FormItem label="Name" name="name" :rules="[{ require: true, message: 'Enter risk name!' }]" has-feedback>
               <Input v-model:value="risksModalConfig.form.name" placeholder="" />
             </FormItem>
 
-            <FormItem label="Assumptions">
-              <Textarea v-model:value="risksModalConfig.form.assumptions" placeholder="" />
+            <FormItem label="Assumptions" name="assumptions">
+              <Textarea v-model:value="risksModalConfig.form.assumptions" placeholder=""></Textarea>
             </FormItem>
 
-            <FormItem label="Risks">
-              <Textarea v-model:value="risksModalConfig.form.risks" placeholder="" />
+            <FormItem label="Risks" name="risks">
+              <Textarea v-model:value="risksModalConfig.form.risks" placeholder=""></Textarea>
             </FormItem>
           </Spin>
         </Form>

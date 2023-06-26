@@ -412,18 +412,18 @@ class Risk(Base):
     assumptions: Mapped[Optional[str]]
     risks: Mapped[Optional[str]]
 
-    project_id: Mapped[int] = mapped_column(ForeignKey("projects.id"), nullable=True)
+    project_id: Mapped[int] = mapped_column(ForeignKey("projects.id"), nullable=False)
     driver_id: Mapped[int] = mapped_column(
         ForeignKey("drivers_in_prj.id"), nullable=True
     )
-    theory_of_change_id: Mapped[int] = mapped_column(
-        ForeignKey("theories_of_change.id"), nullable=True
-    )
+    # theory_of_change_id: Mapped[int] = mapped_column(
+    #     ForeignKey("theory_of_change.id"), nullable=True
+    # )
     toc_from_id: Mapped[int] = mapped_column(
-        ForeignKey("theories_of_change.id"), nullable=True
+        ForeignKey("theory_of_change.id"), nullable=True
     )
     toc_to_id: Mapped[int] = mapped_column(
-        ForeignKey("theories_of_change.id"), nullable=True
+        ForeignKey("theory_of_change.id"), nullable=True
     )
 
 

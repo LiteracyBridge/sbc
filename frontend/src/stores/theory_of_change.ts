@@ -1,13 +1,12 @@
 import { defineStore } from "pinia";
 import { ApiRequest } from "@/apis/api";
 import {
-  Activity,
-  Schedule,
   TheoryOfChange,
   IndicatorGroup,
   IndicatorType,
   LuIndiKit,
   ProjectIndicator,
+  Risk,
 } from "@/types";
 import { useProjectStore } from "./projects";
 import { message } from "ant-design-vue";
@@ -17,6 +16,7 @@ export const useTheoryOfChangeStore = defineStore({
   id: "theory_of_change",
   state: () => ({
     theory_of_change: [] as TheoryOfChange[],
+    risks: [] as Risk[],
     project_indicators: [] as ProjectIndicator[],
     indi_kit_library: [] as LuIndiKit[],
 
@@ -157,6 +157,23 @@ export const useTheoryOfChangeStore = defineStore({
         this.fetchTheoryOfChange(),
         this.fetchIndiKit(),
       ]);
+    },
+    async saveRisk(form: any) {
+      this.$state.isLoading = true;
+      return await ApiRequest.post<TheoryOfChange>(
+        `theory-of-change/${useProjectStore().prj_id}/risks`,
+        form
+      )
+        .then((resp) => {
+          this.$state.theory_of_change = resp;
+          message.success("Risk saved successfully!");
+          return resp;
+        })
+        .catch((err) => {
+          message.error(err.message);
+          throw err;
+        })
+        .finally(() => (this.$state.isLoading = false));
     },
   },
 });

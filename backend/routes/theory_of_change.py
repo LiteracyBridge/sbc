@@ -311,20 +311,20 @@ def get_indicator(db: Session = Depends(models.get_db)):
     return ApiResponse(data=data)
 
 
-@router.post("/{tocId}/risks", response_model=ApiResponse)
-def risks(tocId: int, dto: RisksDto, db: Session = Depends(models.get_db)):
-    toc = db.query(TheoryOfChange).filter(TheoryOfChange.id == tocId).first()
-    risk = Risk()
+@router.post("/{project_id}/risks", response_model=ApiResponse)
+def risks(project_id: int, dto: RisksDto, db: Session = Depends(models.get_db)):
+    # toc = db.query(TheoryOfChange).filter(TheoryOfChange.id == tocId).first()
 
+    risk: Risk = Risk()
     risk.name = dto.name
     risk.mitigation = dto.mitigation
     risk.assumptions = dto.assumptions
     risk.risks = dto.risks
     risk.toc_from_id = dto.toc_from_id
     risk.toc_to_id = dto.toc_to_id
-    risk.theory_of_change_id = tocId
+    risk.project_id = project_id
 
     db.add(risk)
     db.commit()
 
-    return get_by_project_id(toc.project_id, db)
+    return get_by_project_id(project_id, db)
