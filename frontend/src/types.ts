@@ -94,19 +94,6 @@ export class TheoryOfChangeItem {
 //   toc_item: TheoryOfChangeItem;
 // }
 
-export class Risk {
-  id: number = undefined;
-  name: string = "";
-  assumptions: string = "";
-  mitigation: string = "";
-  risks: string = "";
-
-  project_id?: number = null;
-  toc_from_id?: number = null;
-  toc_to_id?: number = null;
-  theory_of_change_id?: number = null;
-}
-
 export class TheoryOfChange {
   id: number;
   name: string = "";
@@ -124,9 +111,24 @@ export class TheoryOfChange {
   /**
    * @deprecated
    */
-  graph: Array<TheoryOfChangeItem> = [];
-  risks: Risk[] = [];
+  // graph: Array<TheoryOfChangeItem> = [];
+  // risks: Risk[] = [];
   // indicators: any[] = [];
+}
+
+
+export class Risk {
+  id: number = undefined;
+  name: string = "";
+  assumptions: string = "";
+  mitigation: string = "";
+  risks: string = "";
+  project_id?: number = null;
+  toc_from_id?: number = null;
+  toc_to_id?: number = null;
+
+  toc_from?: TheoryOfChange;
+  toc_to?: TheoryOfChange;
 }
 
 export class TheoryOfChangeIndicator {
