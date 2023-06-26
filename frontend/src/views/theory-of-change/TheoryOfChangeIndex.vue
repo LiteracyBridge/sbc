@@ -220,6 +220,8 @@ const diagram = reactive({
   edgeSet: new Set(),
 
   edgeLabel(edge, fromOrTo) {
+    if(edge == null) return;
+
     if (fromOrTo == 'from') {
       return this.nodes[edge.fromId].label;
     }
@@ -332,7 +334,7 @@ const diagram = reactive({
       }
     }
     for (const edge of this.edges) {
-      result += `${edge.fromId} -->|factors| ${edge.toId}\n`;
+      result += `${edge.fromId} -->|risk factors| ${edge.toId}\n`;
     }
     return result;
   },
@@ -529,17 +531,16 @@ const risksModalConfig = reactive({
     if (edge == null) {
       return
     }
-    const toc = theoryOfChangeModel.value?.data
-    if (toc == null) {
-      return;
-    }
 
-    const existingRisk = toc.risks.find(i => i.toc_from_id == edge.fromId && i.toc_to_id == edge.toId)
+    const existingRisk = store.risks.find(i => i.toc_from_id == edge.fromId && i.toc_to_id == edge.toId)
     risksModalConfig.form = existingRisk ?? new Risk();
+    risksModalConfig.form.toc_from_id ??= edge.fromId;
+    risksModalConfig.form.toc_to_id ??= edge.toId;
     risksModalConfig.visible = true;
   },
   closeModal: () => {
     risksModalConfig.visible = false;
+    selectedEdge.value = null;
     risksModalConfig.form = new Risk();
   },
   saveForm: async () => {
@@ -549,6 +550,7 @@ const risksModalConfig = reactive({
     // }
 
     const data = {
+      id: risksModalConfig.form.id,
       name: risksModalConfig.form.name,
       assumptions: risksModalConfig.form.assumptions,
       risks: risksModalConfig.form.risks,
@@ -559,7 +561,6 @@ const risksModalConfig = reactive({
     risksModalConfig.isSaving = true;
     store.saveRisk(data)
       .then(resp => {
-        diagram.parseGraph(resp);
         risksModalConfig.closeModal();
       }).finally(() => {
         risksModalConfig.isSaving = false;
@@ -570,9 +571,12 @@ const risksModalConfig = reactive({
 </script>
 
 <template>
-  <Card title="Theory of Change" :loading="config.isLoading">
-    <div v-if="!config.isLoading">
+  <Card title="Theory of Change">
+    <div v-if="config.isLoading" id="graph-loader" style="margin-top: auto;">
+      <GridLoader :use-logo="false" :loading="config.isLoading"></GridLoader>
+    </div>
 
+    <div v-if="!config.isLoading">
       <!-- IndiKit Browser Panel -->
       <IndicatorBrowserPanel :is-visible="isPanelVisible" @is-closed="isPanelVisible = false; showIndicatorModal = true;"
         :toc-item="theoryOfChangeModel.selectedItem"
@@ -776,7 +780,7 @@ const risksModalConfig = reactive({
 
           <FormItem name="description" label="Description" has-feedback :rules="[{ required: false }]">
             <Textarea v-model:value="tocItemModalConfig.form.description">
-                </Textarea>
+                  </Textarea>
           </FormItem>
 
 
@@ -834,7 +838,7 @@ const risksModalConfig = reactive({
       <!-- ===== END: Customer Indicators Modal ==== -->
 
       <!-- ======== START: Risks Modal ======= -->
-      <Modal v-model:visible="risksModalConfig.visible" @ok="risksModalConfig.closeModal()">
+      <Modal v-model:visible="risksModalConfig.visible" @ok="risksModalConfig.closeModal()" @cancel="closeModal()">
 
         <template #title>
           <span>
@@ -848,7 +852,9 @@ const risksModalConfig = reactive({
           <Space>
             <Button :disabled="risksModalConfig.isSaving" @click="risksModalConfig.closeModal()">Cancel</Button>
 
-            <Button :loading="risksModalConfig.isSaving" @click="risksModalConfig.saveForm()" type="primary">Save</Button>
+            <Button :loading="risksModalConfig.isSaving" @click="risksModalConfig.saveForm()" type="primary">
+              {{ risksModalConfig.form?.id ? 'Update' : 'Save' }}
+            </Button>
           </Space>
         </template>
 

@@ -151,21 +151,34 @@ export const useTheoryOfChangeStore = defineStore({
         .catch((err) => message.error(err.message))
         .finally(() => (this.$state.isLoading = false));
     },
+    async fetchRisks() {
+      this.$state.isLoading = true;
+      return await ApiRequest.get<Risk>(
+        `theory-of-change/${useProjectStore().projectId}/risks`
+      )
+        .then((resp) => {
+          this.$state.risks = resp;
+          return resp;
+        })
+        .catch((err) => message.error(err.message))
+        .finally(() => (this.$state.isLoading = false));
+    },
     async download() {
       return await Promise.all([
         this.fetchIndicators(),
         this.fetchTheoryOfChange(),
         this.fetchIndiKit(),
+        this.fetchRisks(),
       ]);
     },
     async saveRisk(form: any) {
       this.$state.isLoading = true;
-      return await ApiRequest.post<TheoryOfChange>(
+      return await ApiRequest.post<Risk>(
         `theory-of-change/${useProjectStore().prj_id}/risks`,
         form
       )
         .then((resp) => {
-          this.$state.theory_of_change = resp;
+          this.$state.risks = resp;
           message.success("Risk saved successfully!");
           return resp;
         })

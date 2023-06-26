@@ -47,6 +47,7 @@ class NewTheoryOfChangeDto(BaseModel):
 
 
 class RisksDto(BaseModel):
+    id: Optional[int]
     name: Optional[str]
     mitigation: Optional[str]
     assumptions: Optional[str]
@@ -304,18 +305,39 @@ def update_indicators(
     return ApiResponse(data=get_toc_by_project_id(theory_of_change.project_id, db))
 
 
-@router.get("/", response_model=ApiResponse)
-def get_indicator(db: Session = Depends(models.get_db)):
-    data = db.query(models.Indicator).all()
+# @router.get("/", response_model=ApiResponse)
+# def get_indicator(db: Session = Depends(models.get_db)):
+#     data = db.query(models.Indicator).all()
 
-    return ApiResponse(data=data)
+#     return ApiResponse(data=data)
+
+
+# ======== RISKS ========= #
+@router.get("/{project_id}/risks", response_model=ApiResponse)
+def get_risks(project_id: int, db: Session = Depends(models.get_db)):
+    return ApiResponse(
+        data=db.query(Risk)
+        .filter(Risk.project_id == project_id)
+        .options(subqueryload(Risk.toc_from), subqueryload(Risk.toc_to))
+        .all()
+    )
 
 
 @router.post("/{project_id}/risks", response_model=ApiResponse)
-def risks(project_id: int, dto: RisksDto, db: Session = Depends(models.get_db)):
-    # toc = db.query(TheoryOfChange).filter(TheoryOfChange.id == tocId).first()
-
+def update_or_create_risk(
+    project_id: int, dto: RisksDto, db: Session = Depends(models.get_db)
+):
     risk: Risk = Risk()
+    if dto.id is not None:
+        risk = (
+            db.query(Risk)
+            .filter(Risk.id == dto.id and Risk.project_id == project_id)
+            .first()
+        )
+
+        if risk is None:
+            raise HTTPException(status_code=404, detail="Risk not found")
+
     risk.name = dto.name
     risk.mitigation = dto.mitigation
     risk.assumptions = dto.assumptions
@@ -324,7 +346,9 @@ def risks(project_id: int, dto: RisksDto, db: Session = Depends(models.get_db)):
     risk.toc_to_id = dto.toc_to_id
     risk.project_id = project_id
 
-    db.add(risk)
+    if dto.id is None:
+        db.add(risk)
+
     db.commit()
 
-    return get_by_project_id(project_id, db)
+    return get_risks(project_id, db)

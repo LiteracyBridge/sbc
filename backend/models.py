@@ -426,6 +426,14 @@ class Risk(Base):
         ForeignKey("theory_of_change.id"), nullable=True
     )
 
+    # Related objects
+    toc_from: Mapped["TheoryOfChange"] = relationship(
+        "TheoryOfChange", foreign_keys=[toc_from_id]
+    )
+    toc_to: Mapped["TheoryOfChange"] = relationship(
+        "TheoryOfChange", foreign_keys=[toc_to_id]
+    )
+
 
 class Activity(Base):
     __tablename__ = "activities"
