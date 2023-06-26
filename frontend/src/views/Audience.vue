@@ -122,8 +122,8 @@ function saveForms() {
   audienceFormRef.value.validateFields().then((values) => {
     // config.value.loading = true;
 
-    store.updateAudience({
-      name: "secondary",
+    store.updateData({
+      name: "secondary_audience",
       editing_user_id: useUserStore().id,
       added: secondaryAudienceForm.audiences
         .filter(i => i.is_new).map(i => i.value),
@@ -142,8 +142,8 @@ function saveForms() {
   primaryFormRef.value.validateFields().then((values) => {
     // config.value.loading = true;
 
-    store.updateAudience({
-      name: "primary",
+    store.updateData({
+      name: "primary_audience",
       editing_user_id: useUserStore().id,
       added: primaryAudienceForm.audiences
         .filter(i => i.is_new).map(i => i.value),

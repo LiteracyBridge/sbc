@@ -19,11 +19,9 @@ interface Objective {
 
 const BULB_ICON = "/images/lightbulb.png"
 
-const projectDataStore = useProjectDataStore();
+const store = useProjectDataStore();
 
 const config = ref({
-  loading: false,
-  projectData: [] as ProjectData[],
   suggestions: {
     questionId: null,
     isOpened: false,
@@ -62,7 +60,7 @@ function showPanel(id: string | number) {
 }
 
 function updateData(event: any, id: number) {
-  projectDataStore.setData(id, event.target.value);
+  store.setData(id, event.target.value);
 }
 
 // Dynamic objectives forms
@@ -87,12 +85,10 @@ function addObjective() {
 };
 
 function saveForms() {
-  console.log(dynamicValidateForm)
-
   objectivesFormRef.value.validateFields().then((values) => {
-    config.value.loading = true;
-
-    const body = {
+    store.updateData({
+      name: "specific_objective",
+      module: "objectives",
       editing_user_id: useUserStore().id,
       added: dynamicValidateForm.objectives
         .filter(i => i.is_new).map(i => i.value),
@@ -103,25 +99,13 @@ function saveForms() {
           return _item;
         }),
       removed: dynamicValidateForm.deleted
-    }
-
-    ApiRequest.post<ProjectData>(`project/${useProjectStore().prj_id}/objectives`, body)
-      .then(resp => {
-        projectDataStore.project_data = resp
-        config.value.projectData = resp;
-
-        message.success("Project objectives updated successfully");
-      })
-      .catch(err => message.error(err.message))
-      .finally(() => config.value.loading = false);
+    });
   });
 }
 
 function fetchData() {
-  config.value.loading = true;
-  ApiRequest.get<ProjectData>(`project/${useProjectStore().prj_id}/data`).then((resp) => {
-    config.value.projectData = resp;
-    dynamicValidateForm.objectives = resp
+  store.download().then((resp) => {
+    dynamicValidateForm.objectives = store.new_project_data
       .filter(p => p.module == "objectives")
       .map(i => {
         return {
@@ -134,18 +118,13 @@ function fetchData() {
     if (dynamicValidateForm.objectives.length == 0) {
       addObjective();
     }
-  })
-    .catch(err => message.error(err.message))
-    .finally(() => config.value.loading = false);
+  });
 }
 
 onMounted(() => {
   fetchData();
 })
 
-const getObjectivesData = computed(() => {
-  return config.value.projectData.filter(i => i.module == "objectives");
-});
 </script>
 
 <template>
@@ -153,7 +132,7 @@ const getObjectivesData = computed(() => {
     :question-id="config.suggestions.questionId" :module="config.suggestions.module">
   </GPTSuggestionPanel>
 
-  <Card class="section" title="Project Objectives" :loading="config.loading">
+  <Card class="section" title="Project Objectives" :loading="store.loading">
     <template #extra>
       <Button type="primary" :ghost="true" @click="saveForms()">Save Changes</Button>
     </template>
@@ -169,8 +148,8 @@ const getObjectivesData = computed(() => {
       <textarea @change="updateData($event, q.id)" :value="projectDataStore.getData(q.id)" rows="4" cols="80" /><br />
       <br /><br /> -->
 
-      <FormItem :name="`input-${count + 1}`"
-        v-for="(q, count) in projectDataStore.questionsForTopic(config.suggestions.module)" :key="q.id">
+      <FormItem :name="`input-${count + 1}`" v-for="(q, count) in store.questionsForTopic(config.suggestions.module)"
+        :key="q.id">
         <template #label>
           {{ count + 1 }}. {{ q.q2u }}
         </template>
@@ -181,7 +160,7 @@ const getObjectivesData = computed(() => {
         <!-- </div> -->
 
         <!-- <div class="control"> -->
-        <Textarea @change="updateData($event, q.id)" :value="projectDataStore.getData(q.id)" :rows="7" :cols="40"
+        <Textarea @change="updateData($event, q.id)" :value="store.getData(q.id)" :rows="7" :cols="40"
           style="width: 70%;"></Textarea>
 
         <!-- </div> -->

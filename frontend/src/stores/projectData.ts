@@ -216,7 +216,7 @@ export const useProjectDataStore = defineStore({
     // Project Objectives
     specificObjectives: (state) => {
       return state.new_project_data.filter(
-        (d) => d.name == "specific_objectives"
+        (d) => d.name == "specific_objective"
       );
     },
 
@@ -348,13 +348,12 @@ export const useProjectDataStore = defineStore({
         })
         .catch((err) => message.error(err.message));
     },
-    async updateAudience(form: {
     async updateData(form: {
       editing_user_id: number;
       added: string[];
       removed: number[];
       updated: Record<string, any>[];
-      name: "primary_audience" | "secondary_audience" | "specific_objectives";
+      name: "primary_audience" | "secondary_audience" | "specific_objective";
       module: "audiences" | "objectives";
     }) {
       this.$state.loading = true;

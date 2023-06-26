@@ -206,7 +206,7 @@ export class ProjectData {
   theory_of_change_id: number;
   data: string;
   module?: "objectives" | "audiences" | "project_info";
-  name?: "specific_objectives" | "secondary_audience" | "primary_audience" | "sector";
+  name?: "specific_objective" | "secondary_audience" | "primary_audience" | "sector";
 }
 
 export class Communication {
