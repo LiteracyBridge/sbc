@@ -1,6 +1,9 @@
 <script setup lang="ts">
 
-import { Card, Form, FormItem, Image, Textarea, type FormInstance, Input, Button, Divider, message } from 'ant-design-vue';
+import {
+  Card, Form, FormItem, Image, Textarea,
+  type FormInstance, Input, Button, Divider, Row, Col, message
+} from 'ant-design-vue';
 import { computed, onMounted, reactive, ref, watch } from 'vue';
 
 import { useProjectDataStore } from '@/stores/projectData';
@@ -158,46 +161,59 @@ const getObjectivesData = computed(() => {
 
     <Form layout="vertical">
 
-      <FormItem :name="`input-${count + 1}`"
-        v-for="(q, count) in projectDataStore.questionsForTopic(config.suggestions.module)" :key="q.id">
-        <template #label>
-          {{ count + 1 }}. {{ q.q2u }}
-        </template>
+      <Row>
+        <Col :span="16" v-for="(q, count) in projectDataStore.questionsForTopic(config.suggestions.module)">
 
-        <img v-if="q.bulb" :src="BULB_ICON" ref="iconRefs" @click="showPanel(q.id)" class="image is-32x32" />
+        <FormItem :name="`input-${count + 1}`" :key="q.id">
+          <template #label>
+            {{ count + 1 }}. {{ q.q2u }}
+          </template>
 
-        <Textarea @change="updateData($event, q.id)" :value="projectDataStore.getData(q.id)" :rows="7" :cols="40"
-          style="width: 70%;"></Textarea>
+          <img v-if="q.bulb" :src="BULB_ICON" ref="iconRefs" @click="showPanel(q.id)" class="image is-32x32" />
 
-      </FormItem>
+          <Textarea @change="updateData($event, q.id)" :value="projectDataStore.getData(q.id)" :rows="7"
+            :cols="40"></Textarea>
+
+        </FormItem>
+
+        </Col>
+      </Row>
+
 
     </Form>
 
     <Form ref="audienceFormRef" name="audience-form-item" :model="dynamicValidateForm" layout="vertical"
       v-bind="formItemLayoutWithOutLabel">
 
-      <FormItem v-for="(objective, index) in dynamicValidateForm.audiences" :key="objective.id"
-        v-bind="index === 0 ? formItemLayout : {}"
-        :label="index != 0 ? '' : '3. Who else influences the actions of your main target audience? What other audiences need to be involved? Who else influences the actions of your main target audience? What other audiences need to be involved?'"
-        :name="['audiences', index, 'value']" :rules="{
-          required: true,
-          message: 'Audience can not be empty',
-          trigger: 'change',
-        }">
+      <Row>
+        <Col :span="16" v-for="(objective, index) in dynamicValidateForm.audiences">
+        <FormItem :key="objective.id" v-bind="index === 0 ? formItemLayout : {}"
+          :label="index != 0 ? '' : '3. Who else influences the actions of your main target audience?'"
+          :name="['audiences', index, 'value']" :rules="{
+            required: true,
+            message: 'Audience can not be empty',
+            trigger: 'change',
+          }"
+          help="What other audiences need to be involved? Who else influences the actions of your main target audience? What other audiences need to be involved?"
+          style="margin-bottom: 10px;">
 
-        <Input v-model:value="objective.value" placeholder="please input audience" style="width: 60%;" />
+          <Input v-model:value="objective.value" placeholder="please input audience" style="width: 60%;" />
 
-        <Button type="ghost" :danger="true" size="small" v-if="dynamicValidateForm.audiences.length > 1" class="ml-2"
-          :disabled="dynamicValidateForm.audiences.length === 1" @click="removeAudience(objective)">
-          <template #icon>
-            <DeleteOutlined />
-          </template>
-          Delete
-        </Button>
-      </FormItem>
+          <Button type="ghost" :danger="true" size="small" v-if="dynamicValidateForm.audiences.length > 1" class="ml-2"
+            :disabled="dynamicValidateForm.audiences.length === 1" @click="removeAudience(objective)">
+
+            <template #icon>
+              <DeleteOutlined />
+            </template>
+            Delete
+          </Button>
+        </FormItem>
+
+        </Col>
+      </Row>
 
       <FormItem v-bind="formItemLayoutWithOutLabel">
-        <Button type="dashed" style="width: 60%" @click="addAudience">
+        <Button type="dashed" @click="addAudience">
           <PlusOutlined />
           Add Audience
         </Button>
