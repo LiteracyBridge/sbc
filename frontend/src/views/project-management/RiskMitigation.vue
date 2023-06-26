@@ -22,10 +22,12 @@ const columns = [
   {
     title: 'Assumptions',
     key: 'assumptions',
+    ellipsis: true,
   },
   {
     title: 'Mitigation Strategy',
-    key: 'strategy',
+    key: 'mitigation',
+    ellipsis: true,
   },
 ]
 </script>
@@ -58,6 +60,10 @@ const columns = [
 
         <template v-if="column.key === 'assumptions'">
           {{ record.assumptions }}
+        </template>
+
+        <template v-if="column.key === 'mitigation'">
+          {{ record.mitigation }}
         </template>
 
         <!-- TODO: Add edit button for adding strategy -->

@@ -559,7 +559,7 @@ const risksModalConfig = reactive({
     };
 
     risksModalConfig.isSaving = true;
-    store.saveRisk(data)
+    store.saveRisk(risksModalConfig.form)
       .then(resp => {
         risksModalConfig.closeModal();
       }).finally(() => {
@@ -870,6 +870,10 @@ const risksModalConfig = reactive({
 
             <FormItem label="Risks" name="risks">
               <Textarea v-model:value="risksModalConfig.form.risks" placeholder=""></Textarea>
+            </FormItem>
+
+            <FormItem label="Mitigation" name="mitigation">
+              <Textarea v-model:value="risksModalConfig.form.mitigation" placeholder=""></Textarea>
             </FormItem>
           </Spin>
         </Form>
