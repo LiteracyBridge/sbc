@@ -98,6 +98,7 @@ class Project(Base):
     name: Mapped[str]
     evaluation_strategy: Mapped[Optional[str]]
     feedback_strategy: Mapped[Optional[str]]
+    sustainability_strategy: Mapped[Optional[str]]
     archived: Mapped[bool] = mapped_column(Boolean, default=False)
     start_date: Mapped[Optional[DateTime]] = mapped_column(DateTime, nullable=True)
     end_date: Mapped[Optional[DateTime]] = mapped_column(DateTime, nullable=True)

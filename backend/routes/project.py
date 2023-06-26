@@ -19,6 +19,7 @@ class UpdateProjectDto(BaseModel):
     # name: str
     evaluation_strategy: Optional[str]
     feedback_strategy: Optional[str]
+    sustainability_strategy: Optional[str]
 
 
 class ProjectObjectiveDto(BaseModel):
@@ -53,6 +54,7 @@ def update_strategy(
     # record.name = dto.name
     record.evaluation_strategy = dto.evaluation_strategy
     record.feedback_strategy = dto.feedback_strategy
+    record.sustainability_strategy = dto.sustainability_strategy
 
     db.commit()
     db.refresh(record)

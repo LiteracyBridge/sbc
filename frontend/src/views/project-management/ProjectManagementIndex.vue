@@ -4,6 +4,7 @@ import { Button, TabPane, Table, Tabs, Tag, Typography } from "ant-design-vue";
 
 import ActivitiesTable from "./activities/ActivitiesTable.vue";
 import RiskMitigation from "./RiskMitigation.vue";
+import SustainabilityStrategy from './SustainabilityStrategy.vue';
 
 const config = ref({
   activeTab: 'activities'
@@ -20,6 +21,9 @@ const config = ref({
       </TabPane>
       <TabPane key="risk" tab="Risk Mitigation Strategy">
         <RiskMitigation></RiskMitigation>
+      </TabPane>
+      <TabPane key="sustainability" tab="Sustainability Strategy">
+        <SustainabilityStrategy></SustainabilityStrategy>
       </TabPane>
     </Tabs>
   </section>

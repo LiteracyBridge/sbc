@@ -18,6 +18,7 @@ export class Project {
   country_id?: number;
   evaluation_strategy?: string;
   feedback_strategy?: string;
+  sustainability_strategy?: string;
 }
 
 export class LuIndiKit {

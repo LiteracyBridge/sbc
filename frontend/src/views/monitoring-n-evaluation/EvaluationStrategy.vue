@@ -1,6 +1,4 @@
 <script lang="ts" setup>
-// TODO: add button for viewing progress in a modal
-// TODO: add button for capturing progress in a modal
 
 import { useProjectStore } from '@/stores/projects';
 import { Button, Space, Form, FormItem, Textarea, Spin, type FormInstance } from 'ant-design-vue';
@@ -15,7 +13,6 @@ const evaluationFormRef = ref<FormInstance>();
 <template>
   <Spin :spinning="store.loading">
     <Form ref="evaluationFormRef" layout="vertical" :model="store.current_project" name="evaluationFormRef">
-      <!-- TODO: Implement saving of form -->
 
       <FormItem label="How will you evaluate the impact of our project? (evaluation strategy narrative)"
         name="evaluation_strategy" :rules="[{ required: true, message: 'Please input your evaluation strategy!' }]">

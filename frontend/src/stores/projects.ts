@@ -235,6 +235,8 @@ export const useProjectStore = defineStore({
       return await ApiRequest.put<Project>(`project/${this.$state.prj_id}`, {
         evaluation_strategy: this.$state.current_project.evaluation_strategy,
         feedback_strategy: this.$state.current_project.feedback_strategy,
+        sustainability_strategy:
+          this.$state.current_project.sustainability_strategy,
       })
         .then((response) => {
           this.$state.current_project = response[0];
