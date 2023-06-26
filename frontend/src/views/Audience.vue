@@ -22,11 +22,11 @@ interface Objective {
 
 const BULB_ICON = "/images/lightbulb.png"
 
-const projectDataStore = useProjectDataStore();
+const store = useProjectDataStore();
 
 const config = ref({
-  loading: false,
-  projectData: [] as ProjectData[],
+  // loading: false,
+  // projectData: [] as ProjectData[],
   suggestions: {
     questionId: null,
     isOpened: false,
@@ -36,7 +36,17 @@ const config = ref({
 
 // Dynamic objectives forms
 const audienceFormRef = ref<FormInstance>();
-const dynamicValidateForm = reactive<{ audiences: Objective[], deleted: number[] }>({
+const primaryFormRef = ref<FormInstance>();
+const secondaryAudienceForm = reactive<{
+  audiences: Objective[], deleted: number[]
+}>({
+  audiences: [],
+  deleted: []
+});
+
+const primaryAudienceForm = reactive<{
+  audiences: Objective[], deleted: number[]
+}>({
   audiences: [],
   deleted: []
 });
@@ -65,24 +75,42 @@ function showPanel(id: string | number) {
 }
 
 function updateData(event: any, id: number) {
-  projectDataStore.setData(id, event.target.value);
+  store.setData(id, event.target.value);
 }
 
 // Dynamic objectives forms
-function removeAudience(item: Objective) {
-  let index = dynamicValidateForm.audiences.indexOf(item);
-  if (index !== -1) {
-    const [el] = dynamicValidateForm.audiences.splice(index, 1);
+function removeAudience(item: Objective, primary: boolean) {
+  if (primary) {
+    let index = primaryAudienceForm.audiences.indexOf(item);
+    if (index !== -1) {
+      const [el] = primaryAudienceForm.audiences.splice(index, 1);
+      if (!el.is_new) {
+        primaryAudienceForm.deleted.push(el.id);
+      }
+    }
+    return;
+  }
 
-    console.log(el)
+  let index = secondaryAudienceForm.audiences.indexOf(item);
+  if (index !== -1) {
+    const [el] = secondaryAudienceForm.audiences.splice(index, 1);
     if (!el.is_new) {
-      dynamicValidateForm.deleted.push(el.id);
+      secondaryAudienceForm.deleted.push(el.id);
     }
   }
 }
 
-function addAudience() {
-  dynamicValidateForm.audiences.push({
+function addAudience(primary: boolean) {
+  if (primary) {
+    primaryAudienceForm.audiences.push({
+      value: '',
+      id: Date.now(),
+      is_new: true
+    });
+    return;
+  }
+
+  secondaryAudienceForm.audiences.push({
     value: '',
     id: Date.now(),
     is_new: true
@@ -90,63 +118,101 @@ function addAudience() {
 };
 
 function saveForms() {
+  // Save secondary audience
   audienceFormRef.value.validateFields().then((values) => {
-    config.value.loading = true;
+    // config.value.loading = true;
 
-    const body = {
+    store.updateAudience({
+      audience: "secondary",
       editing_user_id: useUserStore().id,
-      added: dynamicValidateForm.audiences
+      added: secondaryAudienceForm.audiences
         .filter(i => i.is_new).map(i => i.value),
-      updated: dynamicValidateForm.audiences.filter(i => !i.is_new)
+      updated: secondaryAudienceForm.audiences.filter(i => !i.is_new)
         .map(i => {
           const _item: Record<string, any> = {};
           _item[i.id] = i.value;
           return _item;
         }),
-      removed: dynamicValidateForm.deleted
-    }
-
-    ApiRequest.post<ProjectData>(`project/${useProjectStore().prj_id}/audience`, body)
-      .then(resp => {
-        projectDataStore.project_data = resp
-        config.value.projectData = resp;
-
-        message.success("Project audiences updated successfully");
-      })
-      .catch(err => message.error(err.message))
-      .finally(() => config.value.loading = false);
+      removed: secondaryAudienceForm.deleted
+    })
   });
+
+  // Save primary audience
+  primaryFormRef.value.validateFields().then((values) => {
+    // config.value.loading = true;
+
+    store.updateAudience({
+      audience: "primary",
+      editing_user_id: useUserStore().id,
+      added: primaryAudienceForm.audiences
+        .filter(i => i.is_new).map(i => i.value),
+      updated: primaryAudienceForm.audiences.filter(i => !i.is_new)
+        .map(i => {
+          const _item: Record<string, any> = {};
+          _item[i.id] = i.value;
+          return _item;
+        }),
+      removed: primaryAudienceForm.deleted
+    })
+  });
+
 }
 
-function fetchData() {
-  config.value.loading = true;
-  ApiRequest.get<ProjectData>(`project/${useProjectStore().prj_id}/data`).then((resp) => {
-    config.value.projectData = resp;
-    dynamicValidateForm.audiences = resp
-      .filter(p => p.module == config.value.suggestions.module)
-      .map(i => {
-        return {
-          value: i.data,
-          id: i.id,
-          is_new: false
-        }
-      });
+// function fetchData() {
+//   config.value.loading = true;
+//   ApiRequest.get<ProjectData>(`project/${useProjectStore().prj_id}/data`).then((resp) => {
+//     config.value.projectData = resp;
+//     secondaryAudienceForm.audiences = resp
+//       .filter(p => p.module == config.value.suggestions.module)
+//       .map(i => {
+//         return {
+//           value: i.data,
+//           id: i.id,
+//           is_new: false
+//         }
+//       });
 
-    if (dynamicValidateForm.audiences.length == 0) {
-      addAudience();
-    }
-  })
-    .catch(err => message.error(err.message))
-    .finally(() => config.value.loading = false);
-}
+//     if (secondaryAudienceForm.audiences.length == 0) {
+//       addAudience(false);
+//     }
+//   })
+//     .catch(err => message.error(err.message))
+//     .finally(() => config.value.loading = false);
+// }
 
 onMounted(() => {
-  fetchData();
+  store.download()
+    .then((_resp) => {
+      secondaryAudienceForm.audiences = store.new_project_data
+        .filter(p => p.name == "secondary_audience")
+        .map(i => {
+          return {
+            value: i.data,
+            id: i.id,
+            is_new: false
+          }
+        });
+
+      if (secondaryAudienceForm.audiences.length == 0) {
+        addAudience(false);
+      }
+
+      primaryAudienceForm.audiences = store.new_project_data
+        .filter(p => p.name == "primary_audience")
+        .map(i => {
+          return {
+            value: i.data,
+            id: i.id,
+            is_new: false
+          }
+        });
+
+      if (primaryAudienceForm.audiences.length == 0) {
+        addAudience(true);
+      }
+    })
 })
 
-const getObjectivesData = computed(() => {
-  return config.value.projectData.filter(i => i.module == "objectives");
-});
 </script>
 
 <template>
@@ -154,53 +220,28 @@ const getObjectivesData = computed(() => {
     :question-id="config.suggestions.questionId" :module="config.suggestions.module">
   </GPTSuggestionPanel>
 
-  <Card class="section" title="Project Audiences" :loading="config.loading">
+  <Card class="section" title="Project Audiences" :loading="store.loading">
     <template #extra>
-      <Button type="primary" :ghost="true" @click="saveForms()">Save Changes</Button>
+      <Button type="primary" :ghost="true" :loading="store.loading" @click="saveForms()">Save Changes</Button>
     </template>
 
-    <Form layout="vertical">
+    <Form ref="primaryFormRef" :model="primaryAudienceForm" layout="vertical" v-bind="formItemLayoutWithOutLabel">
 
       <Row>
-        <Col :span="16" v-for="(q, count) in projectDataStore.questionsForTopic(config.suggestions.module)">
+        <Col :span="16" v-for="(objective, index) in primaryAudienceForm.audiences">
 
-        <FormItem :name="`input-${count + 1}`" :key="q.id">
-          <template #label>
-            {{ count + 1 }}. {{ q.q2u }}
-          </template>
-
-          <img v-if="q.bulb" :src="BULB_ICON" ref="iconRefs" @click="showPanel(q.id)" class="image is-32x32" />
-
-          <Textarea @change="updateData($event, q.id)" :value="projectDataStore.getData(q.id)" :rows="7"
-            :cols="40"></Textarea>
-
-        </FormItem>
-
-        </Col>
-      </Row>
-
-
-    </Form>
-
-    <Form ref="audienceFormRef" name="audience-form-item" :model="dynamicValidateForm" layout="vertical"
-      v-bind="formItemLayoutWithOutLabel">
-
-      <Row>
-        <Col :span="16" v-for="(objective, index) in dynamicValidateForm.audiences">
         <FormItem :key="objective.id" v-bind="index === 0 ? formItemLayout : {}"
-          :label="index != 0 ? '' : '3. Who else influences the actions of your main target audience?'"
+          :label="index != 0 ? '' : 'Who is the primary target audience for your project? Who will be adopting the behavior you want to influence?'"
           :name="['audiences', index, 'value']" :rules="{
             required: true,
             message: 'Audience can not be empty',
             trigger: 'change',
-          }"
-          help="What other audiences need to be involved? Who else influences the actions of your main target audience? What other audiences need to be involved?"
-          style="margin-bottom: 10px;">
+          }" style="margin-bottom: 10px;">
 
-          <Input v-model:value="objective.value" placeholder="please input audience" style="width: 60%;" />
+          <Input v-model:value="objective.value" placeholder="Enter primary audience" style="width: 60%;" />
 
-          <Button type="ghost" :danger="true" size="small" v-if="dynamicValidateForm.audiences.length > 1" class="ml-2"
-            :disabled="dynamicValidateForm.audiences.length === 1" @click="removeAudience(objective)">
+          <Button type="ghost" :danger="true" size="small" v-if="primaryAudienceForm.audiences.length > 1" class="ml-2"
+            :disabled="primaryAudienceForm.audiences.length === 1" @click="removeAudience(objective, true)">
 
             <template #icon>
               <DeleteOutlined />
@@ -213,7 +254,68 @@ const getObjectivesData = computed(() => {
       </Row>
 
       <FormItem v-bind="formItemLayoutWithOutLabel">
-        <Button type="dashed" @click="addAudience">
+        <Button type="dashed" @click="addAudience(true)">
+          <PlusOutlined />
+          Add Primary Audience
+        </Button>
+      </FormItem>
+
+    </Form>
+
+
+    <Form layout="vertical">
+      <Row>
+        <Col :span="16" v-for="(q, count) in store.questionsForTopic(config.suggestions.module)">
+
+        <FormItem :name="`input-${count + 1}`" :key="q.id">
+          <template #label>
+            {{ count + 1 }}. {{ q.q2u }}
+          </template>
+
+          <img v-if="q.bulb" :src="BULB_ICON" ref="iconRefs" @click="showPanel(q.id)" class="image is-32x32" />
+
+          <Textarea @change="updateData($event, q.id)" :value="store.getData(q.id)" :rows="7" :cols="40"></Textarea>
+
+        </FormItem>
+
+        </Col>
+      </Row>
+
+
+    </Form>
+
+    <Form ref="audienceFormRef" name="audience-form-item" :model="secondaryAudienceForm" layout="vertical"
+      v-bind="formItemLayoutWithOutLabel">
+
+      <Row>
+        <Col :span="16" v-for="(objective, index) in secondaryAudienceForm.audiences">
+        <FormItem :key="objective.id" v-bind="index === 0 ? formItemLayout : {}"
+          :label="index != 0 ? '' : '3. Who else influences the actions of your main target audience?'"
+          :name="['audiences', index, 'value']" :rules="{
+            required: true,
+            message: 'Audience can not be empty',
+            trigger: 'change',
+          }"
+          help="What other audiences need to be involved? Who else influences the actions of your main target audience? What other audiences need to be involved?"
+          style="margin-bottom: 10px;">
+
+          <Input v-model:value="objective.value" placeholder="please input audience" style="width: 60%;" />
+
+          <Button type="ghost" :danger="true" size="small" v-if="secondaryAudienceForm.audiences.length > 1" class="ml-2"
+            :disabled="secondaryAudienceForm.audiences.length === 1" @click="removeAudience(objective, false)">
+
+            <template #icon>
+              <DeleteOutlined />
+            </template>
+            Delete
+          </Button>
+        </FormItem>
+
+        </Col>
+      </Row>
+
+      <FormItem v-bind="formItemLayoutWithOutLabel">
+        <Button type="dashed" @click="addAudience(false)">
           <PlusOutlined />
           Add Audience
         </Button>

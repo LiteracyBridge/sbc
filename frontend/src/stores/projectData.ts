@@ -10,6 +10,7 @@ export const useProjectDataStore = defineStore({
   id: "project_data",
   state: () => ({
     new_project_data: [] as ProjectData[],
+    loading: false,
     // objectives: [] as ProjectData[],
     questions: [
       {
@@ -153,6 +154,11 @@ export const useProjectDataStore = defineStore({
         label: "Key Stakeholders",
       },
     ],
+
+    /**
+     * @deprecated
+     * use 'new_project_data' instead
+     */
     project_data: [],
     topics: [
       { id: 0, sequence: 0, value: "basic", label: "Project Info" },
@@ -217,17 +223,15 @@ export const useProjectDataStore = defineStore({
     // Audiences
     secondaryAudiences: (state) => {
       return state.new_project_data.filter(
-        (d) => d.name == "secondary_audiences"
+        (d) => d.name == "secondary_audience"
       );
     },
     primaryAudience: (state) => {
-      return state.new_project_data.filter(
-        (d) => d.name == "primary_audiences"
-      );
+      return state.new_project_data.filter((d) => d.name == "primary_audience");
     },
     audiences: (state) => {
       return state.new_project_data.filter(
-        (d) => d.name == "primary_audiences" || d.name == "secondary_audiences"
+        (d) => d.name == "primary_audience" || d.name == "secondary_audience"
       );
     },
   },
@@ -240,6 +244,8 @@ export const useProjectDataStore = defineStore({
     },
 
     async download() {
+      this.$state.loading = true;
+
       // TODO: Remove this query
       const key_index = 1;
       const filter_clause = "prj_id=" + useProjectStore().prj_id;
@@ -264,7 +270,7 @@ export const useProjectDataStore = defineStore({
       // console.error(Object.values(data));
 
       // Download project data
-      await ApiRequest.get<ProjectData>(
+      return await ApiRequest.get<ProjectData>(
         `project/${useProjectStore().prj_id}/data`
       )
         .then((resp) => {
@@ -280,7 +286,11 @@ export const useProjectDataStore = defineStore({
 
           return resp;
         })
-        .catch((err) => message.error(err.message));
+        .catch((err) => {
+          message.error(err.message);
+          throw err;
+        })
+        .finally(() => (this.$state.loading = false));
     },
 
     async setData(q_id: number, data: any) {
@@ -337,6 +347,29 @@ export const useProjectDataStore = defineStore({
           return resp;
         })
         .catch((err) => message.error(err.message));
+    },
+    async updateAudience(form: {
+      editing_user_id: number;
+      added: string[];
+      removed: number[];
+      updated: Record<string, any>[];
+      audience: "primary" | "secondary";
+    }) {
+      this.$state.loading = true;
+      return ApiRequest.post<ProjectData>(
+        `project/${useProjectStore().prj_id}/audience`,
+        form
+      )
+        .then((resp) => {
+          this.$state.new_project_data = resp;
+          message.success("Project audiences updated successfully");
+          return resp;
+        })
+        .catch((err) => {
+          message.error(err.message);
+          throw err;
+        })
+        .finally(() => (this.$state.loading = false));
     },
   },
 });
