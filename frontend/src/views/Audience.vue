@@ -123,7 +123,7 @@ function saveForms() {
     // config.value.loading = true;
 
     store.updateAudience({
-      audience: "secondary",
+      name: "secondary",
       editing_user_id: useUserStore().id,
       added: secondaryAudienceForm.audiences
         .filter(i => i.is_new).map(i => i.value),
@@ -133,7 +133,8 @@ function saveForms() {
           _item[i.id] = i.value;
           return _item;
         }),
-      removed: secondaryAudienceForm.deleted
+      removed: secondaryAudienceForm.deleted,
+      module: "audiences"
     })
   });
 
@@ -142,7 +143,7 @@ function saveForms() {
     // config.value.loading = true;
 
     store.updateAudience({
-      audience: "primary",
+      name: "primary",
       editing_user_id: useUserStore().id,
       added: primaryAudienceForm.audiences
         .filter(i => i.is_new).map(i => i.value),
@@ -152,7 +153,8 @@ function saveForms() {
           _item[i.id] = i.value;
           return _item;
         }),
-      removed: primaryAudienceForm.deleted
+      removed: primaryAudienceForm.deleted,
+      module: "audiences"
     })
   });
 

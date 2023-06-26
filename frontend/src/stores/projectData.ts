@@ -349,15 +349,17 @@ export const useProjectDataStore = defineStore({
         .catch((err) => message.error(err.message));
     },
     async updateAudience(form: {
+    async updateData(form: {
       editing_user_id: number;
       added: string[];
       removed: number[];
       updated: Record<string, any>[];
-      audience: "primary" | "secondary";
+      name: "primary_audience" | "secondary_audience" | "specific_objectives";
+      module: "audiences" | "objectives";
     }) {
       this.$state.loading = true;
       return ApiRequest.post<ProjectData>(
-        `project/${useProjectStore().prj_id}/audience`,
+        `project/${useProjectStore().prj_id}/data`,
         form
       )
         .then((resp) => {

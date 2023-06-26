@@ -1,7 +1,7 @@
 <script setup lang="ts">
 // Importing required Vue and external libraries
 import { onMounted, computed } from "vue";
-import { RouterView } from "vue-router";
+import { RouterView, useRoute, useRouter } from "vue-router";
 import { useLookupStore } from "./stores/lookups";
 import NavBar from "@/components/Layout/NavBar.vue";
 import LeftSideNav from "@/components/Layout/LeftSideNav.vue";
@@ -15,6 +15,8 @@ import GridLoader from "./components/spinners/GridLoader.vue";
 
 const userStore = useUserStore();
 const appStore = AppStore()
+const route = useRoute(),
+  router = useRouter()
 
 // Set ONLINE to true when connected to the internet or false when offline
 const ONLINE = true;
@@ -30,14 +32,22 @@ const showSideNav = computed(() => sideNavStore.visible);
 // Amplify.configure(awsconfig);
 
 // On component mount, download the lookup data if online
-onMounted(() => {
+onMounted(async () => {
+  // router.replace(route.name() || '/')
   appStore.downloadObjects()
+
+  console.warn(route.fullPath)
+  if (router.hasRoute(route.name)) {
+    await router.replace(router.currentRoute.value.fullPath)
+  }
+
   // if (ONLINE) {
   //   lookupStore.download().then(() => appStore.setLoading(false))
   // } else {
   //   appStore.setLoading(false)
   // }
 });
+
 </script>
 
 <template>

@@ -16,17 +16,15 @@ router = APIRouter()
 
 # Types
 class UpdateProjectDto(BaseModel):
-    # name: str
     evaluation_strategy: Optional[str]
     feedback_strategy: Optional[str]
     sustainability_strategy: Optional[str]
 
 
 class ProjectObjectiveDto(BaseModel):
-    # name: str
-    # module: str
+    name: str
+    module: str
     editing_user_id: int
-
     updated: List[Dict[str, str]] = []
     added: Optional[List[str]] = []
     removed: Optional[List[int]] = []
@@ -93,8 +91,8 @@ def get_project_data(project_id: int, db: Session = Depends(models.get_db)):
     )
 
 
-@router.post("/{project_id}/objectives", response_model=ApiResponse)
-def update_objectives(
+@router.post("/{project_id}/data", response_model=ApiResponse)
+def update_data(
     project_id: int, dto: ProjectObjectiveDto, db: Session = Depends(models.get_db)
 ):
     """Manage project objectives"""
@@ -124,8 +122,8 @@ def update_objectives(
             record: ProjectData = ProjectData()
             record.q_id = 10
             record.data = item
-            record.module = "objectives"
-            record.name = "specific_objectives"
+            record.module = dto.module
+            record.name = dto.name
             record.prj_id = project_id
             record.editing_user_id = dto.editing_user_id
 
@@ -133,63 +131,64 @@ def update_objectives(
             db.commit()
             db.refresh(record)
 
-            # Create theory of change objective item
-            toc = create_toc_item(
-                ToCItemDto(
-                    project_id=project_id,
-                    name=item,
-                    reference=record,
-                    type="objective",
-                ),
-                db=db,
-            )
+            if dto.module == "objectives":
+                # Create theory of change objective item
+                toc = create_toc_item(
+                    ToCItemDto(
+                        project_id=project_id,
+                        name=item,
+                        reference=record,
+                        type="objective",
+                    ),
+                    db=db,
+                )
 
-            record.theory_of_change_id = toc.id
-            db.commit()
-
-    return ApiResponse(
-        data=db.query(ProjectData).filter(ProjectData.prj_id == project_id).all()
-    )
-
-
-@router.post("/{project_id}/audience", response_model=ApiResponse)
-def update_audience(
-    project_id: int, dto: ProjectObjectiveDto, db: Session = Depends(models.get_db)
-):
-    """Manage project audiences"""
-
-    # Remove deleted audiences
-    if len(dto.removed) > 0:
-        db.query(ProjectData).filter(ProjectData.id.in_(dto.removed)).delete()
-
-    # Update existing audiences
-    if len(dto.updated) > 0:
-        for item in dto.updated:
-            [value] = item.values()
-            [key] = item.keys()
-
-            record = db.query(ProjectData).filter(ProjectData.id == int(key)).first()
-
-            if record is None:
-                continue
-
-            record.data = value
-            db.commit()
-
-    # Create new objectives
-    if len(dto.added) > 0:
-        for item in dto.added:
-            record: ProjectData = ProjectData()
-            record.q_id = 3
-            record.data = item
-            record.module = "audiences"
-            record.name = "secondary_audiences"
-            record.prj_id = project_id
-            record.editing_user_id = dto.editing_user_id
-
-            db.add(record)
-            db.commit()
+                record.theory_of_change_id = toc.id
+                db.commit()
 
     return ApiResponse(
         data=db.query(ProjectData).filter(ProjectData.prj_id == project_id).all()
     )
+
+
+# @router.post("/{project_id}/audience", response_model=ApiResponse)
+# def update_audience(
+#     project_id: int, dto: ProjectObjectiveDto, db: Session = Depends(models.get_db)
+# ):
+#     """Manage project audiences"""
+
+#     # Remove deleted audiences
+#     if len(dto.removed) > 0:
+#         db.query(ProjectData).filter(ProjectData.id.in_(dto.removed)).delete()
+
+#     # Update existing audiences
+#     if len(dto.updated) > 0:
+#         for item in dto.updated:
+#             [value] = item.values()
+#             [key] = item.keys()
+
+#             record = db.query(ProjectData).filter(ProjectData.id == int(key)).first()
+
+#             if record is None:
+#                 continue
+
+#             record.data = value
+#             db.commit()
+
+#     # Create new objectives
+#     if len(dto.added) > 0:
+#         for item in dto.added:
+#             record: ProjectData = ProjectData()
+#             record.q_id = 3
+#             record.data = item
+#             record.module = "audiences"
+#             record.name = "secondary_audiences"
+#             record.prj_id = project_id
+#             record.editing_user_id = dto.editing_user_id
+
+#             db.add(record)
+#             db.commit()
+
+#     return ApiResponse(
+#         data=db.query(ProjectData).filter(ProjectData.prj_id == project_id).all()
+#     )
