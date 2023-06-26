@@ -1,13 +1,18 @@
 <script lang="ts" setup>
 import { onMounted, ref, reactive, } from "vue";
-import { Button, Space, Spin, Table, Tag, Typography } from "ant-design-vue";
+import {
+  Button, Descriptions, DescriptionsItem, Modal, Spin, Table,
+  Tag, Typography
+} from "ant-design-vue";
 import { SwapOutlined } from "@ant-design/icons-vue";
 
-import { Activity } from "@/types";
+import { Activity, Risk } from "@/types";
 import { useTheoryOfChangeStore } from "@/stores/theory_of_change";
 
 const store = useTheoryOfChangeStore();
-const config = ref({
+const modal = ref({
+  visible: false,
+  selectedRisk: null as Risk | null
 });
 
 const columns = [
@@ -30,6 +35,8 @@ const columns = [
     ellipsis: true,
   },
 ]
+
+
 </script>
 
 <template>
@@ -42,15 +49,18 @@ const columns = [
 
       <template #bodyCell="{ column, record }">
         <template v-if="column.key === 'toc'">
-          <span v-if="record.toc_from_id != null && record.toc_to_id != null">
-            {{ record.toc_from?.name }}
-            <SwapOutlined />
-            {{ record.toc_to?.name }}
-          </span>
 
-          <span v-else>
-            {{ record.toc_from?.name || record.toc_to?.name || 'N/A' }}
-          </span>
+          <Button type="link" @click="modal.selectedRisk = record; modal.visible = true;">
+            <span v-if="record.toc_from_id != null && record.toc_to_id != null">
+              {{ record.toc_from?.name }}
+              <SwapOutlined />
+              {{ record.toc_to?.name }}
+            </span>
+
+            <span v-else>
+              {{ record.toc_from?.name || record.toc_to?.name || 'N/A' }}
+            </span>
+          </Button>
 
         </template>
 
@@ -70,6 +80,23 @@ const columns = [
       </template>
     </Table>
   </Spin>
+
+  <Modal :visible="modal.visible" :title="modal.selectedRisk?.name">
+    <template #footer>
+      <Button @click="modal.visible = false; modal.selectedRisk = null">
+        Close
+      </Button>
+    </template>
+
+    <Descriptions layout="vertical" :column="1">
+      <DescriptionsItem label="Risks" :label-style="{ 'fontWeight': 'bold' }">{{ modal.selectedRisk?.risks }}
+      </DescriptionsItem>
+      <DescriptionsItem label="Assumptions" :label-style="{ 'fontWeight': 'bold' }">{{ modal.selectedRisk?.assumptions }}
+      </DescriptionsItem>
+      <DescriptionsItem label="Mitigation" :label-style="{ 'fontWeight': 'bold' }">{{ modal.selectedRisk?.mitigation }}
+      </DescriptionsItem>
+    </Descriptions>
+  </Modal>
 </template>
 
 <style>
