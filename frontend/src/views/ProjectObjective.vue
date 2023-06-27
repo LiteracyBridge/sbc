@@ -5,11 +5,13 @@ import { computed, onMounted, reactive, ref, watch } from 'vue';
 
 import { useProjectDataStore } from '@/stores/projectData';
 import GPTSuggestionPanel from '@/components/GPTSuggestionPanel.vue';
+import MessageModal from '@/components/MessageModal.vue';
 import { DeleteOutlined, MinusCircleOutlined, PlusOutlined } from '@ant-design/icons-vue';
 import { ApiRequest } from '@/apis/api';
 import { useProjectStore } from '@/stores/projects';
 import { ProjectData } from '@/types';
 import { useUserStore } from '@/stores/user';
+import { twilioBroadcast } from '@/apis/lambda';
 
 interface Objective {
   value: string;
@@ -22,6 +24,7 @@ const BULB_ICON = "/images/lightbulb.png"
 const store = useProjectDataStore();
 
 const config = ref({
+  messages: false,
   suggestions: {
     questionId: null,
     isOpened: false,
@@ -125,6 +128,16 @@ onMounted(() => {
   fetchData();
 })
 
+async function broadcastPage() {
+  let message = "";
+  for (var q of store.questionsForTopic(config.value.suggestions.module)) {
+    const a = store.getData(q.id);
+    if (a != "")
+      message += q.label + "\n" + a + "\n\n";
+  }
+  console.log("Message: " + message);
+  twilioBroadcast(message, config.value.suggestions.module)
+}
 </script>
 
 <template>
@@ -136,6 +149,18 @@ onMounted(() => {
     <template #extra>
       <Button type="primary" :ghost="true" @click="saveForms()">Save Changes</Button>
     </template>
+
+    <div class="buttons-container is-fixed is-absolute is-flex is-flex-direction-column is-align-items-flex-end m-4 mr-6">
+      <button class="button is-link mb-2" :disabled="config.messages" @click.prevent="broadcastPage">
+        <span>Broadcast</span>
+      </button>
+      <button class="button is-link" :disabled="config.messages" @click.prevent="config.messages = true">
+        <span>Messages</span>
+      </button>
+    </div>
+    <Suspense>
+      <MessageModal v-if="config.messages" :topic="config.suggestions.module" v-model="config.messages" />
+    </Suspense>
 
     <Form layout="vertical">
       <!-- <div class="columns mx-4 is-vcentered"> -->
