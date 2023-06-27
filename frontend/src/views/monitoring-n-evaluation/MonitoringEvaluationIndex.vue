@@ -121,7 +121,7 @@ onMounted(() => {
   </ProgressTrackingModal>
 
   <Spin :spinning="config.isLoading || store.loading">
-    <Tabs v-model:activeKey="config.activeTab" centered class="my-3 mx-3">
+    <Tabs v-model:activeKey="config.activeTab" centered>
       <TabPane key="1" tab="Indicators Monitoring">
         <Table :columns="columns" :data-source="store.data" bordered>
           <template #title>
@@ -187,7 +187,7 @@ onMounted(() => {
             </template>
 
             <template v-else-if="column.key === 'recent'">
-              {{ store.getRecentProgress(record) }}
+              {{ (store.getRecentProgress(record)).period }} ({{ store.getRecentProgress(record).value }})
             </template>
 
             <template v-else-if="column.key === 'progress_rate'">
