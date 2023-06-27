@@ -124,52 +124,52 @@ onMounted(() => {
             </Space>
           </template>
 
-          <Descriptions :column="24" size="small" bordered>
+          <Descriptions size="small" bordered layout="vertical">
             <DescriptionsItem :content-style="{ 'max-width': '50px' }" :span="24" label="Target Project Objectives">{{
-              store.projectObjectives(item.id)?.map((obj) => obj.data).join(', ') ?? '' }}
+              store.projectObjectives(item.id)?.map((obj) => obj.data).join(', ') || 'N/A' }}
             </DescriptionsItem>
 
             <!-- TODO: Implement related indicators -->
-            <DescriptionsItem :span="24" label="Related indicator(s)">{{
-              store.indicators(item.id)?.map((obj) => obj.name).join(', ') ?? '' }}
+            <DescriptionsItem label="Related indicator(s)">{{
+              store.indicators(item.id)?.map((obj) => obj.name).join(', ') || 'N/A' }}
             </DescriptionsItem>
 
-            <DescriptionsItem :span="24" label="Target audience(s)">{{
-              store.targetAudiences(item.id)?.map((obj) => obj.data).join(', ') ?? '' }}
+            <DescriptionsItem label="Target audience(s)">{{
+              store.targetAudiences(item.id)?.map((obj) => obj.data).join(', ') || 'N/A' }}
             </DescriptionsItem>
 
-            <DescriptionsItem :span="24" label="Target Behavioral Driver(s)">
+            <DescriptionsItem label="Target Behavioral Driver(s)">
               {{
-                store.behavioralDrivers(item.id)?.map((obj) => obj.name).join(', ') ?? '' }}
+                store.behavioralDrivers(item.id)?.map((obj) => obj.name).join(', ') || 'N/A' }}
             </DescriptionsItem>
 
-            <DescriptionsItem :span="24" label="Message Objectives">
+            <DescriptionsItem label="Message Objectives">
               <span class="preserve-whitespace">
-                {{ item.message_objectives }}
+                {{ item.message_objectives || 'N/A' }}
               </span>
             </DescriptionsItem>
 
-            <DescriptionsItem :span="24" label="Message Delivery Platform">
+            <DescriptionsItem label="Message Delivery Platform">
               <span class="preserve-whitespace">
-                {{ item.delivery_platforms }}
+                {{ item.delivery_platforms || 'N/A' }}
               </span>
             </DescriptionsItem>
 
-            <DescriptionsItem :span="24" label="Message format">
+            <DescriptionsItem label="Message format">
               <span class="preserve-whitespace">
-                {{ item.format }}
+                {{ item.format || 'N/A' }}
               </span>
             </DescriptionsItem>
 
-            <DescriptionsItem :span="24" label="Key Points">
+            <DescriptionsItem label="Key Points">
               <span class="preserve-whitespace">
-                {{ item.key_points }}
+                {{ item.key_points || 'N/A' }}
               </span>
             </DescriptionsItem>
 
-            <DescriptionsItem :span="24" label="Message content">
+            <DescriptionsItem label="Message content">
               <span class="preserve-whitespace">
-                {{ item.contents }}
+                {{ item.contents || 'N/A' }}
               </span>
             </DescriptionsItem>
 
