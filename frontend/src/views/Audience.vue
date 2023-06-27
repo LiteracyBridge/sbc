@@ -233,7 +233,7 @@ onMounted(() => {
         <Col :span="16" v-for="(objective, index) in primaryAudienceForm.audiences">
 
         <FormItem :key="objective.id" v-bind="index === 0 ? formItemLayout : {}"
-          :label="index != 0 ? '' : 'Who is the primary target audience for your project? Who will be adopting the behavior you want to influence?'"
+          :label="index != 0 ? '' : '1. Who is the primary target audience for your project? Who will be adopting the behavior you want to influence?'"
           :name="['audiences', index, 'value']" :rules="{
             required: true,
             message: 'Audience can not be empty',
@@ -269,9 +269,9 @@ onMounted(() => {
       <Row>
         <Col :span="16" v-for="(q, count) in store.questionsForTopic(config.suggestions.module)">
 
-        <FormItem :name="`input-${count + 1}`" :key="q.id">
+        <FormItem :name="`input-${count + 2}`" :key="q.id">
           <template #label>
-            {{ count + 1 }}. {{ q.q2u }}
+            {{ count + 2 }}. {{ q.q2u }}
           </template>
 
           <img v-if="q.bulb" :src="BULB_ICON" ref="iconRefs" @click="showPanel(q.id)" class="image is-32x32" />
