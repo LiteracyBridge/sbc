@@ -1,5 +1,6 @@
 import uuid
 import uvicorn
+import sentry_sdk
 
 from fastapi import Depends, FastAPI, HTTPException
 from mangum import Mangum
@@ -23,6 +24,16 @@ from fastapi.middleware.cors import CORSMiddleware
 
 import models
 from config import settings
+
+
+sentry_sdk.init(
+    dsn=settings.sentry_dsn,
+    # Set traces_sample_rate to 1.0 to capture 100%
+    # of transactions for performance monitoring.
+    # We recommend adjusting this value in production,
+    # traces_sample_rate=1.0,
+)
+
 
 # from database import SessionLocal, engine
 
