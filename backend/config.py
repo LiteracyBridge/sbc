@@ -42,7 +42,7 @@ class Settings:
             self.db_password = getenv("DB_PASSWORD", "")
             self.db_user = getenv("DB_USER", "postgres")
             self.db_port = getenv("DB_PORT", "5432")
-            self.sentry_dsn = getenv("SENTRY_DSN", None)
+            # self.sentry_dsn = getenv("SENTRY_DSN", None)
         else:
             self.load_aws_secrets()
 
@@ -68,7 +68,7 @@ class Settings:
             self.db_password = secrets["password"]
             self.db_host = secrets["host"]
             self.db_port = secrets["port"]
-            self.sentry_dsn = secrets["sbc_sentry_dsn"]
+            # self.sentry_dsn = secrets["sbc_sentry_dsn"]
 
         except Exception as err:
             raise err
