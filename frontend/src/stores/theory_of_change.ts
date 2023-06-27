@@ -51,15 +51,17 @@ export const useTheoryOfChangeStore = defineStore({
       };
     },
     allTocIndicators: (state) => {
-      return state.theory_of_change.flatMap((toc) => {
-        return toc.indicators.flatMap((i) => {
-          return {
-            id: i.id,
-            name: i.indicator?.name ?? i.indicator?.indi_kit?.name ?? "",
-            indi_kit_id: i.indicator?.indi_kit_id,
-          };
-        });
-      });
+      return (
+        state.theory_of_change?.flatMap((toc) => {
+          return toc.indicators.flatMap((i) => {
+            return {
+              id: i.id,
+              name: i.indicator?.name ?? i.indicator?.indi_kit?.name ?? "",
+              indi_kit_id: i.indicator?.indi_kit_id,
+            };
+          });
+        }) ?? []
+      );
     },
     // IndiKit Helpers
     getIndiKitItemById: (state) => {

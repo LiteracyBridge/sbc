@@ -26,6 +26,9 @@ export const useActivityStore = defineStore({
       state.activities.find((a) => a.id == activityId),
     topLevelActivities: (state) =>
       state.activities.filter((a) => a.parent_id == null),
+    totalSubActivities: (state) => {
+      return state.activities.filter((a) => a.parent_id != null).length;
+    },
     subActivitiesByActivityId: (state) => (activityId: number) =>
       state.activities.filter((a) => a.parent_id == activityId),
     schedulesByActivityId: (state) => (activityId: number) =>

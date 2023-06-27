@@ -102,6 +102,15 @@ class Project(Base):
     archived: Mapped[bool] = mapped_column(Boolean, default=False)
     start_date: Mapped[Optional[DateTime]] = mapped_column(DateTime, nullable=True)
     end_date: Mapped[Optional[DateTime]] = mapped_column(DateTime, nullable=True)
+    created_at: Mapped[DateTime] = mapped_column(
+        DateTime(timezone=True), default=func.now()
+    )
+    updated_at: Mapped[DateTime] = mapped_column(
+        DateTime(timezone=True), onupdate=func.now()
+    )
+    deleted_at: Mapped[Optional[DateTime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
 
     country_id: Mapped[int] = mapped_column(ForeignKey("lu_countries.id"))
     organisation_id: Mapped[int] = mapped_column(ForeignKey("organisations.id"))

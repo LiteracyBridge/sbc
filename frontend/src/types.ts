@@ -19,6 +19,11 @@ export class Project {
   evaluation_strategy?: string;
   feedback_strategy?: string;
   sustainability_strategy?: string;
+  editing_user_id?: number;
+  deleted_by_id?: number;
+  updated_at?: Date;
+  created_at?: Date;
+  deleted_at?: Date;
 }
 
 export class LuIndiKit {
@@ -117,7 +122,6 @@ export class TheoryOfChange {
   // indicators: any[] = [];
 }
 
-
 export class Risk {
   id: number = undefined;
   name: string = "";
@@ -206,7 +210,11 @@ export class ProjectData {
   theory_of_change_id: number;
   data: string;
   module?: "objectives" | "audiences" | "project_info";
-  name?: "specific_objective" | "secondary_audience" | "primary_audience" | "sector";
+  name?:
+    | "specific_objective"
+    | "secondary_audience"
+    | "primary_audience"
+    | "sector";
 }
 
 export class Communication {
