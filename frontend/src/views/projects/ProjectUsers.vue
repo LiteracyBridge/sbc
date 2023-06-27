@@ -161,7 +161,7 @@ function filterUser(input: string, option: any) {
   </Spin>
 
 
-  <Modal v-model:visible="config.userModal.visible" @cancel="closeModal()" ok-text="New Project User" cancel-text="Cancel"
+  <Modal v-model:visible="config.userModal.visible" @cancel="closeModal()" title="New Project User" ok-text="Add User" cancel-text="Cancel"
     :mask-closable="false" @ok="saveNewUser()">
 
     <Form name="new-user-form" ref="projectUserFormRef" :model="config.userModal.form" layout="vertical">

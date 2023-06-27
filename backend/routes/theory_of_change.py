@@ -98,26 +98,26 @@ def get_toc_by_project_id(projectId: int, db: Session = Depends(models.get_db)):
 #     return ApiResponse(data=[record])
 
 
-@router.post("/", response_model=ApiResponse)
-def create(dto: NewTheoryOfChangeDto, db: Session = Depends(models.get_db)):
-    record = models.TheoryOfChangeOld()
-    record.name = dto.name
-    record.project_id = dto.project_id
-    record.notes = dto.notes
+# @router.post("/", response_model=ApiResponse)
+# def create(dto: NewTheoryOfChangeDto, db: Session = Depends(models.get_db)):
+#     record = models.TheoryOfChangeOld()
+#     record.name = dto.name
+#     record.project_id = dto.project_id
+#     record.notes = dto.notes
 
-    if dto.name is False:
-        count = (
-            db.query(models.TheoryOfChangeOld)
-            .filter(models.TheoryOfChangeOld.project_id == dto.project_id)
-            .count()
-        )
-        record.name = f"Theory of Change #${count + 1}"
+#     if dto.name is False:
+#         count = (
+#             db.query(models.TheoryOfChangeOld)
+#             .filter(models.TheoryOfChangeOld.project_id == dto.project_id)
+#             .count()
+#         )
+#         record.name = f"Theory of Change #${count + 1}"
 
-    db.add(record)
-    db.commit()
-    db.refresh(record)
+#     db.add(record)
+#     db.commit()
+#     db.refresh(record)
 
-    return ApiResponse(data=record)
+#     return ApiResponse(data=record)
 
 
 @router.get("/{projectId}", response_model=ApiResponse)
@@ -157,7 +157,7 @@ def create_item(
 
     # db.refresh(record)
 
-    return get_toc_by_project_id(project_id, db)
+    return ApiResponse(data=get_toc_by_project_id(project_id, db))
 
 
 @router.put("/{project_id}/item/{itemId}", response_model=ApiResponse)

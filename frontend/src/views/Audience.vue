@@ -264,35 +264,13 @@ onMounted(() => {
 
     </Form>
 
-
-    <Form layout="vertical">
-      <Row>
-        <Col :span="16" v-for="(q, count) in store.questionsForTopic(config.suggestions.module)">
-
-        <FormItem :name="`input-${count + 2}`" :key="q.id">
-          <template #label>
-            {{ count + 2 }}. {{ q.q2u }}
-          </template>
-
-          <img v-if="q.bulb" :src="BULB_ICON" ref="iconRefs" @click="showPanel(q.id)" class="image is-32x32" />
-
-          <Textarea @change="updateData($event, q.id)" :value="store.getData(q.id)" :rows="7" :cols="40"></Textarea>
-
-        </FormItem>
-
-        </Col>
-      </Row>
-
-
-    </Form>
-
     <Form ref="audienceFormRef" name="audience-form-item" :model="secondaryAudienceForm" layout="vertical"
       v-bind="formItemLayoutWithOutLabel">
 
       <Row>
         <Col :span="16" v-for="(objective, index) in secondaryAudienceForm.audiences">
         <FormItem :key="objective.id" v-bind="index === 0 ? formItemLayout : {}"
-          :label="index != 0 ? '' : '3. Who else influences the actions of your main target audience?'"
+          :label="index != 0 ? '' : '2. Who else influences the actions of your main target audience?'"
           :name="['audiences', index, 'value']" :rules="{
             required: true,
             message: 'Audience can not be empty',
@@ -319,9 +297,32 @@ onMounted(() => {
       <FormItem v-bind="formItemLayoutWithOutLabel">
         <Button type="dashed" @click="addAudience(false)">
           <PlusOutlined />
-          Add Audience
+          Add Secondary Audience
         </Button>
       </FormItem>
+    </Form>
+
+    <Form layout="vertical">
+      <Row>
+        <Col :span="16" v-for="(q, count) in store.questionsForTopic(config.suggestions.module)">
+
+        <FormItem :name="`input-${count + 3}`" :key="q.id">
+          <template #label>
+            {{ count + 3 }}. {{ q.q2u }}
+          </template>
+
+          <img v-if="q.bulb" :src="BULB_ICON" ref="iconRefs" @click="showPanel(q.id)" class="image is-32x32" />
+
+          <Textarea @change="updateData($event, q.id)" :value="store.getData(q.id)" :rows="7" :cols="40"></Textarea>
+
+        </FormItem>
+
+        </Col>
+      </Row>
+
+
+
+
 
     </Form>
   </Card>
