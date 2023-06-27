@@ -3,17 +3,20 @@
 import { ref, onMounted } from "vue";
 import { useUserStore } from "@/stores/user";
 import { useRouter } from "vue-router";
-import { Card, Col, Divider, Row, Space, Statistic, TypographyTitle } from "ant-design-vue";
+import { Card, Col, Tag, Table, Divider, Row, Space, Statistic, TypographyTitle } from "ant-design-vue";
 import { useProjectStore } from "@/stores/projects";
 import dayjs from 'dayjs'
 import { useActivityStore } from "@/stores/activities";
 import { useTheoryOfChangeStore } from "@/stores/theory_of_change";
 import { useProjectDataStore } from "@/stores/projectData";
 import { DatabaseOutlined, DeploymentUnitOutlined, ProfileOutlined, TeamOutlined } from "@ant-design/icons-vue";
+import { useLookupStore } from "@/stores/lookups";
 
 // Initialize the user store and the router
 const userStore = useUserStore(),
-  projectStore = useProjectStore();
+  projectStore = useProjectStore(),
+  lookupStore = useLookupStore();
+
 const router = useRouter();
 
 // On component mount, redirect to the login page if the user is not logged in
@@ -22,6 +25,26 @@ onMounted(() => {
     router.push({ path: "/login" });
   }
 });
+
+const columns = [
+  {
+    title: 'Project',
+    key: 'name',
+  },
+  {
+    title: 'Duration',
+    key: 'duration',
+  },
+  {
+    title: 'Country',
+    key: 'country',
+  },
+  {
+    title: 'Role',
+    dataIndex: 'role',
+    key: 'role',
+  },
+]
 </script>
 
 <template>
@@ -81,8 +104,41 @@ onMounted(() => {
         </Statistic>
       </Card>
       </Col>
-
     </Row>
+
+    <Divider orientation="left" style="padding-top: 50px;">Other Projects</Divider>
+
+    <Table :columns="columns" :data-source="projectStore.projects()" bordered size="small">
+
+      <template #bodyCell="{ column, record: project }">
+        <template v-if="column.key == 'name'">
+          {{ project.name }}
+          <Tag class="is-rounded" v-if="projectStore.prj_id == project.prj_id" :color="'green'">
+            Currently Opened
+          </Tag>
+
+          <Tag class="is-rounded" :color="project.archived ? 'red' : 'green'">
+            {{ project.archived ? 'Archived' : 'Active' }}
+          </Tag>
+        </template>
+
+        <template v-if="column.key == 'duration'">
+          <span v-if="project.start_date == null">N/A</span>
+          <span v-else>
+            {{ dayjs(project.start_date).format('MMMM D, YYYY') }} - {{ dayjs(project.end_date).format('MMMM D, YYYY') }}
+          </span>
+        </template>
+
+        <template v-if="column.key == 'country'">
+          {{ lookupStore.lookupNameById("countries", project.country_id) }}
+        </template>
+
+        <template v-if="column.key == 'role'">
+          {{ lookupStore.lookupNameById("access_types", project.access_id) }}
+        </template>
+
+      </template>
+    </Table>
   </section>
 
 
