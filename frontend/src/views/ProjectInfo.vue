@@ -5,6 +5,7 @@ import { ref, watch } from 'vue';
 import { useProjectDataStore } from '@/stores/projectData';
 import GPTSuggestionPanel from '@/components/GPTSuggestionPanel.vue';
 import { useTheoryOfChangeStore } from '@/stores/theory_of_change'
+import MessageModal from '@/components/MessageModal.vue';
 
 
 const BULB_ICON = "/images/lightbulb.png"

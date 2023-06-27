@@ -7,11 +7,7 @@ import { useProjectDataStore } from '@/stores/projectData';
 import GPTSuggestionPanel from '@/components/GPTSuggestionPanel.vue';
 import MessageModal from '@/components/MessageModal.vue';
 import { DeleteOutlined, MinusCircleOutlined, PlusOutlined } from '@ant-design/icons-vue';
-import { ApiRequest } from '@/apis/api';
-import { useProjectStore } from '@/stores/projects';
-import { ProjectData } from '@/types';
 import { useUserStore } from '@/stores/user';
-import { twilioBroadcast } from '@/apis/lambda';
 
 interface Objective {
   value: string;
