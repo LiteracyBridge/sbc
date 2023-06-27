@@ -63,7 +63,7 @@ const columns = [
     </Space>
 
     <Divider></Divider>
-    <Row :gutter="6" style="padding: 10px;">
+    <Row :gutter="8" style="padding: 10px;">
       <Col :span="6">
       <Card>
         <Statistic title="Activities" :value="useActivityStore().topLevelActivities.length">
@@ -106,7 +106,7 @@ const columns = [
       </Col>
     </Row>
 
-    <Divider orientation="left" style="padding-top: 50px;">Other Projects</Divider>
+    <Divider orientation="left" style="padding-top: 50px;">My Projects</Divider>
 
     <Table :columns="columns" :data-source="projectStore.projects()" bordered size="small">
 
@@ -117,8 +117,8 @@ const columns = [
             Currently Opened
           </Tag>
 
-          <Tag class="is-rounded" :color="project.archived ? 'red' : 'green'">
-            {{ project.archived ? 'Archived' : 'Active' }}
+          <Tag class="is-rounded" color="red" v-if="project.archived">
+            Archived
           </Tag>
         </template>
 
@@ -139,16 +139,6 @@ const columns = [
 
       </template>
     </Table>
-  </section>
-
-
-  <section class="hero is-fullheight">
-    <div class="hero-body">
-      <div class="container has-text-centered raised-title">
-        <!-- Display the welcome message, addressing the user with their preferred name -->
-        <h1 class="title is-1">Welcome, {{ userStore.address_as }}!</h1>
-      </div>
-    </div>
   </section>
 </template>
 
