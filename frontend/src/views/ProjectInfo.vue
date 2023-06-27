@@ -12,6 +12,7 @@ const BULB_ICON = "/images/lightbulb.png"
 const projectDataStore = useProjectDataStore();
 
 const config = ref({
+  messages: false,
   loading: false,
   suggestions: {
     questionId: null,
@@ -47,6 +48,18 @@ const updateSector = (value: any, id: number) => {
     <!-- <template #extra>
       <Button type="primary" :ghost="true" @click="saveForms()">Save Changes</Button>
     </template> -->
+    <div class="buttons-container is-fixed is-absolute is-flex is-flex-direction-column is-align-items-flex-end m-4 mr-6">
+      <button class="button is-link mb-2" :disabled="config.messages"
+        @click.prevent="projectDataStore.broadcastPage(config.suggestions.module)">
+        <span>Broadcast</span>
+      </button>
+      <button class="button is-link" :disabled="config.messages" @click.prevent="config.messages = true">
+        <span>Messages</span>
+      </button>
+    </div>
+    <Suspense>
+      <MessageModal v-if="config.messages" :topic="config.suggestions.module" v-model="config.messages" />
+    </Suspense>
 
     <Form layout="vertical">
       <Row>
@@ -59,7 +72,8 @@ const updateSector = (value: any, id: number) => {
           <!-- <label class="label" :for="`input-${count + 1}`">{{ count + 1 }}. {{ q.q2u }}</label> -->
 
           <!-- Use dropdown for sectors -->
-          <Select v-if="q.id == 1" :value="projectDataStore.getData(q.id)" @change="updateSector($event, q.id)" style="padding-bottom: 15px;">
+          <Select v-if="q.id == 1" :value="projectDataStore.getData(q.id)" @change="updateSector($event, q.id)"
+            style="padding-bottom: 15px;">
             <SelectOption v-for="(sector, index) in useTheoryOfChangeStore().getIndiKitSectors" :key="index"
               :value="sector">
               {{ sector }}

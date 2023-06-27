@@ -5,6 +5,7 @@ import { useProjectStore } from "./projects";
 import { ApiRequest } from "@/apis/api";
 import { ProjectData } from "@/types";
 import { message } from "ant-design-vue";
+import { twilioBroadcast } from "../apis/lambda";
 
 export const useProjectDataStore = defineStore({
   id: "project_data",
@@ -371,6 +372,19 @@ export const useProjectDataStore = defineStore({
           throw err;
         })
         .finally(() => (this.$state.loading = false));
+    },
+
+    /**
+     * Broadcasts a message to all users in the project
+     */
+    async broadcastPage(module: string) {
+      let message = "";
+      for (var q of this.questionsForTopic(module)) {
+        const a = this.getData(q.id);
+        if (a != "") message += q.label + "\n" + a + "\n\n";
+      }
+      console.log("Message: " + message);
+      twilioBroadcast(message, module);
     },
   },
 });

@@ -4,7 +4,7 @@ import { ref, reactive, onMounted, onBeforeUnmount, watch } from "vue";
 import { onClickOutside } from "@vueuse/core";
 import { useProjectStore } from "../stores/projects";
 import { useMessageStore } from "../stores/messages";
-import { Button, Modal, Space } from "ant-design-vue";
+import { Button, Modal, Empty, Space } from "ant-design-vue";
 
 const props = defineProps({
   topic: {
@@ -66,7 +66,7 @@ watch(props, (newProps) => {
 </script>
 
 <template>
-  <Modal :visible="visible" @close="closeButton" @keydown.esc="closeButton" tabindex="0">
+  <Modal :visible="visible" @close="closeButton" @keydown.esc="closeButton" tabindex="0" @cancel="closeButton">
     <template #title>
       Message Browser
     </template>
@@ -87,28 +87,32 @@ watch(props, (newProps) => {
       </header> -->
 
     <section class="modal-card-body" :key="componentKey">
-      <div v-for="(message, dx) in messages[topic]" :key="message.id">
-        <u>
-          <i>
-            {{ projectStore.userById(message.user_id).address_as }},
-            {{ message.time.substring(0, 19).replace(" ", " at ") }}
-          </i>
-        </u>
-        <br />
-        <div class="text-with-line-breaks" v-text="message.message" />
-        <br />
-        <b v-if="message.replies.length != 0">Replies:</b>
-        <div class="ml-4" v-for="reply in message.replies" :key="reply.id">
+      <Empty v-if="messages[topic] == null || messages[topic]?.length == 0" description="No messages yet." />
+
+      <div v-else>
+        <div v-for="(message, dx) in messages[topic]" :key="message.id">
           <u>
-            {{ projectStore.userById(reply.user_id).address_as }},
-            {{ reply.time.substring(0, 19).replace(" ", " at ") }}
+            <i>
+              {{ projectStore.userById(message.user_id).address_as }},
+              {{ message.time.substring(0, 19).replace(" ", " at ") }}
+            </i>
           </u>
           <br />
-          {{ reply.message }}
+          <div class="text-with-line-breaks" v-text="message.message" />
+          <br />
+          <b v-if="message.replies.length != 0">Replies:</b>
+          <div class="ml-4" v-for="reply in message.replies" :key="reply.id">
+            <u>
+              {{ projectStore.userById(reply.user_id).address_as }},
+              {{ reply.time.substring(0, 19).replace(" ", " at ") }}
+            </u>
+            <br />
+            {{ reply.message }}
+          </div>
+          <br />
+          <br />
+          <br />
         </div>
-        <br />
-        <br />
-        <br />
       </div>
     </section>
 

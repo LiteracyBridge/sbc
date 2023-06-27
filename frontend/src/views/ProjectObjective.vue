@@ -128,16 +128,6 @@ onMounted(() => {
   fetchData();
 })
 
-async function broadcastPage() {
-  let message = "";
-  for (var q of store.questionsForTopic(config.value.suggestions.module)) {
-    const a = store.getData(q.id);
-    if (a != "")
-      message += q.label + "\n" + a + "\n\n";
-  }
-  console.log("Message: " + message);
-  twilioBroadcast(message, config.value.suggestions.module)
-}
 </script>
 
 <template>
@@ -151,7 +141,8 @@ async function broadcastPage() {
     </template>
 
     <div class="buttons-container is-fixed is-absolute is-flex is-flex-direction-column is-align-items-flex-end m-4 mr-6">
-      <button class="button is-link mb-2" :disabled="config.messages" @click.prevent="broadcastPage">
+      <button class="button is-link mb-2" :disabled="config.messages"
+        @click.prevent="store.broadcastPage(config.suggestions.module)">
         <span>Broadcast</span>
       </button>
       <button class="button is-link" :disabled="config.messages" @click.prevent="config.messages = true">
