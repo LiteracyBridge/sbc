@@ -176,7 +176,7 @@ function filterUser(input: string, option: any) {
         </Select>
       </FormItem>
 
-      <FormItem name="role" label="Role" has-feedback :rules="[{ required: true, message: 'Please select a role!' }]">
+      <FormItem name="role_id" label="Role" has-feedback :rules="[{ required: true, message: 'Please select a role!' }]">
         <Select v-model:value="config.userModal.form.role_id" placeholder="Select role">
           <SelectOption v-for="access in projectStore.grantableAccess" :key="access.id">
             {{ access.name }}
