@@ -187,7 +187,11 @@ onMounted(() => {
             </template>
 
             <template v-else-if="column.key === 'recent'">
-              {{ (store.getRecentProgress(record)).period }} ({{ store.getRecentProgress(record).value }})
+              <span v-if="store.getRecentProgress(record)?.value == null">N/A</span>
+
+              <span v-else>
+                {{ (store.getRecentProgress(record)).period }} ({{ store.getRecentProgress(record).value }})
+              </span>
             </template>
 
             <template v-else-if="column.key === 'progress_rate'">

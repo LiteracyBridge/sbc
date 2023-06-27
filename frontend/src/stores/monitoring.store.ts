@@ -34,7 +34,7 @@ export const useMonitoringStore = defineStore({
         period: string;
       } => {
         const count = (monitoring.evaluation ?? []).length;
-        if (count == 0) return { value: 0, period: "" };
+        if (count == 0) return { value: null, period: null };
 
         return monitoring.evaluation[count - 1];
       },
