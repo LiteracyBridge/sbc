@@ -1,6 +1,6 @@
 import uuid
 import uvicorn
-import sentry_sdk
+# import sentry_sdk
 
 from fastapi import Depends, FastAPI, HTTPException
 from mangum import Mangum
