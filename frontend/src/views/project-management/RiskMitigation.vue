@@ -89,11 +89,14 @@ const columns = [
     </template>
 
     <Descriptions layout="vertical" :column="1">
-      <DescriptionsItem label="Risks" :label-style="{ 'fontWeight': 'bold' }">{{ modal.selectedRisk?.risks }}
+      <DescriptionsItem label="Risks" :label-style="{ 'fontWeight': 'bold' }"><span class="preserve-whitespace">{{
+        modal.selectedRisk?.risks }}</span>
       </DescriptionsItem>
-      <DescriptionsItem label="Assumptions" :label-style="{ 'fontWeight': 'bold' }">{{ modal.selectedRisk?.assumptions }}
+      <DescriptionsItem label="Assumptions" :label-style="{ 'fontWeight': 'bold' }"><span class="preserve-whitespace">{{
+        modal.selectedRisk?.assumptions }}</span>
       </DescriptionsItem>
-      <DescriptionsItem label="Mitigation" :label-style="{ 'fontWeight': 'bold' }">{{ modal.selectedRisk?.mitigation }}
+      <DescriptionsItem label="Mitigation" :label-style="{ 'fontWeight': 'bold' }">
+        <span class="preserve-whitespace">{{ modal.selectedRisk?.mitigation }}</span>
       </DescriptionsItem>
     </Descriptions>
   </Modal>
