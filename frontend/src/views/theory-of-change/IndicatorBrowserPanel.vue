@@ -228,7 +228,7 @@ const addIndiKitIndicator = (item: LuIndiKit) => {
     <Form layout="vertical">
       <Row>
         <Col :span="12">
-        <FormItem label="Can't find indicator in library? Add you own">
+        <FormItem label="Can't find indicator in library? Add your own">
           <AutoComplete v-model:value="config.customIndicator" :options="getProjectIndicators" size="small"
             placeholder="Enter indicator name" style="width: 100%;" @select="onProjectIndicatorSelected">
           </AutoComplete>
@@ -265,7 +265,7 @@ const addIndiKitIndicator = (item: LuIndiKit) => {
     </Row>
 
     <Divider>
-      <Typography.Title :level="5">or browse our library</Typography.Title>
+      <Typography.Title :level="5">Browse Indicators Library</Typography.Title>
     </Divider>
 
     <Row :gutter="7">

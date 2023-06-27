@@ -2,7 +2,6 @@
 // TODO: add button for viewing progress in a modal
 // TODO: add button for capturing progress in a modal
 
-import { ApiRequest } from '@/apis/api';
 import { useMonitoringStore } from '@/stores/monitoring.store';
 import { Monitoring } from '@/types';
 import { Modal, Form, FormItem, Input, Select, SelectOption, Spin, type FormInstance, message } from 'ant-design-vue';
@@ -65,6 +64,7 @@ const generatePeriods = computed(() => {
   //   recorded_periods[evaluation.period] = evaluation.value;
   // });
 
+  // TODO: generate based on project duration
   if (period == 'monthly') {
     return Array(12).fill(0).map((_, i) => {
       const period = `Month ${i + 1}`,

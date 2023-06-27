@@ -59,8 +59,8 @@ const columns = [
   //   key: 'relatedResults',
   // },
   {
-    title: 'Date Collection Method',
-    name: 'Date Collection Method',
+    title: 'Data Collection Method',
+    name: 'Data Collection Method',
     dataIndex: 'data_collection_method',
     key: 'data_collection_method',
   },

@@ -79,7 +79,7 @@ watch(props, (newProps) => {
     :mask-closable="false" @ok="saveForm()">
     <template #title>
       <!-- TODO: show add/update activity depending on item state -->
-      <span>Add Activity</span>
+      <span>Add Task</span>
     </template>
 
     <template #footer>
@@ -92,7 +92,7 @@ watch(props, (newProps) => {
 
         <Row :gutter="6">
           <Col :span="12">
-          <FormItem label="Name" name="name" :rules="[{ required: true, message: 'Please enter activity name!' }]">
+          <FormItem label="Task Name" name="name" :rules="[{ required: true, message: 'Please enter activity name!' }]">
             <Input v-model:value="draftActivity.name" />
           </FormItem>
           </Col>
@@ -156,7 +156,7 @@ watch(props, (newProps) => {
 
         <Row :gutter="6">
           <Col :span="12">
-          <FormItem name="status_id" label="Activity status" has-feedback
+          <FormItem name="status_id" label="Task Status" has-feedback
             :rules="[{ required: true, message: 'Please select an activity status!' }]">
 
             <Select v-model:value="draftActivity.status_id" placeholder="Select activity status" :show-search="true">
@@ -201,6 +201,7 @@ watch(props, (newProps) => {
             </tr>
           </thead>
           <tbody>
+
             <template v-for="(schedule, i) in activityStore.schedulesByActivityId(draftActivity.id)">
               <tr :class="(i % 2) ? 'has-background-white' : 'has-background-light'">
                 <td>{{ schedule.id }}</td>
@@ -247,6 +248,7 @@ watch(props, (newProps) => {
             </template>
           </tbody>
         </table>
+
         <!-- <div class="field is-grouped">
             <div class="control">
               <button class="button is-link">Submit</button>
