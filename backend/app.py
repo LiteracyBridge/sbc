@@ -1,6 +1,7 @@
 import uuid
 import uvicorn
-# import sentry_sdk
+import sentry_sdk
+from sentry_sdk.integrations.aws_lambda import AwsLambdaIntegration
 
 from fastapi import Depends, FastAPI, HTTPException
 from mangum import Mangum
@@ -26,13 +27,17 @@ import models
 from config import settings
 
 
-# sentry_sdk.init(
-#     dsn=settings.sentry_dsn,
-#     # Set traces_sample_rate to 1.0 to capture 100%
-#     # of transactions for performance monitoring.
-#     # We recommend adjusting this value in production,
-#     # traces_sample_rate=1.0,
-# )
+if settings.sentry_dsn is not None:
+    sentry_sdk.init(
+        dsn=settings.sentry_dsn,
+        integrations=[
+            AwsLambdaIntegration(timeout_warning=True),
+        ],
+        #     # Set traces_sample_rate to 1.0 to capture 100%
+        #     # of transactions for performance monitoring.
+        #     # We recommend adjusting this value in production,
+        #     # traces_sample_rate=1.0,
+    )
 
 
 # from database import SessionLocal, engine
