@@ -52,11 +52,11 @@ jobs:
       #     yarn run build
 
       - name: Deploying application to Amazon S3
-        with:
+        env:
           AWS_BUCKET_NAME: ${{ secrets.AWS_FRONTEND_BUCKET_NAME }}
         run: |
           cd frontend
-          aws s3 sync ./dist s3://$AWS_FRONTEND_BUCKET_NAME --delete
+          aws s3 sync ./dist s3://$AWS_BUCKET_NAME --delete
 
         # uses: dvelasquez/deploy-s3-action@main
         # with:
