@@ -41,8 +41,11 @@ jobs:
           yarn --frozen-lockfile
 
       - name: Build dependencies 🛠
+        env:
+          AWS_EXPORTS: ${{ secrets.AMPLIFY_AWS_EXPORTS }}
         run: |
           cd frontend
+          echo $AWS_EXPORTS > aws-exports.js
           yarn build
 
       # - name: Build application
