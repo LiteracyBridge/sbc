@@ -125,49 +125,49 @@ onMounted(() => {
           </template>
 
           <Descriptions size="small" bordered layout="vertical">
-            <DescriptionsItem :content-style="{ 'max-width': '50px' }" :span="24" label="Target Project Objectives">{{
+            <DescriptionsItem :label-style="{ 'font-weight': 'bold' }" label="Target Project Objectives">{{
               store.projectObjectives(item.id)?.map((obj) => obj.data).join(', ') || 'N/A' }}
             </DescriptionsItem>
 
             <!-- TODO: Implement related indicators -->
-            <DescriptionsItem label="Related indicator(s)">{{
+            <DescriptionsItem label="Related Indicators" :label-style="{ 'font-weight': 'bold' }">{{
               store.indicators(item.id)?.map((obj) => obj.name).join(', ') || 'N/A' }}
             </DescriptionsItem>
 
-            <DescriptionsItem label="Target audience(s)">{{
+            <DescriptionsItem label="Target Audiences" :label-style="{ 'font-weight': 'bold' }">{{
               store.targetAudiences(item.id)?.map((obj) => obj.data).join(', ') || 'N/A' }}
             </DescriptionsItem>
 
-            <DescriptionsItem label="Target Behavioral Driver(s)">
+            <DescriptionsItem label="Target Behavioral Drivers" :label-style="{ 'font-weight': 'bold' }">
               {{
                 store.behavioralDrivers(item.id)?.map((obj) => obj.name).join(', ') || 'N/A' }}
             </DescriptionsItem>
 
-            <DescriptionsItem label="Message Objectives">
+            <DescriptionsItem label="Message Objectives" :label-style="{ 'font-weight': 'bold' }">
               <span class="preserve-whitespace">
                 {{ item.message_objectives || 'N/A' }}
               </span>
             </DescriptionsItem>
 
-            <DescriptionsItem label="Message Delivery Platform">
+            <DescriptionsItem label="Message Delivery Channels" :label-style="{ 'font-weight': 'bold' }">
               <span class="preserve-whitespace">
                 {{ item.delivery_platforms || 'N/A' }}
               </span>
             </DescriptionsItem>
 
-            <DescriptionsItem label="Message format">
+            <DescriptionsItem label="Message Format" :label-style="{ 'font-weight': 'bold' }">
               <span class="preserve-whitespace">
                 {{ item.format || 'N/A' }}
               </span>
             </DescriptionsItem>
 
-            <DescriptionsItem label="Key Points">
+            <DescriptionsItem label="Key Points" :label-style="{ 'font-weight': 'bold' }">
               <span class="preserve-whitespace">
                 {{ item.key_points || 'N/A' }}
               </span>
             </DescriptionsItem>
 
-            <DescriptionsItem label="Message content">
+            <DescriptionsItem label="Message Content" :label-style="{ 'font-weight': 'bold' }">
               <span class="preserve-whitespace">
                 {{ item.contents || 'N/A' }}
               </span>
@@ -181,7 +181,7 @@ onMounted(() => {
 
   </Card>
 
-  <Drawer v-model:visible="config.modal.visible" width="650px" :mask-closable="false" @close="closeModal">
+  <Drawer v-model:visible="config.modal.visible" width="60vw" :mask-closable="false" @close="closeModal">
     <template #title>
       {{ config.modal.form?.id != null ? 'Update' : 'New' }} Communication
     </template>
@@ -201,7 +201,6 @@ onMounted(() => {
 
         <FormItem name="title" label="Message Title" has-feedback
           :rules="[{ required: true, message: 'Please enter message title' }]">
-
           <Input v-model:value="config.modal.form.title"> </Input>
         </FormItem>
 
@@ -215,8 +214,17 @@ onMounted(() => {
           </Select>
         </FormItem>
 
+        <FormItem name="target_audiences" label="Target Audiences" has-feedback
+          :rules="[{ required: true, message: 'Please select target audiences!' }]">
+          <Select v-model:value="config.modal.form.target_audiences" placeholder="Select target audiences" mode="multiple"
+            :show-search="true">
+            <SelectOption v-for="obj in useProjectDataStore().audiences" :value="obj.id" :key="obj.id">{{ obj.data }}
+            </SelectOption>
+          </Select>
+        </FormItem>
+
         <FormItem name="drivers" label="Target Behavioral Drivers" has-feedback
-          :rules="[{ required: true, message: 'Please select target drivers!' }]">
+          :rules="[{ required: false, message: 'Please select target drivers!' }]">
 
           <Select v-model:value="config.modal.form.drivers" placeholder="Select target drivers" mode="multiple"
             :show-search="true">
@@ -236,45 +244,34 @@ onMounted(() => {
           </Select>
         </FormItem>
 
-        <FormItem name="target_audiences" label="Target Audiences" has-feedback
-          :rules="[{ required: true, message: 'Please select target audiences!' }]">
-          <Select v-model:value="config.modal.form.target_audiences" placeholder="Select target audiences" mode="multiple"
-            :show-search="true">
-            <SelectOption v-for="obj in useProjectDataStore().audiences" :value="obj.id" :key="obj.id">{{ obj.data }}
-            </SelectOption>
-          </Select>
-        </FormItem>
-
-        <!-- FIXME: Add target behaviour drivers -->
-
         <FormItem name="message_objectives" label="Message Objectives" has-feedback
           :rules="[{ required: true, message: 'Please enter message objectives' }]">
 
-          <Textarea v-model:value="config.modal.form.message_objectives"> </Textarea>
+          <Textarea v-model:value="config.modal.form.message_objectives" :rows="7"> </Textarea>
         </FormItem>
 
-        <FormItem name="delivery_platforms" label="Message Delivery Platforms" has-feedback
-          :rules="[{ required: true, message: 'Please enter message delivery platforms' }]">
+        <FormItem name="delivery_platforms" label="Message Delivery Channels" has-feedback
+          :rules="[{ required: false, message: 'Please enter message delivery platforms' }]">
 
-          <Textarea v-model:value="config.modal.form.delivery_platforms"> </Textarea>
+          <Textarea v-model:value="config.modal.form.delivery_platforms" :rows="7"> </Textarea>
         </FormItem>
 
         <FormItem name="format" label="Message Format" has-feedback
-          :rules="[{ required: true, message: 'Please enter message format!' }]">
+          :rules="[{ required: false, message: 'Please enter message format!' }]">
 
-          <Textarea v-model:value="config.modal.form.format"></Textarea>
+          <Textarea v-model:value="config.modal.form.format" :rows="7"></Textarea>
         </FormItem>
 
         <FormItem name="key_points" label="Message Key Points" has-feedback
           :rules="[{ required: true, message: 'Please enter message key points!' }]">
 
-          <Textarea v-model:value="config.modal.form.key_points" name="key_points"></Textarea>
+          <Textarea v-model:value="config.modal.form.key_points" name="key_points" :rows="10"></Textarea>
         </FormItem>
 
         <FormItem name="contents" label="Message Contents" has-feedback
-          :rules="[{ required: true, message: 'Please enter message content!' }]">
+          :rules="[{ required: false, message: 'Please enter message content!' }]">
 
-          <Textarea v-model:value="config.modal.form.contents" name="contents"></Textarea>
+          <Textarea v-model:value="config.modal.form.contents" name="contents" :rows="10"></Textarea>
         </FormItem>
       </Form>
 
