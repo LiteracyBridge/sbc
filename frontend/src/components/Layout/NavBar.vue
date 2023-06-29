@@ -138,6 +138,13 @@ async function signOut() {
                 Help
               </RouterLink>
 
+              <RouterLink to="/partners" class="navbar-item">
+                <span class="icon mr-1">
+                  <i class="fas fa-question-circle"></i>
+                </span>
+                Partners
+              </RouterLink>
+
               <hr class="navbar-divider">
               <div v-if="userStore.loggedIn">
                 <!-- FIX: fix user logout -->

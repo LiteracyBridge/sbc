@@ -19,7 +19,7 @@ import ProjectObjective from "@/views/ProjectObjective.vue";
 import Audience from "@/views/Audience.vue";
 import CommunicationsIndex from "@/views/communications/CommunicationsIndex.vue";
 import ProjectInfo from "@/views/ProjectInfo.vue";
-
+import Partners from "@/views/Partners.vue";
 
 let user;
 
@@ -170,6 +170,7 @@ const router = createRouter({
       name: "request-access",
       component: AccessRequest,
     },
+    { path: "/partners", name: "partners", component: Partners },
   ],
 });
 

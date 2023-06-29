@@ -57,16 +57,6 @@ const columns = [
     dataIndex: 'duration',
     key: 'duration',
   },
-  {
-    title: 'Intervention',
-    dataIndex: 'intervention',
-    key: 'intervention',
-  },
-  {
-    title: 'Drivers',
-    dataIndex: 'drivers',
-    key: 'drivers',
-  },
 ]
 </script>
 
@@ -75,53 +65,36 @@ const columns = [
     @is-closed="config.selectedActivity = null; config.subActivityModal.visible = false"
     :activity="config.selectedActivity" v-if="config.selectedActivity != null"></SubActivitiesDrawer>
 
-  <Spin :spinning="activityStore.isLoading">
+  <Table :columns="columns" :data-source="activityStore.topLevelActivities" bordered :loading="activityStore.isLoading">
+    <template #title>
+      Project Activities
+    </template>
 
-    <Table :columns="columns" :data-source="activityStore.topLevelActivities" bordered>
-      <template #title>
-        Project Activities
+    <template #bodyCell="{ column, record: activity }">
+      <template v-if="column.key === 'name'">
+        <Space>
+          <a @click="editActivity(activity)">{{ activity.name }}</a>
+
+          <Tag :style="{ 'border-radius': '10px' }" :color="'#108ee9'"
+            @click="config.selectedActivity = activity; config.subActivityModal.visible = true">
+            view tasks
+          </Tag>
+        </Space>
       </template>
 
-      <template #bodyCell="{ column, record: activity }">
-        <template v-if="column.key === 'name'">
-          <Space>
-            <a @click="editActivity(activity)">{{ activity.name }}</a>
-
-            <Tag :style="{ 'border-radius': '10px' }" :color="'#108ee9'"
-              @click="config.selectedActivity = activity; config.subActivityModal.visible = true">
-              view tasks
-            </Tag>
-          </Space>
-        </template>
-
-        <template v-if="column.key === 'status'">
-          {{ lookupStore.lookupNameById('activity_status', activity.status_id) }}
-        </template>
-
-        <template v-if="column.key === 'owner'">
-          {{ projectStore.userName(activity.owner_id) }}
-        </template>
-
-        <template v-if="column.key === 'duration'">
-          {{ activityStore.fromDate(activity.id) }} - {{ activityStore.toDate(activity.id) }}
-        </template>
-
-        <template v-if="column.key === 'intervention'">
-          {{ interventionStore.interventionNameById(activity.intervention_id) }}
-        </template>
-
-        <template v-if="column.key === 'drivers'">
-          <span v-if="activity.driver_ids && activity.driver_ids.length == 1">{{
-            driverStore.nameById(activity.driver_ids[0]) }}
-          </span>
-
-          <span v-else>
-            <i>{{ activity.driver_ids.length }} drivers</i>
-          </span>
-        </template>
+      <template v-if="column.key === 'status'">
+        {{ lookupStore.lookupNameById('activity_status', activity.status_id) }}
       </template>
-    </Table>
-  </Spin>
+
+      <template v-if="column.key === 'owner'">
+        {{ projectStore.userName(activity.owner_id) }}
+      </template>
+
+      <template v-if="column.key === 'duration'">
+        {{ activityStore.fromDate(activity.id) }} - {{ activityStore.toDate(activity.id) }}
+      </template>
+    </template>
+  </Table>
 
   <!-- TODO: display sub activites in a modal -->
   <!-- <template v-if="expandActivity.includes(activity.id)">
