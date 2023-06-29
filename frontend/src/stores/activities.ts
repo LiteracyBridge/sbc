@@ -30,9 +30,9 @@ export const useActivityStore = defineStore({
       return state.activities.filter((a) => a.parent_id != null).length;
     },
     subActivitiesByActivityId: (state) => (activityId: number) =>
-      state.activities.filter((a) => a.parent_id == activityId),
+      state.activities.filter((a) => a.parent_id == activityId) ?? [],
     schedulesByActivityId: (state) => (activityId: number) =>
-      state.schedules.filter((s) => s.activity_id == activityId),
+      state.schedules.filter((s) => s.activity_id == activityId) ?? [],
     fromDate: (state) => (activityId: number) => {
       const schedules = state.schedules.filter(
         (s) => s.activity_id == activityId

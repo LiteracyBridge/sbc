@@ -57,6 +57,10 @@ const columns = [
     dataIndex: 'duration',
     key: 'duration',
   },
+  {
+    title: 'Tasks',
+    key: 'tasks',
+  },
 ]
 </script>
 
@@ -73,12 +77,8 @@ const columns = [
     <template #bodyCell="{ column, record: activity }">
       <template v-if="column.key === 'name'">
         <Space>
-          <a @click="editActivity(activity)">{{ activity.name }}</a>
-
-          <Tag :style="{ 'border-radius': '10px' }" :color="'#108ee9'"
-            @click="config.selectedActivity = activity; config.subActivityModal.visible = true">
-            view tasks
-          </Tag>
+          <!-- TODO: IMPLEMENT ACTIVITY -->
+          <Button type="link" @click="editActivity(activity)">{{ activity.name }}</Button>
         </Space>
       </template>
 
@@ -92,6 +92,13 @@ const columns = [
 
       <template v-if="column.key === 'duration'">
         {{ activityStore.fromDate(activity.id) }} - {{ activityStore.toDate(activity.id) }}
+      </template>
+
+      <template v-if="column.key === 'tasks'">
+
+        <Button type="link" @click="config.selectedActivity = activity; config.subActivityModal.visible = true">
+          View Tasks ({{ activityStore.subActivitiesByActivityId(activity.id).length }})
+        </Button>
       </template>
     </template>
   </Table>
