@@ -8,7 +8,7 @@ import { Button, Comment, Empty, Space, Drawer, Avatar, Tooltip, Spin } from "an
 import { UserOutlined } from "@ant-design/icons-vue";
 import dayjs from 'dayjs';
 
-const emit = defineEmits(["closed", "save"]);
+const emit = defineEmits(["close"]);
 
 const props = defineProps({
   topic: {
@@ -22,8 +22,6 @@ const props = defineProps({
 });
 
 const projectStore = useProjectStore();
-// const messages = ref([]);
-
 const config = ref({
   visible: props.visible,
   loading: false,
@@ -32,7 +30,7 @@ const config = ref({
 
 const closeButton = () => {
   config.value.visible = false;
-  emit("closed", false);
+  emit("close", false);
 };
 
 function flattenMessage(message: any): any {
@@ -68,7 +66,8 @@ onMounted(() => {
     title="Messages">
     <template #extra>
       <Space>
-        <Button @click="fetchMessages()" :loading="config.loading" type="primary" :ghost="true">Refresh</Button>
+        <Button @click="fetchMessages()" :loading="config.loading" type="primary">Refresh</Button>
+
         <Button @click="closeButton">Close</Button>
       </Space>
     </template>

@@ -6,6 +6,8 @@ import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { useProjectDataStore } from '@/stores/projectData';
 import GPTSuggestionPanel from '@/components/GPTSuggestionPanel.vue';
 import MessageModal from '@/components/MessageModal.vue';
+import BroadcastComponent from '@/components/BroadcastComponent.vue';
+
 import { DeleteOutlined, MinusCircleOutlined, PlusOutlined } from '@ant-design/icons-vue';
 import { useUserStore } from '@/stores/user';
 
@@ -133,10 +135,12 @@ onMounted(() => {
 
   <Card class="section" title="Project Objectives" :loading="store.loading">
     <template #extra>
-      <Button type="primary" :ghost="true" @click="saveForms()">Save Changes</Button>
+      <Button type="primary" @click="saveForms()">Save Changes</Button>
     </template>
 
-    <div class="buttons-container is-fixed is-absolute is-flex is-flex-direction-column is-align-items-flex-end m-4 mr-6">
+    <BroadcastComponent :module="config.suggestions.module"></BroadcastComponent>
+
+    <!-- <div class="buttons-container is-fixed is-absolute is-flex is-flex-direction-column is-align-items-flex-end m-4 mr-6">
       <button class="button is-link mb-2" :disabled="config.messages"
         @click.prevent="store.broadcastPage(config.suggestions.module)">
         <span>Broadcast</span>
@@ -147,7 +151,7 @@ onMounted(() => {
     </div>
     <Suspense>
       <MessageModal v-if="config.messages" :topic="config.suggestions.module" v-model="config.messages" />
-    </Suspense>
+    </Suspense> -->
 
     <Form layout="vertical">
       <!-- <div class="columns mx-4 is-vcentered"> -->
