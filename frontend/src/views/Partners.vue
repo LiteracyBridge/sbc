@@ -4,7 +4,15 @@ import { Card, Row, Col, Avatar, Typography, Space, Image, Divider } from 'ant-d
 </script>
 
 <template>
-  <Card title="Partners" class="section" :bordered="false">
+  <Card class="section" :bordered="false">
+    <Typography.Title :level="3">About SBC Impact Designer</Typography.Title>
+    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Id inventore officia optio cupiditate velit voluptas
+      quidem mollitia exercitationem iste dignissimos laudantium animi quaerat eos et, expedita maxime vitae tenetur
+      corporis.</p>
+
+    <Divider></Divider>
+    <Typography.Title :level="4">Our Partners</Typography.Title>
+
     <p style="font-style: italic; margin-bottom: 40px;">
       <!-- Write a brief intro about the project partners -->
       The project would not be possible without the help of our partners. They provided resources and the expertise to

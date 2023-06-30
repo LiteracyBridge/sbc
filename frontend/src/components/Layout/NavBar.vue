@@ -7,6 +7,7 @@ import { useProjectStore } from '@/stores/projects';
 import { useSideNavStore } from "@/stores/sideNav";
 import { useRouter } from 'vue-router';
 import LogoWhite from '@/assets/logo-white.png';
+import { AppstoreFilled, AppstoreOutlined } from '@ant-design/icons-vue';
 
 const router = useRouter();
 const showMobileNav = ref(false)
@@ -139,10 +140,8 @@ async function signOut() {
               </RouterLink>
 
               <RouterLink to="/partners" class="navbar-item">
-                <span class="icon mr-1">
-                  <i class="fas fa-question-circle"></i>
-                </span>
-                Partners
+                <AppstoreFilled class="mr-1"></AppstoreFilled>
+                About
               </RouterLink>
 
               <hr class="navbar-divider">
