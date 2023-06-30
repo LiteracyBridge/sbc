@@ -97,19 +97,22 @@ watch(projectSelected, (newVal) => {
         {{ projectStore.projectName }}
       </p>
       <ul class="menu-list">
-        <li v-for="(item, index) in menuItems" :key="index">
-          <router-link v-if="item.name && !(isActive(item) && isExactActive(item))"
-            :to="{ name: item.name, params: { module: item.params.module } }">
-            {{ item.label }}
+        <li v-for="(item, index) in  menuItems " :key="index">
+          <router-link v-if="item.name" :to="'/forms/' + item.params?.module">
+            <span :class="{ 'is-active': isActive(item) && isExactActive(item) }">
+              {{ item.label }}
+            </span>
           </router-link>
-          <router-link v-if="item.path && !(isActive(item) && isExactActive(item))" :to="item.path">
-            {{ item.label }}
+          <router-link v-if="item.path" :to="item.path">
+            <span :class="{ 'is-active': isActive(item) && isExactActive(item) }">
+              {{ item.label }}
+            </span>
           </router-link>
-          <router-link :to="item.path" v-if="isActive(item) && isExactActive(item)">
+          <!-- <router-link :to="item.path" v-if="isActive(item) && isExactActive(item)">
             <strong>
               {{ item.label }}
             </strong>
-          </router-link>
+          </router-link> -->
         </li>
       </ul>
     </aside>
@@ -144,5 +147,9 @@ watch(projectSelected, (newVal) => {
   top: calc(3.25rem + 5rem);
   /* Add 1rem margin to the existing top value */
   z-index: 100;
+}
+
+.is-active {
+  font-weight: bold;
 }
 </style>
