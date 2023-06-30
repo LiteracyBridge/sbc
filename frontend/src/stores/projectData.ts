@@ -12,6 +12,7 @@ export const useProjectDataStore = defineStore({
   state: () => ({
     new_project_data: [] as ProjectData[],
     loading: false,
+
     // objectives: [] as ProjectData[],
     questions: [
       {
@@ -375,16 +376,28 @@ export const useProjectDataStore = defineStore({
     },
 
     /**
+     * Build broadcast message
+     */
+    buildBroadcastMessage(module: string): string {
+      let msg = "";
+      for (var q of this.questionsForTopic(module)) {
+        const a = this.getData(q.id);
+        if (a != "") msg += q.label + "\n" + a + "\n\n";
+      }
+
+      return msg;
+    },
+
+    /**
      * Broadcasts a message to all users in the project
      */
     async broadcastPage(module: string) {
-      let message = "";
-      for (var q of this.questionsForTopic(module)) {
-        const a = this.getData(q.id);
-        if (a != "") message += q.label + "\n" + a + "\n\n";
-      }
-      console.log("Message: " + message);
-      twilioBroadcast(message, module);
+      message.info("Broadcasting message to all users in the project");
+
+      this.$state.loading = true;
+      const ms = this.buildBroadcastMessage(module);
+      await twilioBroadcast(ms, module);
+      this.$state.loading = false;
     },
   },
 });

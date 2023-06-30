@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, reactive, onMounted, onBeforeUnmount, computed, watch } from "vue";
+import { ref, computed, watch } from "vue";
 
 import { useProjectDataStore } from "@/stores/projectData";
 import * as lambda from "@/apis/lambda";
