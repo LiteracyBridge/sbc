@@ -1,10 +1,10 @@
-import { defineStore } from 'pinia';
-import { useProjectStore } from './projects';
-import axios from 'axios';
-import { SBC_TW_URL } from '../apis/lambda';
+import { defineStore } from "pinia";
+import { useProjectStore } from "./projects";
+import axios from "axios";
+import { SBC_TW_URL } from "../apis/lambda";
 
 export const useMessageStore = defineStore({
-  id: 'messages',
+  id: "messages",
   state: () => ({
     lastSentId: 0,
     lastReceivedId: 0,
@@ -18,21 +18,23 @@ export const useMessageStore = defineStore({
     // Fetches the latest messages for the specified related_item and updates the store state
     async getLatestMessages(related_item, messages) {
       const queryString =
-        '?prj_id=' +
+        "?prj_id=" +
         useProjectStore().prj_id +
-        '&related_item=' +
+        "&related_item=" +
         related_item +
-        '&since_sent_id=' +
+        "&since_sent_id=" +
         this.lastSentId +
-        '&since_received_id=' +
+        "&since_received_id=" +
         this.lastReceivedId;
       let topicMsgs = [];
       topicMsgs = this.messagesForTopic(related_item);
+
       if (related_item in messages) {
         topicMsgs = messages[related_item];
       } else {
         topicMsgs = messages[related_item] = {};
       }
+
       const response = await axios.get(SBC_TW_URL + queryString);
       const rows = response.data;
       for (let i = 0; i < rows.length; i++) {
@@ -60,7 +62,7 @@ export const useMessageStore = defineStore({
             replies: {},
           };
         }
-        if (r_id !== null && r_msg != 'Yes - Send Update') {
+        if (r_id !== null && r_msg != "Yes - Send Update") {
           topicMsgs[s_id].replies[r_id] = {
             time: r_time,
             user_id: r_uid,
@@ -68,6 +70,8 @@ export const useMessageStore = defineStore({
           };
         }
       }
+
+      return topicMsgs;
     },
   },
 });

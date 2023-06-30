@@ -219,7 +219,7 @@ onMounted(() => {
 
 <template>
   <GPTSuggestionPanel :is-visible="config.suggestions.isOpened" @is-closed="config.suggestions.isOpened = false;"
-    :question-id="config.suggestions.questionId" :module="config.suggestions.module">
+    v-if="config.suggestions.module" :question-id="config.suggestions.questionId" :module="config.suggestions.module">
   </GPTSuggestionPanel>
 
   <Card class="section" title="Project Audiences" :loading="store.loading">

@@ -149,7 +149,7 @@ async function broadcastPage() {
 
     <GPTSuggestionPanel :is-visible="suggestionsPanelHandler.isOpened"
       @is-closed="suggestionsPanelHandler.isOpened = false;" :question-id="suggestionsPanelHandler.questionId"
-      :module="suggestionsPanelHandler.module">
+      :module="suggestionsPanelHandler.module" v-if="suggestionsPanelHandler.module">
     </GPTSuggestionPanel>
 
     <div v-for="(q, count) in projectDataStore.questionsForTopic(topic)" :key="q.id" class="columns mx-4 is-vcentered">

@@ -3,7 +3,7 @@ import { Button } from 'ant-design-vue';
 import { ref } from 'vue';
 
 import BroadcastModal from './BroadcastModal.vue';
-import MessageModal from './MessageModal.vue';
+import MessagesDrawer from './MessagesDrawer.vue';
 
 const props = defineProps<{
   module: string;
@@ -19,6 +19,8 @@ const config = ref({
   <BroadcastModal :visible="config.broadcastModal" :module="props.module" @close="config.broadcastModal = false">
   </BroadcastModal>
 
+  <MessagesDrawer v-if="config.messagesModal" :topic="props.module" :visible="config.messagesModal"></MessagesDrawer>
+
   <div class="buttons-container is-fixed is-absolute is-flex is-flex-direction-column is-align-items-flex-end m-4 mr-6">
     <Button @click="config.broadcastModal = true">
       Broadcast
@@ -28,8 +30,4 @@ const config = ref({
       Messages
     </Button>
   </div>
-
-  <Suspense>
-    <MessageModal v-if="config.messagesModal" :topic="props.module" v-model="config.messagesModal" />
-  </Suspense>
 </template>
