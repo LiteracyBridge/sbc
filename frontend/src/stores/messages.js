@@ -47,12 +47,14 @@ export const useMessageStore = defineStore({
         const r_time = row[5];
         const r_uid = row[6];
         const r_msg = row[7];
-        if (s_id) {
-          this.lastSentId = s_id;
-        }
-        if (r_id) {
-          this.lastReceivedId = r_id;
-        }
+
+        // if (s_id) {
+        //   this.lastSentId = s_id;
+        // }
+        // if (r_id) {
+        //   this.lastReceivedId = r_id;
+        // }
+
         if (!(s_id in messages[related_item])) {
           // new sent message
           topicMsgs[s_id] = {
