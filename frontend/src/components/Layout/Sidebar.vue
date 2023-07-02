@@ -3,7 +3,7 @@ import { computed, ref, watch } from 'vue';
 import { useProjectStore } from '@/stores/projects';
 import { useSideNavStore } from "@/stores/sideNav";
 import { useRouter } from 'vue-router';
-import { MenuItem, LayoutSider, Menu } from 'ant-design-vue';
+import { MenuItem, LayoutSider, Menu, Divider } from 'ant-design-vue';
 
 const router = useRouter();
 
@@ -95,19 +95,29 @@ watch(projectSelected, (newVal) => {
 -->
 
 <template>
-  <LayoutSider v-model:collapsed="store.visible" :trigger="null" collapsible :style="{ height: '100vh' }" breakpoint="lg"
-    :collapsed-width="0">
+  <LayoutSider v-model:collapsed="store.visible" :trigger="null" collapsible :style="{ minHeight: '100vh' }" breakpoint="lg"
+    :collapsed-width="0" width="250px">
     <div class="logo">
       {{ projectStore.projectName }}
     </div>
 
     <Menu v-model:selectedKeys="config.activeMenu" theme="dark" mode="inline">
-      <MenuItem key="1">
-      <span>nav 1</span>
+      <MenuItem v-for="(item, index) in  menuItems " :key="index">
+      <router-link v-if="item.name" :to="'/forms/' + item.params?.module">
+        <span>
+          {{ item.label }}
+        </span>
+      </router-link>
+
+      <router-link v-if="item.path" :to="item.path">
+        <span>
+          {{ item.label }}
+        </span>
+      </router-link>
       </MenuItem>
-      <MenuItem key="2">
-      <span>nav 1</span>
-      </MenuItem>
+
+
+      <Divider :style="{ 'background-color': 'white'}"></Divider>
       <MenuItem key="3">
       <span>nav 1</span>
       </MenuItem>
