@@ -14,6 +14,7 @@ import { AppStore } from "./stores/app.store";
 import GridLoader from "./components/spinners/GridLoader.vue";
 import { Layout, LayoutContent, LayoutFooter, LayoutHeader, LayoutSider, Space } from "ant-design-vue";
 
+import Header from "./components/Layout/Header.vue";
 import Sidebar from "./components/Layout/Sidebar.vue";
 import { MenuUnfoldOutlined } from "@ant-design/icons-vue";
 
@@ -71,13 +72,14 @@ onMounted(async () => {
     </LayoutSider> -->
 
     <Layout>
-      <LayoutHeader :has-sider="true" style="background: #fff; padding: 0">
+      <LayoutHeader :has-sider="true" style="background: #fff; padding: 0px 16px 0px 0px;">
         <MenuUnfoldOutlined v-if="sideNavStore.visible" class="trigger"
           @click="() => (sideNavStore.visible = !sideNavStore.visible)" />
         <MenuUnfoldOutlined v-else class="trigger" @click="() => (sideNavStore.visible = !sideNavStore.visible)" />
 
         <!-- Place a dropdown at the end of the header -->
-        <span>sodfosdfosdf</span>
+
+        <Header></Header>
       </LayoutHeader>
 
       <LayoutContent :style="{ margin: '24px 16px 0px 16px', padding: '24px', background: '#fff', minHeight: '280px' }">

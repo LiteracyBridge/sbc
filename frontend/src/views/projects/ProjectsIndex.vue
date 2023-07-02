@@ -23,14 +23,17 @@ onMounted(() => {
 </script>
 
 <template>
-  <section class="section">
+  <!-- <section class="section"> -->
 
+  <div>
     <!-- Projects table component -->
     <ProjectsTable></ProjectsTable>
 
     <Divider></Divider>
 
     <ProjectUsers></ProjectUsers>
+  </div>
 
-  </section>
+
+  <!-- </section> -->
 </template>
