@@ -12,6 +12,10 @@ import { useSideNavStore } from "@/stores/sideNav";
 import { useUserStore } from '@/stores/user';
 import { AppStore } from "./stores/app.store";
 import GridLoader from "./components/spinners/GridLoader.vue";
+import { Layout, LayoutContent, LayoutFooter, LayoutHeader, LayoutSider, Space } from "ant-design-vue";
+
+import Sidebar from "./components/Layout/Sidebar.vue";
+import { MenuUnfoldOutlined } from "@ant-design/icons-vue";
 
 const userStore = useUserStore();
 const appStore = AppStore()
@@ -58,27 +62,64 @@ onMounted(async () => {
     <!-- <GridLoader :loading="appStore.isLoading"></GridLoader> -->
   </div>
 
-  <div class="app-wrapper" v-else>
-    <!-- Render the navigation bar -->
-    <NavBar v-if="userStore.loggedIn" />
-    <div class="left-side-nav-container">
-      <!-- Render the left side navigation if it should be visible -->
+
+
+  <Layout v-else>
+    <Sidebar></Sidebar>
+    <!-- <LayoutSider>
       <LeftSideNav v-if="showSideNav" v-model="showSideNav" />
-      <div class="container is-max-desktop px-2 py-4 custom-container mt-6"
-        :class="{ 'has-left-side-nav': showSideNav, 'main-content': !showSideNav }">
+    </LayoutSider> -->
 
+    <Layout>
+      <LayoutHeader :has-sider="true" style="background: #fff; padding: 0">
+        <MenuUnfoldOutlined v-if="sideNavStore.visible" class="trigger"
+          @click="() => (sideNavStore.visible = !sideNavStore.visible)" />
+        <MenuUnfoldOutlined v-else class="trigger" @click="() => (sideNavStore.visible = !sideNavStore.visible)" />
 
-        <!-- Render the router view using the current route's fullPath as a key -->
-        <router-view :key="$route.fullPath"></router-view>
-      </div>
-    </div>
-  </div>
+        <!-- Place a dropdown at the end of the header -->
+        <span>sodfosdfosdf</span>
+      </LayoutHeader>
+
+      <LayoutContent :style="{ margin: '24px 16px 0px 16px', padding: '24px', background: '#fff', minHeight: '280px' }">
+        Content
+      </LayoutContent>
+
+      <LayoutFooter>Footer</LayoutFooter>
+    </Layout>
+  </Layout>
 </template>
 
 <style>
 /* Importing required CSS libraries */
 @import "bulma/css/bulma.min.css";
 @import "@creativebulma/bulma-tooltip";
+
+html {
+  overflow-y: auto;
+}
+
+.trigger {
+  font-size: 18px;
+  line-height: 64px;
+  padding: 0 24px;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.trigger:hover {
+  color: #1890ff;
+}
+
+.logo {
+  height: 32px;
+  background: rgba(255, 255, 255, 0.3);
+  margin: 16px;
+}
+
+.site-layout .site-layout-background {
+  background: #fff;
+}
+
 
 /* Styling for the app wrapper */
 .app-wrapper {
