@@ -276,8 +276,8 @@ onMounted(() => {
             message: 'Audience can not be empty',
             trigger: 'change',
           }"
-          help="What other audiences need to be involved? Who else influences the actions of your main target audience? What other audiences need to be involved?"
           style="margin-bottom: 10px;">
+          <!-- help="What other audiences need to be involved? Who else influences the actions of your main target audience? What other audiences need to be involved?" -->
 
           <Input v-model:value="objective.value" placeholder="please input audience" style="width: 60%;" />
 
