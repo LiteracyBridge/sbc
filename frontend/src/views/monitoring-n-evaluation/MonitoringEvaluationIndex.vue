@@ -1,7 +1,11 @@
 <script lang="ts" setup>
 
-import { SmileOutlined, DownOutlined, PlusCircleOutlined, SettingOutlined } from '@ant-design/icons-vue';
-import { Tag, Table, Divider, Button, Space, Typography, ButtonGroup, Modal, DescriptionsItem, Descriptions, Form, FormItem, Input, Select, SelectOption, Tabs, TabPane, Textarea, Spin, message } from 'ant-design-vue';
+import { DownOutlined, PlusCircleOutlined } from '@ant-design/icons-vue';
+import {
+  Tag, Table, Divider, Button, Space,
+  Typography, Modal, DescriptionsItem,
+  Descriptions, Tabs, TabPane, Empty, Spin
+} from 'ant-design-vue';
 import { onMounted, ref } from 'vue';
 
 import MonitoringEditModal from './MonitoringEditModal.vue';
@@ -197,7 +201,7 @@ onMounted(() => {
             <template v-else-if="column.key === 'progress_rate'">
               <!-- TODO: Should only display modal -->
               <Tag :color="'cyan'" @click="config.selectedRow = record; config.evaluationModal.visible = true">
-                <Typography :level="'4'">{{ record.progress || 0 }}% </Typography>
+                {{ record.progress || 0 }}%
               </Tag>
             </template>
 
@@ -228,8 +232,10 @@ onMounted(() => {
     @ok="config.evaluationModal.onClose(); config.selectedRow = null">
     <template #footer></template>
 
-    <Descriptions size="small" :label-style="{ 'fontWeight': 'bold' }">
-      <DescriptionsItem v-for="item in (config.selectedRow.evaluation || [])" :label="item.period"> {{ item.value }}
+    <Empty v-if="(config.selectedRow?.evaluation || []).length == 0"></Empty>
+
+    <Descriptions v-else size="small" :label-style="{ 'fontWeight': 'bold' }">
+      <DescriptionsItem v-for="item in (config.selectedRow?.evaluation || [])" :label="item.period"> {{ item.value }}
       </DescriptionsItem>
     </Descriptions>
   </Modal>

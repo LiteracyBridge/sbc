@@ -87,9 +87,7 @@ def record_progress(
 
     progress = {"period": dto.period, "value": dto.value}
     evaluation.append(progress)
-    # record[dto.period] = dto.value
     record.evaluation = evaluation
-    # record.progress = (sum(evaluation.values()) / record.target) * 100
 
     # Computer total progress
     total_progress = 0
