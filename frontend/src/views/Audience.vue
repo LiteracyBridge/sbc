@@ -8,6 +8,7 @@ import { computed, onMounted, reactive, ref, watch } from 'vue';
 
 import { useProjectDataStore } from '@/stores/projectData';
 import GPTSuggestionPanel from '@/components/GPTSuggestionPanel.vue';
+import BroadcastComponent from '@/components/BroadcastComponent.vue';
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons-vue';
 import { ApiRequest } from '@/apis/api';
 import { useProjectStore } from '@/stores/projects';
@@ -224,8 +225,11 @@ onMounted(() => {
 
   <Card class="section" title="Project Audiences" :loading="store.loading">
     <template #extra>
-      <Button type="primary" :ghost="true" :loading="store.loading" @click="saveForms()">Save Changes</Button>
+      <Button type="primary" :loading="store.loading" @click="saveForms()">Save Changes</Button>
     </template>
+
+
+    <BroadcastComponent :module="config.suggestions.module"></BroadcastComponent>
 
     <Form ref="primaryFormRef" :model="primaryAudienceForm" layout="vertical" v-bind="formItemLayoutWithOutLabel">
 
@@ -275,8 +279,7 @@ onMounted(() => {
             required: true,
             message: 'Audience can not be empty',
             trigger: 'change',
-          }"
-          style="margin-bottom: 10px;">
+          }" style="margin-bottom: 10px;">
           <!-- help="What other audiences need to be involved? Who else influences the actions of your main target audience? What other audiences need to be involved?" -->
 
           <Input v-model:value="objective.value" placeholder="please input audience" style="width: 60%;" />
