@@ -1,5 +1,21 @@
 import type { Dayjs } from "dayjs";
 
+export const THEORY_OF_CHANGE_TYPES: Record<string, string> = {
+  "1": "Input",
+  "2": "Activity",
+  "3": "Output",
+  "4": "Outcome",
+  "5": "Impact",
+};
+
+export const SEMS: Record<string, string> = {
+  "1": "Individual",
+  "2": "Interpersonal",
+  "3": "Community",
+  "4": "Organizational",
+  "5": "Policy/Enabling environment",
+};
+
 export class User {
   id: number;
   email: string;

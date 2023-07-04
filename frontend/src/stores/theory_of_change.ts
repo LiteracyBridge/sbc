@@ -25,6 +25,8 @@ export const useTheoryOfChangeStore = defineStore({
     isLoading: false,
   }),
   getters: {
+    data: (state) => state.theory_of_change,
+
     indicatorTypes: (state) => state.indicator_types,
     indicatorGroups: (state) => state.indicator_groups,
     // Theory of Change

@@ -1,6 +1,4 @@
 <script lang="ts" setup>
-// @ts-ignore
-// import mermaidAPI from "/node_modules/mermaid/dist/mermaid.esm.mjs";
 import mermaid from "mermaid";
 
 import { onMounted, onUnmounted, reactive, ref, computed } from "vue";
@@ -9,7 +7,13 @@ import axios from "axios";
 import { onClickOutside } from "@vueuse/core";
 import IndicatorBrowserPanel from "./IndicatorBrowserPanel.vue";
 import { ApiRequest } from "@/apis/api";
-import { Risk, TheoryOfChange, TheoryOfChangeItem } from "@/types";
+import {
+  Risk,
+  SEMS,
+  THEORY_OF_CHANGE_TYPES,
+  TheoryOfChange,
+  TheoryOfChangeItem,
+} from "@/types";
 import GridLoader from "@/components/spinners/GridLoader.vue";
 import { useProjectDataStore } from "@/stores/projectData";
 import { useProjectStore } from "@/stores/projects";
@@ -35,6 +39,8 @@ import {
   Empty,
 } from "ant-design-vue";
 import TheoryOfChangeExamplesBrowser from "./TheoryOfChangeExamplesBrowser.vue";
+import TheoryOfChangeItemModal from "./TheoryOfChangeItemModal.vue";
+
 import CustomIndicatorModal from "./CustomIndicatorModal.vue";
 import {
   DeleteOutlined,
@@ -44,22 +50,6 @@ import {
   SwapOutlined,
 } from "@ant-design/icons-vue";
 import { useTheoryOfChangeStore } from "@/stores/theory_of_change";
-
-const THEORY_OF_CHANGE_TYPES: Record<string, string> = {
-  "1": "Input",
-  "2": "Activity",
-  "3": "Output",
-  "4": "Outcome",
-  "5": "Impact",
-};
-
-const SEMS: Record<string, string> = {
-  "1": "Individual",
-  "2": "Interpersonal",
-  "3": "Community",
-  "4": "Organizational",
-  "5": "Policy/Enabling environment",
-};
 
 const isPanelVisible = ref(false);
 const showIndicatorModal = ref(false);
@@ -72,18 +62,14 @@ const theoryOfChangeModel = ref<{
 });
 const tocItemModalConfig = ref({
   visible: false,
-  itemId: null,
-  data: {},
-  isNew: false,
-  theoryOfChangeId: null,
-  isLoading: false,
-  isDeleting: false,
-  form: new TheoryOfChange(),
+  toc: new TheoryOfChange(),
 });
+
 const config = reactive({
   isLoading: true,
   isExamplePanelVisible: false,
 });
+
 const customIndicator = ref({
   visible: false,
   customIndicator: "",
@@ -381,7 +367,7 @@ const fetchGraph = async () => {
 
 const escapeKeyHandler = (event) => {
   if (event.key === "Escape" || event.keyCode === 27) {
-    closeModal();
+    tocItemModalClosed();
   }
 };
 
@@ -414,9 +400,7 @@ onMounted(() => {
     const selectedItem = theoryOfChangeModel.value.selectedItem;
     if (selectedItem != null) {
       console.log(selectedItem);
-      tocItemModalConfig.value.isNew = false;
-      tocItemModalConfig.value.form = selectedItem;
-      tocItemModalConfig.value.itemId = selectedItem.id;
+      tocItemModalConfig.value.toc = selectedItem;
       tocItemModalConfig.value.visible = true;
     }
   };
@@ -456,89 +440,27 @@ function rotateDiagram() {
 
 //=== START: Theory of Change Item Modal functions
 const newTocItem = () => {
-  tocItemModalConfig.value.form = new TheoryOfChange();
-  tocItemModalConfig.value.isNew = true;
-  tocItemModalConfig.value.theoryOfChangeId = 1;
+  tocItemModalConfig.value.toc = new TheoryOfChange();
   tocItemModalConfig.value.visible = true;
 };
 
-const closeModal = (redraw = true) => {
+const tocItemModalClosed = (redraw = true, data?: TheoryOfChange[]) => {
   selectedNodeId.value = null;
   selectedEdge.value = null;
   showIndicatorModal.value = false;
 
   tocItemModalConfig.value.visible = false;
-  tocItemModalConfig.value.form = new TheoryOfChange();
+  tocItemModalConfig.value.toc = new TheoryOfChange();
+
+  if (data != null) {
+    diagram.parseGraph(data);
+  }
 
   // useSideNavStore().show();
   if (redraw) {
     drawDiagram();
   }
 };
-
-const saveFormItem = async () => {
-  // TODO: send response as callback to close the form
-  const fields = tocItemModalConfig.value.form,
-    tocId = theoryOfChangeModel.value.data;
-
-  const data = {
-    name: fields.name,
-    type_id: fields.type_id,
-    from_id: fields.from_id,
-    to_id: fields.to_id,
-    sem_id: fields.sem_id,
-    description: fields.description,
-    is_validated: fields.is_validated || false,
-  };
-
-  tocItemModalConfig.value.isLoading = true;
-  if (tocItemModalConfig.value.itemId != null || !tocItemModalConfig.value.isNew) {
-    // Update item
-    await ApiRequest.put<TheoryOfChange>(
-      `theory-of-change/${projectStore.prj_id}/item/${tocItemModalConfig.value.itemId}`,
-      data
-    )
-      .then((resp) => {
-        diagram.parseGraph(resp);
-        closeModal(false);
-
-        message.success("Item updated successfully");
-      })
-      .finally(() => {
-        tocItemModalConfig.value.isLoading = false;
-      });
-  } else {
-    //  Create item
-    await ApiRequest.post<TheoryOfChange>(
-      `theory-of-change/${projectStore.prj_id}/item`,
-      data
-    )
-      .then((resp) => {
-        diagram.parseGraph(resp);
-
-        closeModal(false);
-        message.success("Item created successfully");
-      })
-      .finally(() => {
-        tocItemModalConfig.value.isLoading = false;
-      });
-  }
-};
-
-function deleteItem() {
-  tocItemModalConfig.value.isDeleting = true;
-
-  const tocId = theoryOfChangeModel.value.data.id;
-  ApiRequest.delete(`theory-of-change/${tocId}/item/${tocItemModalConfig.value.itemId}`)
-    .then((_) => {
-      deleteNode(selectedNodeId.value);
-
-      closeModal(false);
-    })
-    .finally(() => {
-      tocItemModalConfig.value.isDeleting = false;
-    });
-}
 
 function updateToCModel(resp: TheoryOfChange[], itemId?: number) {
   // if (Array.isArray(resp)) {
@@ -551,11 +473,6 @@ function updateToCModel(resp: TheoryOfChange[], itemId?: number) {
   }
 }
 
-const getTocItemIndicators = computed(() => {
-  return (
-    store.theoryOfChangeItemIndicators(theoryOfChangeModel.value.selectedItem?.id) ?? []
-  );
-});
 //=== END: Theory of Change Item Modal functions
 
 // === START: Risks Modal functions
@@ -625,7 +542,17 @@ const risksModalConfig = reactive({
     >
     </IndicatorBrowserPanel>
 
+    <!-- Theory of Change Item Modal -->
+    <TheoryOfChangeItemModal
+      :visible="tocItemModalConfig.visible"
+      :toc="tocItemModalConfig.toc"
+      @closed="tocItemModalClosed(false)"
+      @saved="tocItemModalClosed(false, $event)"
+      @deleted="deleteNode($event)"
+    ></TheoryOfChangeItemModal>
+
     <!-- Custom Indicator Modal -->
+    <!-- TODO: move to toc modal -->
     <CustomIndicatorModal
       :visible="customIndicator.visible"
       :theory-of-change="theoryOfChangeModel.selectedItem"
@@ -644,7 +571,7 @@ const risksModalConfig = reactive({
     <div v-if="!config.isLoading">
       <div class="level">
         <div class="level-item has-text-centered">
-          <Button type="primary" class="mr-6" @click.prevent="newTocItem()">
+          <Button type="primary" class="mr-6" @click="newTocItem()">
             <template #icon>
               <PlusCircleOutlined />
             </template>
@@ -683,201 +610,7 @@ const risksModalConfig = reactive({
       <Divider></Divider>
 
       <!-- ======== START: Theory of Change Modal ======= -->
-      <Modal v-model:visible="tocItemModalConfig.visible" @ok="closeModal()">
-        <template #footer>
-          <footer style="display: block">
-            <div class="level">
-              <div class="level-left">
-                <div class="level-item">
-                  <Button
-                    role="button"
-                    type="primary"
-                    :danger="true"
-                    @click="deleteItem()"
-                    v-if="tocItemModalConfig.isNew == false"
-                    :class="{ 'is-loading disabled': tocItemModalConfig.isDeleting }"
-                    :disabled="tocItemModalConfig.isDeleting"
-                  >
-                    <DeleteOutlined />
-                    Delete
-                  </Button>
-                </div>
-              </div>
 
-              <div class="level-right">
-                <div class="level-item">
-                  <Button
-                    type="primary"
-                    :class="{ 'is-loading': tocItemModalConfig.isLoading }"
-                    :disabled="tocItemModalConfig.isLoading"
-                    role="button"
-                    @click.prevent="saveFormItem()"
-                  >
-                    {{ tocItemModalConfig.isNew ? "Save" : "Update" }}
-                  </Button>
-
-                  <Button role="button" @click="closeModal(false)">Cancel</Button>
-                </div>
-              </div>
-            </div>
-          </footer>
-        </template>
-
-        <Form layout="vertical" :model="tocItemModalConfig.form">
-
-          <FormItem
-            name="name"
-            label="Label"
-            has-feedback
-            :rules="[{ required: true, message: 'Please enter theory of change label!' }]"
-          >
-            <Input
-              v-model:value="tocItemModalConfig.form.name"
-              placeholder="Enter label"
-            />
-          </FormItem>
-
-          <Row :gutter="4">
-            <Col :span="12">
-              <FormItem label="Links From" name="from_id">
-                <!-- TODO: show list of existing indicators -->
-                <Select
-                  v-model:value="tocItemModalConfig.form.from_id"
-                  :allow-clear="true"
-                >
-                  <SelectOption
-                    v-for="item in theoryOfChangeModel?.data"
-                    :key="item.id"
-                    :value="item.id"
-                  >
-                    {{ item.name }}
-                  </SelectOption>
-                </Select>
-              </FormItem>
-            </Col>
-
-            <Col :span="12">
-              <FormItem label="Links To" name="to_id">
-                <!-- TODO: show list of existing indicators -->
-                <Select v-model:value="tocItemModalConfig.form.to_id" :allow-clear="true">
-                  <SelectOption
-                    v-for="item in theoryOfChangeModel?.data"
-                    :key="item.id"
-                    :value="item.id"
-                  >
-                    {{ item.name }}
-                  </SelectOption>
-                </Select>
-              </FormItem>
-            </Col>
-          </Row>
-
-          <Row :gutter="4">
-            <Col :span="12">
-              <FormItem
-                name="type_id"
-                label="Logic Model Category"
-                has-feedback
-                :rules="[{ required: true, message: 'Please select a category model!' }]"
-              >
-                <Select v-model:value="tocItemModalConfig.form.type_id">
-                  <SelectOption
-                    v-for="key in Object.keys(THEORY_OF_CHANGE_TYPES)"
-                    :key="key"
-                    :value="+key"
-                  >
-                    {{ THEORY_OF_CHANGE_TYPES[key] }}
-                  </SelectOption>
-                </Select>
-              </FormItem>
-            </Col>
-
-            <Col :span="12">
-              <FormItem name="sem_id" label="SEM Level">
-                <Select
-                  v-model:value="tocItemModalConfig.form.sem_id"
-                  :allow-clear="true"
-                >
-                  <SelectOption v-for="key in Object.keys(SEMS)" :key="key" :value="+key">
-                    {{ SEMS[key] }}
-                  </SelectOption>
-                </Select>
-              </FormItem>
-            </Col>
-          </Row>
-
-          <FormItem
-            name="is_validated"
-            label=""
-            has-feedback
-            :rules="[{ required: false }]"
-          >
-            <Checkbox v-model:checked="tocItemModalConfig.form.is_validated"
-              >Validated</Checkbox
-            >
-          </FormItem>
-
-          <!-- <div class="field">
-            <div class="control">
-              <label class="label">
-                Validated
-                <input type="checkbox" class="ml-3" v-model="tocItemModalConfig.form.is_validated" />
-              </label>
-            </div>
-          </div> -->
-
-          <FormItem
-            name="description"
-            label="Description"
-            has-feedback
-            :rules="[{ required: false }]"
-          >
-            <Textarea v-model:value="tocItemModalConfig.form.description"> </Textarea>
-          </FormItem>
-
-          <!-- Indicators -->
-          <div v-if="theoryOfChangeModel.selectedItem?.id != null">
-            <!-- <div class="field"> -->
-            <Divider>Indicators</Divider>
-
-            <!-- <Divider></Divider> -->
-            <Empty
-              description="No indicators added yet."
-              v-if="getTocItemIndicators?.length == 0"
-            ></Empty>
-
-            <div v-else class="field is-grouped is-grouped-multiline">
-              <div
-                class="control"
-                v-for="item in store.theoryOfChangeItemIndicators(
-                  theoryOfChangeModel.selectedItem.id
-                )"
-                :key="item.id"
-              >
-                <div class="tags has-addons">
-                  <a class="tag is-link">{{ item.name }}</a>
-                  <!-- <a class="tag is-delete"></a> -->
-
-                  <!-- TODO: implement deleting of item -->
-                </div>
-              </div>
-            </div>
-
-            <Button
-              size="small"
-              role="button"
-              @click="
-                isPanelVisible = !isPanelVisible;
-                showIndicatorModal = true;
-              "
-            >
-              <PlusCircleOutlined />
-              Add Indicator
-            </Button>
-          </div>
-          <!-- </div> -->
-        </Form>
-      </Modal>
       <!-- ======== END: Theory of Change Modal ======= -->
 
       <!-- ===== START: Customer Indicators Modal ==== -->
@@ -894,7 +627,7 @@ const risksModalConfig = reactive({
       <Modal
         v-model:visible="risksModalConfig.visible"
         @ok="risksModalConfig.closeModal()"
-        @cancel="closeModal()"
+        @cancel="tocItemModalClosed()"
       >
         <template #title>
           <span>
