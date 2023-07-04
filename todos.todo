@@ -1,6 +1,9 @@
 Today:
     ☐ Open indicator panel when tag clicked (toc modal)
     ☐ All editing of indicator item (indicator browser)
+        ☐ use ng typography
+    ☐ move indicator deletion to panel
+        ☐ also add popconfirm
 
     Activities:
         ☐ implement removing task

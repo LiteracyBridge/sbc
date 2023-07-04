@@ -182,7 +182,7 @@ def update_indicators(
     if theory_of_change is None:
         raise HTTPException(status_code=404, detail="Item not found")
 
-    # Add new indikit indicators to project indicators
+    # Add new Indikit indicators to project indicators
     if dto.added is not None:
         new_toc_indicators = list(
             map(

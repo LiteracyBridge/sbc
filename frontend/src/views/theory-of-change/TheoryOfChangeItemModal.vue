@@ -29,10 +29,7 @@ import { TheoryOfChange, THEORY_OF_CHANGE_TYPES, SEMS } from "@/types";
 import IndicatorBrowserPanel from "./IndicatorBrowserPanel.vue";
 import { useTheoryOfChangeStore } from "@/stores/theory_of_change";
 import { useProjectStore } from "@/stores/projects";
-import { DeleteOutlined, PlusCircleOutlined } from "@ant-design/icons-vue";
-
-const isPanelVisible = ref(false);
-const showIndicatorModal = ref(false);
+import { CloseOutlined, DeleteOutlined, PlusCircleOutlined } from "@ant-design/icons-vue";
 
 const emit = defineEmits<{
   (e: "saved", data: TheoryOfChange[]): TheoryOfChange[];
@@ -149,11 +146,8 @@ function deleteIndicator(id: number) {
   <Modal v-model:visible="config.visible" @ok="closeModal()">
     <!-- IndiKit Browser Panel -->
     <IndicatorBrowserPanel
-      :is-visible="isPanelVisible"
-      @is-closed="
-        isPanelVisible = false;
-        showIndicatorModal = true;
-      "
+      :is-visible="config.browserVisible"
+      @is-closed="config.browserVisible = false"
       :toc-item="config.form"
       @is-saved="indicatorSaved($event)"
     >
@@ -307,25 +301,24 @@ function deleteIndicator(id: number) {
             v-for="(item, index) in store.theoryOfChangeItemIndicators(config.form.id)"
             :key="item.id"
           >
-            <Tooltip :title="item.name">
             <!-- TODO: open indicator browser on click -->
-              <Tag :closable="true" @close="deleteIndicator(item.id)">
-                {{ item.name }}
-              </Tag>
-            </Tooltip>
+            <Tag
+              :closable="true"
+              @click="config.browserVisible = true"
+              @close="deleteIndicator(item.id)"
+            >
+              {{ item.name }}
+            </Tag>
           </template>
 
           <Button
             style="margin-top: 10px"
             size="small"
             role="button"
-            @click="
-              isPanelVisible = !isPanelVisible;
-              showIndicatorModal = true;
-            "
+            @click="config.browserVisible = !config.browserVisible"
           >
             <PlusCircleOutlined />
-            Add Indicator
+            Add or Edit Indicators
           </Button>
         </div>
         <!-- </div> -->
