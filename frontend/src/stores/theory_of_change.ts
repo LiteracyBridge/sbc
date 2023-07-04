@@ -119,19 +119,8 @@ export const useTheoryOfChangeStore = defineStore({
         removed_custom: number[];
         added: Array<{ id?: number; name: string; indi_kit_id?: number }>;
       };
-      // newCustomIndicators: Array<{ name: string; id?: number }>;
-
-      // removed: number[] | string[];
-
-      // added: number[] | string[];
-      // removed: number[] | string[];
     }) {
       this.$state.isLoading = true;
-
-      // if(opts.newCustomIndicators.length > 0) {
-      //   // Create new custom indicators
-
-      // }
 
       return ApiRequest.post<TheoryOfChange>(
         `theory-of-change/${opts.tocId}/indicators`,

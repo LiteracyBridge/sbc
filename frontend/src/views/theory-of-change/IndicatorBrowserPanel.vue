@@ -8,7 +8,7 @@ import { PlusOutlined, DeleteOutlined } from "@ant-design/icons-vue";
 
 const emit = defineEmits<{
   (e: 'isClosed', status: boolean): boolean
-  (e: 'isSaved', resp: TheoryOfChange | TheoryOfChange[]): TheoryOfChange
+  (e: 'isSaved', resp: TheoryOfChange[]): TheoryOfChange
 }>()
 
 const props = defineProps<{ tocItem: TheoryOfChange, isVisible: boolean }>();

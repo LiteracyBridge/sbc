@@ -48,6 +48,7 @@ const config = ref({
   deleting: false,
   loading: false,
   form: props.toc || new TheoryOfChange(),
+  browserVisible: false,
 });
 
 watch(props, (newProps) => {
@@ -124,10 +125,26 @@ function deleteItem() {
       config.value.deleting = false;
     });
 }
+
+function indicatorSaved(resp: TheoryOfChange[]) {
+  config.value.form = resp.find((i) => i.id == config.value.form.id);
+}
 </script>
 
 <template>
   <Modal v-model:visible="config.visible" @ok="closeModal()">
+    <!-- IndiKit Browser Panel -->
+    <IndicatorBrowserPanel
+      :is-visible="isPanelVisible"
+      @is-closed="
+        isPanelVisible = false;
+        showIndicatorModal = true;
+      "
+      :toc-item="config.form"
+      @is-saved="indicatorSaved($event)"
+    >
+    </IndicatorBrowserPanel>
+
     <template #footer>
       <footer style="display: block">
         <div class="level">

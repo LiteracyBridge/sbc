@@ -41,7 +41,6 @@ import {
 import TheoryOfChangeExamplesBrowser from "./TheoryOfChangeExamplesBrowser.vue";
 import TheoryOfChangeItemModal from "./TheoryOfChangeItemModal.vue";
 
-import CustomIndicatorModal from "./CustomIndicatorModal.vue";
 import {
   DeleteOutlined,
   PlusCircleOutlined,
@@ -75,8 +74,7 @@ const customIndicator = ref({
   customIndicator: "",
 });
 
-const projectStore = useProjectStore(),
-  store = useTheoryOfChangeStore();
+const store = useTheoryOfChangeStore();
 
 const diagramContainer = ref(null);
 const fromNodeId = ref(null);
@@ -462,16 +460,7 @@ const tocItemModalClosed = (redraw = true, data?: TheoryOfChange[]) => {
   }
 };
 
-function updateToCModel(resp: TheoryOfChange[], itemId?: number) {
-  // if (Array.isArray(resp)) {
-  //   resp = resp[0];
-  // }
 
-  theoryOfChangeModel.value.data = resp;
-  if (itemId != null) {
-    theoryOfChangeModel.value.selectedItem = resp.find((i) => i.id == itemId);
-  }
-}
 
 //=== END: Theory of Change Item Modal functions
 
@@ -530,17 +519,7 @@ const risksModalConfig = reactive({
 
 <template>
   <Card title="Theory of Change" :loading="config.isLoading">
-    <!-- IndiKit Browser Panel -->
-    <IndicatorBrowserPanel
-      :is-visible="isPanelVisible"
-      @is-closed="
-        isPanelVisible = false;
-        showIndicatorModal = true;
-      "
-      :toc-item="theoryOfChangeModel.selectedItem"
-      @is-saved="updateToCModel($event, theoryOfChangeModel.selectedItem?.id)"
-    >
-    </IndicatorBrowserPanel>
+
 
     <!-- Theory of Change Item Modal -->
     <TheoryOfChangeItemModal
@@ -550,15 +529,6 @@ const risksModalConfig = reactive({
       @saved="tocItemModalClosed(false, $event)"
       @deleted="deleteNode($event)"
     ></TheoryOfChangeItemModal>
-
-    <!-- Custom Indicator Modal -->
-    <!-- TODO: move to toc modal -->
-    <CustomIndicatorModal
-      :visible="customIndicator.visible"
-      :theory-of-change="theoryOfChangeModel.selectedItem"
-      @closed="customIndicator.visible = false"
-    >
-    </CustomIndicatorModal>
 
     <!-- Theory of Change examples browser panel -->
     <TheoryOfChangeExamplesBrowser
@@ -608,10 +578,6 @@ const risksModalConfig = reactive({
       </div>
 
       <Divider></Divider>
-
-      <!-- ======== START: Theory of Change Modal ======= -->
-
-      <!-- ======== END: Theory of Change Modal ======= -->
 
       <!-- ===== START: Customer Indicators Modal ==== -->
       <!-- <Modal v-model:visible="customIndicatorModal.visible" title="Add Indicator">
