@@ -272,11 +272,18 @@ class TheoryOfChange(Base):
     project_id: Mapped[Optional[int]] = mapped_column(
         ForeignKey("projects.id", ondelete="CASCADE"), nullable=False
     )
-
-    # TODO: add risks
+    created_at: Mapped[DateTime] = mapped_column(
+        DateTime(timezone=True), default=func.now()
+    )
+    updated_at: Mapped[DateTime] = mapped_column(
+        DateTime(timezone=True), onupdate=func.now()
+    )
+    deleted_at: Mapped[Optional[DateTime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
 
     # Related objects
-    indicators: Mapped[ARRAY["TheoryOfChangeIndicator"]] = relationship(
+    indicators: Mapped[ARRAY] = relationship(
         "TheoryOfChangeIndicator", back_populates="theory_of_change"
     )
     sem: Mapped["LuSem"] = relationship("LuSem")
