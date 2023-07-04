@@ -129,6 +129,11 @@ export const useTheoryOfChangeStore = defineStore({
         .then((resp) => {
           this.$state.theory_of_change = resp;
           message.success("Indicators saved");
+          return resp;
+        })
+        .catch((err) => {
+          message.error(err.message);
+          throw err;
         })
         .finally(() => (this.$state.isLoading = false));
     },

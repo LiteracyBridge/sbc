@@ -141,7 +141,7 @@ class ProjectData(Base):
     prj_id: Mapped[int] = mapped_column(ForeignKey("projects.id"), nullable=True)
     editing_user_id: Mapped[int] = mapped_column(ForeignKey("project_users.id"))
     theory_of_change_id: Mapped[int] = mapped_column(
-        ForeignKey("theory_of_change.id"), nullable=True
+        ForeignKey("theory_of_change.id", ondelete="CASCADE"), nullable=True
     )
 
     project = relationship("Project")
@@ -495,7 +495,7 @@ class Monitoring(Base):
     )
 
     toc_indicator_id: Mapped[int] = mapped_column(
-        ForeignKey("theory_of_change_indicators.id"), nullable=True
+        ForeignKey("theory_of_change_indicators.id", ondelete="CASCADE"), nullable=True
     )
     project_id: Mapped[int] = mapped_column(ForeignKey("projects.id"), nullable=False)
 

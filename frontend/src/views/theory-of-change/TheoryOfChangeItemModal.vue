@@ -20,6 +20,8 @@ import {
   Textarea,
   message,
   Empty,
+  Tag,
+  Tooltip,
 } from "ant-design-vue";
 import { ApiRequest } from "@/apis/api";
 import { TheoryOfChange, THEORY_OF_CHANGE_TYPES, SEMS } from "@/types";
@@ -129,6 +131,18 @@ function deleteItem() {
 function indicatorSaved(resp: TheoryOfChange[]) {
   config.value.form = resp.find((i) => i.id == config.value.form.id);
 }
+
+function deleteIndicator(id: number) {
+  store
+    .saveIndicators({
+      tocId: config.value.form.id,
+      data: { removed: [id], removed_custom: [], added: [] },
+    })
+    .then((resp) => {
+      indicatorSaved(resp);
+      message.success("Indicator deleted successfully");
+    });
+}
 </script>
 
 <template>
@@ -184,7 +198,7 @@ function indicatorSaved(resp: TheoryOfChange[]) {
       </footer>
     </template>
 
-    <Spin :spinning="config.loading || config.deleting">
+    <Spin :spinning="config.loading || config.deleting || store.isLoading">
       <Form layout="vertical" :model="config.form">
         <FormItem
           name="name"
@@ -288,20 +302,17 @@ function indicatorSaved(resp: TheoryOfChange[]) {
             v-if="getTocItemIndicators?.length == 0"
           ></Empty>
 
-          <div v-else class="field is-grouped is-grouped-multiline">
-            <div
-              class="control"
-              v-for="item in store.theoryOfChangeItemIndicators(props.toc.id)"
-              :key="item.id"
-            >
-              <div class="tags has-addons">
-                <a class="tag is-link">{{ item.name }}</a>
-                <!-- <a class="tag is-delete"></a> -->
-
-                <!-- TODO: implement deleting of item -->
-              </div>
-            </div>
-          </div>
+          <template
+            v-else
+            v-for="(item, index) in store.theoryOfChangeItemIndicators(config.form.id)"
+            :key="item.id"
+          >
+            <Tooltip :title="item.name">
+              <Tag :closable="true" @close="deleteIndicator(item.id)">
+                {{ item.name }}
+              </Tag>
+            </Tooltip>
+          </template>
 
           <Button
             size="small"

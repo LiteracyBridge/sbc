@@ -20,12 +20,14 @@ def upgrade() -> None:
     op.add_column("project_data", sa.Column("module", sa.String(), nullable=True))
     op.add_column("project_data", sa.Column("name", sa.String(), nullable=True))
 
-    op.add_column("project_data", sa.Column("toc_item_id", sa.Integer(), nullable=True))
+    op.add_column(
+        "project_data", sa.Column("theory_of_change_id", sa.Integer(), nullable=True)
+    )
     op.create_foreign_key(
-        "fk_project_data_toc_item_id",
+        "fk_project_data_theory_of_change_id",
         "project_data",
-        "theories_of_change_item",
-        ["toc_item_id"],
+        "theory_of_change_item",
+        ["theory_of_change_id"],
         ["id"],
         ondelete="CASCADE",
     )
@@ -33,8 +35,8 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     op.drop_constraint(
-        "fk_project_data_toc_item_id", "project_data", type_="foreignkey"
+        "fk_project_data_theory_of_change_id", "project_data", type_="foreignkey"
     )
-    op.drop_column("project_data", "toc_item_id")
+    op.drop_column("project_data", "theory_of_change_id")
     op.drop_column("project_data", "name")
     op.drop_column("project_data", "module")

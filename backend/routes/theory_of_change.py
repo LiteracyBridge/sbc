@@ -76,50 +76,6 @@ def get_toc_by_project_id(projectId: int, db: Session = Depends(models.get_db)):
     return record
 
 
-# def get_toc_by_id(id: int, db: Session = Depends(models.get_db)):
-#     record = (
-#         db.query(models.TheoryOfChangeOld)
-#         .filter(models.TheoryOfChangeOld.id == id)
-#         .options(
-#             subqueryload(models.TheoryOfChangeOld.risks),
-#             subqueryload(models.TheoryOfChangeOld.graph).subqueryload(
-#                 TheoryOfChangeIndicator.indicators
-#             )
-#             # .subqueryload(TheoryOfChangeIndicator.indicator),
-#             # .options(
-#             #     subqueryload(models.TheoryOfChangeItem.sem),
-#             #     subqueryload(models.TheoryOfChangeItem.type),
-#             # )
-#         )
-#         # .options(joinedload(models.TheoryOfChange.graph))
-#         .first()
-#     )
-
-#     return ApiResponse(data=[record])
-
-
-# @router.post("/", response_model=ApiResponse)
-# def create(dto: NewTheoryOfChangeDto, db: Session = Depends(models.get_db)):
-#     record = models.TheoryOfChangeOld()
-#     record.name = dto.name
-#     record.project_id = dto.project_id
-#     record.notes = dto.notes
-
-#     if dto.name is False:
-#         count = (
-#             db.query(models.TheoryOfChangeOld)
-#             .filter(models.TheoryOfChangeOld.project_id == dto.project_id)
-#             .count()
-#         )
-#         record.name = f"Theory of Change #${count + 1}"
-
-#     db.add(record)
-#     db.commit()
-#     db.refresh(record)
-
-#     return ApiResponse(data=record)
-
-
 @router.get("/{projectId}", response_model=ApiResponse)
 def get_by_project_id(projectId: int, db: Session = Depends(models.get_db)):
     return ApiResponse(data=get_toc_by_project_id(projectId, db))
@@ -140,22 +96,6 @@ def create_item(
 
     db.add(record)
     db.commit()
-
-    # Create activity item if toc item is an activity
-
-    # if dto.to_id is not None:
-    #     # Query for the to_id and link it to the from_id
-    #     to_record = (
-    #         db.query(models.TheoryOfChangeItem)
-    #         .filter(models.TheoryOfChangeItem.id == dto.to_id)
-    #         .first()
-    #     )
-    #     to_record.from_id = record.id
-
-    #     db.add(to_record)
-    #     db.commit()
-
-    # db.refresh(record)
 
     return ApiResponse(data=get_toc_by_project_id(project_id, db))
 
@@ -227,14 +167,14 @@ def get_project_indicators(project_id: int, db: Session = Depends(models.get_db)
 def update_indicators(
     item_id: int, dto: IndicatorDto, db: Session = Depends(models.get_db)
 ):
-    # TODO: Add to project indicators first
-
+    print(dto)
     # Remove deleted indicators
     if dto.removed is not None:
-        db.query(TheoryOfChangeIndicator).filter(
+        records = db.query(TheoryOfChangeIndicator).filter(
             TheoryOfChangeIndicator.theory_of_change_id == item_id,
-            TheoryOfChangeIndicator.indicator_id.in_(dto.removed),
+            TheoryOfChangeIndicator.id.in_(dto.removed),
         ).delete()
+        db.commit()
 
     theory_of_change = (
         db.query(TheoryOfChange).filter(TheoryOfChange.id == item_id).first()
