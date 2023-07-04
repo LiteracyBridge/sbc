@@ -268,7 +268,9 @@ class TheoryOfChange(Base):
         ForeignKey("theory_of_change.id"), nullable=True
     )
     to_id: Mapped[int] = mapped_column(ForeignKey("theory_of_change.id"), nullable=True)
-    sem_id: Mapped[int] = mapped_column(ForeignKey("lu_sem.id"), nullable=True)
+    sem_id: Mapped[Optional[int]] = mapped_column(
+        ForeignKey("lu_sem.id"), nullable=True
+    )
     project_id: Mapped[Optional[int]] = mapped_column(
         ForeignKey("projects.id", ondelete="CASCADE"), nullable=False
     )

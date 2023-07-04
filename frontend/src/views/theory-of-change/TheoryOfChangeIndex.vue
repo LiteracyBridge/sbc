@@ -724,16 +724,6 @@ const risksModalConfig = reactive({
         </template>
 
         <Form layout="vertical" :model="tocItemModalConfig.form">
-          <!-- <div class="field">
-            <div class="field-body">
-              <div class="field">
-                <div class="control">
-                  <label class="label">Label</label>
-                  <input class="input" type="text" maxlength="80" v-model="tocItemModalConfig.form.name" />
-                </div>
-              </div>
-            </div>
-          </div> -->
 
           <FormItem
             name="name"
@@ -803,13 +793,11 @@ const risksModalConfig = reactive({
             </Col>
 
             <Col :span="12">
-              <FormItem
-                name="sem_id"
-                label="SEM Level"
-                has-feedback
-                :rules="[{ required: true, message: 'Please select SEM level!' }]"
-              >
-                <Select v-model:value="tocItemModalConfig.form.sem_id">
+              <FormItem name="sem_id" label="SEM Level">
+                <Select
+                  v-model:value="tocItemModalConfig.form.sem_id"
+                  :allow-clear="true"
+                >
                   <SelectOption v-for="key in Object.keys(SEMS)" :key="key" :value="+key">
                     {{ SEMS[key] }}
                   </SelectOption>
@@ -817,40 +805,6 @@ const risksModalConfig = reactive({
               </FormItem>
             </Col>
           </Row>
-
-          <!-- <div class="field is-horizontal">
-            <div class="columns field-body">
-              <div class="column field">
-                <label class="label">Logic Model Category</label>
-                <div class="control">
-                  <div class="select is-fullwidth">
-                    <select v-model="tocItemModalConfig.form.type_id">
-                      <option v-for="key in Object.keys(THEORY_OF_CHANGE_TYPES)" :key="key" :value="key">
-                        {{ THEORY_OF_CHANGE_TYPES[key] }}
-                      </option>
-
-                    </select>
-                  </div>
-                </div>
-              </div>
-
-              <div class="column field">
-                <label class="label">SEM Level</label>
-
-                <div class="control">
-                  <div class="select is-fullwidth">
-                    <select v-model="tocItemModalConfig.form.sem_id">
-                      <option v-for="key in Object.keys(SEMS)" :key="key" :value="key">
-                        {{ SEMS[key] }}
-                      </option>
-
-                    </select>
-                  </div>
-                </div>
-              </div>
-
-            </div>
-          </div> -->
 
           <FormItem
             name="is_validated"
@@ -880,16 +834,6 @@ const risksModalConfig = reactive({
           >
             <Textarea v-model:value="tocItemModalConfig.form.description"> </Textarea>
           </FormItem>
-
-          <!-- <div class="field">
-            <label class="label">Description</label>
-            <div class="control">
-              <textarea class="textarea" rows="4" columns="80" maxlength="999"
-                v-model="tocItemModalConfig.form.description" />
-            </div>
-          </div> -->
-
-          <!-- TODO: implement saving of indicators -->
 
           <!-- Indicators -->
           <div v-if="theoryOfChangeModel.selectedItem?.id != null">

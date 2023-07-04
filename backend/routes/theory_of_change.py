@@ -34,7 +34,7 @@ class TheoryOfChangeItemDto(BaseModel):
     type_id: str | int
     from_id: Optional[str | int]
     to_id: Optional[str | int]
-    sem_id: str | int
+    sem_id: Optional[str | int]
     name: str
     is_validated: Optional[bool] = False
     description: Optional[str]
