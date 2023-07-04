@@ -1,34 +1,30 @@
 Today:
-    ✔ dynamic primary audiences @done(23-06-26 22:43)
-    ☐ dashboard page
-    ☐ login ui update
-    ☐ partners page
-
+    ☐ Open indicator panel when tag clicked (toc modal)
+    ☐ All editing of indicator item (indicator browser)
 
     Activities:
         ☐ implement removing task
         ☐ implement activity update
         ☐ implement adding deadline to task
 
-    Theory of Change:
-        ☐ Add modal forms validation
-        ☐ implement adding & removing of indicators
-        ☐ add customizing of indikit indicators
-    ☐ connect live url & test all modules
 
-    Monitoring & Evaluation:
-        ☐ Types refactoring
-        ☐
-        ☐ Save evaluation strategy
-
-Frontend:
-    Theory of Change:
-        ☐ Toc examples browser
 
 Backend:
     ☐ copy indikit label to project_indicators when added
 
 Archive:
+  ✔ dynamic primary audiences @done(23-06-26 22:43) @project(Today)
+  ✔ dashboard page @done(23-07-04 22:25) @project(Today)
+  ✔ login ui update @done(23-07-04 22:25) @project(Today)
+  ✔ partners page @done(23-07-04 22:25) @project(Today)
+  ✔ Add modal forms validation @done(23-07-04 22:25) @project(Today.Theory of Change)
+  ✔ implement adding & removing of indicators @done(23-07-04 22:25) @project(Today.Theory of Change)
+  ✔ add customizing of indikit indicators @done(23-07-04 22:25) @project(Today.Theory of Change)
+  ✔ connect live url & test all modules @done(23-07-04 22:25) @project(Today)
+  ✔ Types refactoring @done(23-07-04 22:25) @project(Today.Monitoring & Evaluation)
+  ✔ ☐ @done(23-07-04 22:25) @project(Today.Monitoring & Evaluation)
+  ✔ Save evaluation strategy @done(23-07-04 22:25) @project(Today.Monitoring & Evaluation)
+  ✔ Toc examples browser @done(23-07-04 22:26) @project(Frontend.Theory of Change)
   ✔ add tasks modal @done(23-06-18 12:08) @project(Today.Activies)
   ✔ implemenet adding new task @done(23-06-18 12:08) @project(Today.Activies)
   ✔ Indicator UI redesign @done(23-06-18 11:27) @project(Today.Theory of Change)

@@ -308,6 +308,7 @@ function deleteIndicator(id: number) {
             :key="item.id"
           >
             <Tooltip :title="item.name">
+            <!-- TODO: open indicator browser on click -->
               <Tag :closable="true" @close="deleteIndicator(item.id)">
                 {{ item.name }}
               </Tag>
@@ -315,6 +316,7 @@ function deleteIndicator(id: number) {
           </template>
 
           <Button
+            style="margin-top: 10px"
             size="small"
             role="button"
             @click="
