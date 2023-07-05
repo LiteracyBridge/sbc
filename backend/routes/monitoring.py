@@ -35,9 +35,8 @@ def get_monitoring_by_project_id(projectId: int, db: Session = Depends(models.ge
                 subqueryload(TheoryOfChangeIndicator.indicator),
                 # subqueryload(TheoryOfChangeIndicator.toc_item),
             )
-            #     .subqueryload(TheoryOfChangeIndicator.indicator),
         )
-        # .options(joinedload(models.TheoryOfChange.graph))
+        .order_by(Monitoring.id.desc())
         .all()
     )
     return record

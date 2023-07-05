@@ -5,7 +5,7 @@ import { Monitoring } from '@/types';
 import { Modal, Form, FormItem, Button, Select, SelectOption, Spin, type FormInstance, message, Space } from 'ant-design-vue';
 import { ref, watch } from 'vue';
 import IndicatorBrowserPanel from '@/views/theory-of-change/IndicatorBrowserPanel.vue'
-import { useCommunicationStore } from '@/stores/communication.store';
+import { useMonitoringStore } from '@/stores/monitoring.store';
 
 
 const props = defineProps<{ visible: boolean }>();
@@ -16,7 +16,7 @@ const emit = defineEmits<{
 
 
 const theoryOfChangeStore = useTheoryOfChangeStore(),
-  store = useCommunicationStore();
+  store = useMonitoringStore();
 
 const newIndicatorFormRef = ref<FormInstance>(),
   config = ref({
@@ -62,30 +62,6 @@ const onTheoryOfChangeSelected = (value: number, _option: any) => {
 
   config.value.browser.theoryOfChange = item;
 }
-
-function save() {
-  newIndicatorFormRef.value
-    .validateFields()
-    .then(_ => {
-      // TODO: rewrite adding monitoring item
-
-      // theoryOfChangeStore.saveIndicators({
-      //   tocItemId: config.value.form.toc_item_id,
-      //   added: [config.value.form.indicator_id],
-      //   removed: [],
-      // })
-      //   .then((_resp) => {
-      //     message.success('Indicator added successfully!');
-      //     emit('isUpdated', true);
-
-      //     closeModal();
-      //   })
-      //   .catch((error) => {
-      //     message.error(error.message);
-      //   });
-    });
-}
-
 
 </script>
 
