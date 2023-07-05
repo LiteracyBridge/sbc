@@ -212,17 +212,16 @@ function deleteIndicator(id: number) {
           <Input v-model:value="config.form.name" placeholder="Enter label" />
         </FormItem>
 
-        <Row :gutter="4">
-          <Col :span="12">
+        <Row :gutter="8">
+          <!-- <Col :span="12">
             <FormItem label="Links From" name="from_id">
-              <!-- TODO: show list of existing indicators -->
               <Select v-model:value="config.form.from_id" :allow-clear="true">
                 <SelectOption v-for="item in store?.data" :key="item.id" :value="item.id">
                   {{ item.name }}
                 </SelectOption>
               </Select>
             </FormItem>
-          </Col>
+          </Col> -->
 
           <Col :span="12">
             <FormItem label="Links To" name="to_id">
@@ -234,9 +233,7 @@ function deleteIndicator(id: number) {
               </Select>
             </FormItem>
           </Col>
-        </Row>
 
-        <Row :gutter="4">
           <Col :span="12">
             <FormItem
               name="type_id"
@@ -255,7 +252,9 @@ function deleteIndicator(id: number) {
               </Select>
             </FormItem>
           </Col>
+        </Row>
 
+        <Row :gutter="8">
           <Col :span="12">
             <FormItem name="sem_id" label="SEM Level">
               <Select v-model:value="config.form.sem_id" :allow-clear="true">
@@ -265,16 +264,18 @@ function deleteIndicator(id: number) {
               </Select>
             </FormItem>
           </Col>
-        </Row>
 
-        <FormItem
-          name="is_validated"
-          label=""
-          has-feedback
-          :rules="[{ required: false }]"
-        >
-          <Checkbox v-model:checked="config.form.is_validated">Validated</Checkbox>
-        </FormItem>
+          <Col :span="12">
+            <FormItem
+              name="is_validated"
+              label="Is Theory of Change Validated?"
+              has-feedback
+              :rules="[{ required: false }]"
+            >
+              <Checkbox v-model:checked="config.form.is_validated">Validated</Checkbox>
+            </FormItem>
+          </Col>
+        </Row>
 
         <!-- <div class="field">
             <div class="control">
