@@ -9,6 +9,7 @@ import { useUserStore } from "../stores/user";
 import { Auth } from "aws-amplify";
 import { Hub } from "@aws-amplify/core";
 import { ApiRequest } from "@/apis/api";
+import { AppStore } from "../stores/app.store";
 
 import TheoryOfChangeIndex from "@/views/theory-of-change/TheoryOfChangeIndex.vue";
 import MonitoringEvaluationIndex from "@/views/monitoring-n-evaluation/MonitoringEvaluationIndex.vue";
@@ -52,8 +53,9 @@ async function getUser() {
 }
 
 getUser().then((user) => {
-  console.log(user);
   if (user?.authorized == true) {
+    AppStore().downloadObjects();
+
     router.push({ path: "/" });
   }
 });
