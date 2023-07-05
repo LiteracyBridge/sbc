@@ -90,6 +90,8 @@ function saveFormItem() {
       data
     )
       .then((resp) => {
+        store.theory_of_change = resp;
+
         emit("saved", resp);
         closeModal();
         message.success("Item updated successfully");
@@ -101,6 +103,7 @@ function saveFormItem() {
     //  Create item
     ApiRequest.post<TheoryOfChange>(`theory-of-change/${projectStore.prj_id}/item`, data)
       .then((resp) => {
+        store.theory_of_change = resp;
         emit("saved", resp);
         closeModal();
         message.success("Item created successfully");
