@@ -102,32 +102,50 @@ const generatePeriods = computed(() => {
 
   return [];
 });
-
 </script>
 
 <template>
-  <Modal v-model:visible="config.visible" title="Record Progress" ok-text="Update" cancel-text="Cancel"
-    @cancel="closeModal()" :mask-closable="false" @ok="recordProgress">
-
+  <Modal
+    v-model:visible="config.visible"
+    title="Record Progress"
+    ok-text="Update"
+    cancel-text="Cancel"
+    @cancel="closeModal()"
+    :mask-closable="false"
+    @ok="recordProgress"
+  >
     <Spin :spinning="store.loading">
-
-      <Form layout="vertical" :model="config.form" name="progress_tracking_form" ref="progressTrackingFormRef">
-
+      <Form
+        layout="vertical"
+        :model="config.form"
+        name="progress_tracking_form"
+        ref="progressTrackingFormRef"
+      >
         <!-- TODO: exclude already tracked periods from dropdown -->
-        <FormItem name="period" label="Select Period" has-feedback
-          :rules="[{ required: true, message: 'Please select a period!' }]">
-          <Select v-model:value="config.form.period" placeholder="Please period" :show-search="true" :allow-clear="true"
-            :options="generatePeriods">
-            <!-- <SelectOption v-for="period in generatePeriods" :value="period.value" :disabled="period.disabled"
-              :label="period.label" :key="period.value"></SelectOption> -->
+        <FormItem
+          name="period"
+          label="Select Period"
+          has-feedback
+          :rules="[{ required: true, message: 'Please select a period!' }]"
+        >
+          <Select
+            v-model:value="config.form.period"
+            placeholder="Please period"
+            :show-search="true"
+            :allow-clear="true"
+            :options="generatePeriods"
+          >
           </Select>
         </FormItem>
 
-        <FormItem label="Value" name="value" :rules="[{ required: true, message: 'Please input your username!' }]">
+        <FormItem
+          label="Value"
+          name="value"
+          :rules="[{ required: true, message: 'Progress value is required!' }]"
+        >
           <Input v-model:value="config.form.value" type="number" />
         </FormItem>
       </Form>
-
     </Spin>
   </Modal>
 </template>
