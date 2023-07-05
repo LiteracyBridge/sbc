@@ -143,7 +143,12 @@ function deleteIndicator(id: number) {
 </script>
 
 <template>
-  <Modal v-model:visible="config.visible" @ok="closeModal()">
+  <Modal
+    v-model:visible="config.visible"
+    @cancel="closeModal()"
+    @ok="closeModal()"
+    width="700px"
+  >
     <!-- IndiKit Browser Panel -->
     <IndicatorBrowserPanel
       :is-visible="config.browserVisible"

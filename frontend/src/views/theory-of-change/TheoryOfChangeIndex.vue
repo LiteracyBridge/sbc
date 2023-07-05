@@ -69,11 +69,6 @@ const config = reactive({
   isExamplePanelVisible: false,
 });
 
-const customIndicator = ref({
-  visible: false,
-  customIndicator: "",
-});
-
 const store = useTheoryOfChangeStore();
 
 const diagramContainer = ref(null);
@@ -102,71 +97,73 @@ const mermaidConfig = {
 };
 
 const drawDiagram = async function () {
+  // if (diagramContainer.value == null) {
+  //   return;
+  // }
+
   const { svg } = await mermaid.render("graphDiv", diagram.toMermaid());
-  if (diagramContainer.value) {
-    diagramContainer.value.innerHTML = "";
-    const svgWrapper = document.createElement("div");
-    svgWrapper.innerHTML = svg;
-    const svgElement = svgWrapper.firstChild;
-    diagramContainer.value.appendChild(svgElement);
+  diagramContainer.value.innerHTML = "";
+  const svgWrapper = document.createElement("div");
+  svgWrapper.innerHTML = svg;
+  const svgElement = svgWrapper.firstChild;
+  diagramContainer.value.appendChild(svgElement);
 
-    // Add click event listeners to the nodes manually
-    const nodes = diagramContainer.value.querySelectorAll(".node");
-    nodes.forEach((node) => {
-      let clickTimeout: any;
-      let isSingleClick = true;
+  // Add click event listeners to the nodes manually
+  const nodes = diagramContainer.value.querySelectorAll(".node");
+  nodes.forEach((node) => {
+    let clickTimeout: any;
+    let isSingleClick = true;
 
-      node.addEventListener("click", (event) => {
-        let target = event.target;
-        while (target && !target.classList.contains("node")) {
-          target = target.parentElement;
-        }
-        const nodeId = target.id;
-        const actualNodeId = nodeId.split("-")[1];
+    node.addEventListener("click", (event) => {
+      let target = event.target;
+      while (target && !target.classList.contains("node")) {
+        target = target.parentElement;
+      }
+      const nodeId = target.id;
+      const actualNodeId = nodeId.split("-")[1];
 
-        if (isSingleClick) {
-          clickTimeout = setTimeout(() => {
-            if (isSingleClick) {
-              window.nodeClick(actualNodeId);
-            }
-          }, 250);
-        }
-      });
-
-      node.addEventListener("dblclick", (event) => {
-        isSingleClick = false;
-        clearTimeout(clickTimeout);
-
-        let target = event.target;
-        while (target && !target.classList.contains("node")) {
-          target = target.parentElement;
-        }
-        const nodeId = target.id;
-        const actualNodeId = nodeId.split("-")[1];
-
-        window.nodeDoubleClick(actualNodeId);
-
-        setTimeout(() => {
-          isSingleClick = true;
+      if (isSingleClick) {
+        clickTimeout = setTimeout(() => {
+          if (isSingleClick) {
+            window.nodeClick(actualNodeId);
+          }
         }, 250);
-      });
+      }
     });
 
-    // Add double-click event listeners to the edge labels
-    const edgeLabels = diagramContainer.value.querySelectorAll("g.edgeLabel");
-    const edgePaths = diagramContainer.value.querySelectorAll("g.edgePaths > path");
-    edgeLabels.forEach((edgeLabel, index) => {
-      edgeLabel.addEventListener("dblclick", (event) => {
-        const edgePath = edgePaths[index];
+    node.addEventListener("dblclick", (event) => {
+      isSingleClick = false;
+      clearTimeout(clickTimeout);
 
-        // Extract the source and target node IDs from the edge path's id attribute
-        const edgePathId = edgePath.getAttribute("id");
-        const [sourceNodeId, targetNodeId] = edgePathId.split("-").slice(1, 3);
+      let target = event.target;
+      while (target && !target.classList.contains("node")) {
+        target = target.parentElement;
+      }
+      const nodeId = target.id;
+      const actualNodeId = nodeId.split("-")[1];
 
-        window.edgeDoubleClick(sourceNodeId, targetNodeId);
-      });
+      window.nodeDoubleClick(actualNodeId);
+
+      setTimeout(() => {
+        isSingleClick = true;
+      }, 250);
     });
-  }
+  });
+
+  // Add double-click event listeners to the edge labels
+  const edgeLabels = diagramContainer.value.querySelectorAll("g.edgeLabel");
+  const edgePaths = diagramContainer.value.querySelectorAll("g.edgePaths > path");
+  edgeLabels.forEach((edgeLabel, index) => {
+    edgeLabel.addEventListener("dblclick", (event) => {
+      const edgePath = edgePaths[index];
+
+      // Extract the source and target node IDs from the edge path's id attribute
+      const edgePathId = edgePath.getAttribute("id");
+      const [sourceNodeId, targetNodeId] = edgePathId.split("-").slice(1, 3);
+
+      window.edgeDoubleClick(sourceNodeId, targetNodeId);
+    });
+  });
 };
 
 function nodesToSubgraph(nodes: Object, category: string) {
@@ -248,6 +245,9 @@ const diagram = reactive({
     // if (Array.isArray(data)) data = data[0]
 
     theoryOfChangeModel.value.data = data;
+    this.nodes = {};
+    this.edges = [];
+    this.edgeSet = new Set();
 
     const graph = data.map((r: TheoryOfChange) => {
       return {
@@ -285,14 +285,14 @@ const diagram = reactive({
         risks: r.risks,
       });
 
-      if (r.from_id != null) {
-        edges.push({
-          fromId: r.from_id,
-          toId: r.id,
-          assumptions: r.assumptions,
-          risks: r.risks,
-        });
-      }
+      // if (r.from_id != null) {
+      //   edges.push({
+      //     fromId: r.from_id,
+      //     toId: r.id,
+      //     assumptions: r.assumptions,
+      //     risks: r.risks,
+      //   });
+      // }
     }
 
     for (const edge of edges) {
@@ -343,7 +343,9 @@ const diagram = reactive({
       }
     }
     for (const edge of this.edges) {
-      result += `${edge.fromId} -->|risk factors| ${edge.toId}\n`;
+      if (edge.fromId && edge.toId) {
+        result += `${edge.fromId} -->|risk factors| ${edge.toId}\n`;
+      }
     }
     return result;
   },
@@ -460,8 +462,6 @@ const tocItemModalClosed = (redraw = true, data?: TheoryOfChange[]) => {
   }
 };
 
-
-
 //=== END: Theory of Change Item Modal functions
 
 // === START: Risks Modal functions
@@ -519,8 +519,6 @@ const risksModalConfig = reactive({
 
 <template>
   <Card title="Theory of Change" :loading="config.isLoading">
-
-
     <!-- Theory of Change Item Modal -->
     <TheoryOfChangeItemModal
       :visible="tocItemModalConfig.visible"
@@ -670,12 +668,4 @@ const risksModalConfig = reactive({
   </Card>
 </template>
 
-<style>
-#graph-loader {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  /* bring your own prefixes */
-  transform: translate(-50%, -50%);
-}
-</style>
+<style></style>
