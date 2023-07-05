@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { ref, computed, watch } from "vue";
 import {
+  Popconfirm,
   Checkbox,
   Button,
   Card,
@@ -164,42 +165,40 @@ function deleteIndicator(id: number) {
     </IndicatorBrowserPanel>
 
     <template #footer>
-      <footer style="display: block">
-        <div class="level">
-          <div class="level-left">
-            <div class="level-item">
-              <Button
-                role="button"
-                type="primary"
-                :danger="true"
-                @click="deleteItem()"
-                v-if="!isNew"
-                :class="{ 'is-loading disabled': config.deleting }"
-                :disabled="config.deleting"
-              >
-                <DeleteOutlined />
-                Delete
-              </Button>
-            </div>
-          </div>
+      <div style="width: 100%; display: flex; justify-content: space-between">
+        <Popconfirm
+          title="Are you sure? All its indicators and activities will be deleted!"
+          ok-text="Yes"
+          cancel-text="No"
+          @confirm="deleteItem()"
+        >
+          <Button
+            role="button"
+            type="primary"
+            :danger="true"
+            v-if="!isNew"
+            :loading="config.deleting"
+            :disabled="config.deleting"
+          >
+            <DeleteOutlined />
+            Delete
+          </Button>
+        </Popconfirm>
 
-          <div class="level-right">
-            <div class="level-item">
-              <Button
-                type="primary"
-                :class="{ 'is-loading': config.loading }"
-                :disabled="config.loading"
-                role="button"
-                @click.prevent="saveFormItem()"
-              >
-                {{ isNew ? "Save" : "Update" }}
-              </Button>
+        <Space>
+          <Button
+            type="primary"
+            :loading="config.loading"
+            :disabled="config.loading"
+            role="button"
+            @click.prevent="saveFormItem()"
+          >
+            {{ isNew ? "Save" : "Update" }}
+          </Button>
 
-              <Button role="button" @click="closeModal()">Cancel</Button>
-            </div>
-          </div>
-        </div>
-      </footer>
+          <Button role="button" @click="closeModal()">Cancel</Button>
+        </Space>
+      </div>
     </template>
 
     <Spin :spinning="config.loading || config.deleting || store.isLoading">

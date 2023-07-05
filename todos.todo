@@ -5,7 +5,10 @@ Today:
     ☐ move indicator deletion to panel
         ☐ also add popconfirm
 
+
     Activities:
+        ☐ add duration fields to main activity
+        ☐ add deadline to task
         ☐ implement removing task
         ☐ implement activity update
         ☐ implement adding deadline to task
