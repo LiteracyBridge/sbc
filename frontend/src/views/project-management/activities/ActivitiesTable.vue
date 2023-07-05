@@ -67,7 +67,7 @@ const columns = [
 <template>
   <SubActivitiesDrawer :visible="config.subActivityModal.visible"
     @is-closed="config.selectedActivity = null; config.subActivityModal.visible = false"
-    :activity="config.selectedActivity" v-if="config.selectedActivity != null"></SubActivitiesDrawer>
+    :activity="config.selectedActivity"></SubActivitiesDrawer>
 
   <Table :columns="columns" :data-source="activityStore.topLevelActivities" bordered :loading="activityStore.isLoading">
     <template #title>
