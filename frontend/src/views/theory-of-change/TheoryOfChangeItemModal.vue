@@ -30,6 +30,7 @@ import IndicatorBrowserPanel from "./IndicatorBrowserPanel.vue";
 import { useTheoryOfChangeStore } from "@/stores/theory_of_change";
 import { useProjectStore } from "@/stores/projects";
 import { CloseOutlined, DeleteOutlined, PlusCircleOutlined } from "@ant-design/icons-vue";
+import { useUserStore } from "@/stores/user";
 
 const emit = defineEmits<{
   (e: "saved", data: TheoryOfChange[]): TheoryOfChange[];
@@ -80,6 +81,7 @@ function saveFormItem() {
     sem_id: fields.sem_id,
     description: fields.description,
     is_validated: fields.is_validated || false,
+    editing_user_id: useUserStore().id,
   };
 
   config.value.loading = true;

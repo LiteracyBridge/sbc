@@ -5,12 +5,7 @@ from pydantic import BaseModel
 
 from sqlalchemy.orm import Session, joinedload, subqueryload
 from schema import ApiResponse
-from models import (
-    Monitoring,
-    Risk,
-    TheoryOfChangeOld,
-    # TheoryOfChangeItem,
-)
+from models import Monitoring, Risk, Activity
 import models
 
 router = APIRouter()
@@ -38,6 +33,7 @@ class TheoryOfChangeItemDto(BaseModel):
     name: str
     is_validated: Optional[bool] = False
     description: Optional[str]
+    editing_user_id: Optional[int]
 
 
 class NewTheoryOfChangeDto(BaseModel):
@@ -85,17 +81,32 @@ def get_by_project_id(projectId: int, db: Session = Depends(models.get_db)):
 def create_item(
     project_id: int, dto: TheoryOfChangeItemDto, db: Session = Depends(models.get_db)
 ):
-    record = TheoryOfChange()
-    record.name = dto.name
-    record.type_id = dto.type_id
-    record.from_id = dto.from_id
-    record.to_id = dto.to_id
-    record.sem_id = dto.sem_id
-    record.description = dto.description
-    record.project_id = project_id
+    toc: TheoryOfChange = TheoryOfChange()
+    toc.name = dto.name
+    toc.type_id = dto.type_id
+    toc.from_id = dto.from_id
+    toc.to_id = dto.to_id
+    toc.sem_id = dto.sem_id
+    toc.description = dto.description
+    toc.project_id = project_id
 
-    db.add(record)
+    # todo: use helper method
+    db.add(toc)
     db.commit()
+    db.refresh(toc)
+
+    # Create activity item
+    if toc.type_id == 2:
+        new_activity: Activity = Activity()
+        new_activity.name = toc.name
+        new_activity.notes = toc.description
+        new_activity.prj_id = project_id
+        new_activity.status_id = 1
+        new_activity.editing_user_id = dto.editing_user_id
+        new_activity.theory_of_change_id = toc.id
+
+        db.add(new_activity)
+        db.commit()
 
     return ApiResponse(data=get_toc_by_project_id(project_id, db))
 
@@ -113,7 +124,7 @@ def update_item(
         raise HTTPException(status_code=404, detail="Item not found")
 
     record.name = dto.name
-    record.type_id = dto.type_id
+    # record.type_id = dto.type_id
     record.from_id = dto.from_id
     record.to_id = dto.to_id
     record.sem_id = dto.sem_id
@@ -170,10 +181,14 @@ def update_indicators(
     print(dto)
     # Remove deleted indicators
     if dto.removed is not None:
-        records = db.query(TheoryOfChangeIndicator).filter(
-            TheoryOfChangeIndicator.theory_of_change_id == item_id,
-            TheoryOfChangeIndicator.id.in_(dto.removed),
-        ).delete()
+        records = (
+            db.query(TheoryOfChangeIndicator)
+            .filter(
+                TheoryOfChangeIndicator.theory_of_change_id == item_id,
+                TheoryOfChangeIndicator.id.in_(dto.removed),
+            )
+            .delete()
+        )
         db.commit()
 
     theory_of_change = (
