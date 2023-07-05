@@ -21,9 +21,10 @@ import {
   Avatar,
   List,
   ListItem,
-  ListItemMeta,
+  Popconfirm,
 } from "ant-design-vue";
 import { PlusOutlined, DeleteOutlined } from "@ant-design/icons-vue";
+import { uniqBy } from "lodash-es";
 
 const emit = defineEmits<{
   (e: "isClosed", status: boolean): boolean;
@@ -167,9 +168,12 @@ const getTocIndicators = computed(() => {
 
 // Custom indicator handlers
 const getProjectIndicators = computed(() => {
-  return theoryOfChangeStore.project_indicators.map((i) => {
-    return { ...i, label: i.name, value: i.name };
-  });
+  return uniqBy(
+    theoryOfChangeStore.project_indicators.map((i) => {
+      return { ...i, label: i.name, value: i.name };
+    }),
+    "name"
+  );
 });
 
 const makeIndicatorAsDeleted = (
@@ -277,12 +281,11 @@ const addIndiKitIndicator = (item: LuIndiKit) => {
             {{ indicator.name }}
 
             <template #actions>
-              <Button
-                size="small"
-                type="primary"
-                :ghost="true"
-                :danger="true"
-                @click="
+              <Popconfirm
+                title="Are you sure? Corresponding monitoring item(s) will be deleted!"
+                ok-text="Yes"
+                cancel-text="No"
+                @confirm="
                   makeIndicatorAsDeleted(
                     indicator.name,
                     indicator.id,
@@ -290,9 +293,12 @@ const addIndiKitIndicator = (item: LuIndiKit) => {
                   )
                 "
               >
-                <DeleteOutlined /> Remove
-              </Button>
+                <Button size="small" type="primary" :ghost="true" :danger="true">
+                  <DeleteOutlined /> Remove
+                </Button>
+              </Popconfirm>
             </template>
+
           </ListItem>
         </List>
       </Col>
