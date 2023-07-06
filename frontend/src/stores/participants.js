@@ -1,5 +1,5 @@
-import { defineStore } from 'pinia';
-import { downloadObjects } from '@/apis/lambda.js';
+import { defineStore } from "pinia";
+import { downloadObjects } from "@/apis/lambda.js";
 
 // Initial objects for participant data structure
 const init_objects = {
@@ -8,7 +8,7 @@ const init_objects = {
     prj_id: 0,
     editing_user_id: 0,
     parent_id: 0,
-    name: '',
+    name: "",
     type_id: 0,
     language_id: 0,
     location_id: 0,
@@ -16,22 +16,21 @@ const init_objects = {
 };
 
 export const useParticipantStore = defineStore({
-  id: 'participants',
+  id: "participants",
   state: () => ({
     participants: [],
   }),
   getters: {
-    participantById: (state) =>
-      (participantId) => state.participants.find((p) => p.id == participantId),
-    participantNameById: (state) =>
-      (participantId) => {
-        let name = '';
-        let p = state.participants.find((p) => p.id == participantId);
-        if (p != null) {
-          name = p.name;
-        }
-        return name;
-      },
+    participantById: (state) => (participantId) =>
+      state.participants.find((p) => p.id == participantId),
+    participantNameById: (state) => (participantId) => {
+      let name = "";
+      let p = state.participants.find((p) => p.id == participantId);
+      if (p != null) {
+        name = p.name;
+      }
+      return name;
+    },
   },
   actions: {
     // Clears participant data in the store state
@@ -41,8 +40,8 @@ export const useParticipantStore = defineStore({
       }
     },
     // Downloads participant data and sets it to the store state
-    download() {
-      downloadObjects(init_objects, this);
+    async download() {
+      return await downloadObjects(init_objects, this);
     },
   },
 });
