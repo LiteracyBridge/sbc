@@ -11,28 +11,28 @@ import { useProjectDataStore } from "./projectData";
 import { Project } from "@/types";
 import { ApiRequest } from "@/apis/api";
 import { message } from "ant-design-vue";
+import { AppStore } from "./app.store";
 
 // projectStores returns all the stores that have project-specific data
 const projectStores = () => [
-  useActivityStore,
+  // useActivityStore,
+  useProjectDataStore,
   useInterventionStore,
   useDriverStore,
   useParticipantStore,
-  useProjectDataStore,
 ];
 
 // Clears all project-specific data from stores
 function clearAllProjectStores() {
   for (const store of projectStores()) {
-    store().clear();
+    store().$reset();
   }
 }
 
 // Downloads all project-specific data from stores
-function downloadAllProjectStores() {
-  for (const store of projectStores()) {
-    store().download();
-    console.log("just downloaded " + store());
+async function downloadAllProjectStores() {
+  for await (const store of projectStores()) {
+    await store().download();
   }
 }
 
@@ -214,19 +214,25 @@ export const useProjectStore = defineStore({
     },
 
     // Sets a project as active
-    setPrj(id: number, newProject: boolean = false) {
+    async setPrj(id: number, newProject: boolean = false) {
       this.prj_id = id;
 
+      await useUserStore().setLastProject(id);
+
+      // await AppStore().downloadObjects();
       useProjectStore().download();
       if (id && !newProject) {
+        clearAllProjectStores();
         downloadAllProjectStores();
       } else {
         clearAllProjectStores();
       }
-      useUserStore().setLastProject(id);
+
       if (!id) {
         router.push({ path: "/projects" });
       }
+
+      return;
     },
 
     // Update project strategy

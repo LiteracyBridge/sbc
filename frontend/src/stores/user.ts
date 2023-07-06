@@ -26,6 +26,8 @@ export const useUserStore = defineStore({
     async setLastProject(last_project_id: number) {
       this.last_project_id = last_project_id;
       const response = api.update("users", this.id, { last_project_id });
+
+      return response;
     },
 
     async fetchUser(email: string) {},

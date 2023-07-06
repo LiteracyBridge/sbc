@@ -62,7 +62,7 @@ export const useInterventionStore = defineStore({
       // }
     },
     download() {
-      downloadObjects(init_objects, this, "lu_");
+      return downloadObjects(init_objects, this, "lu_");
     },
     // Download data
     downloadProjectDrivers() {
