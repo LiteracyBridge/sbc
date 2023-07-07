@@ -70,7 +70,7 @@ onMounted(() => {
       <div v-else>
         <Typography.Title :level="5">Project Behavior Drivers</Typography.Title>
 
-        <Tabs v-model:activeKey="config.activeTab" tab-position="left" type="card" tab="sldfsdlfk">
+        <Tabs v-model:activeKey="config.activeTab" tab-position="left" type="card">
 
           <TabPane v-for="driver in drivers" :key="driver.name" :tab="driver.name">
 

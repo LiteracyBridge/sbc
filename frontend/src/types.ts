@@ -59,6 +59,30 @@ export class LuIndiKit {
   purpose: string;
 }
 
+export class Intervention {
+  id: number;
+  name: string;
+  url_description?: string;
+  text_short?: string;
+  text_long?: string;
+  sequence?: number;
+}
+
+export class Driver {
+  id: number;
+  name: string;
+  dgroup?: string;
+  parent_id: number = 0;
+  sequence?: number;
+  sem_id?: number;
+  text_short?: string;
+  text_long?: string;
+  url?: string;
+  category_id?: number;
+  framework_id?: number;
+  intervention_ids?: number[];
+}
+
 export class ProjectIndicator {
   id: number;
   name: string;
