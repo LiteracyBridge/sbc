@@ -203,6 +203,11 @@ export class Activity {
   notes: string = "";
   url: string = "";
   driver_ids: number[] = [];
+  start_date?: Dayjs;
+  end_date?: Dayjs;
+  created_at?: Dayjs;
+  updated_at?: Dayjs;
+  deleted_at?: Dayjs;
 
   // FIXME: REMOVE THIS
   /**

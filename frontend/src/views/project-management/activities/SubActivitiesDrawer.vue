@@ -9,6 +9,7 @@ import { useProjectStore } from "@/stores/projects";
 import { Button, Tag, Drawer, Table } from "ant-design-vue";
 import { Activity } from "@/types";
 import { PlusCircleOutlined } from "@ant-design/icons-vue";
+import { formatDate } from "@/helpers";
 
 import AddSubActivityModal from "./AddSubActivityModal.vue";
 
@@ -88,20 +89,9 @@ const columns = [
     key: "owner",
   },
   {
-    title: "Duration",
-    dataIndex: "duration",
-    key: "duration",
+    title: "Deadline",
+    key: "deadline",
   },
-  // {
-  //   title: 'Intervention',
-  //   dataIndex: 'intervention',
-  //   key: 'intervention',
-  // },
-  // {
-  //   title: 'Drivers',
-  //   dataIndex: 'drivers',
-  //   key: 'drivers',
-  // },
 ];
 </script>
 
@@ -159,24 +149,9 @@ const columns = [
             {{ projectStore.userName(activity.owner_id) }}
           </template>
 
-          <template v-if="column.key === 'duration'">
-            {{ activityStore.fromDate(activity.id) }} -
-            {{ activityStore.toDate(activity.id) }}
+          <template v-if="column.key === 'deadline'">
+            {{ formatDate(activity.end_date) || 'N/A' }}
           </template>
-
-          <!-- <template v-if="column.key === 'intervention'">
-          {{ interventionStore.interventionNameById(activity.intervention_id) }}
-        </template>
-
-        <template v-if="column.key === 'drivers'">
-          <span v-if="activity.driver_ids && activity.driver_ids.length == 1">{{
-            driverStore.nameById(activity.driver_ids[0]) }}
-          </span>
-
-          <span v-else>
-            <i>0 drivers</i>
-          </span>
-        </template> -->
         </template>
       </Table>
     </div>

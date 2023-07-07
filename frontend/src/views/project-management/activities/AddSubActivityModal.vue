@@ -8,7 +8,7 @@ import { useInterventionStore } from "@/stores/interventions";
 import { useDriverStore } from "@/stores/drivers"
 import { useUserStore } from "@/stores/user";
 import { useParticipantStore } from "@/stores/participants";
-import { Button, Col, Form, FormItem, Input, Modal, Row, Select, SelectOption, type FormInstance, Textarea, Spin } from "ant-design-vue";
+import { Button, Col, Form, FormItem, Input, Modal, Row, Select, SelectOption, type FormInstance, Textarea, Spin, DatePicker } from "ant-design-vue";
 import { Activity } from "@/types";
 
 const props = defineProps<{
@@ -71,12 +71,18 @@ const saveForm = () => {
 watch(props, (newProps) => {
   visible.value = newProps.visible;
 })
-
 </script>
 
 <template>
-  <Modal v-model:visible="visible" @cancel="closeModal()" width="750px" ok-text="Save" cancel-text="Cancel"
-    :mask-closable="false" @ok="saveForm()">
+  <Modal
+    v-model:visible="visible"
+    @cancel="closeModal()"
+    width="750px"
+    ok-text="Save"
+    cancel-text="Cancel"
+    :mask-closable="false"
+    @ok="saveForm()"
+  >
     <template #title>
       <!-- TODO: show add/update activity depending on item state -->
       <span>Add Task</span>
@@ -88,23 +94,43 @@ watch(props, (newProps) => {
     </template>
 
     <Spin :spinning="activityStore.isLoading">
-      <Form name="activity-form" ref="taskFormRef" :model="draftActivity" layout="vertical">
-
+      <Form
+        name="activity-form"
+        ref="taskFormRef"
+        :model="draftActivity"
+        layout="vertical"
+      >
         <Row :gutter="6">
           <Col :span="12">
-          <FormItem label="Task Name" name="name" :rules="[{ required: true, message: 'Please enter activity name!' }]">
-            <Input v-model:value="draftActivity.name" />
-          </FormItem>
+            <FormItem
+              label="Task Name"
+              name="name"
+              :rules="[{ required: true, message: 'Please enter activity name!' }]"
+            >
+              <Input v-model:value="draftActivity.name" />
+            </FormItem>
           </Col>
 
           <Col :span="12">
-          <FormItem name="owner_id" label="Owner" has-feedback
-            :rules="[{ required: true, message: 'Please select an owner!' }]">
-            <Select v-model:value="draftActivity.owner_id" placeholder="Select owner" :show-search="true">
-              <SelectOption v-for="user in projectStore.users_in_project" :value="user.user_id" :key="user.user_id">{{
-                user.name }}</SelectOption>
-            </Select>
-          </FormItem>
+            <FormItem
+              name="owner_id"
+              label="Owner"
+              has-feedback
+              :rules="[{ required: true, message: 'Please select an owner!' }]"
+            >
+              <Select
+                v-model:value="draftActivity.owner_id"
+                placeholder="Select owner"
+                :show-search="true"
+              >
+                <SelectOption
+                  v-for="user in projectStore.users_in_project"
+                  :value="user.user_id"
+                  :key="user.user_id"
+                  >{{ user.name }}</SelectOption
+                >
+              </Select>
+            </FormItem>
           </Col>
         </Row>
 
@@ -156,40 +182,58 @@ watch(props, (newProps) => {
 
         <Row :gutter="6">
           <Col :span="12">
-          <FormItem name="status_id" label="Task Status" has-feedback
-            :rules="[{ required: true, message: 'Please select an activity status!' }]">
-
-            <Select v-model:value="draftActivity.status_id" placeholder="Select activity status" :show-search="true">
-              <SelectOption :value="null">None</SelectOption>
-              <SelectOption v-for="status in lookupStore.activity_status" :value="status.id" :key="status.id">
-                {{ status.name }}
-              </SelectOption>
-
-            </Select>
-          </FormItem>
+            <FormItem
+              name="status_id"
+              label="Task Status"
+              has-feedback
+              :rules="[{ required: true, message: 'Please select an activity status!' }]"
+            >
+              <Select
+                v-model:value="draftActivity.status_id"
+                placeholder="Select activity status"
+                :show-search="true"
+              >
+                <SelectOption :value="null">None</SelectOption>
+                <SelectOption
+                  v-for="status in lookupStore.activity_status"
+                  :value="status.id"
+                  :key="status.id"
+                >
+                  {{ status.name }}
+                </SelectOption>
+              </Select>
+            </FormItem>
           </Col>
 
-          <!-- <Col :span="12">
-          <FormItem name="url" label="URL" has-feedback :rules="[{ required: false }]">
-
-            <Input type="url" v-model:value="draftActivity.url"></Input>
-          </FormItem>
-          </Col> -->
+          <Col :span="12">
+            <FormItem
+              name="end_date"
+              label="Deadline"
+              has-feedback
+              :rules="[{ required: false }]"
+            >
+              <DatePicker type="date" v-model:value="draftActivity.end_date"></DatePicker>
+            </FormItem>
+          </Col>
         </Row>
-
 
         <Row :gutter="6">
-
           <Col :span="24">
-          <FormItem name="notes" label="Notes" has-feedback :rules="[{ required: false }]">
-
-            <Textarea v-model:value="draftActivity.notes" :rows="3"></Textarea>
-          </FormItem>
+            <FormItem
+              name="notes"
+              label="Notes"
+              has-feedback
+              :rules="[{ required: false }]"
+            >
+              <Textarea v-model:value="draftActivity.notes" :rows="3"></Textarea>
+            </FormItem>
           </Col>
-
         </Row>
 
-        <table class="table" v-if="activityStore.schedulesByActivityId(draftActivity.id)?.length > 0">
+        <table
+          class="table"
+          v-if="activityStore.schedulesByActivityId(draftActivity.id)?.length > 0"
+        >
           <thead>
             <tr>
               <th>ID</th>
@@ -201,17 +245,25 @@ watch(props, (newProps) => {
             </tr>
           </thead>
           <tbody>
-
-            <template v-for="(schedule, i) in activityStore.schedulesByActivityId(draftActivity.id)">
-              <tr :class="(i % 2) ? 'has-background-white' : 'has-background-light'">
+            <template
+              v-for="(schedule, i) in activityStore.schedulesByActivityId(
+                draftActivity.id
+              )"
+            >
+              <tr :class="i % 2 ? 'has-background-white' : 'has-background-light'">
                 <td>{{ schedule.id }}</td>
                 <td>{{ schedule.planned_date_from }}</td>
                 <td>{{ schedule.planned_date_to }}</td>
-                <td><!--{{schedule.owner_id}}-->
+                <td>
+                  <!--{{schedule.owner_id}}-->
                   <div class="control">
                     <div class="select">
                       <select v-model="schedule.owner_id">
-                        <option v-for="user in projectStore.users_in_project" :value="user.user_id" :key="user.user_id">
+                        <option
+                          v-for="user in projectStore.users_in_project"
+                          :value="user.user_id"
+                          :key="user.user_id"
+                        >
                           {{ user.name }}
                         </option>
                       </select>
@@ -222,7 +274,11 @@ watch(props, (newProps) => {
                   <div class="control">
                     <div class="select">
                       <select v-model="schedule.status_id">
-                        <option v-for="status in lookupStore.activity_status" :value="status.id" :key="status.id">
+                        <option
+                          v-for="status in lookupStore.activity_status"
+                          :value="status.id"
+                          :key="status.id"
+                        >
                           {{ status.name }}
                         </option>
                       </select>
@@ -233,8 +289,11 @@ watch(props, (newProps) => {
                   <div class="control">
                     <div class="select">
                       <select v-model="schedule.participant_id">
-                        <option v-for="participant in participantStore.participants" :value="participant.id"
-                          :key="participant.id">
+                        <option
+                          v-for="participant in participantStore.participants"
+                          :value="participant.id"
+                          :key="participant.id"
+                        >
                           {{ participant.name }}
                         </option>
                       </select>
@@ -242,7 +301,7 @@ watch(props, (newProps) => {
                   </div>
                 </td>
               </tr>
-              <tr :class="(i % 2) ? 'has-background-white' : 'has-background-light'">
+              <tr :class="i % 2 ? 'has-background-white' : 'has-background-light'">
                 <td colspan="9"><input size="70" v-model="schedule.notes" /></td>
               </tr>
             </template>
@@ -257,7 +316,6 @@ watch(props, (newProps) => {
               <button class="button is-link is-light">Cancel</button>
             </div>
           </div>         -->
-
 
         <!-- <div class="field">
             <label class="label">Username</label>
@@ -308,10 +366,7 @@ watch(props, (newProps) => {
               </label>
             </div>
           </div> -->
-
-
       </Form>
     </Spin>
-
   </Modal>
 </template>

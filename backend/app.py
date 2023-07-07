@@ -9,7 +9,7 @@ from mangum import Mangum
 from routes import (
     users,
     theory_of_change,
-    activity,
+    activity_route,
     monitoring,
     project,
     lookups,
@@ -104,7 +104,7 @@ app.include_router(
     dependencies=[Depends(models.get_db)],
 )
 app.include_router(
-    activity.router,
+    activity_route.router,
     prefix="/activity",
     tags=["activity"],
     dependencies=[Depends(models.get_db)],

@@ -478,6 +478,21 @@ class Activity(Base):
         ForeignKey("lu_activity_status.id"), nullable=True
     )
     driver_ids: Mapped[int] = mapped_column(default=[], nullable=True)
+    start_date: Mapped[Optional[DateTime]] = mapped_column(
+        DateTime(timezone=True), default=func.now()
+    )
+    end_date: Mapped[Optional[DateTime]] = mapped_column(
+        DateTime(timezone=True), default=func.now()
+    )
+    created_at: Mapped[DateTime] = mapped_column(
+        DateTime(timezone=True), default=func.now()
+    )
+    updated_at: Mapped[DateTime] = mapped_column(
+        DateTime(timezone=True), onupdate=func.now()
+    )
+    deleted_at: Mapped[Optional[DateTime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
 
 
 class Monitoring(Base):

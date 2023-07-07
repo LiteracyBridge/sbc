@@ -1,14 +1,15 @@
 from typing import List, Optional
-from helpers import ToCItemDto, create_toc_item
 
-import models
 from dataclass_wizard import asdict, fromdict
 from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel
+from sqlalchemy.orm import Session, joinedload, subqueryload
+
+from helpers import ToCItemDto, create_toc_item
+import models
 from models import Activity
 from models import TheoryOfChange
-from pydantic import BaseModel
 from schema import ApiResponse
-from sqlalchemy.orm import Session, joinedload, subqueryload
 
 router = APIRouter()
 
@@ -27,6 +28,8 @@ class ActivityDto(BaseModel):
     status_id: Optional[int]
     driver_ids: Optional[List[int]]
     is_task: Optional[bool] = False
+    end_date: Optional[str]
+    start_date: Optional[str]
 
 
 def get_toc_by_project_id(projectId: int, db: Session = Depends(models.get_db)):
@@ -74,6 +77,9 @@ def create(dto: ActivityDto, db: Session = Depends(models.get_db)):
     new_activity.owner_id = dto.owner_id
     new_activity.parent_id = dto.parent_id
     new_activity.status_id = dto.status_id
+    new_activity.start_date = dto.start_date
+    new_activity.end_date = dto.end_date
+
 
     if dto.driver_ids is None:
         new_activity.driver_ids = []
