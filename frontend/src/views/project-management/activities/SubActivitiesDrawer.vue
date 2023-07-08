@@ -6,7 +6,7 @@ import { useInterventionStore } from "@/stores/interventions";
 import { useDriverStore } from "@/stores/drivers";
 import { useLookupStore } from "@/stores/lookups";
 import { useProjectStore } from "@/stores/projects";
-import { Button, Tag, Drawer, Table } from "ant-design-vue";
+import { Button, Tag, Drawer, Table, Popconfirm } from "ant-design-vue";
 import { Activity } from "@/types";
 import { PlusCircleOutlined } from "@ant-design/icons-vue";
 import { formatDate } from "@/helpers";
@@ -92,6 +92,7 @@ const columns = [
     title: "Deadline",
     key: "deadline",
   },
+  { title: "Action", key: "action" },
 ];
 </script>
 
@@ -106,12 +107,13 @@ const columns = [
   </AddSubActivityModal>
 
   <Drawer
-    title="Activity Tasks"
+    :title="props.activity?.name"
     v-model:visible="config.visible"
     :mask-closable="false"
     width="70vw"
     @close="closeModal()"
   >
+
     <template #extra>
       <Button @click="closeModal()"> Close </Button>
     </template>
@@ -121,6 +123,7 @@ const columns = [
         :columns="columns"
         :data-source="activityStore.subActivitiesByActivityId(props.activity.id)"
         bordered
+        :loading="activityStore.isLoading"
       >
         <template #title>
           <Button
@@ -150,7 +153,18 @@ const columns = [
           </template>
 
           <template v-if="column.key === 'deadline'">
-            {{ formatDate(activity.end_date) || 'N/A' }}
+            {{ formatDate(activity.end_date) || "N/A" }}
+          </template>
+
+          <template v-if="column.key === 'action'">
+            <Popconfirm
+              title="Are you sure?"
+              ok-text="Yes"
+              cancel-text="No"
+              @confirm="activityStore.deleteActivity(activity.id)"
+            >
+              <Button type="primary" :ghost="true" danger size="small"> Delete </Button>
+            </Popconfirm>
           </template>
         </template>
       </Table>

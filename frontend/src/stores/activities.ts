@@ -106,26 +106,21 @@ export const useActivityStore = defineStore({
     //   return activity;
     // },
 
-    async deleteActivity(activityId: number, deleteChildren: boolean = false) {
-      // find activity to be deleted
-      const activity = this.activities.find((a) => a.id === activityId);
-
-      // handle children of the to-be-deleted activity
-      const children = this.activities.filter(
-        (a) => a.parent_id === activityId
-      );
-      const deleteIds = [];
-      deleteIds.push(activity);
-      deleteIds.push(children);
-
-      // console.log('deleteIds:');
-      // console.log(deleteIds);
-      const table = "activities";
-      api.remove(table, deleteIds);
-      if (deleteChildren)
-        this.activities = this.activities.filter((a) => !children.includes(a));
-      else children.forEach((c) => (c.parent_id = activity.parent_id));
-      this.activities = this.activities.filter((a) => a != activity);
+    async deleteActivity(activityId: number) {
+      this.$state.isLoading = true;
+      return await ApiRequest.delete<Activity>(
+        `activity/${useProjectStore().prj_id}/${activityId}`
+      )
+        .then((resp) => {
+          this.$state.activities = resp;
+          message.success("Activity deleted successfully!");
+          return resp;
+        })
+        .catch((err) => {
+          message.error(err.message);
+          throw err;
+        })
+        .finally(() => (this.$state.isLoading = false));
     },
 
     async deleteIntervention(interventionId: number) {

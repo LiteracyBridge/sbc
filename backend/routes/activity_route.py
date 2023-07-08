@@ -139,3 +139,20 @@ def update_or_create(dto: ActivityDto, db: Session = Depends(models.get_db)):
 @router.get("/{projectId}", response_model=ApiResponse)
 def get_activities(projectId: int, db: Session = Depends(models.get_db)):
     return get_project_activities(project_id=projectId, db=db)
+
+
+@router.delete("/{project_id}/{id}", response_model=ApiResponse)
+def delete_activity(project_id: int, id: int, db: Session = Depends(models.get_db)):
+    activity = (
+        db.query(Activity)
+        .filter(Activity.id == id, Activity.prj_id == project_id)
+        .first()
+    )
+
+    if activity is None:
+        return HTTPException(status_code=400, detail="Account cannot be created")
+
+    db.delete(activity)
+    db.commit()
+
+    return get_project_activities(project_id=activity.prj_id, db=db)

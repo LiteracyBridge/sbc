@@ -35,6 +35,8 @@ const config = ref({
 const driverValues = ref(props.draftActivity.driver_ids);
 const taskFormRef = ref<FormInstance>();
 
+const isEditing = computed(() => props.draftActivity?.id != null);
+
 /**
  * 'Activity' here means the item is a top-level activity
  * 'Task/sub activity' here means the item is a sub-activity
@@ -106,8 +108,7 @@ watch(props, (newProps) => {
     @ok="saveForm()"
   >
     <template #title>
-      <!-- TODO: show add/update activity depending on item state -->
-      <span>Add Task</span>
+      <span>{{ isEditing ? "Update" : "Add" }} Task</span>
     </template>
 
     <template #footer>
@@ -155,52 +156,6 @@ watch(props, (newProps) => {
             </FormItem>
           </Col>
         </Row>
-
-        <!-- <Row :gutter="6"> -->
-        <!-- <Col :span="12">
-        <FormItem name="parent_id" label="Group Parent" has-feedback
-          :rules="[{ required: false, message: 'Please select a group parent!' }]">
-
-          <Select v-model:value="draftActivity.parent_id" placeholder="Select group" :show-search="true">
-            <SelectOption :value="null">Not part of a group</SelectOption>
-
-            <SelectOption v-for="activity in activityStore.activities.filter((a) => a.id != draftActivity.id)"
-              :value="activity.id" :key="activity.id">
-              {{ activity.name }}
-            </SelectOption>
-          </Select>
-
-        </FormItem>
-        </Col> -->
-        <!--
-          <Col :span="12">
-          <FormItem name="driverValues" label="Supported Drivers" has-feedback :rules="[{ required: false }]">
-
-            <Select v-model:value="driverValues" placeholder="Please owner" :show-search="true" mode="multiple">
-              <SelectOption v-for="i in driverOptions" :value="i.id" :key="i.id">
-                {{ i.name }}
-              </SelectOption>
-
-            </Select>
-          </FormItem>
-          </Col> -->
-
-        <!-- <Col :span="12">
-          <FormItem name="intervention_id" label="Supported Intervention" has-feedback
-            :rules="[{ required: false, message: 'Please select an intervention!' }]">
-
-            <Select v-model:value="draftActivity.intervention_id" placeholder="Select intervention" :show-search="true"
-              :allow-clear="true">
-              <SelectOption :value="null">None</SelectOption>
-              <SelectOption v-for="intervention in interventionStore.interventions" :value="intervention.id"
-                :key="intervention.id">
-                {{ intervention.name }}
-              </SelectOption>
-
-            </Select>
-          </FormItem>
-          </Col> -->
-        <!-- </Row> -->
 
         <Row :gutter="6">
           <Col :span="12">
@@ -266,143 +221,6 @@ watch(props, (newProps) => {
             </FormItem>
           </Col>
         </Row>
-
-        <table
-          class="table"
-          v-if="activityStore.schedulesByActivityId(draftActivity.id)?.length > 0"
-        >
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>From</th>
-              <th>To</th>
-              <th>Owner</th>
-              <th>Status</th>
-              <th>Participant</th>
-            </tr>
-          </thead>
-          <tbody>
-            <template
-              v-for="(schedule, i) in activityStore.schedulesByActivityId(
-                draftActivity.id
-              )"
-            >
-              <tr :class="i % 2 ? 'has-background-white' : 'has-background-light'">
-                <td>{{ schedule.id }}</td>
-                <td>{{ schedule.planned_date_from }}</td>
-                <td>{{ schedule.planned_date_to }}</td>
-                <td>
-                  <!--{{schedule.owner_id}}-->
-                  <div class="control">
-                    <div class="select">
-                      <select v-model="schedule.owner_id">
-                        <option
-                          v-for="user in projectStore.users_in_project"
-                          :value="user.user_id"
-                          :key="user.user_id"
-                        >
-                          {{ user.name }}
-                        </option>
-                      </select>
-                    </div>
-                  </div>
-                </td>
-                <td>
-                  <div class="control">
-                    <div class="select">
-                      <select v-model="schedule.status_id">
-                        <option
-                          v-for="status in lookupStore.activity_status"
-                          :value="status.id"
-                          :key="status.id"
-                        >
-                          {{ status.name }}
-                        </option>
-                      </select>
-                    </div>
-                  </div>
-                </td>
-                <td>
-                  <div class="control">
-                    <div class="select">
-                      <select v-model="schedule.participant_id">
-                        <option
-                          v-for="participant in participantStore.participants"
-                          :value="participant.id"
-                          :key="participant.id"
-                        >
-                          {{ participant.name }}
-                        </option>
-                      </select>
-                    </div>
-                  </div>
-                </td>
-              </tr>
-              <tr :class="i % 2 ? 'has-background-white' : 'has-background-light'">
-                <td colspan="9"><input size="70" v-model="schedule.notes" /></td>
-              </tr>
-            </template>
-          </tbody>
-        </table>
-
-        <!-- <div class="field is-grouped">
-            <div class="control">
-              <button class="button is-link">Submit</button>
-            </div>
-            <div class="control">
-              <button class="button is-link is-light">Cancel</button>
-            </div>
-          </div>         -->
-
-        <!-- <div class="field">
-            <label class="label">Username</label>
-            <div class="control has-icons-left has-icons-right">
-              <input class="input is-success" type="text" placeholder="Text input" value="bulma">
-              <span class="icon is-small is-left">
-                <i class="fas fa-user"></i>
-              </span>
-              <span class="icon is-small is-right">
-                <i class="fas fa-check"></i>
-              </span>
-            </div>
-            <p class="help is-success">This username is available</p>
-          </div> -->
-
-        <!-- <div class="field">
-            <label class="label">Email</label>
-            <div class="control has-icons-left has-icons-right">
-              <input class="input is-danger" type="email" placeholder="Email input" value="hello@">
-              <span class="icon is-small is-left">
-                <i class="fas fa-envelope"></i>
-              </span>
-              <span class="icon is-small is-right">
-                <i class="fas fa-exclamation-triangle"></i>
-              </span>
-            </div>
-            <p class="help is-danger">This email is invalid</p>
-          </div> -->
-
-        <!-- <div class="field">
-            <div class="control">
-              <label class="checkbox">
-                <input type="checkbox">
-                I agree to the <a href="#">terms and conditions</a>
-              </label>
-            </div>
-          </div> -->
-
-        <!-- <div class="field" v-if="activityStore.activities.length > 0">
-            <div class="control">
-              <label class="radio">Part of a group?
-                <input v-model="child" type="radio" name="question" value="yes">
-                Yes
-              </label>
-              <label class="radio">
-                <input v-model="child" type="radio" name="question" value="no">
-                No
-              </label>
-            </div>
-          </div> -->
       </Form>
     </Spin>
   </Modal>
