@@ -15,10 +15,11 @@ router = APIRouter()
 class UpdateMonitoringDto(BaseModel):
     target: Optional[str]
     baseline: Optional[str]
+    type: Optional[str]
     # TODO: calculate progress on the frontend
     # progress: Optional[int]
     data_collection_method: Optional[str]
-    evaluation_period: Optional[str]
+    reporting_period: Optional[str]
 
 
 class RecordProgressDto(BaseModel):
@@ -63,7 +64,8 @@ def update_item(
     record.target = dto.target
     record.baseline = dto.baseline
     record.data_collection_method = dto.data_collection_method
-    record.evaluation_period = dto.evaluation_period
+    record.reporting_period = dto.reporting_period
+    record.type = dto.type
 
     db.commit()
 
