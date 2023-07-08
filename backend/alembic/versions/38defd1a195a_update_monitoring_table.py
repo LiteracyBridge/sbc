@@ -20,6 +20,7 @@ def upgrade() -> None:
     # Change target and baseline to text
     op.alter_column("monitoring", "target", type_=sa.Text())
     op.alter_column("monitoring", "baseline", type_=sa.Text())
+    op.alter_column("monitoring", "progress", type_=sa.Text())
 
     # Rename evaluation_period to data_collection_method
     op.alter_column(

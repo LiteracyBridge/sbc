@@ -1,25 +1,27 @@
 <script lang="ts" setup>
-// TODO: add button for viewing progress in a modal
-// TODO: add button for capturing progress in a modal
 
 import { useMonitoringStore } from '@/stores/monitoring.store';
+import { useProjectStore } from '@/stores/projects';
 import { Monitoring } from '@/types';
 import { Modal, Form, FormItem, Input, Select, SelectOption, Spin, type FormInstance, message } from 'ant-design-vue';
 import { computed, h, ref, watch } from 'vue';
-
+import dayjs from 'dayjs';
 
 const props = defineProps<{ visible: boolean, record: Monitoring }>();
 const emit = defineEmits<{
   (e: 'isClosed', status: boolean): boolean,
 }>()
 
-const store = useMonitoringStore();
+const store = useMonitoringStore(),
+  projectStore = useProjectStore();
+
 const progressTrackingFormRef = ref<FormInstance>(),
   config = ref({
     visible: props.visible,
     form: {
       value: '',
-      period: ''
+      period: '',
+      progress: null,
     }
   });
 
@@ -36,72 +38,38 @@ function closeModal() {
 }
 
 function recordProgress() {
-  if ((props.record?.target ?? 0) <= 0) {
-    Modal.error({
-      title: 'Indicator target required',
-      content: h('div', {}, [
-        h('p', 'Please set a target first!'),
-      ])
-    });
-    return;
+  if(props.record.type == "Quantitative") {
+    if (props.record?.target == null) {
+      Modal.error({
+        title: 'Indicator target required',
+        content: h('div', {}, [
+          h('p', 'Please set a target first!'),
+        ])
+      });
+      return;
+    }
   }
 
   progressTrackingFormRef.value
     .validateFields()
     .then(values => {
+
+      // Calculate progress
+      if(props.record.type == "Quantitative") {
+        let total = +props.record.progress ?? 0;
+        for(const i of (props.record.evaluation || [])) {
+            total += +i.value
+        }
+
+        config.value.form.progress = ((total / +props.record.target) * 100).toFixed(2);
+      }
+
       store.recordProgress(props.record.id, config.value.form)
         .then((resp) => {
           closeModal();
         });
     });
 }
-
-const generatePeriods = computed(() => {
-  const recorded_periods = (props.record.evaluation ?? []).flatMap((evaluation) => evaluation.period)
-  const period = props.record.reporting_period ?? "monthly"
-
-  // (props.record.evaluation ?? []).forEach((evaluation) => {
-  //   recorded_periods[evaluation.period] = evaluation.value;
-  // });
-
-  // TODO: generate based on project duration
-  if (period == 'monthly') {
-    return Array(12).fill(0).map((_, i) => {
-      const period = `Month ${i + 1}`,
-        disabled = recorded_periods.includes(period);
-      return {
-        label: period,
-        value: period,
-        disabled: disabled
-      }
-    });
-  }
-  if (period == "quarterly") {
-    return Array(4).fill(0).map((_, i) => {
-      const period = `Quarter ${i + 1}`,
-        disabled = recorded_periods.includes(period);
-      return {
-        label: period,
-        value: period,
-        disabled: disabled
-      }
-    });
-  }
-
-  if (period == "weekly") {
-    return Array(53).fill(0).map((_, i) => {
-      const period = `Week ${i + 1}`,
-        disabled = recorded_periods.includes(period);
-      return {
-        label: period,
-        value: period,
-        disabled: disabled
-      }
-    });
-  }
-
-  return [];
-});
 </script>
 
 <template>
@@ -124,18 +92,11 @@ const generatePeriods = computed(() => {
         <!-- TODO: exclude already tracked periods from dropdown -->
         <FormItem
           name="period"
-          label="Select Period"
+          label="Reporting Period"
           has-feedback
-          :rules="[{ required: true, message: 'Please select a period!' }]"
+          :rules="[{ required: true, message: 'Enter reporting period!' }]"
         >
-          <Select
-            v-model:value="config.form.period"
-            placeholder="Please period"
-            :show-search="true"
-            :allow-clear="true"
-            :options="generatePeriods"
-          >
-          </Select>
+          <Input v-model:value="config.form.period" placeholder="eg. Month 1"> </Input>
         </FormItem>
 
         <FormItem
@@ -143,7 +104,7 @@ const generatePeriods = computed(() => {
           name="value"
           :rules="[{ required: true, message: 'Progress value is required!' }]"
         >
-          <Input v-model:value="config.form.value" type="number" />
+          <Input v-model:value="config.form.value" />
         </FormItem>
       </Form>
     </Spin>

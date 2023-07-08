@@ -237,11 +237,12 @@ export class Monitoring {
   target?: string;
   baseline?: string;
   data_collection_method?: string;
+  progress?: string | number;
   evaluation: Array<{ value: number; period: string }> = [];
-  reporting_period?: "monthly" | "weekly" | "quarterly";
+  reporting_period?: "Monthly" | "Weekly" | "Quarterly" | "Annually" | "Semi-Annually";
   toc_item_indicator_id?: number;
   project_id?: number;
-  type: string;
+  type: "Quantitative" | "Qualitative" | "Percentage";
   toc_indicator: TheoryOfChangeIndicator;
 }
 

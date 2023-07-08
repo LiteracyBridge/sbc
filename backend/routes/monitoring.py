@@ -25,6 +25,7 @@ class UpdateMonitoringDto(BaseModel):
 class RecordProgressDto(BaseModel):
     value: Optional[int]
     period: Optional[str]
+    progress: Optional[str]
 
 
 def get_monitoring_by_project_id(
@@ -88,16 +89,9 @@ def record_progress(
     if evaluation is None:
         evaluation = []
 
-    progress = {"period": dto.period, "value": dto.value}
-    evaluation.append(progress)
+    evaluation.append({"period": dto.period, "value": dto.value})
     record.evaluation = evaluation
-
-    # Computer total progress
-    total_progress = 0
-    for i in evaluation:
-        total_progress += i["value"]
-
-    record.progress = (total_progress / record.target) * 100
+    record.progress = dto.progress
 
     db.commit()
 

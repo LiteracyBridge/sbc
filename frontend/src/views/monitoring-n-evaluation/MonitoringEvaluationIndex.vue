@@ -172,7 +172,7 @@ function getTypeColor(type?: string): string {
             <div class="full-width">
               <div></div>
 
-              <Button type="primary" @click="config.indicatorModalVisible = true">
+              <Button type="primary" @click.prevent="config.indicatorModalVisible = true">
                 <template #icon>
                   <PlusCircleOutlined />
                 </template>
@@ -219,9 +219,10 @@ function getTypeColor(type?: string): string {
               <span v-if="store.getRecentProgress(record)?.value == null">N/A</span>
 
               <span v-else>
-                {{ store.getRecentProgress(record).period }} ({{
+                {{ store.getRecentProgress(record).value }}
+                <!-- ({{
                   store.getRecentProgress(record).value
-                }})
+                }}) -->
               </span>
             </template>
 
@@ -244,7 +245,7 @@ function getTypeColor(type?: string): string {
                   type="primary"
                   :ghost="true"
                   size="small"
-                  @click="
+                  @click.prevent="
                     config.selectedRow = record;
                     config.progressTrackingModal.visible = true;
                   "
@@ -257,7 +258,7 @@ function getTypeColor(type?: string): string {
                   :danger="true"
                   :ghost="true"
                   size="small"
-                  @click="
+                  @click.prevent="
                     config.selectedRow = record;
                     config.editModalVisible = true;
                   "
