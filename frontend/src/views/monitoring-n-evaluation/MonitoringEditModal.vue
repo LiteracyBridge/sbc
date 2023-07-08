@@ -109,18 +109,21 @@ function saveForm() {
         </Row>
 
         <FormItem
-          name="evaluation_period"
-          label="Select Evaluation Period"
+          name="reporting_period"
+          label="Reporting Period"
           has-feedback
-          :rules="[{ required: true, message: 'Please select an evaluation period!' }]"
+          :rules="[{ required: true, message: 'Select a reporting period!' }]"
         >
           <Select
-            v-model:value="props.form.evaluation_period"
-            placeholder="Please select evaluation period"
+            v-model:value="props.form.reporting_period"
+            placeholder="Select reporting period"
             :show-search="true"
           >
             <SelectOption value="weekly">Weekly</SelectOption>
             <SelectOption value="monthly">Monthly</SelectOption>
+            <SelectOption value="quarterly">Quarterly</SelectOption>
+            <SelectOption value="semi-annually">Semi-annually</SelectOption>
+            <SelectOption value="annually">Annually</SelectOption>
           </Select>
         </FormItem>
       </Form>

@@ -58,7 +58,7 @@ function recordProgress() {
 
 const generatePeriods = computed(() => {
   const recorded_periods = (props.record.evaluation ?? []).flatMap((evaluation) => evaluation.period)
-  const period = props.record.evaluation_period ?? "monthly"
+  const period = props.record.reporting_period ?? "monthly"
 
   // (props.record.evaluation ?? []).forEach((evaluation) => {
   //   recorded_periods[evaluation.period] = evaluation.value;

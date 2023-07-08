@@ -234,13 +234,12 @@ export class Schedule {
 
 export class Monitoring {
   id: number;
-  target?: number;
-  baseline?: number;
+  target?: string;
+  baseline?: string;
   data_collection_method?: string;
   data_collection_frequency?: string;
   evaluation: Array<{ value: number; period: string }> = [];
-  evaluation_period?: "monthly" | "weekly" | "quarterly";
-
+  reporting_period?: "monthly" | "weekly" | "quarterly";
   toc_item_indicator_id?: number;
   project_id?: number;
 

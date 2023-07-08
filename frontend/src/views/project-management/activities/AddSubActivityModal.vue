@@ -69,19 +69,12 @@ const saveForm = () => {
         props.draftActivity.prj_id = projectStore.prj_id;
       }
 
-      // if (props.draftActivity.id == null) {
-        activityStore.updateOrCreate(props.draftActivity)
-          .then((resp) => {
-            console.log(resp)
-            if (resp != null) closeModal();
-          });
-      // } else {
-      //   // FIXME: test activity update
-      //   activityStore.updateActivity(props.draftActivity)
-      //     .then((resp) => {
-      //       if (resp != null) closeModal();
-      //     })
-      // }
+      activityStore.updateOrCreate(props.draftActivity)
+        .then((resp) => {
+          console.log(resp)
+          if (resp != null) closeModal();
+        });
+
     });
 };
 

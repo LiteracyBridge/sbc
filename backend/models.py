@@ -499,16 +499,24 @@ class Monitoring(Base):
     __tablename__ = "monitoring"
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
-    target: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
-    baseline: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
-    progress: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    target: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    baseline: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    progress: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     data_collection_method: Mapped[Optional[str]]
-    data_collection_frequency: Mapped[Optional[str]]
-    evaluation_period: Mapped[Optional[str]]
+    reporting_period: Mapped[Optional[str]]
+    type: Mapped[Optional[str]]
     evaluation: Mapped[ARRAY] = mapped_column(
         MutableList.as_mutable(JSON), nullable=True, default=[]
     )
-
+    created_at: Mapped[DateTime] = mapped_column(
+        DateTime(timezone=True), default=func.now()
+    )
+    updated_at: Mapped[DateTime] = mapped_column(
+        DateTime(timezone=True), onupdate=func.now()
+    )
+    deleted_at: Mapped[Optional[DateTime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
     toc_indicator_id: Mapped[int] = mapped_column(
         ForeignKey("theory_of_change_indicators.id", ondelete="CASCADE"), nullable=True
     )

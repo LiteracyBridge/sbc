@@ -6,6 +6,30 @@ Today:
         ✔ also add popconfirm @done(23-07-07 23:02)
     ☐ move sbc driver logic to fastapi route
 
+    Broadcast:
+        ☐ implement customizing of message
+        ☐ fix dropdown fields not included in generated message
+
+    Monitoring:
+        ☐ The Baseline and Target values don't need the up/down arrows to add whole numbers
+            ☐ baseline optional
+            ☐ target optional
+        ☐ rename evaluation period to "Reporting Period"
+            ☐ options to select should be "Weekly", "Monthly", "Quarterly", "Semi-annually", "Annually"
+        ☐ remove data collection frequency field
+            ☐ delete from model
+        ☐ add Reporting period to table
+        ☐ Similarly to the Baseline/Target values, in the Record Progress pop-up, the value shouldn't be restricted to a whole number
+        ☐ add a "Type" column to the table, with the options "#", "%" and "Qualitative"
+        ☐ The % progress calculation would only be relevant for indicators with the "#" type. We can still maintain the column and just leave it blank for indicators of other types
+        ☐ Format of fields for reporting on the indicators should be based on indicator type (#, % or qual). # fields won't necessarily be whole numbers.
+        ☐ We should instruct users to report just for the reporting period, rather than cumulative to date, but the "Recent progress" column should instead be called "Progress to date" where we sum up for them the cumulative to date, and calculate % progress based on that. This is again only relevant for "#" indicators. % and qual indicators should just show most recently reported in the "Progress to date" column.
+
+
+    Communications:
+        ☐ AI suggestions for the "message key points" and "message content" fields?
+        ☐
+
 
     Activities:
         ✔ add duration fields to main activity @done(23-07-08 00:57)

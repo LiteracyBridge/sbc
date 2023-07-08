@@ -13,11 +13,11 @@ router = APIRouter()
 
 
 class UpdateMonitoringDto(BaseModel):
-    target: Optional[int]
-    baseline: Optional[int]
+    target: Optional[str]
+    baseline: Optional[str]
+    # TODO: calculate progress on the frontend
     # progress: Optional[int]
     data_collection_method: Optional[str]
-    data_collection_frequency: Optional[str]
     evaluation_period: Optional[str]
 
 
@@ -26,7 +26,9 @@ class RecordProgressDto(BaseModel):
     period: Optional[str]
 
 
-def get_monitoring_by_project_id(projectId: int, db: Session = Depends(models.get_db)):
+def get_monitoring_by_project_id(
+    projectId: int, db: Session = Depends(models.get_db)
+) -> List[Monitoring]:
     record = (
         db.query(Monitoring)
         .filter(Monitoring.project_id == projectId)
@@ -53,7 +55,7 @@ def update_item(
     dto: UpdateMonitoringDto,
     db: Session = Depends(models.get_db),
 ):
-    record = db.query(Monitoring).filter(Monitoring.id == id).first()
+    record: Monitoring | None = db.query(Monitoring).filter(Monitoring.id == id).first()
 
     if record is None:
         raise HTTPException(status_code=404, detail="Item not found")
@@ -61,7 +63,6 @@ def update_item(
     record.target = dto.target
     record.baseline = dto.baseline
     record.data_collection_method = dto.data_collection_method
-    record.data_collection_frequency = dto.data_collection_frequency
     record.evaluation_period = dto.evaluation_period
 
     db.commit()
@@ -75,6 +76,7 @@ def record_progress(
     dto: RecordProgressDto,
     db: Session = Depends(models.get_db),
 ):
+    # TODO: rewrite progress tracking
     record = db.query(Monitoring).filter(Monitoring.id == id).first()
 
     if record is None:
