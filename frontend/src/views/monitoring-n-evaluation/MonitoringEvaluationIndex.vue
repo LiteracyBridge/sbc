@@ -78,9 +78,8 @@ const columns = [
     key: "data_collection_method",
   },
   {
-    title: "Frequency of Data Collection",
-    key: "data_collection_frequency",
-    dataIndex: "data_collection_frequency",
+    title: "Reporting Period",
+    key: "reporting_period",
   },
   {
     dataIndex: "target",
@@ -123,6 +122,21 @@ onMounted(() => {
       store.download();
     });
 });
+
+function getTypeColor(type?: string): string {
+  if (!type) return "brown";
+
+  switch (type.toLowerCase()) {
+    case "qualitative":
+      return "blue";
+    case "quantitative":
+      return "green";
+    case "percentage":
+      return "purple";
+    default:
+      return "white";
+  }
+}
 </script>
 
 <template>
@@ -153,23 +167,17 @@ onMounted(() => {
   <Spin :spinning="config.isLoading || store.loading">
     <Tabs v-model:activeKey="config.activeTab" centered>
       <TabPane key="1" tab="Indicators Monitoring">
-        <Table :columns="columns" :data-source="store.data" bordered>
+        <Table :columns="columns" size="small" :data-source="store.data" bordered>
           <template #title>
-            <div class="level">
-              <div class="level-left">
-                <Typography :level="3">Indicators Monitoring</Typography>
-              </div>
+            <div class="full-width">
+              <div></div>
 
-              <div class="level-right">
-                <Space>
-                  <Button type="primary" @click="config.indicatorModalVisible = true">
-                    <template #icon>
-                      <PlusCircleOutlined />
-                    </template>
-                    Add Indicator
-                  </Button>
-                </Space>
-              </div>
+              <Button type="primary" @click="config.indicatorModalVisible = true">
+                <template #icon>
+                  <PlusCircleOutlined />
+                </template>
+                Add Indicator
+              </Button>
             </div>
           </template>
 
@@ -179,7 +187,12 @@ onMounted(() => {
             </template>
 
             <template v-if="column.key === 'indicator'">
-              {{ store.getIndicatorName(record.id) }}
+              <span>
+                {{ store.getIndicatorName(record.id) }}
+              </span>
+              <Tag :color="getTypeColor(record.type)">{{
+                record.type || "not defined"
+              }}</Tag>
             </template>
 
             <!-- <template v-if="column.key === 'relatedResults'">
@@ -190,21 +203,8 @@ onMounted(() => {
               {{ record.data_collection_method }}
             </template>
 
-            <template v-if="column.key === 'data_collection_frequency'">
-              {{ record.data_collection_frequency }}
-            </template>
-
-            <template v-else-if="column.key === 'action'">
-              <span>
-                <a>Invite 一 {{ record.name }}</a>
-                <Divider type="vertical" />
-                <a>Delete</a>
-                <Divider type="vertical" />
-                <a class="ant-dropdown-link">
-                  More actions
-                  <down-outlined />
-                </a>
-              </span>
+            <template v-if="column.key === 'reporting_period'">
+              {{ record.reporting_period }}
             </template>
 
             <template v-else-if="column.key === 'target'">
