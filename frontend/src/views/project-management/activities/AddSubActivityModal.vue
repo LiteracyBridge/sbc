@@ -1,6 +1,8 @@
 <script lang="ts" setup>
 
-import { ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
+import  dayjs from "dayjs";
+import  type {Dayjs} from "dayjs";
 import { useActivityStore } from "@/stores/activities";
 import { useLookupStore } from "@/stores/lookups";
 import { useProjectStore } from "@/stores/projects";
@@ -8,32 +10,40 @@ import { useInterventionStore } from "@/stores/interventions";
 import { useDriverStore } from "@/stores/drivers"
 import { useUserStore } from "@/stores/user";
 import { useParticipantStore } from "@/stores/participants";
-import { Button, Col, Form, FormItem, Input, Modal, Row, Select, SelectOption, type FormInstance, Textarea, Spin, DatePicker } from "ant-design-vue";
+import { Button, Col, Form, FormItem, Input, Modal, Row, Select, SelectOption, type FormInstance, Textarea, Spin, DatePicker, RangePicker } from "ant-design-vue";
 import { Activity } from "@/types";
 
 const props = defineProps<{
   draftActivity: Activity,
-  visible: boolean, parentActivity: Activity
+  visible: boolean,
+  parentActivity: Activity
 }>();
+
+const emit = defineEmits(["closed", "save"]);
 
 const activityStore = useActivityStore();
 const userStore = useUserStore();
 const lookupStore = useLookupStore();
 const projectStore = useProjectStore();
-const interventionStore = useInterventionStore();
 const participantStore = useParticipantStore();
-const driverStore = useDriverStore();
 
-const visible = ref(props.visible);
+const config = ref({
+  visible: props.visible,
+  duration: [dayjs(props.draftActivity?.start_date), dayjs(props.draftActivity.end_date)] as [Dayjs | null, Dayjs | null],
+});
+
 const driverValues = ref(props.draftActivity.driver_ids);
-const driverOptions = ref(driverStore.driversInProject);
 const taskFormRef = ref<FormInstance>();
 
-const emit = defineEmits(["closed", "save"]);
+/**
+ * 'Activity' here means the item is a top-level activity
+ * 'Task/sub activity' here means the item is a sub-activity
+ */
+const isActivity  = computed(() => props.draftActivity.parent_id == null && props.draftActivity.id != null);
 
 const closeModal = () => {
   taskFormRef.value.resetFields();
-  visible.value = false;
+  config.value.visible = false;
   emit("closed", true);
 };
 
@@ -41,7 +51,14 @@ const saveForm = () => {
   taskFormRef.value
     .validateFields()
     .then(values => {
-      props.draftActivity.parent_id ??= props.parentActivity.id;
+      // Update duration
+      if(isActivity.value) {
+        props.draftActivity.start_date = config.value.duration[0];
+        props.draftActivity.end_date = config.value.duration[1];
+      } else {
+        props.draftActivity.parent_id ??= props.parentActivity.id;
+      }
+
       props.draftActivity.driver_ids = [...driverValues.value];
 
       // Update editing user
@@ -49,33 +66,38 @@ const saveForm = () => {
 
       // Set project id
       if (props.draftActivity.prj_id == null) {
-        props.draftActivity.prj_id = projectStore.projectId;
+        props.draftActivity.prj_id = projectStore.prj_id;
       }
 
-      if (props.draftActivity.id == null) {
-        activityStore.addActivity(props.draftActivity)
+      // if (props.draftActivity.id == null) {
+        activityStore.updateOrCreate(props.draftActivity)
           .then((resp) => {
             console.log(resp)
             if (resp != null) closeModal();
-          })
-      } else {
-        // FIXME: test activity update
-        activityStore.updateActivity(props.draftActivity)
-          .then((resp) => {
-            if (resp != null) closeModal();
-          })
-      }
+          });
+      // } else {
+      //   // FIXME: test activity update
+      //   activityStore.updateActivity(props.draftActivity)
+      //     .then((resp) => {
+      //       if (resp != null) closeModal();
+      //     })
+      // }
     });
 };
 
 watch(props, (newProps) => {
-  visible.value = newProps.visible;
-})
+  config.value.visible = newProps.visible;
+
+  config.value.duration = [
+    dayjs(newProps.draftActivity.start_date),
+    dayjs(newProps.draftActivity.end_date)
+  ];
+}, {deep: true});
 </script>
 
 <template>
   <Modal
-    v-model:visible="visible"
+    v-model:visible="config.visible"
     @cancel="closeModal()"
     width="750px"
     ok-text="Save"
@@ -90,7 +112,7 @@ watch(props, (newProps) => {
 
     <template #footer>
       <Button @click="closeModal()" type="ghost">Cancel</Button>
-      <Button @click="saveForm" type="primary">Save</Button>
+      <Button @click="saveForm()" type="primary">Save</Button>
     </template>
 
     <Spin :spinning="activityStore.isLoading">
@@ -107,7 +129,7 @@ watch(props, (newProps) => {
               name="name"
               :rules="[{ required: true, message: 'Please enter activity name!' }]"
             >
-              <Input v-model:value="draftActivity.name" />
+              <Input v-model:value="draftActivity.name" :disabled="isActivity" />
             </FormItem>
           </Col>
 
@@ -205,7 +227,7 @@ watch(props, (newProps) => {
             </FormItem>
           </Col>
 
-          <Col :span="12">
+          <Col :span="12" v-if="!isActivity">
             <FormItem
               name="end_date"
               label="Deadline"
@@ -213,6 +235,21 @@ watch(props, (newProps) => {
               :rules="[{ required: false }]"
             >
               <DatePicker type="date" v-model:value="draftActivity.end_date"></DatePicker>
+            </FormItem>
+          </Col>
+
+          <Col :span="12" v-else>
+            <FormItem
+              name="duration"
+              label="Duration"
+              has-feedback
+              :rules="[{ required: false }]"
+            >
+              <RangePicker
+                v-model:value="config.duration"
+                :allow-clear="true"
+                :allow-empty="[true, true]"
+              ></RangePicker>
             </FormItem>
           </Col>
         </Row>

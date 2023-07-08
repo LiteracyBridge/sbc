@@ -69,7 +69,7 @@ function addIntervention(intervention) {
   if (selectedPrjDriver.value) {
     driver_ids = [selectedPrjDriver.value.id];
   }
-  activityStore.addActivity({
+  activityStore.updateOrCreate({
     name: intervention.name,
     driver_ids,
     intervention_id: intervention.id,

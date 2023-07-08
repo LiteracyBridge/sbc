@@ -75,7 +75,7 @@ export const useActivityStore = defineStore({
 
       // api.downloadObjects(init_objects, this, "", true);
     },
-    async addActivity(activity: Activity): Promise<Activity | null> {
+    async updateOrCreate(activity: Activity): Promise<Activity | null> {
       activity.prj_id ??= useProjectStore().prj_id;
       activity.editing_user_id = useUserStore().id;
 
@@ -96,15 +96,15 @@ export const useActivityStore = defineStore({
         .finally(() => (this.$state.isLoading = false));
     },
 
-    async updateActivity(activity: Partial<Activity>) {
-      // console.log(activity);
-      // TODO: implement updating activity via api
-      let idx = this.activities.findIndex((a) => a.id == activity.id);
-      api.update("activities", activity.id, { ...activity });
-      this.activities.splice(idx, 1, activity as any);
+    // async updateActivity(activity: Partial<Activity>) {
+    //   // console.log(activity);
+    //   // TODO: implement updating activity via api
+    //   let idx = this.activities.findIndex((a) => a.id == activity.id);
+    //   api.update("activities", activity.id, { ...activity });
+    //   this.activities.splice(idx, 1, activity as any);
 
-      return activity;
-    },
+    //   return activity;
+    // },
 
     async deleteActivity(activityId: number, deleteChildren: boolean = false) {
       // find activity to be deleted
