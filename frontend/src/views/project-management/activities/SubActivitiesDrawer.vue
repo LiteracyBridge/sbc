@@ -13,8 +13,6 @@ import { formatDate } from "@/helpers";
 
 import AddSubActivityModal from "./AddSubActivityModal.vue";
 
-const interventionStore = useInterventionStore();
-const driverStore = useDriverStore();
 const lookupStore = useLookupStore();
 const projectStore = useProjectStore();
 

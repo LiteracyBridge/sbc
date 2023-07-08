@@ -2,9 +2,8 @@
 import { computed, onMounted, ref, watch } from "vue";
 import { useActivityStore } from "@/stores/activities";
 import { useLookupStore } from "@/stores/lookups";
-import { useProjectStore } from "@/stores/projects";
-import { Button, Tag, Drawer, Table } from "ant-design-vue";
-import { Activity } from "@/types";
+import { Button, Tag, Table } from "ant-design-vue";
+import { formatDate } from "@/helpers";
 import { useUserStore } from "@/stores/user";
 
 const columns = [
@@ -14,15 +13,13 @@ const columns = [
     key: "name",
   },
   {
-    title: "Duration",
-    dataIndex: "duration",
-    key: "duration",
+    title: "Deadline",
+    key: "deadline",
   },
 ];
 
 const userStore = useUserStore();
 const lookupStore = useLookupStore();
-const projectStore = useProjectStore();
 
 const activityStore = useActivityStore();
 
@@ -60,12 +57,16 @@ const myActivities = computed(() => {
 
 onMounted(() => {
   activityStore.download();
-})
-
+});
 </script>
 
 <template>
-  <Table :columns="columns" :data-source="myActivities" bordered :loading="activityStore.isLoading">
+  <Table
+    :columns="columns"
+    :data-source="myActivities"
+    bordered
+    :loading="activityStore.isLoading"
+  >
     <template #title> My Tasks </template>
 
     <template #bodyCell="{ column, record: activity }">
@@ -79,9 +80,8 @@ onMounted(() => {
 
       <!-- TODO: add activity column -->
 
-      <template v-if="column.key === 'duration'">
-        {{ activityStore.fromDate(activity.id) }} -
-        {{ activityStore.toDate(activity.id) }}
+      <template v-if="column.key === 'deadline'">
+        {{ formatDate(activity.end_date) || "N/A" }}
       </template>
     </template>
   </Table>

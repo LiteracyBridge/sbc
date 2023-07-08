@@ -25,14 +25,12 @@ const activityStore = useActivityStore();
 const userStore = useUserStore();
 const lookupStore = useLookupStore();
 const projectStore = useProjectStore();
-const participantStore = useParticipantStore();
 
 const config = ref({
   visible: props.visible,
   duration: [dayjs(props.draftActivity?.start_date), dayjs(props.draftActivity.end_date)] as [Dayjs | null, Dayjs | null],
 });
 
-const driverValues = ref(props.draftActivity.driver_ids);
 const taskFormRef = ref<FormInstance>();
 
 const isEditing = computed(() => props.draftActivity?.id != null);
@@ -61,7 +59,7 @@ const saveForm = () => {
         props.draftActivity.parent_id ??= props.parentActivity.id;
       }
 
-      props.draftActivity.driver_ids = [...driverValues.value];
+      // props.draftActivity.driver_ids = [...driverValues.value];
 
       // Update editing user
       props.draftActivity.editing_user_id = userStore.user.id;
