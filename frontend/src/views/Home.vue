@@ -47,7 +47,7 @@ onMounted(() => {
 
 const columns = [
   {
-    title: "Project",
+    title: "Project Name",
     key: "name",
   },
   {
