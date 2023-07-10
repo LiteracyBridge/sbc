@@ -394,7 +394,7 @@ export const useProjectDataStore = defineStore({
         for (const o of this.specificObjectives) {
           msg += `  • ${o.data}\n`;
         }
-        msg += '\n\n';
+        msg += '\n';
       }
 
       // Add audiences to the message
@@ -403,7 +403,7 @@ export const useProjectDataStore = defineStore({
         for (const o of this.primaryAudience) {
           msg += `  • ${o.data}\n`;
         }
-        msg += '\n\n';
+        msg += '\n';
 
         msg += "Secondary Audiences\n";
         for (const o of this.secondaryAudiences) {

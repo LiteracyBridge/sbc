@@ -124,13 +124,16 @@ function fetchData() {
 
 onMounted(() => {
   fetchData();
-})
-
+});
 </script>
 
 <template>
-  <GPTSuggestionPanel :is-visible="config.suggestions.isOpened" @is-closed="config.suggestions.isOpened = false;"
-    :question-id="config.suggestions.questionId" :module="config.suggestions.module">
+  <GPTSuggestionPanel
+    :is-visible="config.suggestions.isOpened"
+    @is-closed="config.suggestions.isOpened = false"
+    :question-id="config.suggestions.questionId"
+    :module="config.suggestions.module"
+  >
   </GPTSuggestionPanel>
 
   <Card class="section" title="Project Objectives" :loading="store.loading">
@@ -139,19 +142,6 @@ onMounted(() => {
     </template>
 
     <BroadcastComponent :module="config.suggestions.module"></BroadcastComponent>
-
-    <!-- <div class="buttons-container is-fixed is-absolute is-flex is-flex-direction-column is-align-items-flex-end m-4 mr-6">
-      <button class="button is-link mb-2" :disabled="config.messages"
-        @click.prevent="store.broadcastPage(config.suggestions.module)">
-        <span>Broadcast</span>
-      </button>
-      <button class="button is-link" :disabled="config.messages" @click.prevent="config.messages = true">
-        <span>Messages</span>
-      </button>
-    </div>
-    <Suspense>
-      <MessageModal v-if="config.messages" :topic="config.suggestions.module" v-model="config.messages" />
-    </Suspense> -->
 
     <Form layout="vertical">
       <!-- <div class="columns mx-4 is-vcentered"> -->
@@ -164,48 +154,80 @@ onMounted(() => {
       <textarea @change="updateData($event, q.id)" :value="projectDataStore.getData(q.id)" rows="4" cols="80" /><br />
       <br /><br /> -->
 
-      <FormItem :name="`input-${count + 1}`" v-for="(q, count) in store.questionsForTopic(config.suggestions.module)"
-        :key="q.id">
-        <template #label>
-          {{ count + 1 }}. {{ q.q2u }}
-        </template>
+      <FormItem
+        :name="`input-${count + 1}`"
+        v-for="(q, count) in store.questionsForTopic(config.suggestions.module)"
+        :key="q.id"
+      >
+        <template #label> {{ count + 1 }}. {{ q.q2u }} </template>
         <!-- <label class="label" :for="`input-${count + 1}`">{{ count + 1 }}. {{ q.q2u }}</label> -->
 
         <!-- <div class="control"> -->
-        <img v-if="q.bulb" :src="BULB_ICON" ref="iconRefs" @click="showPanel(q.id)" class="image is-32x32" />
+        <img
+          v-if="q.bulb"
+          :src="BULB_ICON"
+          ref="iconRefs"
+          @click="showPanel(q.id)"
+          class="image is-32x32"
+        />
         <!-- </div> -->
 
         <!-- <div class="control"> -->
-        <Textarea @change="updateData($event, q.id)" :value="store.getData(q.id)" :rows="7" :cols="40"
-          style="width: 70%;"></Textarea>
+        <Textarea
+          @change="updateData($event, q.id)"
+          :value="store.getData(q.id)"
+          :rows="7"
+          :cols="40"
+          style="width: 70%"
+        ></Textarea>
 
         <!-- </div> -->
-
       </FormItem>
       <!-- </div> -->
 
       <!-- </div> -->
     </Form>
 
-
     <!-- <Divider>What specific objective(s) will your project achieve? What changes will your project make happen?</Divider> -->
 
-    <Form ref="objectivesFormRef" name="dynamic_form_item" :model="dynamicValidateForm"
-      v-bind="formItemLayoutWithOutLabel" layout="vertical">
-
-      <FormItem v-for="(objective, index) in dynamicValidateForm.objectives" :key="objective.id"
+    <Form
+      ref="objectivesFormRef"
+      name="dynamic_form_item"
+      :model="dynamicValidateForm"
+      v-bind="formItemLayoutWithOutLabel"
+      layout="vertical"
+    >
+      <FormItem
+        v-for="(objective, index) in dynamicValidateForm.objectives"
+        :key="objective.id"
         v-bind="index === 0 ? formItemLayout : {}"
-        :label="index != 0 ? '' : '3. What specific objective(s) will your project achieve? What changes will your project make happen?'"
-        :name="['objectives', index, 'value']" :rules="{
+        :label="
+          index != 0
+            ? ''
+            : '3. What specific objective(s) will your project achieve? What changes will your project make happen?'
+        "
+        :name="['objectives', index, 'value']"
+        :rules="{
           required: true,
           message: 'Objective can not be empty',
           trigger: 'change',
-        }">
+        }"
+      >
+        <Input
+          v-model:value="objective.value"
+          placeholder="please input objective"
+          style="width: 60%"
+        />
 
-        <Input v-model:value="objective.value" placeholder="please input objective" style="width: 60%;" />
-
-        <Button type="ghost" :danger="true" size="small" v-if="dynamicValidateForm.objectives.length > 1" class="ml-2"
-          :disabled="dynamicValidateForm.objectives.length === 1" @click="removeObjective(objective)">
+        <Button
+          type="ghost"
+          :danger="true"
+          size="small"
+          v-if="dynamicValidateForm.objectives.length > 1"
+          class="ml-2"
+          :disabled="dynamicValidateForm.objectives.length === 1"
+          @click="removeObjective(objective)"
+        >
           <template #icon>
             <DeleteOutlined />
           </template>
