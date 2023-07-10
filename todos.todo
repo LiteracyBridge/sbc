@@ -11,18 +11,18 @@ Today:
         ☐ fix dropdown fields not included in generated message
 
     Monitoring:
-        ☐ The Baseline and Target values don't need the up/down arrows to add whole numbers
-            ☐ baseline optional
-            ☐ target optional
-        ☐ rename evaluation period to "Reporting Period"
-            ☐ options to select should be "Weekly", "Monthly", "Quarterly", "Semi-annually", "Annually"
-        ☐ remove data collection frequency field
-            ☐ delete from model
-        ☐ add Reporting period to table
-        ☐ Similarly to the Baseline/Target values, in the Record Progress pop-up, the value shouldn't be restricted to a whole number
-        ☐ add a "Type" column to the table, with the options "#", "%" and "Qualitative"
-        ☐ The % progress calculation would only be relevant for indicators with the "#" type. We can still maintain the column and just leave it blank for indicators of other types
-        ☐ Format of fields for reporting on the indicators should be based on indicator type (#, % or qual). # fields won't necessarily be whole numbers.
+        ✔ The Baseline and Target values don't need the up/down arrows to add whole numbers @done(23-07-08 13:27)
+            ✔ baseline optional @done(23-07-08 13:27)
+            ✔ target optional @done(23-07-08 13:27)
+        ✔ rename evaluation period to "Reporting Period" @done(23-07-08 13:28)
+            ✔ options to select should be "Weekly", "Monthly", "Quarterly", "Semi-annually", "Annually" @done(23-07-08 13:28)
+        ✔ remove data collection frequency field @done(23-07-08 13:34)
+            ✔ delete from model @done(23-07-08 13:34)
+        ✔ add Reporting period to table @done(23-07-08 13:34)
+        ✔ Similarly to the Baseline/Target values, in the Record Progress pop-up, the value shouldn't be restricted to a whole number @done(23-07-08 13:44)
+        ✔ add a "Type" column to the table, with the options "#", "%" and "Qualitative" @done(23-07-08 13:44)
+        ✔ The % progress calculation would only be relevant for indicators with the "#" type. We can still maintain the column and just leave it blank for indicators of other types @done(23-07-08 15:01)
+        ✔ Format of fields for reporting on the indicators should be based on indicator type (#, % or qual). # fields won't necessarily be whole numbers. @done(23-07-08 15:01)
         ☐ We should instruct users to report just for the reporting period, rather than cumulative to date, but the "Recent progress" column should instead be called "Progress to date" where we sum up for them the cumulative to date, and calculate % progress based on that. This is again only relevant for "#" indicators. % and qual indicators should just show most recently reported in the "Progress to date" column.
 
 
