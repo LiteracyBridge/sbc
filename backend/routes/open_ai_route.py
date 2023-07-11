@@ -23,7 +23,6 @@ FORMATS = {
     "paragraph": "Respond only with one paragraph.",
     "item": "Respond only with a single item, not a list or a sentence.",
 }
-# from amplio.rolemanager import manager
 
 
 ########################################################################################################################
@@ -98,27 +97,27 @@ def call_openai_api(prompt, context, stop):
     retries = 5
     backoff = 1
 
-    for i in range(retries):
-        try:
-            response = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo",
-                stop=stop,
-                temperature=0.5,
-                messages=[
-                    {"role": "system", "content": context},
-                    {"role": "user", "content": prompt},
-                ],
-            )
-            return response["choices"][0]["message"]["content"]
-        except RateLimitError as e:
-            if i < retries - 1:
-                time.sleep(backoff)
-                backoff *= 2
-                continue
-            else:
-                error_message = f"Request failed after {retries} retries due to rate limiting. Error: {str(e)}"
-                print(error_message)
-                return error_message
+    # for i in range(retries):
+    try:
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            stop=stop,
+            temperature=0.5,
+            messages=[
+                {"role": "system", "content": context},
+                {"role": "user", "content": prompt},
+            ],
+        )
+        return response["choices"][0]["message"]["content"]
+    except RateLimitError as e:
+        # if i < retries - 1:
+        #     time.sleep(backoff)
+        #     backoff *= 2
+        #     continue
+        # else:
+        error_message = f"Request failed after {retries} retries due to rate limiting. Error: {str(e)}"
+        print(error_message)
+        return error_message
 
     # url = "https://api.openai.com/v1/chat/completions"
     # headers = {
@@ -163,8 +162,10 @@ def gptCompletion(prompt, context=None, format_type=None, start="", stop=""):
         full_prompt = prompt
     else:
         full_prompt = prompt + "\n" + start
+
     completion = call_openai_api(full_prompt, full_context, stop)
     response = start + completion
+
     return response
 
 
@@ -241,17 +242,17 @@ def handler(body: Dict[Any, Any], request: Request):
 
         # def process():
         response = gptCompletion(prompt, context, format_type, start, stop)
-        s3 = boto3.client("s3")
-        BUCKET_NAME = "sbc-temp"
-        s3.put_object(
-            Bucket=BUCKET_NAME,
-            Key=f"{request_id}.json",
-            Body=json.dumps(response),
-            ContentType="application/json",
-        )
-        # asyncio.run(process())
+        # s3 = boto3.client("s3")
+        # BUCKET_NAME = "sbc-temp"
+        # s3.put_object(
+        #     Bucket=BUCKET_NAME,
+        #     Key=f"{request_id}.json",
+        #     Body=json.dumps(response),
+        #     ContentType="application/json",
+        # )
+        # # asyncio.run(process())
 
-        return {"requestId": request_id}
+        return {"result": response}
     else:
         result = "LIMIT REACHED"
 

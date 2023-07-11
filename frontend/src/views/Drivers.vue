@@ -6,6 +6,7 @@ import { useInterventionStore } from "../stores/interventions";
 import { ref, onMounted } from "vue";
 import { useUserStore } from "@/stores/user";
 import { useRouter } from "vue-router";
+import { SelectOption, Select, Row, Col } from "ant-design-vue";
 
 const userStore = useUserStore();
 onMounted(() => {
@@ -97,21 +98,19 @@ function clearSelection() {
 
 <template>
   <section ref="top" class="section">
-    <div class="container">
-      <div class="columns">
-        <div class="column is-narrow">
-          <br />
-          <select
+    <div class="">
+      <Row :gutter="8">
+        <Col :span="6">
+          <Select
             name="filter_drivers"
-            mx="mx-0"
-            v-model="driver_filter"
-            @change="clearSelection"
-            class="outline-grey text-black text-base"
+            v-model:value="driver_filter"
+            @select="clearSelection"
+            style="width: 100%"
           >
-            <option value="all">All Drivers</option>
-            <option value="project">Project Drivers</option>
-            <option value="suggested">Suggested Drivers</option>
-          </select>
+            <SelectOption value="all">All Drivers</SelectOption>
+            <SelectOption value="project">Project Drivers</SelectOption>
+            <SelectOption value="suggested">Suggested Drivers</SelectOption>
+          </Select>
 
           <aside class="is-small menu">
             <div
@@ -198,97 +197,97 @@ function clearSelection() {
               Refresh Suggestions
             </button>
           </aside>
-        </div>
-        <div class="column">
-          <main>
-            <div v-if="selectedDriver" class="message is-link">
-              <div class="message-header">
-                <div class="level">
-                  <!-- show the icon for the selected factor -- the driver or parent driver if a dimension -->
-                  <img
-                    :src="'/images/' + driverStore.iconFilename(selectedFactor)"
-                    class="level-left image is-32x32 mx-4"
-                  />
-                  <span class="level-left is-size-3">{{ selectedDriver.name }}</span>
+        </Col>
+
+        <Col :span="18">
+          <div v-if="selectedDriver" class="message is-link">
+            <div class="message-header">
+              <div class="level">
+                <!-- show the icon for the selected factor -- the driver or parent driver if a dimension -->
+                <img
+                  :src="'/images/' + driverStore.iconFilename(selectedFactor)"
+                  class="level-left image is-32x32 mx-4"
+                />
+                <span class="level-left is-size-3">{{ selectedDriver.name }}</span>
+              </div>
+            </div>
+
+            <div class="message-body">
+              <!-- <div class="is-size-5"> -->
+              <!-- <div v-if="selectedPrjDriver" class="columns"> -->
+              <!-- <div class="column is-narrow"> -->
+              <!-- <div class="notification is-link is-narrow"> -->
+              <div class="level">
+                <div class="is-pulled-left">
+                  <button
+                    v-if="selectedPrjDriver == null"
+                    class="button is-success"
+                    @click="addDriver"
+                  >
+                    <span class="icon is-small">
+                      <i class="fas fa-check"></i>
+                    </span>
+                    <span>Add</span>
+                  </button>
+                  <button v-else class="button is-danger" @click="removeDriver">
+                    <span class="icon is-small">
+                      <i class="fas fa-times"></i>
+                    </span>
+                    <span class="has-text-centered">Remove</span>
+                  </button>
                 </div>
+
+                <div v-if="selectedPrjDriver" class="is-pulled-right">
+                  Importance:
+                  <select
+                    name="importance"
+                    id="importance"
+                    :value="selectedPrjDriver.importance_id"
+                    @change="setImportance"
+                  >
+                    <option
+                      v-for="importance in lookupStore.importance"
+                      :key="importance.id"
+                      :value="importance.id"
+                    >
+                      {{ importance.name }}
+                    </option>
+                  </select>
+                </div>
+                <!-- </div> -->
+                <!-- </div> -->
+                <!-- </div> -->
+                <!-- </div> -->
               </div>
 
-              <div class="message-body">
-                <!-- <div class="is-size-5"> -->
-                <!-- <div v-if="selectedPrjDriver" class="columns"> -->
-                <!-- <div class="column is-narrow"> -->
-                <!-- <div class="notification is-link is-narrow"> -->
-                <div class="level">
-                  <div class="is-pulled-left">
-                    <button
-                      v-if="selectedPrjDriver == null"
-                      class="button is-success"
-                      @click="addDriver"
-                    >
-                      <span class="icon is-small">
-                        <i class="fas fa-check"></i>
-                      </span>
-                      <span>Add</span>
-                    </button>
-                    <button v-else class="button is-danger" @click="removeDriver">
-                      <span class="icon is-small">
-                        <i class="fas fa-times"></i>
-                      </span>
-                      <span class="has-text-centered">Remove</span>
-                    </button>
-                  </div>
-
-                  <div v-if="selectedPrjDriver" class="is-pulled-right">
-                    Importance:
-                    <select
-                      name="importance"
-                      id="importance"
-                      :value="selectedPrjDriver.importance_id"
-                      @change="setImportance"
-                    >
-                      <option
-                        v-for="importance in lookupStore.importance"
-                        :key="importance.id"
-                        :value="importance.id"
-                      >
-                        {{ importance.name }}
-                      </option>
-                    </select>
-                  </div>
-                  <!-- </div> -->
-                  <!-- </div> -->
-                  <!-- </div> -->
-                  <!-- </div> -->
-                </div>
-
-                <div class="has-text-weight-bold is-italic is-size-5">
-                  <!-- <p>
+              <div class="has-text-weight-bold is-italic is-size-5">
+                <!-- <p>
                     Category: {{ driverStore.lu_driver_categories[selectedDriver.category_id].name }}
                   </p> -->
-                </div>
+              </div>
 
-                <p>{{ selectedDriver.text_long }}</p>
-                <br />
+              <p>{{ selectedDriver.text_long }}</p>
+              <br />
 
-                <div v-if="driver_filter == 'suggested'">
-                  <span class="has-text-weight-bold is-italic is-size-5"
-                    >Relevance to Project:</span
-                  >
-                  <br />
-                  <span v-if="selectedDriver">{{
-                    driverStore.suggestionExplanation(selectedDriver.id)
-                  }}</span>
-                  <br />
-                  <br />
-                  <span class="has-text-weight-bold is-italic is-size-5">Example:</span>
-                  <br />
-                  <span v-if="selectedDriver">{{
-                    driverStore.suggestionExample(selectedDriver.id)
-                  }}</span>
-                </div>
+              <div v-if="driver_filter == 'suggested'">
+                <span class="has-text-weight-bold is-italic is-size-5"
+                  >Relevance to Project:</span
+                >
+                <br />
+                <span v-if="selectedDriver">{{
+                  driverStore.suggestionExplanation(selectedDriver.id)
+                }}</span>
                 <br />
                 <br />
-                <!-- <div
+                <span class="has-text-weight-bold is-italic is-size-5">Example:</span>
+                <br />
+                <span v-if="selectedDriver">{{
+                  driverStore.suggestionExample(selectedDriver.id)
+                }}</span>
+              </div>
+              <br />
+              <br />
+              <!-- <div
                     class="has-text-weight-bold is-italic is-size-5"
                     v-if="interventionStore.interventionsByDriver(selectedDriver)"
                   >Interventions:
@@ -337,9 +336,18 @@ function clearSelection() {
                   <br />
                   <br />
                 </div> -->
-              </div>
             </div>
-          </main>
+          </div>
+        </Col>
+      </Row>
+
+      <div class="columns">
+        <div class="column is-narrow">
+          <br />
+        </div>
+
+        <div class="column">
+          <main></main>
         </div>
       </div>
     </div>
