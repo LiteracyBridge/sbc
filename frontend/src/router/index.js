@@ -44,27 +44,23 @@ async function getUser() {
         );
       }
 
-      return null;
+      AppStore().is_loading = false;
+      return { authorized: false };
     })
     .catch(() => {
+      AppStore().is_loading = false;
       useUserStore().setUser();
-      return null;
+      return { authorized: false };
     });
 }
 
-getUser().then((user) => {
-  if (user?.authorized == true) {
-    AppStore().downloadObjects();
-
-    router.push({ path: "/" });
-  }
-});
-
 Hub.listen("auth", async (data) => {
+  console.log(data.payload.event);
   switch (data.payload.event) {
     case "signIn":
       user = await getUser();
-      if (user?.authorized) {
+      if (user?.authorized == true) {
+        await AppStore().downloadObjects();
         router.push({ path: "/" });
       } else {
         router.push({ path: "/request-access" });
@@ -90,11 +86,23 @@ Hub.listen("auth", async (data) => {
       user = null;
       useUserStore().setUser();
       router.push({ path: "/login" });
+      window.location.reload();
       break;
     case "signIn_failure":
       console.log("user sign in failed");
       break;
     case "configured":
+      getUser().then(async (user) => {
+        console.log("Existing user: ", user);
+        console.log(user);
+        if (user?.authorized == true) {
+          await AppStore().downloadObjects();
+
+          router.push({ path: "/" });
+        } else {
+          router.push({ path: "/login" });
+        }
+      });
       console.log("the Auth module is configured");
   }
 });

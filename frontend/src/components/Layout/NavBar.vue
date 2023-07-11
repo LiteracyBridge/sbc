@@ -41,8 +41,8 @@ async function signOut() {
         userStore.setUser();
         sideNavStore.hide()
 
-        router.push('/login');
-        window.location.reload()
+        // router.push('/login');
+        // window.location.reload()
       })
   } catch (error) {
     userStore.setUser();
