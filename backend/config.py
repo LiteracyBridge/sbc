@@ -28,6 +28,8 @@ class Settings:
     db_password: str
     db_user: str
     db_port: Optional[str] = "5432"
+    open_ai_key: Optional[str] = None
+
     sentry_dsn: Optional[str] = None
 
     is_local: bool = False
@@ -43,21 +45,20 @@ class Settings:
             self.db_user = getenv("DB_USER", "postgres")
             self.db_port = getenv("DB_PORT", "5432")
             self.sentry_dsn = getenv("SENTRY_DSN", None)
+            self.open_ai_key = getenv("OPEN_AI_KEY", None)
         else:
             self.load_aws_secrets()
 
     def load_aws_secrets(self):
-        # @classmethod
         session = Session()
         client = session.client(
             # endpoint_url="http://localhost:4566",
             service_name="secretsmanager",
             region_name=AWS_REGION,
         )
-        secret_name: str = "lb_stats_test"
-        # def _get_secret( secret_name: str) -> str | dict[str, Any]:
         try:
-            secret_string = client.get_secret_value(SecretId=secret_name)[
+            # Load postgres secrets
+            secret_string = client.get_secret_value(SecretId="lb_stats_test")[
                 "SecretString"
             ]
             secrets = json.loads(secret_string)
@@ -70,12 +71,16 @@ class Settings:
             self.db_port = secrets["port"]
             self.sentry_dsn = secrets["sbc_sentry_dsn"]
 
+            # Load OpenAI secrets
+            secret_string = client.get_secret_value(SecretId="openai")["SecretString"]
+            secrets = json.loads(secret_string)
+            self.open_ai_key = secrets["Authorization"]
+
         except Exception as err:
             raise err
 
     def db_url(self):
         return f"postgresql://{self.db_user}:{self.db_password}@{self.db_host}:{self.db_port}/{self.db_name}"
-
 
     # @classmethod
     # def get_secrets(self, settings: BaseSettings) -> dict[str, Any]:
