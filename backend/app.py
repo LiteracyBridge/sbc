@@ -15,6 +15,7 @@ from routes import (
     lookups,
     organisation_route,
     communication_route,
+    data_service_route,
 )
 from monitoring import logging_config
 from middlewares.correlation_id_middleware import CorrelationIdMiddleware
@@ -137,6 +138,12 @@ app.include_router(
     communication_route.router,
     prefix="/communications",
     tags=["communications"],
+    dependencies=[Depends(models.get_db)],
+)
+app.include_router(
+    data_service_route.router,
+    prefix="/data-service",
+    tags=["data-service"],
     dependencies=[Depends(models.get_db)],
 )
 

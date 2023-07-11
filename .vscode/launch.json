@@ -8,9 +8,9 @@
             "type": "firefox",
             "request": "launch",
             "reAttach": true,
-            "name": "Launch against localhost",
+            "name": "Launch Firefox against localhost",
             "url": "http://localhost:5173",
-            "webRoot": "${workspaceFolder}"
+            "webRoot": "${workspaceFolder}",
         },
         {
             "cwd": "${workspaceFolder}/backend",
