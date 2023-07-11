@@ -16,6 +16,7 @@ from routes import (
     organisation_route,
     communication_route,
     data_service_route,
+    open_ai_route
 )
 from monitoring import logging_config
 from middlewares.correlation_id_middleware import CorrelationIdMiddleware
@@ -146,6 +147,13 @@ app.include_router(
     tags=["data-service"],
     dependencies=[Depends(models.get_db)],
 )
+app.include_router(
+    open_ai_route.router,
+    prefix="/open-ai",
+    tags=["open-ai"],
+    dependencies=[Depends(models.get_db)],
+)
+
 
 ###############################################################################
 #   Handler for AWS Lambda                                                    #

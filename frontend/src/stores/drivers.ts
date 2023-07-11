@@ -180,7 +180,7 @@ export const useDriverStore = defineStore({
     },
 
     // Get example for the suggested driver by id
-    suggestionExample: (state) => (id:number) => {
+    suggestionExample: (state) => (id: number) => {
       const foundDriver = state.drivers_suggested.find((d) => d.id == id);
       let example;
       if (foundDriver) {
@@ -204,8 +204,8 @@ export const useDriverStore = defineStore({
 
     // Download data
     async download() {
-      await api.downloadObjects(init_objects, this);
-      return this.suggestDrivers();
+      return await api.downloadObjects(init_objects, this);
+      // return this.suggestDrivers();
     },
 
     // Add driver to project
@@ -361,7 +361,8 @@ export const useDriverStore = defineStore({
         '[{"id":0,"name":"","explanation":"","example":""}]\n\n(In place of the 0 for id, use the number preceding each dimension name)\n\n';
       context = context_drivers + context_project;
       ai_answer = await api.gptCompletion(question, context); //, null,'[{"id":'
-      if (ai_answer) {
+
+      if (!/rate limit/i.test((ai_answer as string) ?? "")) {
         json_answer = JSON.parse(ai_answer);
         this.drivers_suggested = this.drivers_suggested.concat(json_answer);
       }
