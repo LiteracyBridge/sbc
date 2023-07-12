@@ -221,9 +221,9 @@ def lambda_handler(event, context):
     }
 
 
-@router.post("/")
-@router.get("/")
-@router.put("/")
+@router.post("")
+@router.get("")
+@router.put("")
 def handler(body: Dict[Any, Any], request: Request):
     result = "BAD METHOD"
     request_id = request.headers.get("x-amz-request-id", str(uuid4()))
