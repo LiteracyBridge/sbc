@@ -1,9 +1,10 @@
 <script lang="ts" setup>
 import { useUserStore } from "@/stores/user";
-import { UserOutlined } from "@ant-design/icons-vue";
+import { InfoCircleOutlined, UserOutlined } from "@ant-design/icons-vue";
 import { Modal , Spin, Form, type FormInstance,
    FormItem, Row, Col, Input,
-    Avatar} from "ant-design-vue";
+    Avatar,
+Tooltip} from "ant-design-vue";
 import { ref, watch } from "vue";
 
 const props = defineProps<{
@@ -83,32 +84,51 @@ watch(props, (newProps)=> {
             <FormItem
               label="Address As"
               name="address_as"
-              help="This is the name that will be used to address you in the project."
               :rules="[{ required: false, message: 'Full name is required!' }]"
               :label-col="labelColSpan"
               :colon="false"
             >
-              <Input v-model:value="store.user.address_as" />
+              <Input v-model:value="store.user.address_as">
+                <template #suffix>
+                  <Tooltip
+                    title="This is the name that will be used to address you in the project."
+                  >
+                    <InfoCircleOutlined />
+                  </Tooltip>
+                </template>
+              </Input>
             </FormItem>
 
             <FormItem
               label="SMS Phone Number"
               name="sms"
-              help="This number will be used to send you SMS notifications"
               :label-col="labelColSpan"
               :colon="false"
             >
-              <Input v-model:value="store.user.sms" type="tel" />
+              <Input v-model:value="store.user.sms" type="tel">
+                <template #suffix>
+                  <Tooltip title="This number will be used to send you SMS notifications">
+                    <InfoCircleOutlined />
+                  </Tooltip>
+                </template>
+              </Input>
             </FormItem>
 
             <FormItem
               label="WhatsApp Number"
               name="whatsapp"
-              help="This number will be used to send you Whatsapp notifications"
               :label-col="labelColSpan"
               :colon="false"
             >
-              <Input v-model:value="store.user.whatsapp" type="tel" />
+              <Input v-model:value="store.user.whatsapp" type="tel">
+                <template #suffix>
+                  <Tooltip
+                    title="This number will be used to send you Whatsapp notifications"
+                  >
+                    <InfoCircleOutlined />
+                  </Tooltip>
+                </template>
+              </Input>
             </FormItem>
           </Form>
         </Col>
