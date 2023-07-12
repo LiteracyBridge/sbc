@@ -213,7 +213,7 @@ export const useDriverStore = defineStore({
     },
 
     // Add driver to project
-    async add(lu_driver_id: number, importance_id?: number = 1) {
+    async add(lu_driver_id: number, importance_id: number = 1) {
       // TODO: add parent driver if it doesn't exist
       ApiRequest.post<ProjectDriver>(
         `project/${useProjectStore().prj_id}/drivers`,

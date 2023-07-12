@@ -247,11 +247,6 @@ onMounted(() => {
           <FormItem
             :key="objective.id"
             v-bind="index === 0 ? formItemLayout : {}"
-            :label="
-              index != 0
-                ? ''
-                : '1. Who is the primary target audience for your project? Who will be adopting the behavior you want to influence?'
-            "
             :name="['audiences', index, 'value']"
             :rules="{
               required: true,
@@ -260,6 +255,14 @@ onMounted(() => {
             }"
             style="margin-bottom: 10px"
           >
+            <template #label>
+              <span class="font-weight-bold">{{
+                index != 0
+                  ? ""
+                  : "1. Who is the primary target audience for your project? Who will be adopting the behavior you want to influence?"
+              }}</span>
+            </template>
+
             <Input
               v-model:value="objective.value"
               placeholder="Enter primary audience"
@@ -304,11 +307,6 @@ onMounted(() => {
           <FormItem
             :key="objective.id"
             v-bind="index === 0 ? formItemLayout : {}"
-            :label="
-              index != 0
-                ? ''
-                : '2. Who else influences the actions of your main target audience?'
-            "
             :name="['audiences', index, 'value']"
             :rules="{
               required: true,
@@ -318,7 +316,13 @@ onMounted(() => {
             style="margin-bottom: 10px"
           >
             <!-- help="What other audiences need to be involved? Who else influences the actions of your main target audience? What other audiences need to be involved?" -->
-
+            <template #label>
+              <span class="font-weight-bold">{{
+                index != 0
+                  ? ""
+                  : "2. Who else influences the actions of your main target audience?"
+              }}</span>
+            </template>
             <Input
               v-model:value="objective.value"
               placeholder="please input audience"
@@ -358,7 +362,9 @@ onMounted(() => {
           v-for="(q, count) in store.questionsForTopic(config.suggestions.module)"
         >
           <FormItem :name="`input-${count + 3}`" :key="q.id">
-            <template #label> {{ count + 3 }}. {{ q.q2u }} </template>
+            <template #label>
+              <span class="font-weight-bold"> {{ count + 3 }}. {{ q.q2u }}</span>
+            </template>
 
             <img
               v-if="q.bulb"

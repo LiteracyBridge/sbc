@@ -59,15 +59,15 @@ const updateSector = (value: any, id: number) => {
             )"
             :key="q.id"
           >
-            <template #label> {{ count + 1 }}. {{ q.q2u }} </template>
-            <!-- <label class="label" :for="`input-${count + 1}`">{{ count + 1 }}. {{ q.q2u }}</label> -->
-
-            <!-- Use dropdown for sectors -->
+            <template #label>
+              <span class="font-weight-bold"> {{ count + 1 }}. {{ q.q2u }} </span>
+            </template>
             <Select
               v-if="q.id == 1"
               :value="projectDataStore.getData(q.id)"
               @change="updateSector($event, q.id)"
               style="padding-bottom: 15px"
+              class="font-weight-bold"
             >
               <SelectOption
                 v-for="(sector, index) in useTheoryOfChangeStore().getIndiKitSectors"

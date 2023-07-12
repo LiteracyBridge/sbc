@@ -159,7 +159,9 @@ onMounted(() => {
         v-for="(q, count) in store.questionsForTopic(config.suggestions.module)"
         :key="q.id"
       >
-        <template #label> {{ count + 1 }}. {{ q.q2u }} </template>
+        <template #label>
+          <span class="font-weight-bold"> {{ count + 1 }}. {{ q.q2u }}</span>
+        </template>
         <!-- <label class="label" :for="`input-${count + 1}`">{{ count + 1 }}. {{ q.q2u }}</label> -->
 
         <!-- <div class="control"> -->
@@ -201,11 +203,6 @@ onMounted(() => {
         v-for="(objective, index) in dynamicValidateForm.objectives"
         :key="objective.id"
         v-bind="index === 0 ? formItemLayout : {}"
-        :label="
-          index != 0
-            ? ''
-            : '3. What specific objective(s) will your project achieve? What changes will your project make happen?'
-        "
         :name="['objectives', index, 'value']"
         :rules="{
           required: true,
@@ -213,6 +210,15 @@ onMounted(() => {
           trigger: 'change',
         }"
       >
+        <template #label>
+          <span class="font-weight-bold"
+            >{{
+              index != 0
+                ? ""
+                : "3. What specific objective(s) will your project achieve? What changes will your project make happen?"
+            }}
+          </span>
+        </template>
         <Input
           v-model:value="objective.value"
           placeholder="please input objective"
