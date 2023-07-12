@@ -2,6 +2,10 @@ import { defineStore } from "pinia";
 import { useUserStore } from "./user";
 import { useProjectDataStore } from "./projectData";
 import * as api from "../apis/lambda";
+import { ApiRequest } from "@/apis/api";
+import { useProjectStore } from "./projects";
+import { Driver, ProjectDriver } from "@/types";
+import { message } from "ant-design-vue";
 
 // Initialize objects with default values
 const init_objects = {
@@ -57,8 +61,8 @@ export const useDriverStore = defineStore({
   // Define the state
   state: () => ({
     lu_driver_categories: [], //{id:0,name:'',color:'#000000'},
-    lu_drivers: [], // {id:null,name:'',dgroup:'',parent_id:0,sem_id:0,text_short:'',text_long:'',url:'',category_id:0,intervention_ids:[]},
-    drivers_in_prj: [], // {id:null,editing_user_id:0,lu_driver_id:0,importance_id:0,notes_context:'',notes_gap:'',notes_goal:''},
+    lu_drivers: [] as Driver[],
+    drivers_in_prj: [] as ProjectDriver[],
     drivers_suggested: [],
   }),
 
@@ -209,18 +213,33 @@ export const useDriverStore = defineStore({
     },
 
     // Add driver to project
-    async add(lu_driver_id: number) {
-      const table = "drivers_in_prj";
-      const driver = { ...init_objects.drivers_in_prj };
-      const importance_id = 1; // initially set to medium importance
-      driver.lu_driver_id = lu_driver_id;
-      driver.importance_id = importance_id;
-      this.drivers_in_prj.push(driver);
-      await api
-        .insert(table, { lu_driver_id, importance_id })
-        .then((id) => (driver.id = id));
-      driver.editing_user_id = useUserStore().id;
-      return driver;
+    async add(lu_driver_id: number, importance_id?: number = 1) {
+      // TODO: add parent driver if it doesn't exist
+      ApiRequest.post<ProjectDriver>(
+        `project/${useProjectStore().prj_id}/drivers`,
+        {
+          lu_driver_id,
+          editing_user_id: useUserStore().id,
+          importance_id: importance_id || 1,
+        }
+      ).then((drivers) => {
+        this.$state.drivers_in_prj = drivers;
+        message.success("Driver added to project successfully!");
+
+        return drivers;
+      });
+
+      // const table = "drivers_in_prj";
+      // const driver = { ...init_objects.drivers_in_prj };
+      // const importance_id = 1; // initially set to medium importance
+      // driver.lu_driver_id = lu_driver_id;
+      // driver.importance_id = importance_id;
+      // this.drivers_in_prj.push(driver);
+      // await api
+      //   .insert(table, { lu_driver_id, importance_id })
+      //   .then((id) => (driver.id = id));
+      // driver.editing_user_id = useUserStore().id;
+      // return driver;
     },
 
     // Remove driver from project

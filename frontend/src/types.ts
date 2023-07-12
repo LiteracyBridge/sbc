@@ -83,6 +83,18 @@ export class Driver {
   intervention_ids?: number[];
 }
 
+export class ProjectDriver extends Driver {
+  prj_id: number;
+  editing_user_id?: number;
+  lu_driver_id?: number;
+  importance_id?: number;
+  notes_context?: string;
+  notes_gap?: string;
+  notes_goal?: string;
+
+  project?: Project;
+}
+
 export class ProjectIndicator {
   id: number;
   name: string;
@@ -239,7 +251,12 @@ export class Monitoring {
   data_collection_method?: string;
   progress?: string | number;
   evaluation: Array<{ value: number; period: string }> = [];
-  reporting_period?: "Monthly" | "Weekly" | "Quarterly" | "Annually" | "Semi-Annually";
+  reporting_period?:
+    | "Monthly"
+    | "Weekly"
+    | "Quarterly"
+    | "Annually"
+    | "Semi-Annually";
   toc_item_indicator_id?: number;
   project_id?: number;
   type: "Quantitative" | "Qualitative" | "Percentage";

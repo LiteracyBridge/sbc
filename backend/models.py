@@ -35,6 +35,15 @@ class LuIndiKit(Base):
     indicator_level: Mapped[ARRAY[str]] = mapped_column(ARRAY(String))
 
 
+class LuImportance(Base):
+    __tablename__ = "lu_importance"
+
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    name: Mapped[str]
+    sequence: Mapped[int]
+    color: Mapped[Optional[str]]
+
+
 class LuTheoryOfChangeType(Base):
     __tablename__ = "lu_toc_types"
 
@@ -204,8 +213,6 @@ class LuDriver(Base):
     )
     sem_id: Mapped[int] = mapped_column(Integer, ForeignKey("lu_sem.id"), nullable=True)
 
-    description: Mapped[Optional[str]]
-
 
 class IndicatorType(Base):
     __tablename__ = "lu_indicator_types"
@@ -246,11 +253,11 @@ class ProjectDriver(Base):
     __tablename__ = "drivers_in_prj"
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
-    name: Mapped[str]
     notes_context: Mapped[Optional[str]]
     notes_gap: Mapped[Optional[str]]
     notes_goal: Mapped[Optional[str]]
 
+    importance_id: Mapped[int] = mapped_column(ForeignKey("lu_importance.id"))
     prj_id: Mapped[int] = mapped_column(ForeignKey("projects.id"))
     lu_driver_id: Mapped[int] = mapped_column(ForeignKey("lu_drivers.id"))
     editing_user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))

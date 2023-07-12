@@ -7,6 +7,7 @@ import { ref, onMounted } from "vue";
 import { useUserStore } from "@/stores/user";
 import { useRouter } from "vue-router";
 import { SelectOption, Select, Row, Col } from "ant-design-vue";
+import { Driver } from "@/types";
 
 const userStore = useUserStore();
 onMounted(() => {
@@ -24,13 +25,14 @@ const selectedPrjDriver = ref(null);
 const selectedCategoryId = ref(null);
 const driver_filter = ref("all");
 
-function setImportance(event) {
+function setImportance(event: any) {
   const importance_id = parseInt(event.target.value);
   selectedPrjDriver.value.importance_id = importance_id;
 }
 
 function addDriver() {
   driverStore.add(selectedDriver.value.id);
+
   const prjDriver = driverStore.prjDriverByLUid(selectedDriver.value.id);
   console.log(prjDriver);
   selectedPrjDriver.value = prjDriver;
@@ -48,7 +50,7 @@ function removeDriver() {
   }
 }
 
-const setDriver = function (driver = null) {
+const setDriver = function (driver?: Driver) {
   if (selectedDriver.value && selectedDriver.value == driver) {
     selectedDriver.value = null;
     selectedFactor.value = null;
@@ -65,42 +67,31 @@ const setDriver = function (driver = null) {
   top.scrollTo(0, 0);
 };
 
-function addIntervention(intervention) {
-  let driver_ids = [];
-  if (selectedPrjDriver.value) {
-    driver_ids = [selectedPrjDriver.value.id];
-  }
-  activityStore.updateOrCreate({
-    name: intervention.name,
-    driver_ids,
-    intervention_id: intervention.id,
-  });
-}
-
-function getImportanceColor(driverId) {
+function getImportanceColor(driverId: number) {
   let color = "white";
   const prjDriver = driverStore.prjDriverByLUid(driverId);
   if (prjDriver) {
-    color = lookupStore.importance[prjDriver.importance_id].color;
+    color = lookupStore.importance[prjDriver.importance_id]?.color || "white";
   }
   return color;
 }
 
 function clearSelection() {
-  if (driver_filter != "all") {
+  if (driver_filter.value != "all") {
     selectedCategoryId.value = null;
     selectedDriver.value = null;
     selectedFactor.value = null;
     selectedPrjDriver.value = null;
   }
 }
+
 </script>
 
 <template>
   <section ref="top" class="section">
     <div class="">
       <Row :gutter="8">
-        <Col :span="6">
+        <Col :span="5">
           <Select
             name="filter_drivers"
             v-model:value="driver_filter"
@@ -112,7 +103,7 @@ function clearSelection() {
             <SelectOption value="suggested">Suggested Drivers</SelectOption>
           </Select>
 
-          <aside class="is-small menu">
+          <aside class="is-small menu mt-3">
             <div
               v-for="category in driverStore.lu_driver_categories"
               :key="category.id"
@@ -173,7 +164,7 @@ function clearSelection() {
                         :class="dimension.id === selectedDriver ? 'is-active' : ''"
                         :style="`outline-style:solid;outline-color:${getImportanceColor(
                           dimension.id
-                        )};background-color:#${dimension.color}`"
+                        )};`"
                       >
                         <div
                           class="level-item"
@@ -199,7 +190,7 @@ function clearSelection() {
           </aside>
         </Col>
 
-        <Col :span="18">
+        <Col :span="19">
           <div v-if="selectedDriver" class="message is-link">
             <div class="message-header">
               <div class="level">
