@@ -205,12 +205,12 @@ onMounted(() => {
         v-bind="index === 0 ? formItemLayout : {}"
         :name="['objectives', index, 'value']"
         :rules="{
-          required: true,
+          required: false,
           message: 'Objective can not be empty',
           trigger: 'change',
         }"
       >
-        <template #label>
+        <template #label v-if="index == 0">
           <span class="font-weight-bold"
             >{{
               index != 0
@@ -221,7 +221,7 @@ onMounted(() => {
         </template>
         <Input
           v-model:value="objective.value"
-          placeholder="please input objective"
+          placeholder="Enter objective"
           style="width: 60%"
         />
 
@@ -242,7 +242,7 @@ onMounted(() => {
       </FormItem>
 
       <FormItem v-bind="formItemLayoutWithOutLabel">
-        <Button type="dashed" style="width: 60%" @click="addObjective">
+        <Button type="primary" :ghost="true" style="width: 60%" @click="addObjective">
           <PlusOutlined />
           Add Objective
         </Button>

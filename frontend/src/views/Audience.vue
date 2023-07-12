@@ -249,13 +249,13 @@ onMounted(() => {
             v-bind="index === 0 ? formItemLayout : {}"
             :name="['audiences', index, 'value']"
             :rules="{
-              required: true,
+              required: false,
               message: 'Audience can not be empty',
               trigger: 'change',
             }"
             style="margin-bottom: 10px"
           >
-            <template #label>
+            <template #label v-if="index == 0">
               <span class="font-weight-bold">{{
                 index != 0
                   ? ""
@@ -288,7 +288,12 @@ onMounted(() => {
       </Row>
 
       <FormItem v-bind="formItemLayoutWithOutLabel">
-        <Button type="dashed" @click="addAudience(true)">
+        <Button
+          type="primary"
+          :ghost="true"
+          style="width: 40%"
+          @click="addAudience(true)"
+        >
           <PlusOutlined />
           Add Primary Audience
         </Button>
@@ -309,14 +314,14 @@ onMounted(() => {
             v-bind="index === 0 ? formItemLayout : {}"
             :name="['audiences', index, 'value']"
             :rules="{
-              required: true,
+              required: false,
               message: 'Audience can not be empty',
               trigger: 'change',
             }"
             style="margin-bottom: 10px"
           >
             <!-- help="What other audiences need to be involved? Who else influences the actions of your main target audience? What other audiences need to be involved?" -->
-            <template #label>
+            <template #label v-if="index == 0">
               <span class="font-weight-bold">{{
                 index != 0
                   ? ""
@@ -348,7 +353,12 @@ onMounted(() => {
       </Row>
 
       <FormItem v-bind="formItemLayoutWithOutLabel">
-        <Button type="dashed" @click="addAudience(false)">
+        <Button
+          type="primary"
+          :ghost="true"
+          style="width: 40%"
+          @click="addAudience(false)"
+        >
           <PlusOutlined />
           Add Secondary Audience
         </Button>
