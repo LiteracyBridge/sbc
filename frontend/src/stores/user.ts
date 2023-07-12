@@ -2,6 +2,8 @@ import { defineStore } from "pinia";
 import * as api from "@/apis/lambda.js";
 import { useProjectStore } from "./projects";
 import { User } from "@/types";
+import { ApiRequest } from "@/apis/api";
+import { message } from "ant-design-vue";
 
 export const useUserStore = defineStore({
   id: "user",
@@ -10,6 +12,8 @@ export const useUserStore = defineStore({
       id: null,
       email: null,
       name: null,
+      sms: null,
+      whatsapp: null,
       address_as: null,
       last_project_id: null,
       organisation_id: null,
@@ -65,6 +69,23 @@ export const useUserStore = defineStore({
         this.$state = user_attributes;
         console.log(this.$state);
       }
+    },
+
+    async updateProfile() {
+      return ApiRequest.put<User>(`users/${this.$state.id}`, {
+        name: this.$state.name,
+        address_as: this.$state.address_as,
+        sms: this.$state.sms,
+        whatsapp: this.whatsapp,
+      })
+        .then((resp) => {
+          message.success("Profile updated successfully!");
+          return resp;
+        })
+        .catch((err) => {
+          message.error("Unable to update profile");
+          throw err;
+        });
     },
   },
 });

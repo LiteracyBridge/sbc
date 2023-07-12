@@ -91,13 +91,17 @@ class User(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
     # id = Column(Integer, primary_key=True, index=True)
-    email = Column(String, unique=True, index=True)
-    name = Column(String)
-    address_as = Column(String, nullable=True)
+    email: Mapped[str] = mapped_column(String, unique=True, index=True)
+    name: Mapped[Optional[str]] = mapped_column(String)
+    address_as: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    sms: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    whatsapp: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     organisation_id: Mapped[int] = mapped_column(ForeignKey("organisations.id"))
     last_project_id: Mapped[Optional[int]] = mapped_column(ForeignKey("projects.id"))
 
-    organisation: Organisation = relationship("Organisation", back_populates="users")
+    organisation: Mapped["Organisation"] = relationship(
+        "Organisation", back_populates="users"
+    )
 
 
 class Project(Base):

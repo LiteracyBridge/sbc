@@ -19,6 +19,8 @@ export const SEMS: Record<string, string> = {
 export class User {
   id: number;
   email: string;
+  sms?: string;
+  whatsapp?: string;
   name: string;
   address_as?: string;
   token?: string;

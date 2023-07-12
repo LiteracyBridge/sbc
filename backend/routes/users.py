@@ -17,6 +17,13 @@ class UserDto(BaseModel):
     last_project_id: Optional[int]
 
 
+class UpdateUserDto(BaseModel):
+    name: Optional[str]
+    sms: Optional[str]
+    whatsapp: Optional[str]
+    address_as: Optional[str]
+
+
 @router.post("/", response_model=ApiResponse)
 def create(dto: UserDto, db: Session = Depends(get_db)):
     invite = db.query(Invitation).filter(Invitation.email == dto.email).first()
@@ -82,4 +89,20 @@ def get_user_by_email(email: str, db: Session = Depends(get_db)):
         db.commit()
         db.refresh(user)
 
+    return ApiResponse(data=[user])
+
+
+@router.put("/{id}", response_model=ApiResponse)
+def update_user(id: int, dto: UpdateUserDto, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.id == id).first()
+
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    user.name = dto.name
+    user.address_as = dto.address_as
+    user.sms = dto.sms
+    user.whatsapp = dto.whatsapp
+
+    db.commit()
     return ApiResponse(data=[user])
