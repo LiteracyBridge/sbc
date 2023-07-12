@@ -2,14 +2,15 @@
 
 import {
   Card, Form, FormItem, Image, Textarea,
-  type FormInstance, Input, Button, Divider, Row, Col, message
+  type FormInstance, Input, Button, Divider, Row, Col, message,
+  Tooltip
 } from 'ant-design-vue';
 import { computed, onMounted, reactive, ref, watch } from 'vue';
 
 import { useProjectDataStore } from '@/stores/projectData';
 import GPTSuggestionPanel from '@/components/GPTSuggestionPanel.vue';
 import BroadcastComponent from '@/components/BroadcastComponent.vue';
-import { DeleteOutlined, PlusOutlined } from '@ant-design/icons-vue';
+import { DeleteOutlined, PlusOutlined, InfoCircleOutlined } from '@ant-design/icons-vue';
 import { ApiRequest } from '@/apis/api';
 import { useProjectStore } from '@/stores/projects';
 import { ProjectData } from '@/types';
@@ -320,7 +321,7 @@ onMounted(() => {
             }"
             style="margin-bottom: 10px"
           >
-            <!-- help="What other audiences need to be involved? Who else influences the actions of your main target audience? What other audiences need to be involved?" -->
+            <!-- help= -->
             <template #label v-if="index == 0">
               <span class="font-weight-bold">{{
                 index != 0
@@ -328,11 +329,20 @@ onMounted(() => {
                   : "2. Who else influences the actions of your main target audience?"
               }}</span>
             </template>
+
             <Input
               v-model:value="objective.value"
               placeholder="please input audience"
               style="width: 60%"
-            />
+            >
+              <template #suffix>
+                <Tooltip
+                  title="What other audiences need to be involved? Who else influences the actions of your main target audience? What other audiences need to be involved?"
+                >
+                  <InfoCircleOutlined />
+                </Tooltip>
+              </template>
+            </Input>
 
             <Button
               type="ghost"
