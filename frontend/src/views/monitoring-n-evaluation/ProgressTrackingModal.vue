@@ -3,9 +3,10 @@
 import { useMonitoringStore } from '@/stores/monitoring.store';
 import { useProjectStore } from '@/stores/projects';
 import { Monitoring } from '@/types';
-import { Modal, Form, FormItem, Input, Select, SelectOption, Spin, type FormInstance, message } from 'ant-design-vue';
+import { Modal, Form, FormItem, Input, Select, SelectOption, Spin, type FormInstance, Tooltip } from 'ant-design-vue';
 import { computed, h, ref, watch } from 'vue';
 import dayjs from 'dayjs';
+import { InfoCircleOutlined } from '@ant-design/icons-vue';
 
 const props = defineProps<{ visible: boolean, record: Monitoring }>();
 const emit = defineEmits<{
@@ -104,7 +105,15 @@ function recordProgress() {
           name="value"
           :rules="[{ required: true, message: 'Progress value is required!' }]"
         >
-          <Input v-model:value="config.form.value" />
+          <Input v-model:value="config.form.value">
+            <template #suffix>
+              <Tooltip
+                title="Progress value must be for the period that is being recorded. Cumulative reporting is not supported."
+              >
+                <InfoCircleOutlined />
+              </Tooltip>
+            </template>
+          </Input>
         </FormItem>
       </Form>
     </Spin>

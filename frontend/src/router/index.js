@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from "vue-router";
 import Drivers from "../views/Drivers.vue";
 import Login from "../views/Login.vue";
 import Home from "../views/Home.vue";
-import Projects from "../views/Projects.vue";
+// import Projects from "../views/Projects.vue";
 import Forms from "../views/Forms.vue";
 import Interventions from "../views/Interventions.vue";
 import { useUserStore } from "../stores/user";
