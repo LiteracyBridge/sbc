@@ -32,7 +32,7 @@ class LuIndiKit(Base):
     section: Mapped[Optional[str]]
     sector: Mapped[str]
     sub_sector: Mapped[Optional[str]]
-    indicator_level: Mapped[ARRAY[str]] = mapped_column(ARRAY(String))
+    indicator_level: Mapped[ARRAY] = mapped_column(ARRAY(String))
 
 
 class LuImportance(Base):
@@ -82,7 +82,7 @@ class Invitation(Base):
     status: Mapped[str]
     organisation_id: Mapped[int] = mapped_column(ForeignKey("organisations.id"))
 
-    organisation: Organisation = relationship("Organisation")
+    organisation: Mapped["Organisation"] = relationship("Organisation")
 
 
 class User(Base):
@@ -90,7 +90,6 @@ class User(Base):
     __allow_unmapped__ = True
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
-    # id = Column(Integer, primary_key=True, index=True)
     email: Mapped[str] = mapped_column(String, unique=True, index=True)
     name: Mapped[Optional[str]] = mapped_column(String)
     address_as: Mapped[Optional[str]] = mapped_column(String, nullable=True)
@@ -127,10 +126,6 @@ class Project(Base):
 
     country_id: Mapped[int] = mapped_column(ForeignKey("lu_countries.id"))
     organisation_id: Mapped[int] = mapped_column(ForeignKey("organisations.id"))
-
-    # theories_of_change = relationship(
-    #     "TheoryOfChange", back_populates="project", load_on_pending=True
-    # )
 
 
 class ProjectData(Base):
@@ -233,7 +228,6 @@ class IndicatorType(Base):
 class Indicator(Base):
     __tablename__ = "lu_indicators"
 
-    # id = Column(Integer, primary_key=True, index=True)
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
     name: Mapped[str]
     phrasing: Mapped[str]
@@ -245,11 +239,6 @@ class Indicator(Base):
         "IndicatorType",
         back_populates="indicators",
     )
-    # theory_of_change: Mapped["TheoryOfChangeIndicator"] = relationship(
-    #     "TheoryOfChangeIndicator",
-    #     back_populates="indicator",
-    # )
-
     # TODO: Generate alembic migration to create a table using the sqlalchemy model below
 
 
@@ -278,7 +267,9 @@ class TheoryOfChange(Base):
     from_id: Mapped[int] = mapped_column(
         ForeignKey("theory_of_change.id"), nullable=True
     )
-    to_id: Mapped[int] = mapped_column(ForeignKey("theory_of_change.id"), nullable=True)
+    links_to: Mapped[ARRAY] = mapped_column(
+        MutableList.as_mutable(JSON), nullable=True, default=[]
+    )
     sem_id: Mapped[Optional[int]] = mapped_column(
         ForeignKey("lu_sem.id"), nullable=True
     )
@@ -301,88 +292,6 @@ class TheoryOfChange(Base):
     )
     sem: Mapped["LuSem"] = relationship("LuSem")
     type: Mapped["LuTheoryOfChangeType"] = relationship("LuTheoryOfChangeType")
-
-
-# TODO: remove this model
-class TheoryOfChangeOld(Base):
-    __tablename__ = "theories_of_change"
-
-    id: Mapped[int] = mapped_column(primary_key=True, index=True)
-    name: Mapped[str]
-    notes: Mapped[Optional[str]]
-    project_id: Mapped[int] = mapped_column(ForeignKey("projects.id"))
-
-    # project = relationship(
-    #     "Project", back_populates="theories_of_change", load_on_pending=True
-    # )
-    # graph = relationship(
-    #     "TheoryOfChangeItem", back_populates="theory_of_change", load_on_pending=True
-    # )
-    # risks = relationship("Risk", load_on_pending=True)
-
-
-# TODO: remove this model
-# class TheoryOfChangeItem(Base):
-#     __tablename__ = "theories_of_change_item"
-
-#     id: Mapped[int] = mapped_column(primary_key=True, index=True)
-#     name: Mapped[str]
-#     description: Mapped[Optional[str]]
-#     is_validated: Mapped[bool] = mapped_column(Boolean, default=False)
-#     type_id: Mapped[int] = mapped_column(ForeignKey("lu_toc_types.id"), nullable=True)
-#     from_id: Mapped[int] = mapped_column(
-#         ForeignKey("theories_of_change_item.id"), nullable=True
-#     )
-#     to_id: Mapped[int] = mapped_column(
-#         ForeignKey("theories_of_change_item.id"), nullable=True
-#     )
-#     sem_id: Mapped[int] = mapped_column(ForeignKey("lu_sem.id"), nullable=True)
-#     theory_of_change_id: Mapped[int] = mapped_column(
-#         ForeignKey("theories_of_change.id"), nullable=False
-#     )
-#     project_data_id: Mapped[Optional[int]] = mapped_column(
-#         ForeignKey("project_data.id", ondelete="CASCADE"), nullable=True
-#     )
-
-#     # todo: add is_validated
-
-#     # Related objects
-#     # indicators: Mapped[List["TheoryOfChangeIndicator"]] = relationship(
-#     #     "TheoryOfChangeIndicator",
-#     # )
-#     # theory_of_change = relationship(
-#     #     "TheoryOfChange", back_populates="graph", load_on_pending=True
-#     # )
-#     sem = relationship("LuSem", load_on_pending=True)
-#     type = relationship("TheoryOfChangeType", load_on_pending=True)
-#     # from_item = relationship(
-#     #     "TheoryOfChangeItem",
-#     #     remote_side=[to_id],
-#     #     foreign_keys=[to_id],
-#     #     # back_populates="to_item",
-#     #     load_on_pending=True,
-#     # )
-#     # to_item = relationship(
-#     #     "TheoryOfChangeItem",
-#     #     # remote_side=[from_id],
-#     #     # back_popul//ates="from_item",
-#     #     foreign_keys=[from_id],
-#     #     load_on_pending=True,
-#     # )
-
-
-# TODO: remove this model
-# class TheoryOfChangeIndicator(Base):
-#     __tablename__ = "theory_of_change_indicators"
-
-#     id: Mapped[int] = mapped_column(primary_key=True, index=True)
-#     toc_item_id: Mapped[int] = mapped_column(ForeignKey("theories_of_change_item.id"))
-#     indicator_id: Mapped[int] = mapped_column(ForeignKey("lu_indicators.id"))
-
-#     indicator: Mapped["Indicator"] = relationship("Indicator", load_on_pending=True)
-#     toc_item: Mapped["TheoryOfChangeItem"] = relationship(
-#         "TheoryOfChangeItem", load_on_pending=True, back_populates="indicators"
-#     )
 
 
 class ProjectIndicators(Base):
@@ -424,15 +333,6 @@ class TheoryOfChangeIndicator(Base):
     project: Mapped["Project"] = relationship("Project")
 
 
-# TODO: remove this model
-# class TheoryOfChangeType(Base):
-#     __tablename__ = "lu_toc_types"
-
-#     id: Mapped[int] = mapped_column(primary_key=True, index=True)
-#     name: Mapped[str]
-#     description: Mapped[Optional[str]]
-
-
 class Risk(Base):
     __tablename__ = "risks"
 
@@ -446,9 +346,6 @@ class Risk(Base):
     driver_id: Mapped[int] = mapped_column(
         ForeignKey("drivers_in_prj.id"), nullable=True
     )
-    # theory_of_change_id: Mapped[int] = mapped_column(
-    #     ForeignKey("theory_of_change.id"), nullable=True
-    # )
     toc_from_id: Mapped[int] = mapped_column(
         ForeignKey("theory_of_change.id"), nullable=True
     )
@@ -560,16 +457,10 @@ class Communication(Base):
         ForeignKey("projects.id", ondelete="CASCADE"), nullable=False
     )
 
-    drivers: Mapped[ARRAY["CommunicationDriver"]] = relationship("CommunicationDriver")
-    target_audiences: Mapped[ARRAY["CommunicationAudience"]] = relationship(
-        "CommunicationAudience"
-    )
-    indicators: Mapped[ARRAY["CommunicationIndicator"]] = relationship(
-        "CommunicationIndicator"
-    )
-    project_objectives: Mapped[ARRAY["CommunicationObjective"]] = relationship(
-        "CommunicationObjective"
-    )
+    drivers: Mapped[ARRAY] = relationship("CommunicationDriver")
+    target_audiences: Mapped[ARRAY] = relationship("CommunicationAudience")
+    indicators: Mapped[ARRAY] = relationship("CommunicationIndicator")
+    project_objectives: Mapped[ARRAY] = relationship("CommunicationObjective")
 
 
 class CommunicationObjective(Base):
