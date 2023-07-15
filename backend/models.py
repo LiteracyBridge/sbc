@@ -7,6 +7,7 @@ from sqlalchemy import (
     ForeignKey,
     Integer,
     String,
+    Text,
 )
 from sqlalchemy.orm import relationship, mapped_column
 from sqlalchemy.orm import Mapped
@@ -130,6 +131,11 @@ class Project(Base):
     country_id: Mapped[int] = mapped_column(ForeignKey("lu_countries.id"))
     organisation_id: Mapped[int] = mapped_column(ForeignKey("organisations.id"))
 
+    # Relations
+    stakeholders: Mapped[List["Stakeholder"]] = relationship(
+        "Stakeholder", back_populates="project"
+    )
+
 
 class ProjectData(Base):
     __tablename__ = "project_data"
@@ -142,7 +148,7 @@ class ProjectData(Base):
     # Module of data/question -> driver/objective/background_context
     module: Mapped[Optional[str]]
 
-    # Module of data/question -> specific_objectives/behaviour_influence
+    # Module of data/question -> specific_objectives/behavior_influence
     name: Mapped[Optional[str]]
 
     prj_id: Mapped[int] = mapped_column(ForeignKey("projects.id"), nullable=True)
@@ -268,7 +274,7 @@ class TheoryOfChange(Base, SoftDeleteMixin):
     # )
     # TODO: remove this field
     # @deprecated
-    to_id: Mapped[int] = mapped_column(ForeignKey("theory_of_change.id"), nullable=True)
+    # to_id: Mapped[int] = mapped_column(ForeignKey("theory_of_change.id"), nullable=True)
     links_to: Mapped[Optional[List]] = mapped_column(
         MutableList.as_mutable(ARRAY(Integer)), nullable=True, default=[]
     )
@@ -547,6 +553,37 @@ class AccessRequest(Base):
     deleted_at: Mapped[Optional[DateTime]] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
+
+
+class Stakeholder(Base, SoftDeleteMixin):
+    __tablename__ = "stakeholders"
+
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    name: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    email: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    # WhatsApp app number
+    whatsapp: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    # SMS phone number
+    sms: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=func.now()
+    )
+    deleted_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+
+    editing_user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL"), nullable=False
+    )
+    project_id: Mapped[int] = mapped_column(
+        ForeignKey("projects.id", ondelete="CASCADE"), nullable=False
+    )
+
+    project: Mapped["Project"] = relationship("Project", back_populates="stakeholders")
 
 
 Base.metadata.create_all(bind=engine)

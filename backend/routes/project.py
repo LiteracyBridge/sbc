@@ -1,7 +1,8 @@
 from typing import List, Optional, Dict, Annotated
-
+from datetime import datetime
 from sqlalchemy import text
-from models import LuDriver, ProjectDriver
+from backend.routes.data_service_route import get
+from models import LuDriver, ProjectDriver, Stakeholder
 from helpers import ToCItemDto, create_toc_item
 
 import models
@@ -259,6 +260,80 @@ def update_data(
         data=db.query(ProjectData).filter(ProjectData.prj_id == project_id).all()
     )
 
+
+# ================== START: PROJECT STAKEHOLDERS ================== ##
+class StakeholderDto(BaseModel):
+    id: Optional[int]
+    name: Optional[str]
+    description: Optional[str]
+    sms: Optional[str]
+    whatsapp: Optional[str]
+    email: Optional[str]
+    editing_user_id: int
+
+
+@router.get("/{project_id}/stakeholders")
+def get_stakeholders(
+    project_id: int, db: Session = Depends(models.get_db)
+) -> ApiResponse:
+    return ApiResponse(
+        data=db.query(Stakeholder).filter(Stakeholder.project_id == project_id).all()
+    )
+
+
+@router.delete("/{project_id}/stakeholders/{stakeholder_id}")
+def delete_stakeholder(
+    project_id: int, stakeholder_id: int, db: Session = Depends(models.get_db)
+) -> ApiResponse:
+    """Delete a stakeholder from the project"""
+
+    record: Stakeholder = (
+        db.query(Stakeholder)
+        .filter(Stakeholder.id == stakeholder_id, Stakeholder.project_id == project_id)
+        .first()
+    )
+
+    if record is None:
+        raise HTTPException(status_code=404, detail="Stakeholder not found")
+
+    record.delete()
+    db.commit()
+
+    return get_stakeholders(project_id=project_id, db=db)
+
+
+@router.post("/{project_id}/stakeholders")
+def update_or_add_stakeholder(
+    project_id: int, dto: StakeholderDto, db: Session = Depends(models.get_db)
+) -> ApiResponse:
+    """Add a new stakeholder to the project"""
+
+    record: Stakeholder = Stakeholder()
+
+    if dto.id is not None:
+        record = db.query(Stakeholder).filter(Stakeholder.id == dto.id).first()
+
+        if record is None:
+            raise HTTPException(status_code=404, detail="Stakeholder not found")
+    else:
+        record.project_id = project_id
+        record.created_at = datetime.now()
+
+    record.name = dto.name
+    record.description = dto.description
+    record.sms = dto.sms
+    record.whatsapp = dto.whatsapp
+    record.email = dto.email
+    record.editing_user_id = dto.editing_user_id
+    record.updated_at = datetime.now()
+
+    db.add(record)
+    db.commit()
+
+    return get_stakeholders(project_id=project_id, db=db)
+
+
+# ================== END: PROJECT STAKEHOLDERS ==================== ##
 
 # @router.post("/{project_id}/audience", response_model=ApiResponse)
 # def update_audience(
