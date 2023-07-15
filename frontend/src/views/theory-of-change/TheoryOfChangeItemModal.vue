@@ -75,12 +75,7 @@ const closeModal = () => {
 function saveFormItem() {
   const fields = config.value.form;
   const data = {
-    name: fields.name,
-    type_id: fields.type_id,
-    from_id: fields.from_id,
-    to_id: fields.to_id,
-    sem_id: fields.sem_id,
-    description: fields.description,
+    ...fields,
     is_validated: fields.is_validated || false,
     editing_user_id: useUserStore().id,
   };
@@ -224,9 +219,13 @@ function deleteIndicator(id: number) {
           </Col> -->
 
           <Col :span="12">
-            <FormItem label="Links To" name="to_id">
+            <FormItem label="Links To" name="links_to">
               <!-- TODO: show list of existing indicators -->
-              <Select v-model:value="config.form.to_id" :allow-clear="true">
+              <Select
+                v-model:value="config.form.links_to"
+                :allow-clear="true"
+                mode="multiple"
+              >
                 <SelectOption v-for="item in store?.data" :key="item.id" :value="item.id">
                   {{ item.name }}
                 </SelectOption>

@@ -11,7 +11,6 @@ import models
 router = APIRouter()
 
 
-# Types
 class IndicatorDto(BaseModel):
     # TODO: remove these
     removed: List[int]
@@ -26,10 +25,11 @@ class IndicatorDto(BaseModel):
 
 
 class TheoryOfChangeItemDto(BaseModel):
-    type_id: str | int
-    from_id: Optional[str | int]
+    type_id: int
+    # from_id: Optional[str | int]
     to_id: Optional[str | int]
-    sem_id: Optional[str | int]
+    links_to: Optional[List[int]]
+    sem_id: Optional[int]
     name: str
     is_validated: Optional[bool] = False
     description: Optional[str]
@@ -84,8 +84,9 @@ def create_item(
     toc: TheoryOfChange = TheoryOfChange()
     toc.name = dto.name
     toc.type_id = dto.type_id
-    toc.from_id = dto.from_id
-    toc.to_id = dto.to_id
+    # toc.from_id = dto.from_id
+    # toc.to_id = dto.to_id
+    toc.links_to = dto.links_to
     toc.sem_id = dto.sem_id
     toc.description = dto.description
     toc.project_id = project_id
@@ -125,8 +126,8 @@ def update_item(
 
     record.name = dto.name
     # record.type_id = dto.type_id
-    record.from_id = dto.from_id
-    record.to_id = dto.to_id
+    # record.from_id = dto.from_id
+    record.links_to = dto.links_to
     record.sem_id = dto.sem_id
     record.description = dto.description
     record.is_validated = dto.is_validated

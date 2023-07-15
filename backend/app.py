@@ -27,7 +27,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 import models
 from config import settings
-
+import model_events
 
 if settings.sentry_dsn is not None:
     sentry_sdk.init(

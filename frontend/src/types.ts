@@ -165,6 +165,7 @@ export class TheoryOfChange {
   sem_id?: number;
   project_id: number;
   is_validated: boolean = false;
+  links_to: number[] = [];
 
   indicators: Array<TheoryOfChangeIndicator> = [];
 

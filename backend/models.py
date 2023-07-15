@@ -14,8 +14,14 @@ from sqlalchemy.orm import Mapped
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.mutable import MutableList
 from sqlalchemy.sql import func
-
+from sqlalchemy_easy_softdelete.mixin import generate_soft_delete_mixin_class
+from datetime import datetime
 from database import Base, SessionLocal, engine
+
+
+# Create a Class that inherits from our class builder
+class SoftDeleteMixin(generate_soft_delete_mixin_class()):
+    deleted_at: datetime
 
 
 class LuIndiKit(Base):
@@ -28,7 +34,6 @@ class LuIndiKit(Base):
     wording_portuguese: Mapped[Optional[str]]
     wording_czech: Mapped[Optional[str]]
     guidance: Mapped[Optional[str]]
-
     section: Mapped[Optional[str]]
     sector: Mapped[str]
     sub_sector: Mapped[Optional[str]]
@@ -136,14 +141,10 @@ class ProjectData(Base):
     q_id: Mapped[Optional[int]]
     data: Mapped[Optional[str]]
 
-    """
-    Module of data/question -> driver/objective/background_context
-    """
+    # Module of data/question -> driver/objective/background_context
     module: Mapped[Optional[str]]
 
-    """
-    Module of data/question -> specific_objectives/behaviour_influence
-    """
+    # Module of data/question -> specific_objectives/behaviour_influence
     name: Mapped[Optional[str]]
 
     prj_id: Mapped[int] = mapped_column(ForeignKey("projects.id"), nullable=True)
@@ -262,13 +263,16 @@ class TheoryOfChange(Base):
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
     name: Mapped[str]
     description: Mapped[Optional[str]]
-    is_validated: Mapped[bool] = mapped_column(Boolean, default=False)
+    is_validated: Mapped[Optional[bool]] = mapped_column(Boolean, default=False)
     type_id: Mapped[int] = mapped_column(ForeignKey("lu_toc_types.id"), nullable=True)
-    from_id: Mapped[int] = mapped_column(
-        ForeignKey("theory_of_change.id"), nullable=True
-    )
-    links_to: Mapped[ARRAY] = mapped_column(
-        MutableList.as_mutable(JSON), nullable=True, default=[]
+    # from_id: Mapped[int] = mapped_column(
+    #     ForeignKey("theory_of_change.id"), nullable=True
+    # )
+    # TODO: remove this field
+    # @deprecated
+    to_id: Mapped[int] = mapped_column(ForeignKey("theory_of_change.id"), nullable=True)
+    links_to: Mapped[Optional[List]] = mapped_column(
+        ARRAY(Integer), nullable=True, default=[]
     )
     sem_id: Mapped[Optional[int]] = mapped_column(
         ForeignKey("lu_sem.id"), nullable=True

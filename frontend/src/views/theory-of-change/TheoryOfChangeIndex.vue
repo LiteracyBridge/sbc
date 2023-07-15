@@ -182,7 +182,7 @@ function nodesToSubgraph(nodes: Object, category: string) {
   return result;
 }
 
-function Node(id: number, label: string, defaultProperties: Object) {
+function Node(id: number | string, label: string, defaultProperties: Object) {
   const mergedProperties = Object.assign({}, defaultProperties, { id, label });
   this.id = mergedProperties.id;
   this.label = mergedProperties.label;
@@ -273,27 +273,36 @@ const diagram = reactive({
     const edges: {
       fromId: number;
       toId: number;
-      assumptions: any;
-      risks: any;
-    }[] = [];
+      // assumptions: any;
+      // risks: any;
+    }[] = data.flatMap((r) => {
+      if ((r.links_to || []).length == 0) {
+        return { fromId: r.id, toId: null };
+      }
 
-    for (const r of data) {
-      edges.push({
-        fromId: r.id,
-        toId: r.to_id,
-        assumptions: r.assumptions,
-        risks: r.risks,
+      return r.links_to.flatMap((l) => {
+        return { fromId: r.id, toId: l };
       });
+    });
 
-      // if (r.from_id != null) {
-      //   edges.push({
-      //     fromId: r.from_id,
-      //     toId: r.id,
-      //     assumptions: r.assumptions,
-      //     risks: r.risks,
-      //   });
-      // }
-    }
+    // console.log(_temp);
+
+    // edges.push({
+    //   fromId: r.id,
+    //   toId: r.to_id,
+    //   // assumptions: r.assumptions,
+    //   // risks: r.risks,
+    // });
+    // edges.push(..._temp);
+    // if (r.from_id != null) {
+    //   edges.push({
+    //     fromId: r.from_id,
+    //     toId: r.id,
+    //     assumptions: r.assumptions,
+    //     risks: r.risks,
+    //   });
+    // }
+    // }
 
     for (const edge of edges) {
       this.createEdge(edge.fromId, edge.toId, false);
@@ -301,8 +310,8 @@ const diagram = reactive({
     drawDiagram();
   },
 
-  createNode: function (label, logicModel) {
-    const node = new Node(this.nextNodeId, label, this.defaultNode);
+  createNode: function (label: string, logicModel: string) {
+    const node = Node(this.nextNodeId, label, this.defaultNode);
     node.logicModel = logicModel;
     this.nodes[this.nextNodeId] = node;
     this.nextNodeId =
