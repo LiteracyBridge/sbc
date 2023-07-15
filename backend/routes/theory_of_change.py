@@ -85,8 +85,6 @@ def create_item(
     toc: TheoryOfChange = TheoryOfChange()
     toc.name = dto.name
     toc.type_id = dto.type_id
-    # toc.from_id = dto.from_id
-    # toc.to_id = dto.to_id
     toc.links_to = dto.links_to
     toc.sem_id = dto.sem_id
     toc.description = dto.description
@@ -149,32 +147,13 @@ def delete_item(
     if record is None:
         raise HTTPException(status_code=404, detail="Item not found")
 
-    # Reset all the from_id
-    # db.query(TheoryOfChange).filter(TheoryOfChange.from_id == record.id).update(
-    #     {"from_id": None}
-    # )
-
-    # db.query(TheoryOfChangeIndicator).filter(
-    #     TheoryOfChangeIndicator.theory_of_change_id == record.id
-    # ).delete()
-    # db.query(Risk).filter(Risk.toc_from_id == record.id).delete()
-
-    # Reset all the to_id
-    # db.query(TheoryOfChange).filter(TheoryOfChange.to_id == record.id).update(
-    #     {"to_id": None}
-    # )
-
-
     # Handle related items deletion in event
     theory_of_change_deleted(record, db)
 
     # Delete the record
     record.delete()
 
-    # db.delete()
-    # db.delete(record)
     db.commit()
-    # db.
 
     return get_by_project_id(project_id, db)
 

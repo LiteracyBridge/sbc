@@ -51,8 +51,4 @@ def theory_of_change_deleted(item: TheoryOfChange, db: Session):
     for indicator in indicators:
         indicator.delete()
 
-    # TODO: remove associated activity & links_to
-    print(item.id)
-    print("model deleted event")
-
     db.commit()

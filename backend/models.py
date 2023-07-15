@@ -91,7 +91,6 @@ class Invitation(Base):
 
 class User(Base):
     __tablename__ = "users"
-    __allow_unmapped__ = True
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
     email: Mapped[str] = mapped_column(String, unique=True, index=True)
