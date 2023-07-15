@@ -1,16 +1,15 @@
 from typing import List, Optional, Dict, Annotated
 from datetime import datetime
 from sqlalchemy import text
-from backend.routes.data_service_route import get
 from models import LuDriver, ProjectDriver, Stakeholder
 from helpers import ToCItemDto, create_toc_item
 
 import models
 from fastapi import APIRouter, Depends, HTTPException, Body
-from models import ProjectData
+from models import ProjectData, Project
 from pydantic import BaseModel
 from schema import ApiResponse
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, subqueryload
 
 router = APIRouter()
 
@@ -33,7 +32,12 @@ class ProjectObjectiveDto(BaseModel):
 
 @router.get("/{id}", response_model=ApiResponse)
 def find_project(id: int, db: Session = Depends(models.get_db)):
-    record = db.query(models.Project).filter(models.Project.id == id).first()
+    record = (
+        db.query(Project)
+        .filter(Project.id == id)
+        .options(subqueryload(Project.stakeholders))
+        .first()
+    )
 
     if record is None:
         raise HTTPException(status_code=404, detail="Project not found")
@@ -272,7 +276,6 @@ class StakeholderDto(BaseModel):
     editing_user_id: int
 
 
-@router.get("/{project_id}/stakeholders")
 def get_stakeholders(
     project_id: int, db: Session = Depends(models.get_db)
 ) -> ApiResponse:

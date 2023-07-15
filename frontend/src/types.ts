@@ -16,6 +16,12 @@ export const SEMS: Record<string, string> = {
   "5": "Policy/Enabling environment",
 };
 
+class Timestamps {
+  deleted_by_id?: number;
+  updated_at?: Date;
+  created_at?: Date;
+  deleted_at?: Date;
+}
 export class User {
   id: number;
   email: string;
@@ -28,7 +34,18 @@ export class User {
   organisation_id?: number;
 }
 
-export class Project {
+export class Stakeholder extends Timestamps {
+  id: number;
+  name?: string;
+  description?: string;
+  sms?: string;
+  whatsapp?: string;
+  email?: string;
+  editing_user_id: number;
+  project_id: number;
+}
+
+export class Project extends Timestamps {
   id: number;
   name: string;
   start_date: Dayjs;
@@ -38,10 +55,8 @@ export class Project {
   feedback_strategy?: string;
   sustainability_strategy?: string;
   editing_user_id?: number;
-  deleted_by_id?: number;
-  updated_at?: Date;
-  created_at?: Date;
-  deleted_at?: Date;
+
+  stakeholders: Stakeholder[] = [];
 }
 
 export class LuIndiKit {

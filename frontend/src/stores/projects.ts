@@ -8,7 +8,7 @@ import { useParticipantStore } from "./participants";
 import router from "@/router";
 import { useLookupStore } from "./lookups";
 import { useProjectDataStore } from "./projectData";
-import { Project } from "@/types";
+import { Project, Stakeholder } from "@/types";
 import { ApiRequest } from "@/apis/api";
 import { message } from "ant-design-vue";
 import { AppStore } from "./app.store";
@@ -124,6 +124,7 @@ export const useProjectStore = defineStore({
         return grantable_access_types;
       }
     },
+    stakeholders: (state) => state.current_project?.stakeholders ?? [],
   },
   actions: {
     // Archives a project by updating its archived status
@@ -255,6 +256,7 @@ export const useProjectStore = defineStore({
         })
         .finally(() => (this.$state.loading = false));
     },
+
     // Downloads project data
     async download() {
       if (this.prj_id) {
@@ -303,6 +305,54 @@ export const useProjectStore = defineStore({
       }
 
       return;
+    },
+
+    /**
+     * Delete project stakeholder
+     */
+    async deleteStakeholder(id: number) {
+      this.$state.loading = true;
+
+      return await ApiRequest.delete<Stakeholder>(
+        `project/${this.prj_id}/stakeholders/${id}`
+      )
+        .then((resp) => {
+          this.$state.current_project.stakeholders = resp;
+          message.success("Stakeholder deleted successfully!");
+          return resp;
+        })
+        .catch((error) => {
+          message.error(error.message);
+          throw error;
+        })
+        .finally(() => (this.$state.loading = false));
+    },
+    /**
+     * Update or add project stakeholder
+     */
+    async createOrUpdateStakeholder(form: Stakeholder) {
+      this.$state.loading = true;
+
+      form.project_id = this.prj_id;
+      form.editing_user_id = useUserStore().id;
+
+      return await ApiRequest.post<Stakeholder>(
+        `project/${this.prj_id}/stakeholders`,
+        form
+      )
+        .then((resp) => {
+          this.$state.current_project.stakeholders = resp;
+          message.success(
+            `Stakeholder ${form.id != null ? "updated" : "added"} successfully`
+          );
+
+          return resp;
+        })
+        .catch((error) => {
+          message.error(error.message);
+          throw error;
+        })
+        .finally(() => (this.$state.loading = false));
     },
   },
 });
