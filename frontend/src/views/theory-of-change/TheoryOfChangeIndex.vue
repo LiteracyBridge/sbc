@@ -2,45 +2,27 @@
 import mermaid from "mermaid";
 
 import { onMounted, onUnmounted, reactive, ref, computed } from "vue";
-import { useSideNavStore } from "@/stores/sideNav";
-import axios from "axios";
-import { onClickOutside } from "@vueuse/core";
-import IndicatorBrowserPanel from "./IndicatorBrowserPanel.vue";
-import { ApiRequest } from "@/apis/api";
 import {
   Risk,
   SEMS,
   THEORY_OF_CHANGE_TYPES,
   TheoryOfChange,
-  TheoryOfChangeItem,
 } from "@/types";
-import GridLoader from "@/components/spinners/GridLoader.vue";
-import { useProjectDataStore } from "@/stores/projectData";
-import { useProjectStore } from "@/stores/projects";
 import {
-  Checkbox,
   Button,
   Card,
-  Col,
   Divider,
   Form,
   FormItem,
   Input,
   Modal,
-  Popover,
-  Row,
-  Select,
-  SelectOption,
   Space,
   Spin,
   Switch,
   Textarea,
-  message,
-  Empty,
 } from "ant-design-vue";
 import TheoryOfChangeExamplesBrowser from "./TheoryOfChangeExamplesBrowser.vue";
 import TheoryOfChangeItemModal from "./TheoryOfChangeItemModal.vue";
-
 import {
   DeleteOutlined,
   PlusCircleOutlined,
@@ -50,7 +32,6 @@ import {
 } from "@ant-design/icons-vue";
 import { useTheoryOfChangeStore } from "@/stores/theory_of_change";
 
-const isPanelVisible = ref(false);
 const showIndicatorModal = ref(false);
 const theoryOfChangeModel = ref<{
   data: TheoryOfChange[];
@@ -241,10 +222,8 @@ const diagram = reactive({
     if (this.orientationIndex == 4) this.orientationIndex = 0;
   },
   parseGraph: function (data: TheoryOfChange[]) {
-    console.log(data);
-    // if (Array.isArray(data)) data = data[0]
-
     theoryOfChangeModel.value.data = data;
+
     this.nodes = {};
     this.edges = [];
     this.edgeSet = new Set();
@@ -284,25 +263,6 @@ const diagram = reactive({
         return { fromId: r.id, toId: l };
       });
     });
-
-    // console.log(_temp);
-
-    // edges.push({
-    //   fromId: r.id,
-    //   toId: r.to_id,
-    //   // assumptions: r.assumptions,
-    //   // risks: r.risks,
-    // });
-    // edges.push(..._temp);
-    // if (r.from_id != null) {
-    //   edges.push({
-    //     fromId: r.from_id,
-    //     toId: r.id,
-    //     assumptions: r.assumptions,
-    //     risks: r.risks,
-    //   });
-    // }
-    // }
 
     for (const edge of edges) {
       this.createEdge(edge.fromId, edge.toId, false);
@@ -427,7 +387,7 @@ onUnmounted(() => {
   window.removeEventListener("keydown", escapeKeyHandler);
 });
 
-function deleteNode(nodeId) {
+function deleteNode(nodeId: number) {
   // remove edges
   let i = 0;
   while (diagram.edges[i]) {
@@ -437,6 +397,7 @@ function deleteNode(nodeId) {
     }
     i++;
   }
+
   delete diagram.nodes[nodeId];
   selectedNodeId.value = null; // closes modal
   drawDiagram();
@@ -465,7 +426,6 @@ const tocItemModalClosed = (redraw = true, data?: TheoryOfChange[]) => {
     diagram.parseGraph(data);
   }
 
-  // useSideNavStore().show();
   if (redraw) {
     drawDiagram();
   }
@@ -585,16 +545,6 @@ const risksModalConfig = reactive({
       </div>
 
       <Divider></Divider>
-
-      <!-- ===== START: Customer Indicators Modal ==== -->
-      <!-- <Modal v-model:visible="customIndicatorModal.visible" title="Add Indicator">
-        <Row>
-          <AutoComplete v-model:value="customIndicatorModal.customIndicator" :options="getProjectIndicators" size="small"
-            placeholder="Add indicator" style="width: 100%;">
-          </AutoComplete>
-        </Row>
-      </Modal> -->
-      <!-- ===== END: Customer Indicators Modal ==== -->
 
       <!-- ======== START: Risks Modal ======= -->
       <Modal

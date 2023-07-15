@@ -1,6 +1,5 @@
 from typing import Dict, List, Optional
 from sqlalchemy import (
-    ARRAY,
     JSON,
     DateTime,
     Boolean,
@@ -11,7 +10,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import relationship, mapped_column
 from sqlalchemy.orm import Mapped
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.dialects.postgresql import JSONB, ARRAY
 from sqlalchemy.ext.mutable import MutableList
 from sqlalchemy.sql import func
 from sqlalchemy_easy_softdelete.mixin import generate_soft_delete_mixin_class
@@ -257,7 +256,7 @@ class ProjectDriver(Base):
     editing_user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
 
 
-class TheoryOfChange(Base):
+class TheoryOfChange(Base, SoftDeleteMixin):
     __tablename__ = "theory_of_change"
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
@@ -272,7 +271,7 @@ class TheoryOfChange(Base):
     # @deprecated
     to_id: Mapped[int] = mapped_column(ForeignKey("theory_of_change.id"), nullable=True)
     links_to: Mapped[Optional[List]] = mapped_column(
-        ARRAY(Integer), nullable=True, default=[]
+        MutableList.as_mutable(ARRAY(Integer)), nullable=True, default=[]
     )
     sem_id: Mapped[Optional[int]] = mapped_column(
         ForeignKey("lu_sem.id"), nullable=True
@@ -280,10 +279,10 @@ class TheoryOfChange(Base):
     project_id: Mapped[Optional[int]] = mapped_column(
         ForeignKey("projects.id", ondelete="CASCADE"), nullable=False
     )
-    created_at: Mapped[DateTime] = mapped_column(
+    created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=func.now()
     )
-    updated_at: Mapped[DateTime] = mapped_column(
+    updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), onupdate=func.now()
     )
     deleted_at: Mapped[Optional[DateTime]] = mapped_column(
@@ -312,7 +311,7 @@ class ProjectIndicators(Base):
     project: Mapped["Project"] = relationship("Project")
 
 
-class TheoryOfChangeIndicator(Base):
+class TheoryOfChangeIndicator(Base, SoftDeleteMixin):
     __tablename__ = "theory_of_change_indicators"
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
@@ -329,6 +328,15 @@ class TheoryOfChangeIndicator(Base):
     activity_id: Mapped[int] = mapped_column(
         ForeignKey("activities.id", ondelete="CASCADE")
     )
+    created_at: Mapped[DateTime] = mapped_column(
+        DateTime(timezone=True), default=func.now()
+    )
+    updated_at: Mapped[DateTime] = mapped_column(
+        DateTime(timezone=True), onupdate=func.now()
+    )
+    deleted_at: Mapped[Optional[DateTime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
 
     indicator: Mapped["ProjectIndicators"] = relationship("ProjectIndicators")
     theory_of_change: Mapped["TheoryOfChange"] = relationship(
@@ -337,7 +345,7 @@ class TheoryOfChangeIndicator(Base):
     project: Mapped["Project"] = relationship("Project")
 
 
-class Risk(Base):
+class Risk(Base, SoftDeleteMixin):
     __tablename__ = "risks"
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
@@ -355,6 +363,15 @@ class Risk(Base):
     )
     toc_to_id: Mapped[int] = mapped_column(
         ForeignKey("theory_of_change.id"), nullable=True
+    )
+    created_at: Mapped[DateTime] = mapped_column(
+        DateTime(timezone=True), default=func.now()
+    )
+    updated_at: Mapped[DateTime] = mapped_column(
+        DateTime(timezone=True), onupdate=func.now()
+    )
+    deleted_at: Mapped[Optional[DateTime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
     )
 
     # Related objects

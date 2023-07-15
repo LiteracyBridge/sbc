@@ -1,4 +1,5 @@
 from typing import Dict, List, Optional
+from model_events import theory_of_change_deleted
 from models import ProjectIndicators, TheoryOfChange, TheoryOfChangeIndicator
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
@@ -137,9 +138,9 @@ def update_item(
     return get_by_project_id(project_id, db)
 
 
-@router.delete("/{id}/item/{itemId}", response_model=ApiResponse)
+@router.delete("/{project_id}/item/{itemId}", response_model=ApiResponse)
 def delete_item(
-    id: int,
+    project_id: int,
     itemId: int,
     db: Session = Depends(models.get_db),
 ):
@@ -149,20 +150,33 @@ def delete_item(
         raise HTTPException(status_code=404, detail="Item not found")
 
     # Reset all the from_id
-    db.query(TheoryOfChange).filter(TheoryOfChange.from_id == record.id).update(
-        {"from_id": None}
-    )
+    # db.query(TheoryOfChange).filter(TheoryOfChange.from_id == record.id).update(
+    #     {"from_id": None}
+    # )
+
+    # db.query(TheoryOfChangeIndicator).filter(
+    #     TheoryOfChangeIndicator.theory_of_change_id == record.id
+    # ).delete()
+    # db.query(Risk).filter(Risk.toc_from_id == record.id).delete()
 
     # Reset all the to_id
-    db.query(TheoryOfChange).filter(TheoryOfChange.to_id == record.id).update(
-        {"to_id": None}
-    )
+    # db.query(TheoryOfChange).filter(TheoryOfChange.to_id == record.id).update(
+    #     {"to_id": None}
+    # )
+
+
+    # Handle related items deletion in event
+    theory_of_change_deleted(record, db)
 
     # Delete the record
-    db.delete(record)
-    db.commit()
+    record.delete()
 
-    return get_by_project_id(id, db)
+    # db.delete()
+    # db.delete(record)
+    db.commit()
+    # db.
+
+    return get_by_project_id(project_id, db)
 
 
 # ======== INDICATORS ========= #
