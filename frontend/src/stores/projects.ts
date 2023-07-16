@@ -229,9 +229,9 @@ export const useProjectStore = defineStore({
         clearAllProjectStores();
       }
 
-      if (!id) {
-        router.push({ path: "/projects" });
-      }
+      // if (!id) {
+      //   router.push({ path: "/projects" });
+      // }
 
       return;
     },
@@ -288,7 +288,7 @@ export const useProjectStore = defineStore({
       }
 
       // Download current project data
-      if (this.projectId) {
+      if (this.prj_id) {
         this.$state.loading = true;
         await ApiRequest.get<Project>(`project/${this.projectId}`)
           .then((response) => {

@@ -31,6 +31,7 @@ const isExactActive = (item) => {
 
 const projectStore = useProjectStore();
 const menuItems = [
+  { label: "Dashboard", path: "/" },
   { label: "Project Info", path: "/project-info" },
   { label: "Background and context", name: "forms", params: { module: "background" } },
   {
@@ -122,13 +123,13 @@ watch(projectSelected, (newVal) => {
     <Menu v-model:selectedKeys="config.activeMenu" theme="dark" mode="inline">
       <MenuItem v-for="(item, index) in menuItems" :key="index">
         <router-link v-if="item.name" :to="'/forms/' + item.params?.module">
-          <span>
+          <span role="link">
             {{ item.label }}
           </span>
         </router-link>
 
         <router-link v-if="item.path" :to="item.path">
-          <span>
+          <span role="link">
             {{ item.label }}
           </span>
         </router-link>
