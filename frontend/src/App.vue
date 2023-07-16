@@ -72,7 +72,7 @@ onMounted(async () => {
     </LayoutSider> -->
 
     <Layout>
-      <LayoutHeader :has-sider="true" style="background: #fff; padding: 0px 16px 0px 0px;">
+      <LayoutHeader :has-sider="true" style="background: #ffffff; padding: 0px 16px 0px 0px;">
         <MenuUnfoldOutlined v-if="sideNavStore.visible" class="trigger"
           @click="() => (sideNavStore.visible = !sideNavStore.visible)" />
         <MenuUnfoldOutlined v-else class="trigger" @click="() => (sideNavStore.visible = !sideNavStore.visible)" />
@@ -82,7 +82,7 @@ onMounted(async () => {
         <Header></Header>
       </LayoutHeader>
 
-      <LayoutContent :style="{ margin: '24px 16px 0px 16px', padding: '24px', background: '#fff', minHeight: '280px' }">
+      <LayoutContent :style="{ margin: '24px 16px 0px 16px', padding: '24px', background: '#ffffff', minHeight: '280px' }">
 
         <router-view :key="$route.fullPath"></router-view>
 
@@ -121,7 +121,7 @@ html {
 }
 
 .site-layout .site-layout-background {
-  background: #fff;
+  background: #ffffff;
 }
 
 
