@@ -102,6 +102,9 @@ export const useProjectStore = defineStore({
       return undefined;
     },
     projectName: (state) => {
+      const name = state.current_project?.name;
+      if (name) return name;
+
       if (state.prj_id && state.user_projects.length) {
         const foundProject = state.user_projects.find(
           (p) => p.prj_id == state.prj_id

@@ -97,86 +97,120 @@ const usersDropdownOptions = computed(() => {
 function filterUser(input: string, option: any) {
   return option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0;
 }
-
 </script>
 
 <template>
-  <Spin :spinning="config.loading">
-    <Table :columns="columns" :data-source="projectStore.users_in_project" bordered>
-      <template #title>
-        <Row justify="space-between">
-          <Col :span="20">
-          <Typography :level="3">Users with access to {{ projectStore.projectName }}</Typography>
-          </Col>
+  <Table
+    :columns="columns"
+    :data-source="projectStore.users_in_project"
+    bordered
+    :loading="config.loading"
+  >
+    <template #title>
+      <div class="full-width">
+        <span>
+          <Typography :level="3"
+            >Users with access to {{ projectStore.projectName }}</Typography
+          >
+        </span>
 
-          <Col :span="4">
-          <!-- TODO: implement creating new project in a modal -->
-          <Button type="primary" @click="config.userModal.visible = true;">
-            <template #icon>
-              <PlusCircleOutlined />
-            </template>
-            Add User
-          </Button>
-          </Col>
-        </Row>
+        <!-- TODO: implement creating new project in a modal -->
+        <Button type="primary" @click="config.userModal.visible = true">
+          <template #icon>
+            <PlusCircleOutlined />
+          </template>
+          Add User
+        </Button>
+      </div>
+    </template>
+
+    <template #bodyCell="{ column, record: user }">
+      <template v-if="column.key == 'name'">
+        {{ user.name }}
       </template>
 
-      <template #bodyCell="{ column, record: user }">
-        <template v-if="column.key == 'name'">
-          {{ user.name }}
-        </template>
-
-        <template v-if="column.key == 'address_as'">
-          {{ user.address_as }}
-        </template>
-
-        <template v-if="column.key == 'email'">
-          {{ user.email }}
-        </template>
-
-        <template v-if="column.key == 'role'">
-          <Select :value="user.access_id" @change="projectStore.updateAccess($event, user.id)"
-            v-if="projectStore.userById(userStore.id).access_id == 0" style="width: 100%;">
-            <SelectOption v-for="access in lookupStore.access_types" :value="access.id" :key="access.id">
-              {{ access.name }}
-            </SelectOption>
-          </Select>
-
-          <span v-else>
-            {{ lookupStore.lookupNameById("access_types", user.access_id) }}
-          </span>
-        </template>
-
-        <template v-if="column.key === 'actions'">
-          <Button type="primary" :disabled="true" :ghost="true" :danger="true">
-            <template #icon>
-              <DeleteOutlined />
-            </template>
-            Remove
-          </Button>
-        </template>
-
+      <template v-if="column.key == 'address_as'">
+        {{ user.address_as }}
       </template>
-    </Table>
-  </Spin>
 
+      <template v-if="column.key == 'email'">
+        {{ user.email }}
+      </template>
 
-  <Modal v-model:visible="config.userModal.visible" @cancel="closeModal()" title="New Project User" ok-text="Add User" cancel-text="Cancel"
-    :mask-closable="false" @ok="saveNewUser()">
+      <template v-if="column.key == 'role'">
+        <Select
+          :value="user.access_id"
+          @change="projectStore.updateAccess($event, user.id)"
+          v-if="projectStore.userById(userStore.id).access_id == 0"
+          style="width: 100%"
+        >
+          <SelectOption
+            v-for="access in lookupStore.access_types"
+            :value="access.id"
+            :key="access.id"
+          >
+            {{ access.name }}
+          </SelectOption>
+        </Select>
 
-    <Form name="new-user-form" ref="projectUserFormRef" :model="config.userModal.form" layout="vertical">
+        <span v-else>
+          {{ lookupStore.lookupNameById("access_types", user.access_id) }}
+        </span>
+      </template>
 
+      <template v-if="column.key === 'actions'">
+        <Button type="primary" :disabled="true" :ghost="true" :danger="true">
+          <template #icon>
+            <DeleteOutlined />
+          </template>
+          Remove
+        </Button>
+      </template>
+    </template>
+  </Table>
+
+  <Modal
+    v-model:visible="config.userModal.visible"
+    @cancel="closeModal()"
+    title="New Project User"
+    ok-text="Add User"
+    cancel-text="Cancel"
+    :mask-closable="false"
+    @ok="saveNewUser()"
+  >
+    <Form
+      name="new-user-form"
+      ref="projectUserFormRef"
+      :model="config.userModal.form"
+      layout="vertical"
+    >
       <!-- <FormItem label="Full Name" name="name" :rules="[{ required: true, message: 'Please enter full name!' }]">
           <Input v-model:value="config.userModal.form.name" />
         </FormItem> -->
 
-      <FormItem name="email" label="Email" has-feedback :rules="[{ required: true, message: 'Please select a email!' }]">
-        <Select v-model:value="config.userModal.form.email" placeholder="Select email" :allow-clear="true"
-          :options="usersDropdownOptions" :show-search="true" :filter-option="filterUser">
+      <FormItem
+        name="email"
+        label="Email"
+        has-feedback
+        :rules="[{ required: true, message: 'Please select a email!' }]"
+      >
+        <Select
+          v-model:value="config.userModal.form.email"
+          placeholder="Select email"
+          :allow-clear="true"
+          :options="usersDropdownOptions"
+          :show-search="true"
+          :filter-option="filterUser"
+        >
         </Select>
       </FormItem>
 
-      <FormItem name="role_id" label="Role" has-feedback :rules="[{ required: true, message: 'Please select a role!' }]">
+      <FormItem
+        name="role_id"
+        label="Role"
+        has-feedback
+        :rules="[{ required: true, message: 'Please select a role!' }]"
+      >
         <Select v-model:value="config.userModal.form.role_id" placeholder="Select role">
           <SelectOption v-for="access in projectStore.grantableAccess" :key="access.id">
             {{ access.name }}

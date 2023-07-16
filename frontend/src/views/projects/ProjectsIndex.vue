@@ -4,11 +4,13 @@ import { useUserStore } from "@/stores/user";
 import { useRouter } from "vue-router";
 
 import ProjectsTable from "./ProjectsTable.vue";
-import { Divider, Tabs, TabPane } from "ant-design-vue";
+import { Divider, Card, Tabs, TabPane, PageHeader } from "ant-design-vue";
 import ProjectUsers from "./ProjectUsers.vue";
 import ProjectStakeholders from "./ProjectStakeholders.vue";
+import { useProjectStore } from "@/stores/projects";
 
 const userStore = useUserStore();
+const store = useProjectStore();
 
 const activeTab = ref("users");
 
@@ -22,12 +24,14 @@ onMounted(() => {
 </script>
 
 <template>
-  <section class="section">
+  <PageHeader
+    style="border: 1px solid rgb(235, 237, 240)"
+    :title="store.projectName"
+    sub-title="Manage project users and stakeholders"
+  />
+
+  <Card :bordered="false">
     <!-- Projects table component -->
-    <ProjectsTable></ProjectsTable>
-
-    <Divider></Divider>
-
     <Tabs v-model:activeKey="activeTab" centered>
       <TabPane key="users" tab="Project Users">
         <ProjectUsers></ProjectUsers>
@@ -37,5 +41,9 @@ onMounted(() => {
         <ProjectStakeholders></ProjectStakeholders>
       </TabPane>
     </Tabs>
-  </section>
+
+    <Divider></Divider>
+
+    <ProjectsTable></ProjectsTable>
+  </Card>
 </template>

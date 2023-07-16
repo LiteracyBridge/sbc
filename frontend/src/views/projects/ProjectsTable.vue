@@ -96,21 +96,16 @@ function filterCountry(input: string, option: any) {
     :loading="config.loading"
   >
     <template #title>
-      <Row justify="space-between">
-        <Col :span="20">
-          <Typography :level="2">My Projects</Typography>
-        </Col>
+      <div class="full-width">
+        <Typography :level="2">My Projects</Typography>
 
-        <Col :span="4">
-          <!-- TODO: implement creating new project in a modal -->
-          <Button type="primary" @click="config.projectModal.visible = true">
-            <template #icon>
-              <PlusCircleOutlined />
-            </template>
-            Add Project
-          </Button>
-        </Col>
-      </Row>
+        <Button type="primary" @click="config.projectModal.visible = true">
+          <template #icon>
+            <PlusCircleOutlined />
+          </template>
+          Add Project
+        </Button>
+      </div>
     </template>
 
     <template #bodyCell="{ column, record: project }">
