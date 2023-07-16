@@ -35,7 +35,7 @@ def find_project(id: int, db: Session = Depends(models.get_db)):
     record = (
         db.query(Project)
         .filter(Project.id == id)
-        .options(subqueryload(Project.stakeholders))
+        .options(subqueryload(Project.stakeholders), subqueryload(Project.organisation))
         .first()
     )
 

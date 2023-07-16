@@ -9,19 +9,26 @@ import "@aws-amplify/ui-vue/styles.css";
 import { Amplify } from "aws-amplify";
 import awsconfig from "./aws-exports";
 import { useSideNavStore } from "@/stores/sideNav";
-import { useUserStore } from '@/stores/user';
+import { useUserStore } from "@/stores/user";
 import { AppStore } from "./stores/app.store";
 import GridLoader from "./components/spinners/GridLoader.vue";
-import { Layout, LayoutContent, LayoutFooter, LayoutHeader, LayoutSider, Space } from "ant-design-vue";
+import {
+  Layout,
+  LayoutContent,
+  LayoutFooter,
+  LayoutHeader,
+  LayoutSider,
+  Space,
+} from "ant-design-vue";
 
 import Header from "./components/Layout/Header.vue";
 import Sidebar from "./components/Layout/Sidebar.vue";
 import { MenuUnfoldOutlined } from "@ant-design/icons-vue";
 
 const userStore = useUserStore();
-const appStore = AppStore()
+const appStore = AppStore();
 const route = useRoute(),
-  router = useRouter()
+  router = useRouter();
 
 // Set ONLINE to true when connected to the internet or false when offline
 const ONLINE = true;
@@ -41,9 +48,9 @@ onMounted(async () => {
   // router.replace(route.name() || '/')
   // appStore.downloadObjects()
 
-  console.warn(route.fullPath)
+  console.warn(route.fullPath);
   if (router.hasRoute(route.name)) {
-    await router.replace(router.currentRoute.value.fullPath)
+    await router.replace(router.currentRoute.value.fullPath);
   }
 
   // if (ONLINE) {
@@ -52,7 +59,6 @@ onMounted(async () => {
   //   appStore.setLoading(false)
   // }
 });
-
 </script>
 
 <template>
@@ -63,8 +69,6 @@ onMounted(async () => {
     <!-- <GridLoader :loading="appStore.isLoading"></GridLoader> -->
   </div>
 
-
-
   <Layout v-else>
     <Sidebar></Sidebar>
     <!-- <LayoutSider>
@@ -72,20 +76,25 @@ onMounted(async () => {
     </LayoutSider> -->
 
     <Layout>
-      <LayoutHeader :has-sider="true" style="background: #ffffff; padding: 0px 16px 0px 0px;">
+      <!-- <LayoutHeader :has-sider="true" style="background: #ffffff; padding: 0px 16px 0px 0px;">
         <MenuUnfoldOutlined v-if="sideNavStore.visible" class="trigger"
           @click="() => (sideNavStore.visible = !sideNavStore.visible)" />
-        <MenuUnfoldOutlined v-else class="trigger" @click="() => (sideNavStore.visible = !sideNavStore.visible)" />
+        <MenuUnfoldOutlined v-else class="trigger" @click="() => (sideNavStore.visible = !sideNavStore.visible)" /> -->
 
-        <!-- Place a dropdown at the end of the header -->
+      <!-- Place a dropdown at the end of the header -->
 
-        <Header></Header>
-      </LayoutHeader>
+      <Header></Header>
+      <!-- </LayoutHeader> -->
 
-      <LayoutContent :style="{ margin: '24px 16px 0px 16px', padding: '24px', background: '#ffffff', minHeight: '280px' }">
-
+      <LayoutContent
+        :style="{
+          margin: '24px 16px 0px 16px',
+          padding: '24px',
+          background: '#ffffff',
+          minHeight: '280px',
+        }"
+      >
         <router-view :key="$route.fullPath"></router-view>
-
       </LayoutContent>
 
       <LayoutFooter>Footer</LayoutFooter>
@@ -114,16 +123,10 @@ html {
   color: #1890ff;
 }
 
-.logo {
-  height: 32px;
-  background: rgba(255, 255, 255, 0.3);
-  margin: 16px;
-}
 
 .site-layout .site-layout-background {
   background: #ffffff;
 }
-
 
 /* Styling for the app wrapper */
 .app-wrapper {

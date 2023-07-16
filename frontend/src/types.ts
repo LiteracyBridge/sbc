@@ -22,6 +22,16 @@ class Timestamps {
   created_at?: Date;
   deleted_at?: Date;
 }
+
+export class Organisation extends Timestamps {
+  id: number;
+  name: string;
+  country_id: number;
+
+  users: User[];
+  projects: Project[];
+}
+
 export class User {
   id: number;
   email: string;
@@ -56,6 +66,7 @@ export class Project extends Timestamps {
   sustainability_strategy?: string;
   editing_user_id?: number;
 
+  organisation: Organisation;
   stakeholders: Stakeholder[] = [];
 }
 

@@ -3,7 +3,8 @@ import { computed, ref, watch } from "vue";
 import { useProjectStore } from "@/stores/projects";
 import { useSideNavStore } from "@/stores/sideNav";
 import { useRouter } from "vue-router";
-import { MenuItem, LayoutSider, Menu, Divider } from "ant-design-vue";
+import { MenuItem, LayoutSider, Menu, Divider, Typography, Avatar } from "ant-design-vue";
+import { UserOutlined } from "@ant-design/icons-vue";
 
 const router = useRouter();
 
@@ -108,9 +109,15 @@ watch(projectSelected, (newVal) => {
     width="250px"
   >
     <div class="logo">
-      {{ projectStore.projectName }}
-      <Divider></Divider>
+      <Avatar id="logo-image">
+        <template #icon><UserOutlined /></template>
+      </Avatar>
+
+      <span style="color: white">
+        {{ projectStore.current_project.organisation?.name }}
+      </span>
     </div>
+    <Divider :style="{ backgroundColor: 'white' }"></Divider>
 
     <Menu v-model:selectedKeys="config.activeMenu" theme="dark" mode="inline">
       <MenuItem v-for="(item, index) in menuItems" :key="index">
@@ -135,4 +142,18 @@ watch(projectSelected, (newVal) => {
   </LayoutSider>
 </template>
 
-<style scoped></style>
+<style scoped>
+.logo {
+  height: 48px;
+  /* background: rgba(255, 255, 255, 0.3); */
+  margin: 10px;
+  padding-top: 8px;
+  color: white;
+  text-align: center;
+  font-size: 18px;
+}
+
+#logo-image {
+  margin-right: 8px;
+}
+</style>

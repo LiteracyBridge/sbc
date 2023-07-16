@@ -74,6 +74,10 @@ class Organisation(Base):
     users: Mapped[List["User"]] = relationship(
         "User", back_populates="organisation", load_on_pending=True
     )
+    projects: Mapped[List["Project"]] = relationship(
+        "Project",
+        back_populates="organisation",
+    )
 
 
 class Invitation(Base):
@@ -134,6 +138,9 @@ class Project(Base):
     # Relations
     stakeholders: Mapped[List["Stakeholder"]] = relationship(
         "Stakeholder", back_populates="project"
+    )
+    organisation: Mapped["Organisation"] = relationship(
+        "Organisation", back_populates="projects"
     )
 
 
@@ -225,7 +232,10 @@ class IndicatorType(Base):
     name: Mapped[str]
     parent_id: Mapped[int] = mapped_column(Integer, ForeignKey("lu_indicator_types.id"))
 
-    parent = relationship("IndicatorType", remote_side=[id], load_on_pending=True)
+    parent = relationship(
+        "IndicatorType",
+        remote_side=[id],
+    )
     indicators = relationship("Indicator", back_populates="group")
 
 
