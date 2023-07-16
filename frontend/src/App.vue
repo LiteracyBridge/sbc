@@ -102,7 +102,11 @@ onMounted(async () => {
           <router-view :key="$route.fullPath"></router-view>
         </LayoutContent>
 
-        <LayoutFooter>Footer</LayoutFooter>
+        <LayoutFooter class="text-center">
+          <span>
+            © {{ new Date().getFullYear() }} AMPLIO NETWORK. All rights reserved.</span
+          >
+        </LayoutFooter>
       </Layout>
     </Layout>
   </div>
