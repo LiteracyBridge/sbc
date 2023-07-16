@@ -19,6 +19,9 @@ import {
   LayoutHeader,
   LayoutSider,
   Space,
+  FloatButton,
+  Popconfirm,
+  ConfigProvider,
 } from "ant-design-vue";
 
 import Header from "./components/Layout/Header.vue";
@@ -74,41 +77,62 @@ onMounted(async () => {
       <router-view :key="$route.fullPath"></router-view>
     </div>
 
-    <Layout v-else>
-      <Sidebar></Sidebar>
-      <!-- <LayoutSider>
+    <ConfigProvider
+      v-else
+      :theme="{
+        token: {
+          colorPrimary: '#51be8d',
+        },
+      }"
+    >
+      <Layout>
+        <Sidebar></Sidebar>
+        <!-- <LayoutSider>
       <LeftSideNav v-if="showSideNav" v-model="showSideNav" />
     </LayoutSider> -->
 
-      <Layout>
-        <!-- <LayoutHeader :has-sider="true" style="background: #ffffff; padding: 0px 16px 0px 0px;">
+        <Layout>
+          <!-- <LayoutHeader :has-sider="true" style="background: #ffffff; padding: 0px 16px 0px 0px;">
         <MenuUnfoldOutlined v-if="sideNavStore.visible" class="trigger"
           @click="() => (sideNavStore.visible = !sideNavStore.visible)" />
         <MenuUnfoldOutlined v-else class="trigger" @click="() => (sideNavStore.visible = !sideNavStore.visible)" /> -->
 
-        <!-- Place a dropdown at the end of the header -->
+          <!-- Place a dropdown at the end of the header -->
 
-        <Header></Header>
-        <!-- </LayoutHeader> -->
+          <Header></Header>
+          <!-- </LayoutHeader> -->
 
-        <LayoutContent
-          :style="{
-            margin: '24px 16px 0px 16px',
-            padding: '24px',
-            background: '#ffffff',
-            minHeight: '280px',
-          }"
-        >
-          <router-view :key="$route.fullPath"></router-view>
-        </LayoutContent>
-
-        <LayoutFooter class="text-center">
-          <span>
-            © {{ new Date().getFullYear() }} AMPLIO NETWORK. All rights reserved.</span
+          <LayoutContent
+            :style="{
+              margin: '24px 16px 0px 16px',
+              padding: '24px',
+              background: '#ffffff',
+              minHeight: '280px',
+            }"
           >
-        </LayoutFooter>
+            <router-view :key="$route.fullPath"></router-view>
+
+            <FloatButton tooltip="HELP INFO"></FloatButton>
+
+            <FloatButton
+              :style="{
+                right: '94px',
+              }"
+            >
+              <template #tooltip>
+                <div>Documents</div>
+              </template>
+            </FloatButton>
+          </LayoutContent>
+
+          <LayoutFooter class="text-center">
+            <span>
+              © {{ new Date().getFullYear() }} AMPLIO NETWORK. All rights reserved.</span
+            >
+          </LayoutFooter>
+        </Layout>
       </Layout>
-    </Layout>
+    </ConfigProvider>
   </div>
 </template>
 

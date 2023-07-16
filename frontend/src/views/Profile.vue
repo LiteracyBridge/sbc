@@ -41,7 +41,7 @@ watch(props, (newProps)=> {
 
 <template>
   <Modal
-    v-model:visible="config.visible"
+    v-model:open="config.visible"
     title="Update Profile"
     @cancel="closeModal()"
     ok-text="Update Profile"
@@ -53,7 +53,7 @@ watch(props, (newProps)=> {
     <Spin :spinning="config.loading">
       <Row :gutter="8">
         <Col :span="7">
-          <Avatar :size="128" style="margin: 0 auto; display: block">
+          <Avatar :size="128" style="margin: 35% auto; display: block">
             <template #icon>
               <UserOutlined />
             </template>
