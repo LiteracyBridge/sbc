@@ -26,11 +26,14 @@ import {
   Divider,
 } from "ant-design-vue";
 import { useProjectStore } from "@/stores/projects";
+import Profile from "@/views/Profile.vue";
 
 const router = useRouter();
 const userStore = useUserStore();
 const sideNavStore = useSideNavStore();
 const projectStore = useProjectStore();
+
+const profileVisible = ref(false);
 
 async function signOut() {
   try {
@@ -61,6 +64,8 @@ function changeProject(prjId: number) {
 </script>
 
 <template>
+  <Profile :visible="profileVisible" @close="profileVisible = false"></Profile>
+
   <LayoutHeader :has-sider="true" style="background: #ffffff; padding: 0px 16px 0px 0px">
     <div id="header-items">
       <span>
@@ -116,21 +121,19 @@ function changeProject(prjId: number) {
 
           <template #overlay>
             <Menu>
-              <MenuItem key="projects" :click="signOut">
+              <MenuItem key="projects">
                 <RouterLink to="/projects">
                   <AppstoreOutlined />
                   <span> Manage Projects </span>
                 </RouterLink>
               </MenuItem>
 
-              <MenuItem key="profile" :click="signOut">
-                <RouterLink to="/profile">
-                  <UserOutlined />
-                  <span> My Profile </span>
-                </RouterLink>
+              <MenuItem key="profile" @click="profileVisible = true">
+                <UserOutlined />
+                <span> My Profile </span>
               </MenuItem>
 
-              <MenuItem key="logout" :click="signOut">
+              <MenuItem key="logout" @click="signOut">
                 <LogoutOutlined />
                 <span> Logout </span>
               </MenuItem>
