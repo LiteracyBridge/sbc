@@ -16,7 +16,8 @@ from routes import (
     organisation_route,
     communication_route,
     data_service_route,
-    open_ai_route
+    open_ai_route,
+    feedback_route
 )
 from monitoring import logging_config
 from middlewares.correlation_id_middleware import CorrelationIdMiddleware
@@ -151,6 +152,12 @@ app.include_router(
     open_ai_route.router,
     prefix="/open-ai",
     tags=["open-ai"],
+    dependencies=[Depends(models.get_db)],
+)
+app.include_router(
+    feedback_route.router,
+    prefix="/feedback",
+    tags=["feedback"],
     dependencies=[Depends(models.get_db)],
 )
 

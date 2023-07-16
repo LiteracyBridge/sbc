@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // Importing required Vue and external libraries
-import { onMounted, computed } from "vue";
+import { onMounted, computed, ref } from "vue";
 import { RouterView, useRoute, useRouter } from "vue-router";
 import { useLookupStore } from "./stores/lookups";
 import NavBar from "@/components/Layout/NavBar.vue";
@@ -27,14 +27,15 @@ import {
 import Header from "./components/Layout/Header.vue";
 import Sidebar from "./components/Layout/Sidebar.vue";
 import { MenuUnfoldOutlined } from "@ant-design/icons-vue";
+import Feedback from "./views/Feedback.vue";
 
 const userStore = useUserStore();
 const appStore = AppStore();
+
 const route = useRoute(),
   router = useRouter();
 
-// Set ONLINE to true when connected to the internet or false when offline
-const ONLINE = true;
+const feedbackModalVisible = ref(false);
 
 // Initialize the lookup store and side navigation store
 // const lookupStore = useLookupStore();
@@ -86,6 +87,11 @@ onMounted(async () => {
       }"
     >
       <Layout>
+        <Feedback
+          :visible="feedbackModalVisible"
+          @close="feedbackModalVisible = false"
+        ></Feedback>
+
         <Sidebar></Sidebar>
         <!-- <LayoutSider>
       <LeftSideNav v-if="showSideNav" v-model="showSideNav" />
@@ -112,16 +118,13 @@ onMounted(async () => {
           >
             <router-view :key="$route.fullPath"></router-view>
 
-            <FloatButton tooltip="HELP INFO"></FloatButton>
-
             <FloatButton
-              :style="{
-                right: '94px',
-              }"
+              tooltip="Send us Feedback"
+              @click.prevent="feedbackModalVisible = true"
             >
-              <template #tooltip>
-                <div>Documents</div>
-              </template>
+              <!-- <template #icon>
+
+            </template> -->
             </FloatButton>
           </LayoutContent>
 

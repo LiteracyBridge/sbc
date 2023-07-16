@@ -148,7 +148,7 @@ const isEditing = computed(() => config.value.modal.form?.id != null);
   </Table>
 
   <Modal
-    v-model:visible="config.modal.visible"
+    v-model:open="config.modal.visible"
     @cancel="closeModal()"
     :mask-closable="false"
   >
