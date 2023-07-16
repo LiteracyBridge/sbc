@@ -1,415 +1,339 @@
-<script lang="ts"  setup>
-// @ts-ignore
-import mermaidAPI from "/node_modules/mermaid/dist/mermaid.esm.mjs";
-import { onMounted, onUnmounted, reactive, ref, computed } from "vue";
-import { useSideNavStore } from "@/stores/sideNav";
-import axios from "axios";
-import { onClickOutside } from "@vueuse/core";
-import IndicatorBrowserPanel from "@/components/IndicatorBrowserPanel.vue";
+<script lang="ts" setup>
+import { ref, computed, watch } from "vue";
+import {
+  Popconfirm,
+  Checkbox,
+  Button,
+  Card,
+  Col,
+  Divider,
+  Form,
+  FormItem,
+  Input,
+  Modal,
+  Popover,
+  Row,
+  Select,
+  SelectOption,
+  Space,
+  Spin,
+  Switch,
+  Textarea,
+  message,
+  Empty,
+  Tag,
+  Tooltip,
+} from "ant-design-vue";
 import { ApiRequest } from "@/apis/api";
+import { TheoryOfChange, THEORY_OF_CHANGE_TYPES, SEMS } from "@/types";
 
-const form = ref<{
-  name: string; type: string | number,
-  sem: string | number,
-  is_validated: boolean,
-  description: string,
-  to_id?: number | number,
-  from_id?: number | number,
-}>({
-  name: undefined,
-  type: undefined,
-  sem: undefined,
-  description: undefined,
-  is_validated: false,
-  to_id: undefined,
-  from_id: undefined,
-});
-const config = ref({ isLoading: false });
+import IndicatorBrowserPanel from "./IndicatorBrowserPanel.vue";
+import { useTheoryOfChangeStore } from "@/stores/theory_of_change";
+import { useProjectStore } from "@/stores/projects";
+import { CloseOutlined, DeleteOutlined, PlusCircleOutlined } from "@ant-design/icons-vue";
+import { useUserStore } from "@/stores/user";
 
+const emit = defineEmits<{
+  (e: "saved", data: TheoryOfChange[]): TheoryOfChange[];
+  (e: "closed"): void;
+  (e: "deleted", id: number): number;
+}>();
 
-const isPanelVisible = ref(false);
-const showIndicatorModal = ref(false);
+const props = defineProps<{ visible: boolean; toc?: TheoryOfChange }>();
 
-const svgUrl = ref("");
-const svgImgSrcUrl = ref("");
-const diagramContainer = ref(null);
-const addNodeLabel = ref("");
-const addNodeLogicModel = ref("");
-const fromNodeId = ref(null);
-const selectedNodeId = ref(null);
-const selectedEdge = ref(null);
+const store = useTheoryOfChangeStore(),
+  projectStore = useProjectStore();
 
-
-const emit = defineEmits(['onItemAdded', 'isClosed']);
-
-const props = defineProps({
-  isNew: {
-    type: Boolean,
-    required: true,
-  },
-  theoryOfChangeId: {
-    type: Number,
-    required: false,
-  },
-  isVisible: {
-    type: Boolean,
-    required: true,
-  },
-  itemDetails: {
-    type: Object,
-    required: false,
-  },
-  items: {
-    type: Array,
-    required: false,
-    default: []
-  },
+const config = ref({
+  visible: props.visible,
+  deleting: false,
+  loading: false,
+  form: props.toc || new TheoryOfChange(),
+  browserVisible: false,
 });
 
-const getItems = computed<{ name: string; id: number }[]>(() => {
-  return props.items as { name: string; id: number }[];
+watch(props, (newProps) => {
+  config.value.visible = newProps.visible;
+  config.value.form = newProps.toc || new TheoryOfChange();
+});
+
+const isNew = computed(() => config.value.form?.id == null);
+
+const getTocItemIndicators = computed(() => {
+  if (isNew.value) return [];
+
+  return store.theoryOfChangeItemIndicators(config.value.form?.id) ?? [];
 });
 
 const closeModal = () => {
+  config.value.visible = false;
+  config.value.form = new TheoryOfChange();
 
-  selectedNodeId.value = null;
-  selectedEdge.value = null;
-  showIndicatorModal.value = false;
-
-  // if (tempNavHidden) {
-  //   tempNavHidden = false;
-  // }
-
-  emit("isClosed", true);
-  useSideNavStore().show();
-  // drawDiagram();
+  emit("closed");
 };
 
-const saveForm = async () => {
-  // TODO: make http request to save the form
-  // TODO: send response as callback to close the form
-  const fields = form.value;
+function saveFormItem() {
+  const fields = config.value.form;
+  const data = {
+    ...fields,
+    is_validated: fields.is_validated || false,
+    editing_user_id: useUserStore().id,
+  };
 
-  config.value.isLoading = true;
+  config.value.loading = true;
+  if (!isNew.value) {
+    // Update item
+    ApiRequest.put<TheoryOfChange>(
+      `theory-of-change/${projectStore.prj_id}/item/${props.toc?.id}`,
+      data
+    )
+      .then((resp) => {
+        store.theory_of_change = resp;
 
-  // TODO: if item is not new, then update it
-
-  await ApiRequest.post(`theory-of-change/${props.theoryOfChangeId}/item`, {
-    name: fields.name,
-    type_id: 1,
-    from_id: fields.from_id,
-    to_id: fields.to_id,
-    sem_id: 1,
-    description: "dummy description"
-  }).then(resp => {
-    console.log(resp)
-
-    emit("onItemAdded", resp);
-    closeModal();
-  }).finally(() => {
-    config.value.isLoading = false;
-  });
+        emit("saved", resp);
+        closeModal();
+        message.success("Item updated successfully");
+      })
+      .finally(() => {
+        config.value.loading = false;
+      });
+  } else {
+    //  Create item
+    ApiRequest.post<TheoryOfChange>(`theory-of-change/${projectStore.prj_id}/item`, data)
+      .then((resp) => {
+        store.theory_of_change = resp;
+        emit("saved", resp);
+        closeModal();
+        message.success("Item created successfully");
+      })
+      .finally(() => {
+        config.value.loading = false;
+      });
+  }
 }
 
 function deleteItem() {
-  // TODO: implement deleting of the item
-  // remove edges
+  config.value.deleting = true;
+
+  ApiRequest.delete(`theory-of-change/${projectStore.prj_id}/item/${props.toc?.id}`)
+    .then((_) => {
+      emit("deleted", props.toc?.id);
+      closeModal();
+      message.success("Item deleted successfully");
+    })
+    .finally(() => {
+      config.value.deleting = false;
+    });
 }
 
+function indicatorSaved(resp: TheoryOfChange[]) {
+  config.value.form = resp.find((i) => i.id == config.value.form.id);
+}
 
-onMounted(() => {
-  if (props.isVisible) {
-    useSideNavStore().hide();
-  }
-
-  if (props.itemDetails != null) {
-    console.log(props.itemDetails)
-    form.value = props.itemDetails as any;
-  }
-  // drawDiagram();
-});
-const modalRef = ref(null);
-const edgeModalRef = ref(null);
-
-onClickOutside(modalRef, closeModal);
-onClickOutside(edgeModalRef, closeModal);
-
+function deleteIndicator(id: number) {
+  store
+    .saveIndicators({
+      tocId: config.value.form.id,
+      data: { removed: [id], removed_custom: [], added: [] },
+    })
+    .then((resp) => {
+      indicatorSaved(resp);
+      message.success("Indicator deleted successfully");
+    });
+}
 </script>
 
 <template>
-  <div>
+  <Modal
+    v-model:visible="config.visible"
+    @cancel="closeModal()"
+    @ok="closeModal()"
+    width="700px"
+  >
+    <!-- IndiKit Browser Panel -->
+    <IndicatorBrowserPanel
+      :is-visible="config.browserVisible"
+      @is-closed="config.browserVisible = false"
+      :toc-item="config.form"
+      @is-saved="indicatorSaved($event)"
+    >
+    </IndicatorBrowserPanel>
 
-    <div class="`modal p-2`" :class="{ 'is-active': props.isVisible }">
-      <div class="modal-background"></div>
+    <template #footer>
+      <div style="width: 100%; display: flex; justify-content: space-between">
+        <Popconfirm
+          title="Are you sure? All its indicators and activities will be deleted!"
+          ok-text="Yes"
+          cancel-text="No"
+          @confirm="deleteItem()"
+        >
+          <Button
+            role="button"
+            type="primary"
+            :danger="true"
+            v-if="!isNew"
+            :loading="config.deleting"
+            :disabled="config.deleting"
+          >
+            <DeleteOutlined />
+            Delete
+          </Button>
+        </Popconfirm>
 
-      <div ref="modalRef" class="modal-card">
-        <header class="modal-card-head">
-          <p class="modal-card-title">Theory of Change Item</p>
-          <button @click="closeModal" class="delete" aria-label="close"></button>
-        </header>
+        <Space>
+          <Button
+            type="primary"
+            :loading="config.loading"
+            :disabled="config.loading"
+            role="button"
+            @click.prevent="saveFormItem()"
+          >
+            {{ isNew ? "Save" : "Update" }}
+          </Button>
 
-        <section class="modal-card-body">
-          <form>
-
-            <!-- <div class="level-left is-normal">
-              <label class="label">Label</label>
-            </div> -->
-            <div class="field">
-              <div class="field-body">
-                <div class="field">
-                  <div class="control">
-                    <label class="label">Label</label>
-                    <input class="input" type="text" maxlength="80" v-model="form.name" />
-                  </div>
-                </div>
-              </div>
-              <!-- <div class="level-right">
-                <div class="level-item">
-                  <button class="button is-danger ml-6" @click="deleteNode(selectedNodeId)">
-                    Delete
-                  </button>
-                </div>
-              </div> -->
-            </div>
-
-            <div class="field is-horizontal">
-              <div class="field-body">
-
-                <div class="field">
-                  <label class="label">Links From</label>
-
-                  <div class="control">
-                    <div class="select is-fullwidth">
-                      <!-- TODO: show list of existing indicators -->
-                      <select v-model="form.from_id">
-                        <!-- @ts-ignore -->
-                        <option v-for="item in getItems" :key="item.id" :value="item.id">
-                          {{ item.name }}
-                        </option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="field">
-                  <label class="label">Links To</label>
-
-                  <div class="control">
-                    <div class="select is-fullwidth">
-                      <!-- TODO: show list of existing indicators -->
-                      <select v-model="form.to_id">
-                        <!-- @ts-ignore -->
-                        <option v-for="item in getItems" :key="item.id" :value="item.id">
-                          {{ item.name }}
-                        </option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-
-            <div class="field is-horizontal">
-              <div class="field-body">
-                <div class="columns">
-                  <!-- Column 1: SEM Level and Category -->
-
-                  <div class="column">
-                    <div class="field">
-                      <label class="label">Logic Model Category</label>
-                      <div class="control">
-                        <div class="select">
-                          <select v-model="form.type">
-                            <option value="activity">Activity</option>
-                            <option value="output">Output</option>
-                            <option value="intermediate_outcome">
-                              Intermediate Outcome
-                            </option>
-                            <option value="outcome">Outcome</option>
-                            <option value="impact">Impact</option>
-                          </select>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Column 2: Audience -->
-                  <div class="column">
-                    <div class="field">
-                      <label class="label">SEM Level</label>
-                      <div class="control">
-                        <div class="select">
-                          <select v-model="form.sem">
-                            <option value="individual">Individual</option>
-                            <option value="interpersonal">Interpersonal</option>
-                            <option value="community">Community</option>
-                            <option value="organizational">Organizational</option>
-                            <option value="policy">Policy</option>
-                          </select>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="column">
-                    <div class="field">
-                      <div class="control">
-                        <label class="label">
-                          Validated<br />
-                          <input type="checkbox" v-model="form.is_validated" />
-                        </label>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <!--
-                  <div class="field">
-                    <label class="label">Indicator</label>
-                    <div class="control">
-                      <input class="input" type="text" maxlength="80" v-model="selectedNode.indicator" />
-
-                      <button class="button is-small" role="button"
-                        @click.prevent="isIndicatorModalVisible = !isIndicatorModalVisible">
-                        <span class="icon is-small mr-1">
-                          <i class="fas fa-plus"></i>
-                        </span>
-                        Add Indicator
-                      </button>
-                    </div>
-                  </div> -->
-
-
-            <div class="field">
-              <label class="label">Description</label>
-              <div class="control">
-                <textarea class="textarea" rows="4" columns="80" maxlength="999" v-model="form.description" />
-              </div>
-            </div>
-
-
-            <!-- TODO: implement saving of indicators -->
-            <div class="field">
-              <label class="label">Indicators</label>
-
-              <hr>
-
-              <div class="field is-grouped is-grouped-multiline">
-                <div class="control">
-                  <div class="tags has-addons">
-                    <a class="tag is-link">Technology</a>
-                    <a class="tag is-delete"></a>
-                  </div>
-                </div>
-
-                <div class="control">
-                  <div class="tags has-addons">
-                    <a class="tag is-link">CSS</a>
-                    <a class="tag is-delete"></a>
-                  </div>
-                </div>
-
-                <div class="control">
-                  <div class="tags has-addons">
-                    <a class="tag is-link">Flexbox</a>
-                    <a class="tag is-delete"></a>
-                  </div>
-                </div>
-
-                <div class="control">
-                  <div class="tags has-addons">
-                    <a class="tag is-link">Web Design</a>
-                    <a class="tag is-delete"></a>
-                  </div>
-                </div>
-              </div>
-
-              <!-- <div class="control">
-                      <input class="input" type="text" placeholder="Text input">
-                    </div> -->
-              <button class="button is-small" role="button"
-                @click.prevent="isPanelVisible = !isPanelVisible; showIndicatorModal = true; useSideNavStore().hide();">
-                <span class="icon is-small mr-1">
-                  <i class="fas fa-plus"></i>
-                </span>
-                Add Indicator
-              </button>
-            </div>
-
-          </form>
-        </section>
-
-        <footer class="modal-card-foot" style="display: block;">
-          <div class="level">
-            <div class="level-left">
-              <div class="level-item">
-                <button role="button" class="button is-small is-danger" @click="deleteItem()" v-if="props.isNew == false">
-                  <span class="icon">
-                    <i class="fas fa-trash"></i>
-                  </span>
-                  <!-- Delete Item -->
-                </button>
-
-              </div>
-            </div>
-
-            <div class="level-right">
-              <div class="level-item">
-                <button class="button is-primary" :class="{ 'is-loading': config.isLoading }" role="button"
-                  @click.prevent="saveForm()">Save</button>
-                <button class="button" role="button" @click="closeModal">Close</button>
-              </div>
-            </div>
-          </div>
-          <!-- <button class="button is-success">Save changes</button> -->
-          <!-- <button class="button" @click="closeModal">Cancel</button> -->
-        </footer>
+          <Button role="button" @click="closeModal()">Cancel</Button>
+        </Space>
       </div>
+    </template>
 
-    </div>
+    <Spin :spinning="config.loading || config.deleting || store.isLoading">
+      <Form layout="vertical" :model="config.form">
+        <FormItem
+          name="name"
+          label="Label"
+          has-feedback
+          :rules="[{ required: true, message: 'Please enter theory of change label!' }]"
+        >
+          <Input v-model:value="config.form.name" placeholder="Enter label" />
+        </FormItem>
 
-  </div>
+        <Row :gutter="8">
+          <!-- <Col :span="12">
+            <FormItem label="Links From" name="from_id">
+              <Select v-model:value="config.form.from_id" :allow-clear="true">
+                <SelectOption v-for="item in store?.data" :key="item.id" :value="item.id">
+                  {{ item.name }}
+                </SelectOption>
+              </Select>
+            </FormItem>
+          </Col> -->
+
+          <Col :span="12">
+            <FormItem label="Links To" name="links_to">
+              <!-- TODO: show list of existing indicators -->
+              <Select
+                v-model:value="config.form.links_to"
+                :allow-clear="true"
+                mode="multiple"
+              >
+                <SelectOption v-for="item in store?.data" :key="item.id" :value="item.id">
+                  {{ item.name }}
+                </SelectOption>
+              </Select>
+            </FormItem>
+          </Col>
+
+          <Col :span="12">
+            <FormItem
+              name="type_id"
+              label="Logic Model Category"
+              has-feedback
+              :rules="[{ required: true, message: 'Please select a category model!' }]"
+            >
+              <Select v-model:value="config.form.type_id">
+                <SelectOption
+                  v-for="key in Object.keys(THEORY_OF_CHANGE_TYPES)"
+                  :key="key"
+                  :value="+key"
+                >
+                  {{ THEORY_OF_CHANGE_TYPES[key] }}
+                </SelectOption>
+              </Select>
+            </FormItem>
+          </Col>
+        </Row>
+
+        <Row :gutter="8">
+          <Col :span="12">
+            <FormItem name="sem_id" label="SEM Level">
+              <Select v-model:value="config.form.sem_id" :allow-clear="true">
+                <SelectOption v-for="key in Object.keys(SEMS)" :key="key" :value="+key">
+                  {{ SEMS[key] }}
+                </SelectOption>
+              </Select>
+            </FormItem>
+          </Col>
+
+          <Col :span="12">
+            <FormItem
+              name="is_validated"
+              label="Is Theory of Change Validated?"
+              has-feedback
+              :rules="[{ required: false }]"
+            >
+              <Checkbox v-model:checked="config.form.is_validated">Validated</Checkbox>
+            </FormItem>
+          </Col>
+        </Row>
+
+        <!-- <div class="field">
+            <div class="control">
+              <label class="label">
+                Validated
+                <input type="checkbox" class="ml-3" v-model="tocItemModalConfig.form.is_validated" />
+              </label>
+            </div>
+          </div> -->
+
+        <FormItem
+          name="description"
+          label="Description"
+          has-feedback
+          :rules="[{ required: false }]"
+        >
+          <Textarea v-model:value="config.form.description"> </Textarea>
+        </FormItem>
+
+        <!-- Indicators -->
+        <div v-if="props.toc?.id != null">
+          <!-- <div class="field"> -->
+          <Divider>Indicators</Divider>
+
+          <!-- <Divider></Divider> -->
+          <Empty
+            description="No indicators added yet."
+            v-if="getTocItemIndicators?.length == 0"
+          ></Empty>
+
+          <template
+            v-else
+            v-for="(item, index) in store.theoryOfChangeItemIndicators(config.form.id)"
+            :key="item.id"
+          >
+            <!-- TODO: open indicator browser on click -->
+            <Tag
+              :closable="true"
+              @click="config.browserVisible = true"
+              @close="deleteIndicator(item.id)"
+            >
+              {{ item.name }}
+            </Tag>
+          </template>
+
+          <Button
+            style="margin-top: 10px"
+            size="small"
+            role="button"
+            @click="config.browserVisible = !config.browserVisible"
+          >
+            <PlusCircleOutlined />
+            Add or Edit Indicators
+          </Button>
+        </div>
+        <!-- </div> -->
+      </Form>
+    </Spin>
+  </Modal>
 </template>
 
-<style>
-</style>
-
-
-
-<!--
-        <div class="field">
-          <div class="control">
-            <div>
-              <button class="button is-info" type="button" @click="uploadDiagram">
-                Upload
-              </button>
-            </div>
-          </div>
-        </div>
-        <div class="field">
-          <div class="control">
-            <div>
-              <button class="button is-info" type="button" @click="getJSON">
-                Download JSON
-              </button>
-            </div>
-          </div>
-        </div>
--->
-
-
-
-        <!-- <div class="field" v-if="true">
-          <label class="label">JSON String to Import</label>
-          <div class="control">
-            <input
-              class="input"
-              @change="diagram.parseJSON(textToImport)"
-              type="text"
-              name="importNode"
-              id="importNode"
-              v-model="textToImport"
-            />
-          </div>
-        </div> -->
+<style></style>

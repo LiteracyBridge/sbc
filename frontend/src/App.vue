@@ -39,7 +39,7 @@ const showSideNav = computed(() => sideNavStore.visible);
 // On component mount, download the lookup data if online
 onMounted(async () => {
   // router.replace(route.name() || '/')
-  appStore.downloadObjects()
+  // appStore.downloadObjects()
 
   console.warn(route.fullPath)
   if (router.hasRoute(route.name)) {

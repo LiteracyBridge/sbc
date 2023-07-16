@@ -1,26 +1,40 @@
 <script lang="ts" setup>
+import { DownOutlined, PlusCircleOutlined } from "@ant-design/icons-vue";
+import {
+  Tag,
+  Table,
+  Divider,
+  Button,
+  Space,
+  Typography,
+  Modal,
+  DescriptionsItem,
+  Descriptions,
+  Tabs,
+  TabPane,
+  Empty,
+  Spin,
+} from "ant-design-vue";
+import { onMounted, ref } from "vue";
 
-import { SmileOutlined, DownOutlined, PlusCircleOutlined, SettingOutlined } from '@ant-design/icons-vue';
-import { Tag, Table, Divider, Button, Space, Typography, ButtonGroup, Modal, DescriptionsItem, Descriptions, Form, FormItem, Input, Select, SelectOption, Tabs, TabPane, Textarea, Spin, message } from 'ant-design-vue';
-import { onMounted, ref } from 'vue';
-
-import MonitoringEditModal from './MonitoringEditModal.vue';
-import ProgressTrackingModal from './ProgressTrackingModal.vue';
-import AddMonitoringIndicatorModal from './AddMonitoringIndicatorModal.vue';
-import EvaluationStrategy from './EvaluationStrategy.vue';
-import { useMonitoringStore } from '@/stores/monitoring.store';
+import MonitoringEditModal from "./MonitoringEditModal.vue";
+import ProgressTrackingModal from "./ProgressTrackingModal.vue";
+import AddMonitoringIndicatorModal from "./AddMonitoringIndicatorModal.vue";
+import EvaluationStrategy from "./EvaluationStrategy.vue";
+import { useMonitoringStore } from "@/stores/monitoring.store";
+import { useTheoryOfChangeStore } from "@/stores/theory_of_change";
 
 const store = useMonitoringStore();
 
 const config = ref({
-  activeTab: '1',
+  activeTab: "1",
   isLoading: false,
   selectedRow: undefined,
   editModalVisible: false,
   indicatorModalVisible: false,
   evaluationForm: {
-    evaluation_strategy: '',
-    feedback_strategy: '',
+    evaluation_strategy: "",
+    feedback_strategy: "",
   },
   evaluationModal: {
     visible: false,
@@ -31,8 +45,8 @@ const config = ref({
   progressTrackingModal: {
     visible: false,
     form: {
-      value: '',
-      period: ''
+      value: "",
+      period: "",
     },
     onClose: () => {
       config.value.progressTrackingModal.visible = false;
@@ -40,17 +54,16 @@ const config = ref({
   },
 });
 
-
 const columns = [
   {
-    title: 'Theory of Change',
-    key: 'tocItem',
+    title: "Theory of Change",
+    key: "tocItem",
   },
   {
-    title: 'Indicator',
-    name: 'Indicator',
-    dataIndex: 'indicator',
-    key: 'indicator',
+    title: "Indicator",
+    name: "Indicator",
+    dataIndex: "indicator",
+    key: "indicator",
   },
   // {
   //   title: 'Related Results',
@@ -59,25 +72,24 @@ const columns = [
   //   key: 'relatedResults',
   // },
   {
-    title: 'Data Collection Method',
-    name: 'Data Collection Method',
-    dataIndex: 'data_collection_method',
-    key: 'data_collection_method',
+    title: "Data Collection Method",
+    name: "Data Collection Method",
+    dataIndex: "data_collection_method",
+    key: "data_collection_method",
   },
   {
-    title: 'Frequency of Data Collection',
-    key: 'data_collection_frequency',
-    dataIndex: 'data_collection_frequency',
+    title: "Reporting Period",
+    key: "reporting_period",
   },
   {
-    dataIndex: 'target',
-    title: 'Target',
-    key: 'target',
+    dataIndex: "target",
+    title: "Target",
+    key: "target",
   },
   {
-    dataIndex: 'baseline',
-    title: 'Baseline',
-    key: 'baseline',
+    dataIndex: "baseline",
+    title: "Baseline",
+    key: "baseline",
   },
 
   // {
@@ -89,68 +101,98 @@ const columns = [
   //     key: 'q2',
   // },
   {
-    title: 'Recent Progress',
-    key: 'recent',
+    title: "Recent Progress",
+    key: "recent",
   },
   {
-    title: '% Progress',
-    key: 'progress_rate',
+    title: "% Progress",
+    key: "progress_rate",
   },
   {
-    title: 'Actions',
-    key: 'actions',
+    title: "Actions",
+    key: "actions",
   },
 ];
 
 onMounted(() => {
-  store.download();
+  store.loading = true;
+  useTheoryOfChangeStore()
+    .fetchIndicators()
+    .then(() => {
+      store.download();
+    });
 });
 
+function getTypeColor(type?: string): string {
+  if (!type) return "brown";
+
+  switch (type.toLowerCase()) {
+    case "qualitative":
+      return "blue";
+    case "quantitative":
+      return "green";
+    case "percentage":
+      return "purple";
+    default:
+      return "white";
+  }
+}
 </script>
 
 <template>
-  <MonitoringEditModal v-if="config.selectedRow != null" :visible="config.editModalVisible" :form="config.selectedRow"
-    @is-closed="config.selectedRow = null; config.editModalVisible = false;">
+  <MonitoringEditModal
+    v-if="config.selectedRow != null"
+    :visible="config.editModalVisible"
+    :form="config.selectedRow"
+    @is-closed="
+      config.selectedRow = null;
+      config.editModalVisible = false;
+    "
+  >
   </MonitoringEditModal>
 
-  <AddMonitoringIndicatorModal :visible="config.indicatorModalVisible" @is-closed="config.indicatorModalVisible = false">
+  <AddMonitoringIndicatorModal
+    :visible="config.indicatorModalVisible"
+    @is-closed="config.indicatorModalVisible = false"
+  >
   </AddMonitoringIndicatorModal>
 
-  <ProgressTrackingModal :visible="config.progressTrackingModal.visible"
-    @is-closed="config.progressTrackingModal.visible = true" :record="config.selectedRow">
+  <ProgressTrackingModal
+    :visible="config.progressTrackingModal.visible"
+    @is-closed="config.progressTrackingModal.visible = true"
+    :record="config.selectedRow"
+  >
   </ProgressTrackingModal>
 
   <Spin :spinning="config.isLoading || store.loading">
     <Tabs v-model:activeKey="config.activeTab" centered>
       <TabPane key="1" tab="Indicators Monitoring">
-        <Table :columns="columns" :data-source="store.data" bordered>
+        <Table :columns="columns" size="small" :data-source="store.data" bordered>
           <template #title>
-            <div class="level">
-              <div class="level-left">
-                <Typography :level="3">Indicators Monitoring</Typography>
-              </div>
+            <div class="full-width">
+              <div></div>
 
-              <div class="level-right">
-                <Space>
-                  <Button type="primary" @click="config.indicatorModalVisible = true">
-                    <template #icon>
-                      <PlusCircleOutlined />
-                    </template>
-                    Add Indicator
-                  </Button>
-
-                </Space>
-              </div>
+              <Button type="primary" @click.prevent="config.indicatorModalVisible = true">
+                <template #icon>
+                  <PlusCircleOutlined />
+                </template>
+                Add Indicator
+              </Button>
             </div>
           </template>
 
           <template #bodyCell="{ column, record }">
             <template v-if="column.key === 'tocItem'">
-              {{ store.getTheoryOfChange(record.id)?.name ?? 'N/A' }}
+              {{ store.getTheoryOfChange(record.id)?.name ?? "N/A" }}
             </template>
 
             <template v-if="column.key === 'indicator'">
-              {{ store.getIndicatorName(record.id) }}
+              <span>
+                {{ store.getIndicatorName(record.id) }}
+              </span>
+              <Tag :color="getTypeColor(record.type)">{{
+                record.type || "not defined"
+              }}</Tag>
             </template>
 
             <!-- <template v-if="column.key === 'relatedResults'">
@@ -161,21 +203,8 @@ onMounted(() => {
               {{ record.data_collection_method }}
             </template>
 
-            <template v-if="column.key === 'data_collection_frequency'">
-              {{ record.data_collection_frequency }}
-            </template>
-
-            <template v-else-if="column.key === 'action'">
-              <span>
-                <a>Invite 一 {{ record.name }}</a>
-                <Divider type="vertical" />
-                <a>Delete</a>
-                <Divider type="vertical" />
-                <a class="ant-dropdown-link">
-                  More actions
-                  <down-outlined />
-                </a>
-              </span>
+            <template v-if="column.key === 'reporting_period'">
+              {{ record.reporting_period }}
             </template>
 
             <template v-else-if="column.key === 'target'">
@@ -190,26 +219,51 @@ onMounted(() => {
               <span v-if="store.getRecentProgress(record)?.value == null">N/A</span>
 
               <span v-else>
-                {{ (store.getRecentProgress(record)).period }} ({{ store.getRecentProgress(record).value }})
+                {{ store.getRecentProgress(record).value }}
+                <!-- ({{
+                  store.getRecentProgress(record).value
+                }}) -->
               </span>
             </template>
 
             <template v-else-if="column.key === 'progress_rate'">
               <!-- TODO: Should only display modal -->
-              <Tag :color="'cyan'" @click="config.selectedRow = record; config.evaluationModal.visible = true">
-                <Typography :level="'4'">{{ record.progress || 0 }}% </Typography>
+              <Tag
+                :color="'cyan'"
+                @click="
+                  config.selectedRow = record;
+                  config.evaluationModal.visible = true;
+                "
+              >
+                {{ record.progress || 0 }}%
               </Tag>
             </template>
 
             <template v-else-if="column.key === 'actions'">
               <Space>
-                <Button type="primary" :ghost="true" size="small"
-                  @click="config.selectedRow = record; config.progressTrackingModal.visible = true">Record
-                  Progress</Button>
+                <Button
+                  type="primary"
+                  :ghost="true"
+                  size="small"
+                  @click.prevent="
+                    config.selectedRow = record;
+                    config.progressTrackingModal.visible = true;
+                  "
+                  >Record Progress</Button
+                >
 
                 <!-- TODO: should open edit modal -->
-                <Button type="primary" :danger="true" :ghost="true" size="small"
-                  @click="config.selectedRow = record; config.editModalVisible = true;">Edit</Button>
+                <Button
+                  type="primary"
+                  :danger="true"
+                  :ghost="true"
+                  size="small"
+                  @click.prevent="
+                    config.selectedRow = record;
+                    config.editModalVisible = true;
+                  "
+                  >Edit</Button
+                >
               </Space>
             </template>
           </template>
@@ -218,18 +272,29 @@ onMounted(() => {
 
       <TabPane key="2" tab="Project Evaluation Strategy">
         <EvaluationStrategy></EvaluationStrategy>
-
       </TabPane>
     </Tabs>
   </Spin>
 
-
-  <Modal v-model:visible="config.evaluationModal.visible" title="Evaluation Periods" width="800px"
-    @ok="config.evaluationModal.onClose(); config.selectedRow = null">
+  <Modal
+    v-model:visible="config.evaluationModal.visible"
+    title="Evaluation Periods"
+    width="800px"
+    @ok="
+      config.evaluationModal.onClose();
+      config.selectedRow = null;
+    "
+  >
     <template #footer></template>
 
-    <Descriptions size="small" :label-style="{ 'fontWeight': 'bold' }">
-      <DescriptionsItem v-for="item in (config.selectedRow.evaluation || [])" :label="item.period"> {{ item.value }}
+    <Empty v-if="(config.selectedRow?.evaluation || []).length == 0"></Empty>
+
+    <Descriptions v-else size="small" :label-style="{ fontWeight: 'bold' }">
+      <DescriptionsItem
+        v-for="item in config.selectedRow?.evaluation || []"
+        :label="item.period"
+      >
+        {{ item.value }}
       </DescriptionsItem>
     </Descriptions>
   </Modal>

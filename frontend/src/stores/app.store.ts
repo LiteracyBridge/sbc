@@ -20,7 +20,7 @@ export const AppStore = defineStore({
     async downloadObjects() {
       this.setLoading(true);
 
-      await useProjectStore()
+      return await useProjectStore()
         .download()
         .then(async () => await useLookupStore().download())
         .then(async () => await useTheoryOfChangeStore().download())

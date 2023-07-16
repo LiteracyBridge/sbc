@@ -7,7 +7,7 @@ import VueAxios from "vue-axios";
 import router from "./router";
 import { Amplify } from "aws-amplify";
 import awsconfig from "./aws-exports";
-import mermaidDirective from "./directives/mermaid";
+// import mermaidDirective from "./directives/mermaid";
 
 // Ant Design imports
 import { message } from "ant-design-vue";
@@ -46,7 +46,7 @@ app
 // app.use(Button);
 
 // Register the mermaid directive
-app.directive("mermaid", mermaidDirective);
+// app.directive("mermaid", mermaidDirective);
 
 // Provide axios instance globally
 app.provide("axios", app.config.globalProperties.axios);

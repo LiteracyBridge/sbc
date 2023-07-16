@@ -75,7 +75,7 @@ export const useActivityStore = defineStore({
 
       // api.downloadObjects(init_objects, this, "", true);
     },
-    async addActivity(activity: Activity): Promise<Activity | null> {
+    async updateOrCreate(activity: Activity): Promise<Activity | null> {
       activity.prj_id ??= useProjectStore().prj_id;
       activity.editing_user_id = useUserStore().id;
 
@@ -96,36 +96,31 @@ export const useActivityStore = defineStore({
         .finally(() => (this.$state.isLoading = false));
     },
 
-    async updateActivity(activity: Partial<Activity>) {
-      // console.log(activity);
-      // TODO: implement updating activity via api
-      let idx = this.activities.findIndex((a) => a.id == activity.id);
-      api.update("activities", activity.id, { ...activity });
-      this.activities.splice(idx, 1, activity as any);
+    // async updateActivity(activity: Partial<Activity>) {
+    //   // console.log(activity);
+    //   // TODO: implement updating activity via api
+    //   let idx = this.activities.findIndex((a) => a.id == activity.id);
+    //   api.update("activities", activity.id, { ...activity });
+    //   this.activities.splice(idx, 1, activity as any);
 
-      return activity;
-    },
+    //   return activity;
+    // },
 
-    async deleteActivity(activityId: number, deleteChildren: boolean = false) {
-      // find activity to be deleted
-      const activity = this.activities.find((a) => a.id === activityId);
-
-      // handle children of the to-be-deleted activity
-      const children = this.activities.filter(
-        (a) => a.parent_id === activityId
-      );
-      const deleteIds = [];
-      deleteIds.push(activity);
-      deleteIds.push(children);
-
-      // console.log('deleteIds:');
-      // console.log(deleteIds);
-      const table = "activities";
-      api.remove(table, deleteIds);
-      if (deleteChildren)
-        this.activities = this.activities.filter((a) => !children.includes(a));
-      else children.forEach((c) => (c.parent_id = activity.parent_id));
-      this.activities = this.activities.filter((a) => a != activity);
+    async deleteActivity(activityId: number) {
+      this.$state.isLoading = true;
+      return await ApiRequest.delete<Activity>(
+        `activity/${useProjectStore().prj_id}/${activityId}`
+      )
+        .then((resp) => {
+          this.$state.activities = resp;
+          message.success("Activity deleted successfully!");
+          return resp;
+        })
+        .catch((err) => {
+          message.error(err.message);
+          throw err;
+        })
+        .finally(() => (this.$state.isLoading = false));
     },
 
     async deleteIntervention(interventionId: number) {

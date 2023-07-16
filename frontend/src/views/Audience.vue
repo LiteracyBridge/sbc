@@ -2,13 +2,15 @@
 
 import {
   Card, Form, FormItem, Image, Textarea,
-  type FormInstance, Input, Button, Divider, Row, Col, message
+  type FormInstance, Input, Button, Divider, Row, Col, message,
+  Tooltip
 } from 'ant-design-vue';
 import { computed, onMounted, reactive, ref, watch } from 'vue';
 
 import { useProjectDataStore } from '@/stores/projectData';
 import GPTSuggestionPanel from '@/components/GPTSuggestionPanel.vue';
-import { DeleteOutlined, PlusOutlined } from '@ant-design/icons-vue';
+import BroadcastComponent from '@/components/BroadcastComponent.vue';
+import { DeleteOutlined, PlusOutlined, InfoCircleOutlined } from '@ant-design/icons-vue';
 import { ApiRequest } from '@/apis/api';
 import { useProjectStore } from '@/stores/projects';
 import { ProjectData } from '@/types';
@@ -214,88 +216,159 @@ onMounted(() => {
       }
     })
 })
-
 </script>
 
 <template>
-  <GPTSuggestionPanel :is-visible="config.suggestions.isOpened" @is-closed="config.suggestions.isOpened = false;"
-    v-if="config.suggestions.module" :question-id="config.suggestions.questionId" :module="config.suggestions.module">
+  <GPTSuggestionPanel
+    :is-visible="config.suggestions.isOpened"
+    @is-closed="config.suggestions.isOpened = false"
+    v-if="config.suggestions.module"
+    :question-id="config.suggestions.questionId"
+    :module="config.suggestions.module"
+  >
   </GPTSuggestionPanel>
 
   <Card class="section" title="Project Audiences" :loading="store.loading">
     <template #extra>
-      <Button type="primary" :ghost="true" :loading="store.loading" @click="saveForms()">Save Changes</Button>
+      <Button type="primary" :loading="store.loading" @click="saveForms()"
+        >Save Changes</Button
+      >
     </template>
 
-    <Form ref="primaryFormRef" :model="primaryAudienceForm" layout="vertical" v-bind="formItemLayoutWithOutLabel">
+    <BroadcastComponent :module="config.suggestions.module"></BroadcastComponent>
 
+    <Form
+      ref="primaryFormRef"
+      :model="primaryAudienceForm"
+      layout="vertical"
+      v-bind="formItemLayoutWithOutLabel"
+    >
       <Row>
         <Col :span="16" v-for="(objective, index) in primaryAudienceForm.audiences">
-
-        <FormItem :key="objective.id" v-bind="index === 0 ? formItemLayout : {}"
-          :label="index != 0 ? '' : '1. Who is the primary target audience for your project? Who will be adopting the behavior you want to influence?'"
-          :name="['audiences', index, 'value']" :rules="{
-            required: true,
-            message: 'Audience can not be empty',
-            trigger: 'change',
-          }" style="margin-bottom: 10px;">
-
-          <Input v-model:value="objective.value" placeholder="Enter primary audience" style="width: 60%;" />
-
-          <Button type="ghost" :danger="true" size="small" v-if="primaryAudienceForm.audiences.length > 1" class="ml-2"
-            :disabled="primaryAudienceForm.audiences.length === 1" @click="removeAudience(objective, true)">
-
-            <template #icon>
-              <DeleteOutlined />
+          <FormItem
+            :key="objective.id"
+            v-bind="index === 0 ? formItemLayout : {}"
+            :name="['audiences', index, 'value']"
+            :rules="{
+              required: false,
+              message: 'Audience can not be empty',
+              trigger: 'change',
+            }"
+            style="margin-bottom: 10px"
+          >
+            <template #label v-if="index == 0">
+              <span class="font-weight-bold">{{
+                index != 0
+                  ? ""
+                  : "1. Who is the primary target audience for your project? Who will be adopting the behavior you want to influence?"
+              }}</span>
             </template>
-            Delete
-          </Button>
-        </FormItem>
 
+            <Input
+              v-model:value="objective.value"
+              placeholder="Enter primary audience"
+              style="width: 60%"
+            />
+
+            <Button
+              type="ghost"
+              :danger="true"
+              size="small"
+              v-if="primaryAudienceForm.audiences.length > 1"
+              class="ml-2"
+              :disabled="primaryAudienceForm.audiences.length === 1"
+              @click="removeAudience(objective, true)"
+            >
+              <template #icon>
+                <DeleteOutlined />
+              </template>
+              Delete
+            </Button>
+          </FormItem>
         </Col>
       </Row>
 
       <FormItem v-bind="formItemLayoutWithOutLabel">
-        <Button type="dashed" @click="addAudience(true)">
+        <Button
+          type="primary"
+          :ghost="true"
+          style="width: 40%"
+          @click="addAudience(true)"
+        >
           <PlusOutlined />
           Add Primary Audience
         </Button>
       </FormItem>
-
     </Form>
 
-    <Form ref="audienceFormRef" name="audience-form-item" :model="secondaryAudienceForm" layout="vertical"
-      v-bind="formItemLayoutWithOutLabel">
-
+    <Form
+      ref="audienceFormRef"
+      name="audience-form-item"
+      :model="secondaryAudienceForm"
+      layout="vertical"
+      v-bind="formItemLayoutWithOutLabel"
+    >
       <Row>
         <Col :span="16" v-for="(objective, index) in secondaryAudienceForm.audiences">
-        <FormItem :key="objective.id" v-bind="index === 0 ? formItemLayout : {}"
-          :label="index != 0 ? '' : '2. Who else influences the actions of your main target audience?'"
-          :name="['audiences', index, 'value']" :rules="{
-            required: true,
-            message: 'Audience can not be empty',
-            trigger: 'change',
-          }"
-          help="What other audiences need to be involved? Who else influences the actions of your main target audience? What other audiences need to be involved?"
-          style="margin-bottom: 10px;">
-
-          <Input v-model:value="objective.value" placeholder="please input audience" style="width: 60%;" />
-
-          <Button type="ghost" :danger="true" size="small" v-if="secondaryAudienceForm.audiences.length > 1" class="ml-2"
-            :disabled="secondaryAudienceForm.audiences.length === 1" @click="removeAudience(objective, false)">
-
-            <template #icon>
-              <DeleteOutlined />
+          <FormItem
+            :key="objective.id"
+            v-bind="index === 0 ? formItemLayout : {}"
+            :name="['audiences', index, 'value']"
+            :rules="{
+              required: false,
+              message: 'Audience can not be empty',
+              trigger: 'change',
+            }"
+            style="margin-bottom: 10px"
+          >
+            <!-- help= -->
+            <template #label v-if="index == 0">
+              <span class="font-weight-bold">{{
+                index != 0
+                  ? ""
+                  : "2. Who else influences the actions of your main target audience?"
+              }}</span>
             </template>
-            Delete
-          </Button>
-        </FormItem>
 
+            <Input
+              v-model:value="objective.value"
+              placeholder="please input audience"
+              style="width: 60%"
+            >
+              <template #suffix>
+                <Tooltip
+                  title="What other audiences need to be involved? Who else influences the actions of your main target audience? What other audiences need to be involved?"
+                >
+                  <InfoCircleOutlined />
+                </Tooltip>
+              </template>
+            </Input>
+
+            <Button
+              type="ghost"
+              :danger="true"
+              size="small"
+              v-if="secondaryAudienceForm.audiences.length > 1"
+              class="ml-2"
+              :disabled="secondaryAudienceForm.audiences.length === 1"
+              @click="removeAudience(objective, false)"
+            >
+              <template #icon>
+                <DeleteOutlined />
+              </template>
+              Delete
+            </Button>
+          </FormItem>
         </Col>
       </Row>
 
       <FormItem v-bind="formItemLayoutWithOutLabel">
-        <Button type="dashed" @click="addAudience(false)">
+        <Button
+          type="primary"
+          :ghost="true"
+          style="width: 40%"
+          @click="addAudience(false)"
+        >
           <PlusOutlined />
           Add Secondary Audience
         </Button>
@@ -304,26 +377,32 @@ onMounted(() => {
 
     <Form layout="vertical">
       <Row>
-        <Col :span="16" v-for="(q, count) in store.questionsForTopic(config.suggestions.module)">
+        <Col
+          :span="16"
+          v-for="(q, count) in store.questionsForTopic(config.suggestions.module)"
+        >
+          <FormItem :name="`input-${count + 3}`" :key="q.id">
+            <template #label>
+              <span class="font-weight-bold"> {{ count + 3 }}. {{ q.q2u }}</span>
+            </template>
 
-        <FormItem :name="`input-${count + 3}`" :key="q.id">
-          <template #label>
-            {{ count + 3 }}. {{ q.q2u }}
-          </template>
+            <img
+              v-if="q.bulb"
+              :src="BULB_ICON"
+              ref="iconRefs"
+              @click="showPanel(q.id)"
+              class="image is-32x32"
+            />
 
-          <img v-if="q.bulb" :src="BULB_ICON" ref="iconRefs" @click="showPanel(q.id)" class="image is-32x32" />
-
-          <Textarea @change="updateData($event, q.id)" :value="store.getData(q.id)" :rows="7" :cols="40"></Textarea>
-
-        </FormItem>
-
+            <Textarea
+              @change="updateData($event, q.id)"
+              :value="store.getData(q.id)"
+              :rows="7"
+              :cols="40"
+            ></Textarea>
+          </FormItem>
         </Col>
       </Row>
-
-
-
-
-
     </Form>
   </Card>
 </template>

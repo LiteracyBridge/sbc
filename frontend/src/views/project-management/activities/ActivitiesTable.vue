@@ -1,78 +1,95 @@
 <script lang="ts" setup>
-import { onMounted, ref, reactive, } from "vue";
+import { onMounted, ref, reactive } from "vue";
 import { useActivityStore } from "@/stores/activities";
 import { useInterventionStore } from "@/stores/interventions";
 import { useDriverStore } from "@/stores/drivers";
 import { useLookupStore } from "@/stores/lookups";
-import { useProjectStore } from '@/stores/projects'
+import { useProjectStore } from "@/stores/projects";
 import { Button, Space, Spin, Table, Tag, Typography } from "ant-design-vue";
-import { PlusCircleOutlined } from "@ant-design/icons-vue";
-
-// import AddActivityModal from './AddActivityModal.vue';
+import { formatDate } from "@/helpers";
+import AddSubActivityModal from "./AddSubActivityModal.vue";
 import SubActivitiesDrawer from "./SubActivitiesDrawer.vue";
 import { Activity } from "@/types";
 
-const showAddModal = ref(false);
-const showEditModal = ref(false);
-
-const interventionStore = useInterventionStore();
-const driverStore = useDriverStore();
 const lookupStore = useLookupStore();
 const projectStore = useProjectStore();
+const activityStore = useActivityStore();
 
 const config = ref({
   selectedActivity: null,
-  subActivityModal: { visible: false },
+  subActivityDrawer: { visible: false },
+  modal: {
+    activity: null as Activity,
+    visible: false,
+  },
 });
 
-const activityStore = useActivityStore();
-const draftActivity = ref(null);
-
 function editActivity(activity: Activity) {
-  draftActivity.value = JSON.parse(JSON.stringify(activity));
-  showEditModal.value = true;
+  config.value.modal.activity = activity;
+  config.value.modal.visible = true;
 }
 
 onMounted(() => {
   activityStore.download();
-})
+});
+
 const columns = [
   {
-    title: 'Name',
-    dataIndex: 'name',
-    key: 'name',
+    title: "Name",
+    dataIndex: "name",
+    key: "name",
   },
   {
-    title: 'Status',
-    dataIndex: 'status',
-    key: 'status',
+    title: "Status",
+    dataIndex: "status",
+    key: "status",
   },
   {
-    title: 'Owner',
-    dataIndex: 'Owner',
-    key: 'owner',
+    title: "Owner",
+    dataIndex: "Owner",
+    key: "owner",
   },
   {
-    title: 'Duration',
-    dataIndex: 'duration',
-    key: 'duration',
+    title: "Duration",
+    key: "duration",
   },
   {
-    title: 'Tasks',
-    key: 'tasks',
+    title: "Tasks",
+    key: "tasks",
   },
-]
+  { title: "Action", key: "action" },
+];
 </script>
 
 <template>
-  <SubActivitiesDrawer :visible="config.subActivityModal.visible"
-    @is-closed="config.selectedActivity = null; config.subActivityModal.visible = false"
-    :activity="config.selectedActivity" v-if="config.selectedActivity != null"></SubActivitiesDrawer>
+  <SubActivitiesDrawer
+    :visible="config.subActivityDrawer.visible"
+    @is-closed="
+      config.selectedActivity = null;
+      config.subActivityDrawer.visible = false;
+    "
+    :activity="config.selectedActivity"
+  ></SubActivitiesDrawer>
 
-  <Table :columns="columns" :data-source="activityStore.topLevelActivities" bordered :loading="activityStore.isLoading">
-    <template #title>
-      Project Activities
-    </template>
+  <AddSubActivityModal
+    v-if="config.modal.visible"
+    :parent-activity="config.modal.activity"
+    :draft-activity="config.modal.activity"
+    :visible="config.modal.visible"
+    @closed="
+      config.modal.visible = false;
+      config.modal.activity = null;
+    "
+  >
+  </AddSubActivityModal>
+
+  <Table
+    :columns="columns"
+    :data-source="activityStore.topLevelActivities"
+    bordered
+    :loading="activityStore.isLoading"
+  >
+    <template #title> Project Activities </template>
 
     <template #bodyCell="{ column, record: activity }">
       <template v-if="column.key === 'name'">
@@ -83,7 +100,7 @@ const columns = [
       </template>
 
       <template v-if="column.key === 'status'">
-        {{ lookupStore.lookupNameById('activity_status', activity.status_id) }}
+        {{ lookupStore.lookupNameById("activity_status", activity.status_id) }}
       </template>
 
       <template v-if="column.key === 'owner'">
@@ -91,14 +108,33 @@ const columns = [
       </template>
 
       <template v-if="column.key === 'duration'">
-        {{ activityStore.fromDate(activity.id) }} - {{ activityStore.toDate(activity.id) }}
+        {{ formatDate(activity.start_date) || "" }} -
+        {{ formatDate(activity.end_date) || "" }}
       </template>
 
       <template v-if="column.key === 'tasks'">
-
-        <Button type="link" @click="config.selectedActivity = activity; config.subActivityModal.visible = true">
+        <Button
+          type="link"
+          @click="
+            config.selectedActivity = activity;
+            config.subActivityDrawer.visible = true;
+          "
+        >
           View Tasks ({{ activityStore.subActivitiesByActivityId(activity.id).length }})
         </Button>
+      </template>
+
+      <template v-if="column.key === 'action'">
+        <Space>
+          <Button
+            :ghost="true"
+            type="primary"
+            size="small"
+            @click="editActivity(activity)"
+            >Edit</Button
+          >
+          <!-- <Button type="link" @click="editActivity(activity)">Delete</Button> -->
+        </Space>
       </template>
     </template>
   </Table>
@@ -195,5 +231,4 @@ const columns = [
   </table> -->
 </template>
 
-<style>
-</style>
+<style></style>

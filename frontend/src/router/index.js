@@ -2,13 +2,14 @@ import { createRouter, createWebHistory } from "vue-router";
 import Drivers from "../views/Drivers.vue";
 import Login from "../views/Login.vue";
 import Home from "../views/Home.vue";
-import Projects from "../views/Projects.vue";
+// import Projects from "../views/Projects.vue";
 import Forms from "../views/Forms.vue";
 import Interventions from "../views/Interventions.vue";
 import { useUserStore } from "../stores/user";
 import { Auth } from "aws-amplify";
 import { Hub } from "@aws-amplify/core";
 import { ApiRequest } from "@/apis/api";
+import { AppStore } from "../stores/app.store";
 
 import TheoryOfChangeIndex from "@/views/theory-of-change/TheoryOfChangeIndex.vue";
 import MonitoringEvaluationIndex from "@/views/monitoring-n-evaluation/MonitoringEvaluationIndex.vue";
@@ -43,26 +44,23 @@ async function getUser() {
         );
       }
 
-      return null;
+      AppStore().is_loading = false;
+      return { authorized: false };
     })
     .catch(() => {
+      AppStore().is_loading = false;
       useUserStore().setUser();
-      return null;
+      return { authorized: false };
     });
 }
 
-getUser().then((user) => {
-  console.log(user);
-  if (user?.authorized == true) {
-    router.push({ path: "/" });
-  }
-});
-
 Hub.listen("auth", async (data) => {
+  console.log(data.payload.event);
   switch (data.payload.event) {
     case "signIn":
       user = await getUser();
-      if (user?.authorized) {
+      if (user?.authorized == true) {
+        await AppStore().downloadObjects();
         router.push({ path: "/" });
       } else {
         router.push({ path: "/request-access" });
@@ -88,11 +86,23 @@ Hub.listen("auth", async (data) => {
       user = null;
       useUserStore().setUser();
       router.push({ path: "/login" });
+      window.location.reload();
       break;
     case "signIn_failure":
       console.log("user sign in failed");
       break;
     case "configured":
+      getUser().then(async (user) => {
+        console.log("Existing user: ", user);
+        console.log(user);
+        if (user?.authorized == true) {
+          await AppStore().downloadObjects();
+
+          router.push({ path: "/" });
+        } else {
+          router.push({ path: "/login" });
+        }
+      });
       console.log("the Auth module is configured");
   }
 });

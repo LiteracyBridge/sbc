@@ -1,20 +1,21 @@
 from typing import List, Optional
-from helpers import ToCItemDto, create_toc_item
 
-import models
-from dataclass_wizard import asdict, fromdict
 from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel
+from sqlalchemy.orm import Session, joinedload, subqueryload
+
+from helpers import ToCItemDto, create_toc_item
+import models
 from models import Activity
 from models import TheoryOfChange
-from pydantic import BaseModel
 from schema import ApiResponse
-from sqlalchemy.orm import Session, joinedload, subqueryload
 
 router = APIRouter()
 
 
 # Types
 class ActivityDto(BaseModel):
+    id: Optional[int]
     name: str
     notes: Optional[str]
     url: Optional[str]
@@ -27,6 +28,8 @@ class ActivityDto(BaseModel):
     status_id: Optional[int]
     driver_ids: Optional[List[int]]
     is_task: Optional[bool] = False
+    end_date: Optional[str]
+    start_date: Optional[str]
 
 
 def get_toc_by_project_id(projectId: int, db: Session = Depends(models.get_db)):
@@ -62,8 +65,15 @@ def get_project_activities(project_id: int, db: Session = Depends(models.get_db)
 
 
 @router.post("/", response_model=ApiResponse)
-def create(dto: ActivityDto, db: Session = Depends(models.get_db)):
+def update_or_create(dto: ActivityDto, db: Session = Depends(models.get_db)):
     new_activity: Activity = Activity()
+
+    if dto.id is not None:
+        new_activity = db.query(Activity).filter(Activity.id == dto.id).first()
+
+        if new_activity is None:
+            return HTTPException(status_code=400, detail="Account cannot be created")
+
     new_activity.name = dto.name
     new_activity.url = dto.url
     new_activity.notes = dto.notes
@@ -74,27 +84,33 @@ def create(dto: ActivityDto, db: Session = Depends(models.get_db)):
     new_activity.owner_id = dto.owner_id
     new_activity.parent_id = dto.parent_id
     new_activity.status_id = dto.status_id
+    new_activity.start_date = dto.start_date
+    new_activity.end_date = dto.end_date
 
     if dto.driver_ids is None:
         new_activity.driver_ids = []
     else:
         new_activity.driver_ids = dto.driver_ids
 
+    if dto.id is not None:
+        db.commit()
+        return get_project_activities(new_activity.prj_id, db)
+
     db.add(new_activity)
     db.commit()
     db.refresh(new_activity)
 
-    if not dto.is_task:
-        create_toc_item(
-            dto=ToCItemDto(
-                project_id=dto.prj_id,
-                type="activity",
-                name=dto.name,
-                reference=new_activity,
-            ),
-            db=db,
-        )
-        # new_activity.toc_item_id = theory_of_change.id
+    # if not dto.is_task:
+    #     create_toc_item(
+    #         dto=ToCItemDto(
+    #             project_id=dto.prj_id,
+    #             type="activity",
+    #             name=dto.name,
+    #             reference=new_activity,
+    #         ),
+    #         db=db,
+    #     )
+    # new_activity.toc_item_id = theory_of_change.id
 
     # # Create a new record in the toc graph table
     # toc_item = TheoryOfChange()
@@ -123,3 +139,20 @@ def create(dto: ActivityDto, db: Session = Depends(models.get_db)):
 @router.get("/{projectId}", response_model=ApiResponse)
 def get_activities(projectId: int, db: Session = Depends(models.get_db)):
     return get_project_activities(project_id=projectId, db=db)
+
+
+@router.delete("/{project_id}/{id}", response_model=ApiResponse)
+def delete_activity(project_id: int, id: int, db: Session = Depends(models.get_db)):
+    activity = (
+        db.query(Activity)
+        .filter(Activity.id == id, Activity.prj_id == project_id)
+        .first()
+    )
+
+    if activity is None:
+        return HTTPException(status_code=400, detail="Account cannot be created")
+
+    db.delete(activity)
+    db.commit()
+
+    return get_project_activities(project_id=activity.prj_id, db=db)

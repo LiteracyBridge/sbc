@@ -344,6 +344,7 @@ export const useProjectDataStore = defineStore({
       )
         .then((resp) => {
           this.$state.project_data = resp;
+          this.$state.new_project_data = resp;
           message.success("Project objectives added successfully");
 
           return resp;
@@ -382,9 +383,33 @@ export const useProjectDataStore = defineStore({
       let msg = "";
       for (var q of this.questionsForTopic(module)) {
         const a = this.getData(q.id);
-        if (a != "") msg += q.label + "\n" + a + "\n\n";
+        if (a != "") {
+          msg += `${q.label} \n${a} \n\n`;
+        }
       }
 
+      // If module is objectives, Add 'specific objectives' to the message
+      if (module == "objectives") {
+        msg += "Specific Objectives\n";
+        for (const o of this.specificObjectives) {
+          msg += `  • ${o.data}\n`;
+        }
+        msg += '\n';
+      }
+
+      // Add audiences to the message
+      if (module == "audiences") {
+        msg += "Primary Audiences\n";
+        for (const o of this.primaryAudience) {
+          msg += `  • ${o.data}\n`;
+        }
+        msg += '\n';
+
+        msg += "Secondary Audiences\n";
+        for (const o of this.secondaryAudiences) {
+          msg += `  • ${o.data}\n`;
+        }
+      }
       return msg;
     },
 

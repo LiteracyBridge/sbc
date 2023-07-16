@@ -2,12 +2,16 @@ import { defineStore } from "pinia";
 import { useUserStore } from "./user";
 import { useProjectDataStore } from "./projectData";
 import * as api from "../apis/lambda";
+import { ApiRequest } from "@/apis/api";
+import { useProjectStore } from "./projects";
+import { Driver, ProjectDriver } from "@/types";
+import { message } from "ant-design-vue";
 
 // Initialize objects with default values
 const init_objects = {
   lu_driver_categories: { id: 0, name: "", color: "#000000" },
   lu_drivers: {
-    id: null,
+    id: null as number,
     name: "",
     dgroup: "",
     parent_id: 0,
@@ -16,10 +20,10 @@ const init_objects = {
     text_long: "",
     url: "",
     category_id: 0,
-    intervention_ids: [],
+    intervention_ids: [] as number[],
   },
   drivers_in_prj: {
-    id: null,
+    id: null as number,
     editing_user_id: 0,
     lu_driver_id: 0,
     importance_id: 0,
@@ -34,7 +38,7 @@ const init_objects = {
     text_short: "",
     text_long: "",
     name: "",
-    intervention_ids: [],
+    intervention_ids: [] as string[],
     dip_id: 0,
     user_id: 0,
     importance_id: 0,
@@ -43,7 +47,7 @@ const init_objects = {
     notes_goal: "",
   },
   driver_graph: {
-    id: null,
+    id: null as number,
     editing_user_id: 0,
     driver_id: 0,
     driver_influenced_id: 0,
@@ -57,14 +61,14 @@ export const useDriverStore = defineStore({
   // Define the state
   state: () => ({
     lu_driver_categories: [], //{id:0,name:'',color:'#000000'},
-    lu_drivers: [], // {id:null,name:'',dgroup:'',parent_id:0,sem_id:0,text_short:'',text_long:'',url:'',category_id:0,intervention_ids:[]},
-    drivers_in_prj: [], // {id:null,editing_user_id:0,lu_driver_id:0,importance_id:0,notes_context:'',notes_gap:'',notes_goal:''},
+    lu_drivers: [] as Driver[],
+    drivers_in_prj: [] as ProjectDriver[],
     drivers_suggested: [],
   }),
 
   getters: {
     // Retrieve driver name by id
-    nameById: (state) => (dip_id) => {
+    nameById: (state) => (dip_id: number) => {
       const lu_driver_id = state.drivers_in_prj.find(
         (dip) => dip.id == dip_id
       ).lu_driver_id;
@@ -73,7 +77,7 @@ export const useDriverStore = defineStore({
     },
 
     // Generate icon filename based on driver name
-    iconFilename: (state) => (driver) => {
+    iconFilename: (state) => (driver: { name: string }) => {
       return driver.name.toLowerCase().replace(" ", "_") + ".svg";
     },
 
@@ -88,7 +92,7 @@ export const useDriverStore = defineStore({
      * @param {string} filter - either 'all', 'project', or 'suggested'
      * @returns {Object[]} a list of top-level drivers (factors) satifying the provided parameter filters
      */
-    factorsByCategory: (state) => (category_id, filter) => {
+    factorsByCategory: (state) => (category_id: number, filter: string) => {
       if (filter == "project") {
         return state.lu_drivers.filter(
           (d) =>
@@ -118,7 +122,7 @@ export const useDriverStore = defineStore({
      * @param {string} filter - either 'all', 'project', or 'suggested'
      * @returns {Object[]} a list of second-level drivers (dimensions) satifying the provided parameter filters
      */
-    dimensionsByFactor: (state) => (factor, filter) => {
+    dimensionsByFactor: (state) => (factor: { id: any }, filter: string) => {
       if (filter == "project") {
         return state.lu_drivers.filter(
           (d) =>
@@ -138,17 +142,17 @@ export const useDriverStore = defineStore({
     },
 
     // Get drivers by category
-    driversByCategory: (state) => (category_id) => {
+    driversByCategory: (state) => (category_id: number) => {
       return state.lu_drivers.filter((d) => d.category_id === category_id);
     },
 
     // Find luDriver by id
-    luDriverById: (state) => (id) => {
+    luDriverById: (state) => (id: number) => {
       return state.lu_drivers.find((d) => d.id === id);
     },
 
     // Find project driver by luDriver id
-    prjDriverByLUid: (state) => (LUid) => {
+    prjDriverByLUid: (state) => (LUid: number) => {
       return state.drivers_in_prj.find((d) => d.lu_driver_id == LUid);
     },
 
@@ -168,7 +172,7 @@ export const useDriverStore = defineStore({
     },
 
     // Get explanation for the suggested driver by id
-    suggestionExplanation: (state) => (id) => {
+    suggestionExplanation: (state) => (id: number) => {
       const foundDriver = state.drivers_suggested.find((d) => d.id == id);
       let explain;
       if (foundDriver) {
@@ -180,7 +184,7 @@ export const useDriverStore = defineStore({
     },
 
     // Get example for the suggested driver by id
-    suggestionExample: (state) => (id) => {
+    suggestionExample: (state) => (id: number) => {
       const foundDriver = state.drivers_suggested.find((d) => d.id == id);
       let example;
       if (foundDriver) {
@@ -194,37 +198,52 @@ export const useDriverStore = defineStore({
 
   actions: {
     // Clear state
-    clear() {
-      for (const property of Object.keys(this.$state)) {
-        if (!property.startsWith("lu_")) {
-          this.$state[property] = [];
-        }
-      }
-    },
+    // clear() {
+    //   for (const property of Object.keys(this.$state)) {
+    //     if (!property.startsWith("lu_")) {
+    //       this.$state[property] = [];
+    //     }
+    //   }
+    // },
 
     // Download data
     async download() {
-      await api.downloadObjects(init_objects, this);
-      this.suggestDrivers();
+      return await api.downloadObjects(init_objects, this);
+      // return this.suggestDrivers();
     },
 
     // Add driver to project
-    async add(lu_driver_id) {
-      const table = "drivers_in_prj";
-      const driver = { ...init_objects.drivers_in_prj };
-      const importance_id = 1; // initially set to medium importance
-      driver.lu_driver_id = lu_driver_id;
-      driver.importance_id = importance_id;
-      this.drivers_in_prj.push(driver);
-      await api
-        .insert(table, { lu_driver_id, importance_id })
-        .then((id) => (driver.id = id));
-      driver.editing_user_id = useUserStore().id;
-      return driver;
+    async add(lu_driver_id: number, importance_id: number = 1) {
+      // TODO: add parent driver if it doesn't exist
+      ApiRequest.post<ProjectDriver>(
+        `project/${useProjectStore().prj_id}/drivers`,
+        {
+          lu_driver_id,
+          editing_user_id: useUserStore().id,
+          importance_id: importance_id || 1,
+        }
+      ).then((drivers) => {
+        this.$state.drivers_in_prj = drivers;
+        message.success("Driver added to project successfully!");
+
+        return drivers;
+      });
+
+      // const table = "drivers_in_prj";
+      // const driver = { ...init_objects.drivers_in_prj };
+      // const importance_id = 1; // initially set to medium importance
+      // driver.lu_driver_id = lu_driver_id;
+      // driver.importance_id = importance_id;
+      // this.drivers_in_prj.push(driver);
+      // await api
+      //   .insert(table, { lu_driver_id, importance_id })
+      //   .then((id) => (driver.id = id));
+      // driver.editing_user_id = useUserStore().id;
+      // return driver;
     },
 
     // Remove driver from project
-    async remove(id) {
+    async remove(id: number) {
       const table = "drivers_in_prj";
       const deleteIDs = [id];
       const index = this.drivers_in_prj.findIndex((d) => d.id == id);
@@ -233,7 +252,7 @@ export const useDriverStore = defineStore({
     },
 
     // Set importance of a driver
-    async setImportance(driver, importance_id) {
+    async setImportance(driver: any, importance_id: number) {
       const table = "drivers_in_prj";
       const userId = useUserStore().id;
       const lu_driver_id = driver.lu_driver_id;
@@ -361,10 +380,12 @@ export const useDriverStore = defineStore({
         '[{"id":0,"name":"","explanation":"","example":""}]\n\n(In place of the 0 for id, use the number preceding each dimension name)\n\n';
       context = context_drivers + context_project;
       ai_answer = await api.gptCompletion(question, context); //, null,'[{"id":'
-      if (ai_answer) {
+
+      if (!/rate limit/i.test((ai_answer as string) ?? "")) {
         json_answer = JSON.parse(ai_answer);
         this.drivers_suggested = this.drivers_suggested.concat(json_answer);
       }
+      return;
     },
   },
 });

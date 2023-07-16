@@ -9,12 +9,14 @@ from mangum import Mangum
 from routes import (
     users,
     theory_of_change,
-    activity,
+    activity_route,
     monitoring,
     project,
     lookups,
     organisation_route,
     communication_route,
+    data_service_route,
+    open_ai_route
 )
 from monitoring import logging_config
 from middlewares.correlation_id_middleware import CorrelationIdMiddleware
@@ -25,7 +27,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 import models
 from config import settings
-
+import model_events
 
 if settings.sentry_dsn is not None:
     sentry_sdk.init(
@@ -104,7 +106,7 @@ app.include_router(
     dependencies=[Depends(models.get_db)],
 )
 app.include_router(
-    activity.router,
+    activity_route.router,
     prefix="/activity",
     tags=["activity"],
     dependencies=[Depends(models.get_db)],
@@ -139,6 +141,19 @@ app.include_router(
     tags=["communications"],
     dependencies=[Depends(models.get_db)],
 )
+app.include_router(
+    data_service_route.router,
+    prefix="/data-service",
+    tags=["data-service"],
+    dependencies=[Depends(models.get_db)],
+)
+app.include_router(
+    open_ai_route.router,
+    prefix="/open-ai",
+    tags=["open-ai"],
+    dependencies=[Depends(models.get_db)],
+)
+
 
 ###############################################################################
 #   Handler for AWS Lambda                                                    #

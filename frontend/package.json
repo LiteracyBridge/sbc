@@ -11,10 +11,8 @@
   "dependencies": {
     "@ant-design/icons-vue": "^6.1.0",
     "@aws-amplify/ui-vue": "^2.4.18",
-    "@vueform/multiselect": "^2.5.2",
     "@vueuse/core": "^8.9.4",
     "ant-design-vue": "^3.2.20",
-    "antd-css-utilities": "^1.0.3",
     "aws-amplify": "^4.3.30",
     "axios": "^0.27.2",
     "bulma": "^0.9.4",
@@ -23,9 +21,7 @@
     "pinia": "^2.0.16",
     "vue": "^3.2.37",
     "vue-axios": "^3.4.1",
-    "vue-multiselect": "^3.0.0-beta.1",
-    "vue-router": "^4.1.2",
-    "vue3-side-panel": "^1.2.0"
+    "vue-router": "^4.1.2"
   },
   "devDependencies": {
     "@creativebulma/bulma-tooltip": "^1.2.0",

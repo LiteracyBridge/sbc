@@ -1,8 +1,32 @@
 import type { Dayjs } from "dayjs";
 
+export const THEORY_OF_CHANGE_TYPES: Record<string, string> = {
+  "1": "Input",
+  "2": "Activity",
+  "3": "Output",
+  "4": "Outcome",
+  "5": "Impact",
+};
+
+export const SEMS: Record<string, string> = {
+  "1": "Individual",
+  "2": "Interpersonal",
+  "3": "Community",
+  "4": "Organizational",
+  "5": "Policy/Enabling environment",
+};
+
+class Timestamps {
+  deleted_by_id?: number;
+  updated_at?: Date;
+  created_at?: Date;
+  deleted_at?: Date;
+}
 export class User {
   id: number;
   email: string;
+  sms?: string;
+  whatsapp?: string;
   name: string;
   address_as?: string;
   token?: string;
@@ -10,7 +34,18 @@ export class User {
   organisation_id?: number;
 }
 
-export class Project {
+export class Stakeholder extends Timestamps {
+  id: number;
+  name?: string;
+  description?: string;
+  sms?: string;
+  whatsapp?: string;
+  email?: string;
+  editing_user_id: number;
+  project_id: number;
+}
+
+export class Project extends Timestamps {
   id: number;
   name: string;
   start_date: Dayjs;
@@ -20,10 +55,8 @@ export class Project {
   feedback_strategy?: string;
   sustainability_strategy?: string;
   editing_user_id?: number;
-  deleted_by_id?: number;
-  updated_at?: Date;
-  created_at?: Date;
-  deleted_at?: Date;
+
+  stakeholders: Stakeholder[] = [];
 }
 
 export class LuIndiKit {
@@ -41,6 +74,42 @@ export class LuIndiKit {
 
   // TODO: To be provided by Petr
   purpose: string;
+}
+
+export class Intervention {
+  id: number;
+  name: string;
+  url_description?: string;
+  text_short?: string;
+  text_long?: string;
+  sequence?: number;
+}
+
+export class Driver {
+  id: number;
+  name: string;
+  dgroup?: string;
+  parent_id: number = 0;
+  sequence?: number;
+  sem_id?: number;
+  text_short?: string;
+  text_long?: string;
+  url?: string;
+  category_id?: number;
+  framework_id?: number;
+  intervention_ids?: number[];
+}
+
+export class ProjectDriver extends Driver {
+  prj_id: number;
+  editing_user_id?: number;
+  lu_driver_id?: number;
+  importance_id?: number;
+  notes_context?: string;
+  notes_gap?: string;
+  notes_goal?: string;
+
+  project?: Project;
 }
 
 export class ProjectIndicator {
@@ -111,6 +180,7 @@ export class TheoryOfChange {
   sem_id?: number;
   project_id: number;
   is_validated: boolean = false;
+  links_to: number[] = [];
 
   indicators: Array<TheoryOfChangeIndicator> = [];
 
@@ -163,6 +233,11 @@ export class Activity {
   notes: string = "";
   url: string = "";
   driver_ids: number[] = [];
+  start_date?: Dayjs;
+  end_date?: Dayjs;
+  created_at?: Dayjs;
+  updated_at?: Dayjs;
+  deleted_at?: Dayjs;
 
   // FIXME: REMOVE THIS
   /**
@@ -189,16 +264,20 @@ export class Schedule {
 
 export class Monitoring {
   id: number;
-  target?: number;
-  baseline?: number;
+  target?: string;
+  baseline?: string;
   data_collection_method?: string;
-  data_collection_frequency?: string;
+  progress?: string | number;
   evaluation: Array<{ value: number; period: string }> = [];
-  evaluation_period?: "monthly" | "weekly" | "quarterly";
-
+  reporting_period?:
+    | "Monthly"
+    | "Weekly"
+    | "Quarterly"
+    | "Annually"
+    | "Semi-Annually";
   toc_item_indicator_id?: number;
   project_id?: number;
-
+  type: "Quantitative" | "Qualitative" | "Percentage";
   toc_indicator: TheoryOfChangeIndicator;
 }
 

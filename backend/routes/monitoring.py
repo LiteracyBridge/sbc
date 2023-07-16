@@ -13,20 +13,24 @@ router = APIRouter()
 
 
 class UpdateMonitoringDto(BaseModel):
-    target: Optional[int]
-    baseline: Optional[int]
+    target: Optional[str]
+    baseline: Optional[str]
+    type: Optional[str]
+    # TODO: calculate progress on the frontend
     # progress: Optional[int]
     data_collection_method: Optional[str]
-    data_collection_frequency: Optional[str]
-    evaluation_period: Optional[str]
+    reporting_period: Optional[str]
 
 
 class RecordProgressDto(BaseModel):
     value: Optional[int]
     period: Optional[str]
+    progress: Optional[str]
 
 
-def get_monitoring_by_project_id(projectId: int, db: Session = Depends(models.get_db)):
+def get_monitoring_by_project_id(
+    projectId: int, db: Session = Depends(models.get_db)
+) -> List[Monitoring]:
     record = (
         db.query(Monitoring)
         .filter(Monitoring.project_id == projectId)
@@ -35,9 +39,8 @@ def get_monitoring_by_project_id(projectId: int, db: Session = Depends(models.ge
                 subqueryload(TheoryOfChangeIndicator.indicator),
                 # subqueryload(TheoryOfChangeIndicator.toc_item),
             )
-            #     .subqueryload(TheoryOfChangeIndicator.indicator),
         )
-        # .options(joinedload(models.TheoryOfChange.graph))
+        .order_by(Monitoring.id.desc())
         .all()
     )
     return record
@@ -54,7 +57,7 @@ def update_item(
     dto: UpdateMonitoringDto,
     db: Session = Depends(models.get_db),
 ):
-    record = db.query(Monitoring).filter(Monitoring.id == id).first()
+    record: Monitoring | None = db.query(Monitoring).filter(Monitoring.id == id).first()
 
     if record is None:
         raise HTTPException(status_code=404, detail="Item not found")
@@ -62,8 +65,8 @@ def update_item(
     record.target = dto.target
     record.baseline = dto.baseline
     record.data_collection_method = dto.data_collection_method
-    record.data_collection_frequency = dto.data_collection_frequency
-    record.evaluation_period = dto.evaluation_period
+    record.reporting_period = dto.reporting_period
+    record.type = dto.type
 
     db.commit()
 
@@ -76,6 +79,7 @@ def record_progress(
     dto: RecordProgressDto,
     db: Session = Depends(models.get_db),
 ):
+    # TODO: rewrite progress tracking
     record = db.query(Monitoring).filter(Monitoring.id == id).first()
 
     if record is None:
@@ -85,18 +89,9 @@ def record_progress(
     if evaluation is None:
         evaluation = []
 
-    progress = {"period": dto.period, "value": dto.value}
-    evaluation.append(progress)
-    # record[dto.period] = dto.value
+    evaluation.append({"period": dto.period, "value": dto.value})
     record.evaluation = evaluation
-    # record.progress = (sum(evaluation.values()) / record.target) * 100
-
-    # Computer total progress
-    total_progress = 0
-    for i in evaluation:
-        total_progress += i["value"]
-
-    record.progress = (total_progress / record.target) * 100
+    record.progress = dto.progress
 
     db.commit()
 

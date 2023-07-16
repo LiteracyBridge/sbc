@@ -1,34 +1,61 @@
 Today:
-    ✔ dynamic primary audiences @done(23-06-26 22:43)
-    ☐ dashboard page
-    ☐ login ui update
-    ☐ partners page
+    ✔ Open indicator panel when tag clicked (toc modal) @done(23-07-07 23:02)
+    ☐ All editing of indicator item (indicator browser)
+        ☐ use ng typography
+    ☐ move indicator deletion to panel
+        ✔ also add popconfirm @done(23-07-07 23:02)
+    ☐ move sbc driver logic to fastapi route
+
+    Broadcast:
+        ☐ implement customizing of message
+        ☐ fix dropdown fields not included in generated message
+
+    Monitoring:
+        ✔ The Baseline and Target values don't need the up/down arrows to add whole numbers @done(23-07-08 13:27)
+            ✔ baseline optional @done(23-07-08 13:27)
+            ✔ target optional @done(23-07-08 13:27)
+        ✔ rename evaluation period to "Reporting Period" @done(23-07-08 13:28)
+            ✔ options to select should be "Weekly", "Monthly", "Quarterly", "Semi-annually", "Annually" @done(23-07-08 13:28)
+        ✔ remove data collection frequency field @done(23-07-08 13:34)
+            ✔ delete from model @done(23-07-08 13:34)
+        ✔ add Reporting period to table @done(23-07-08 13:34)
+        ✔ Similarly to the Baseline/Target values, in the Record Progress pop-up, the value shouldn't be restricted to a whole number @done(23-07-08 13:44)
+        ✔ add a "Type" column to the table, with the options "#", "%" and "Qualitative" @done(23-07-08 13:44)
+        ✔ The % progress calculation would only be relevant for indicators with the "#" type. We can still maintain the column and just leave it blank for indicators of other types @done(23-07-08 15:01)
+        ✔ Format of fields for reporting on the indicators should be based on indicator type (#, % or qual). # fields won't necessarily be whole numbers. @done(23-07-08 15:01)
+        ☐ We should instruct users to report just for the reporting period, rather than cumulative to date, but the "Recent progress" column should instead be called "Progress to date" where we sum up for them the cumulative to date, and calculate % progress based on that. This is again only relevant for "#" indicators. % and qual indicators should just show most recently reported in the "Progress to date" column.
+
+
+    Communications:
+        ☐ AI suggestions for the "message key points" and "message content" fields?
+        ☐
 
 
     Activities:
+        ✔ add duration fields to main activity @done(23-07-08 00:57)
+        ✔ add deadline to task @done(23-07-08 00:57)
         ☐ implement removing task
-        ☐ implement activity update
-        ☐ implement adding deadline to task
+        ✔ implement activity update @done(23-07-08 00:58)
+        ✔ implement adding deadline to task @done(23-07-08 00:58)
 
-    Theory of Change:
-        ☐ Add modal forms validation
-        ☐ implement adding & removing of indicators
-        ☐ add customizing of indikit indicators
-    ☐ connect live url & test all modules
 
-    Monitoring & Evaluation:
-        ☐ Types refactoring
-        ☐
-        ☐ Save evaluation strategy
-
-Frontend:
-    Theory of Change:
-        ☐ Toc examples browser
 
 Backend:
     ☐ copy indikit label to project_indicators when added
 
 Archive:
+  ✔ dynamic primary audiences @done(23-06-26 22:43) @project(Today)
+  ✔ dashboard page @done(23-07-04 22:25) @project(Today)
+  ✔ login ui update @done(23-07-04 22:25) @project(Today)
+  ✔ partners page @done(23-07-04 22:25) @project(Today)
+  ✔ Add modal forms validation @done(23-07-04 22:25) @project(Today.Theory of Change)
+  ✔ implement adding & removing of indicators @done(23-07-04 22:25) @project(Today.Theory of Change)
+  ✔ add customizing of indikit indicators @done(23-07-04 22:25) @project(Today.Theory of Change)
+  ✔ connect live url & test all modules @done(23-07-04 22:25) @project(Today)
+  ✔ Types refactoring @done(23-07-04 22:25) @project(Today.Monitoring & Evaluation)
+  ✔ ☐ @done(23-07-04 22:25) @project(Today.Monitoring & Evaluation)
+  ✔ Save evaluation strategy @done(23-07-04 22:25) @project(Today.Monitoring & Evaluation)
+  ✔ Toc examples browser @done(23-07-04 22:26) @project(Frontend.Theory of Change)
   ✔ add tasks modal @done(23-06-18 12:08) @project(Today.Activies)
   ✔ implemenet adding new task @done(23-06-18 12:08) @project(Today.Activies)
   ✔ Indicator UI redesign @done(23-06-18 11:27) @project(Today.Theory of Change)

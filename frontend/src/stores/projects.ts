@@ -8,31 +8,31 @@ import { useParticipantStore } from "./participants";
 import router from "@/router";
 import { useLookupStore } from "./lookups";
 import { useProjectDataStore } from "./projectData";
-import { Project } from "@/types";
+import { Project, Stakeholder } from "@/types";
 import { ApiRequest } from "@/apis/api";
 import { message } from "ant-design-vue";
+import { AppStore } from "./app.store";
 
 // projectStores returns all the stores that have project-specific data
 const projectStores = () => [
-  useActivityStore,
+  // useActivityStore,
+  useProjectDataStore,
   useInterventionStore,
   useDriverStore,
   useParticipantStore,
-  useProjectDataStore,
 ];
 
 // Clears all project-specific data from stores
 function clearAllProjectStores() {
   for (const store of projectStores()) {
-    store().clear();
+    store().$reset();
   }
 }
 
 // Downloads all project-specific data from stores
-function downloadAllProjectStores() {
-  for (const store of projectStores()) {
-    store().download();
-    console.log("just downloaded " + store());
+async function downloadAllProjectStores() {
+  for await (const store of projectStores()) {
+    await store().download();
   }
 }
 
@@ -124,6 +124,7 @@ export const useProjectStore = defineStore({
         return grantable_access_types;
       }
     },
+    stakeholders: (state) => state.current_project?.stakeholders ?? [],
   },
   actions: {
     // Archives a project by updating its archived status
@@ -214,19 +215,25 @@ export const useProjectStore = defineStore({
     },
 
     // Sets a project as active
-    setPrj(id: number, newProject: boolean = false) {
+    async setPrj(id: number, newProject: boolean = false) {
       this.prj_id = id;
 
+      await useUserStore().setLastProject(id);
+
+      // await AppStore().downloadObjects();
       useProjectStore().download();
       if (id && !newProject) {
+        clearAllProjectStores();
         downloadAllProjectStores();
       } else {
         clearAllProjectStores();
       }
-      useUserStore().setLastProject(id);
+
       if (!id) {
         router.push({ path: "/projects" });
       }
+
+      return;
     },
 
     // Update project strategy
@@ -249,6 +256,7 @@ export const useProjectStore = defineStore({
         })
         .finally(() => (this.$state.loading = false));
     },
+
     // Downloads project data
     async download() {
       if (this.prj_id) {
@@ -297,6 +305,54 @@ export const useProjectStore = defineStore({
       }
 
       return;
+    },
+
+    /**
+     * Delete project stakeholder
+     */
+    async deleteStakeholder(id: number) {
+      this.$state.loading = true;
+
+      return await ApiRequest.delete<Stakeholder>(
+        `project/${this.prj_id}/stakeholders/${id}`
+      )
+        .then((resp) => {
+          this.$state.current_project.stakeholders = resp;
+          message.success("Stakeholder deleted successfully!");
+          return resp;
+        })
+        .catch((error) => {
+          message.error(error.message);
+          throw error;
+        })
+        .finally(() => (this.$state.loading = false));
+    },
+    /**
+     * Update or add project stakeholder
+     */
+    async createOrUpdateStakeholder(form: Stakeholder) {
+      this.$state.loading = true;
+
+      form.project_id = this.prj_id;
+      form.editing_user_id = useUserStore().id;
+
+      return await ApiRequest.post<Stakeholder>(
+        `project/${this.prj_id}/stakeholders`,
+        form
+      )
+        .then((resp) => {
+          this.$state.current_project.stakeholders = resp;
+          message.success(
+            `Stakeholder ${form.id != null ? "updated" : "added"} successfully`
+          );
+
+          return resp;
+        })
+        .catch((error) => {
+          message.error(error.message);
+          throw error;
+        })
+        .finally(() => (this.$state.loading = false));
     },
   },
 });

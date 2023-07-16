@@ -1,22 +1,17 @@
 from typing import Dict, List, Optional
+from model_events import theory_of_change_deleted
 from models import ProjectIndicators, TheoryOfChange, TheoryOfChangeIndicator
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
 from sqlalchemy.orm import Session, joinedload, subqueryload
 from schema import ApiResponse
-from models import (
-    Monitoring,
-    Risk,
-    TheoryOfChangeOld,
-    # TheoryOfChangeItem,
-)
+from models import Monitoring, Risk, Activity
 import models
 
 router = APIRouter()
 
 
-# Types
 class IndicatorDto(BaseModel):
     # TODO: remove these
     removed: List[int]
@@ -31,13 +26,15 @@ class IndicatorDto(BaseModel):
 
 
 class TheoryOfChangeItemDto(BaseModel):
-    type_id: str | int
-    from_id: Optional[str | int]
+    type_id: int
+    # from_id: Optional[str | int]
     to_id: Optional[str | int]
-    sem_id: str | int
+    links_to: Optional[List[int]]
+    sem_id: Optional[int]
     name: str
     is_validated: Optional[bool] = False
     description: Optional[str]
+    editing_user_id: Optional[int]
 
 
 class NewTheoryOfChangeDto(BaseModel):
@@ -76,50 +73,6 @@ def get_toc_by_project_id(projectId: int, db: Session = Depends(models.get_db)):
     return record
 
 
-# def get_toc_by_id(id: int, db: Session = Depends(models.get_db)):
-#     record = (
-#         db.query(models.TheoryOfChangeOld)
-#         .filter(models.TheoryOfChangeOld.id == id)
-#         .options(
-#             subqueryload(models.TheoryOfChangeOld.risks),
-#             subqueryload(models.TheoryOfChangeOld.graph).subqueryload(
-#                 TheoryOfChangeIndicator.indicators
-#             )
-#             # .subqueryload(TheoryOfChangeIndicator.indicator),
-#             # .options(
-#             #     subqueryload(models.TheoryOfChangeItem.sem),
-#             #     subqueryload(models.TheoryOfChangeItem.type),
-#             # )
-#         )
-#         # .options(joinedload(models.TheoryOfChange.graph))
-#         .first()
-#     )
-
-#     return ApiResponse(data=[record])
-
-
-# @router.post("/", response_model=ApiResponse)
-# def create(dto: NewTheoryOfChangeDto, db: Session = Depends(models.get_db)):
-#     record = models.TheoryOfChangeOld()
-#     record.name = dto.name
-#     record.project_id = dto.project_id
-#     record.notes = dto.notes
-
-#     if dto.name is False:
-#         count = (
-#             db.query(models.TheoryOfChangeOld)
-#             .filter(models.TheoryOfChangeOld.project_id == dto.project_id)
-#             .count()
-#         )
-#         record.name = f"Theory of Change #${count + 1}"
-
-#     db.add(record)
-#     db.commit()
-#     db.refresh(record)
-
-#     return ApiResponse(data=record)
-
-
 @router.get("/{projectId}", response_model=ApiResponse)
 def get_by_project_id(projectId: int, db: Session = Depends(models.get_db)):
     return ApiResponse(data=get_toc_by_project_id(projectId, db))
@@ -129,33 +82,31 @@ def get_by_project_id(projectId: int, db: Session = Depends(models.get_db)):
 def create_item(
     project_id: int, dto: TheoryOfChangeItemDto, db: Session = Depends(models.get_db)
 ):
-    record = TheoryOfChange()
-    record.name = dto.name
-    record.type_id = dto.type_id
-    record.from_id = dto.from_id
-    record.to_id = dto.to_id
-    record.sem_id = dto.sem_id
-    record.description = dto.description
-    record.project_id = project_id
+    toc: TheoryOfChange = TheoryOfChange()
+    toc.name = dto.name
+    toc.type_id = dto.type_id
+    toc.links_to = dto.links_to
+    toc.sem_id = dto.sem_id
+    toc.description = dto.description
+    toc.project_id = project_id
 
-    db.add(record)
+    # todo: use helper method
+    db.add(toc)
     db.commit()
+    db.refresh(toc)
 
-    # Create activity item if toc item is an activity
+    # Create activity item
+    if toc.type_id == 2:
+        new_activity: Activity = Activity()
+        new_activity.name = toc.name
+        new_activity.notes = toc.description
+        new_activity.prj_id = project_id
+        new_activity.status_id = 1
+        new_activity.editing_user_id = dto.editing_user_id
+        new_activity.theory_of_change_id = toc.id
 
-    # if dto.to_id is not None:
-    #     # Query for the to_id and link it to the from_id
-    #     to_record = (
-    #         db.query(models.TheoryOfChangeItem)
-    #         .filter(models.TheoryOfChangeItem.id == dto.to_id)
-    #         .first()
-    #     )
-    #     to_record.from_id = record.id
-
-    #     db.add(to_record)
-    #     db.commit()
-
-    # db.refresh(record)
+        db.add(new_activity)
+        db.commit()
 
     return ApiResponse(data=get_toc_by_project_id(project_id, db))
 
@@ -173,9 +124,9 @@ def update_item(
         raise HTTPException(status_code=404, detail="Item not found")
 
     record.name = dto.name
-    record.type_id = dto.type_id
-    record.from_id = dto.from_id
-    record.to_id = dto.to_id
+    # record.type_id = dto.type_id
+    # record.from_id = dto.from_id
+    record.links_to = dto.links_to
     record.sem_id = dto.sem_id
     record.description = dto.description
     record.is_validated = dto.is_validated
@@ -185,9 +136,9 @@ def update_item(
     return get_by_project_id(project_id, db)
 
 
-@router.delete("/{id}/item/{itemId}", response_model=ApiResponse)
+@router.delete("/{project_id}/item/{itemId}", response_model=ApiResponse)
 def delete_item(
-    id: int,
+    project_id: int,
     itemId: int,
     db: Session = Depends(models.get_db),
 ):
@@ -196,21 +147,15 @@ def delete_item(
     if record is None:
         raise HTTPException(status_code=404, detail="Item not found")
 
-    # Reset all the from_id
-    db.query(TheoryOfChange).filter(TheoryOfChange.from_id == record.id).update(
-        {"from_id": None}
-    )
-
-    # Reset all the to_id
-    db.query(TheoryOfChange).filter(TheoryOfChange.to_id == record.id).update(
-        {"to_id": None}
-    )
+    # Handle related items deletion in event
+    theory_of_change_deleted(record, db)
 
     # Delete the record
-    db.delete(record)
+    record.delete()
+
     db.commit()
 
-    return get_by_project_id(id, db)
+    return get_by_project_id(project_id, db)
 
 
 # ======== INDICATORS ========= #
@@ -227,14 +172,18 @@ def get_project_indicators(project_id: int, db: Session = Depends(models.get_db)
 def update_indicators(
     item_id: int, dto: IndicatorDto, db: Session = Depends(models.get_db)
 ):
-    # TODO: Add to project indicators first
-
+    print(dto)
     # Remove deleted indicators
     if dto.removed is not None:
-        db.query(TheoryOfChangeIndicator).filter(
-            TheoryOfChangeIndicator.theory_of_change_id == item_id,
-            TheoryOfChangeIndicator.indicator_id.in_(dto.removed),
-        ).delete()
+        records = (
+            db.query(TheoryOfChangeIndicator)
+            .filter(
+                TheoryOfChangeIndicator.theory_of_change_id == item_id,
+                TheoryOfChangeIndicator.id.in_(dto.removed),
+            )
+            .delete()
+        )
+        db.commit()
 
     theory_of_change = (
         db.query(TheoryOfChange).filter(TheoryOfChange.id == item_id).first()
@@ -242,7 +191,7 @@ def update_indicators(
     if theory_of_change is None:
         raise HTTPException(status_code=404, detail="Item not found")
 
-    # Add new indikit indicators to project indicators
+    # Add new Indikit indicators to project indicators
     if dto.added is not None:
         new_toc_indicators = list(
             map(

@@ -1,27 +1,33 @@
 <script setup>
-import { ref } from 'vue'
-import { Auth } from 'aws-amplify';
-import { onClickOutside } from '@vueuse/core'
-import { useUserStore } from '@/stores/user'
-import { useProjectStore } from '@/stores/projects';
+import { ref } from "vue";
+import { Auth } from "aws-amplify";
+import { onClickOutside } from "@vueuse/core";
+import { useUserStore } from "@/stores/user";
+import { useProjectStore } from "@/stores/projects";
 import { useSideNavStore } from "@/stores/sideNav";
-import { useRouter } from 'vue-router';
-import LogoWhite from '@/assets/logo-white.png';
-import { AppstoreFilled, AppstoreOutlined } from '@ant-design/icons-vue';
+import { useRouter } from "vue-router";
+import LogoWhite from "@/assets/logo-white.png";
+import { AppstoreFilled, AppstoreOutlined, UserOutlined } from "@ant-design/icons-vue";
+import Profile from "@/views/Profile.vue";
 
 const router = useRouter();
-const showMobileNav = ref(false)
+const showMobileNav = ref(false);
 const userStore = useUserStore();
 const projectStore = useProjectStore();
-const navbarMenuRef = ref(null)
-const navbarBurgerRef = ref(null)
+const navbarMenuRef = ref(null);
+const navbarBurgerRef = ref(null);
 const sideNavStore = useSideNavStore();
+const profileVisible = ref(false);
 
-onClickOutside(navbarMenuRef, () => {
-  showMobileNav.value = false
-}, {
-  ignore: [navbarBurgerRef]
-})
+onClickOutside(
+  navbarMenuRef,
+  () => {
+    showMobileNav.value = false;
+  },
+  {
+    ignore: [navbarBurgerRef],
+  }
+);
 
 const toggleSideNav = function (event) {
   const x = event.currentTarget;
@@ -30,41 +36,44 @@ const toggleSideNav = function (event) {
 };
 
 const goHome = function () {
-  router.push('/');
-}
-
+  router.push("/");
+};
 
 async function signOut() {
   try {
-    await Auth.signOut()
-      .then((resp) => {
-        userStore.setUser();
-        sideNavStore.hide()
+    await Auth.signOut().then((resp) => {
+      userStore.setUser();
+      sideNavStore.hide();
 
-        router.push('/login');
-        window.location.reload()
-      })
+      // router.push('/login');
+      // window.location.reload()
+    });
   } catch (error) {
     userStore.setUser();
-    router.push('/login')
+    router.push("/login");
 
-    window.location.reload()
-    console.log('error signing out: ', error);
+    window.location.reload();
+    console.log("error signing out: ", error);
   }
 }
-
 </script>
 
 <template>
-  <nav class="navbar is-success is-fixed-top" aria-label="main navigation" role="navigation">
+  <nav
+    class="navbar is-success is-fixed-top"
+    aria-label="main navigation"
+    role="navigation"
+  >
     <!-- <div class="container is-max-desktop px-2"> -->
     <div class="container is-fluid">
       <div class="navbar-brand">
-
         <div class="navbar-item" @click="goHome">
           <!-- <a class="navbar-item"> -->
-          <img src="@/assets/logo.png" alt="Bulma: Free, open source, and modern CSS framework based on Flexbox"
-            class="mr-1">
+          <img
+            src="@/assets/logo.png"
+            alt="Bulma: Free, open source, and modern CSS framework based on Flexbox"
+            class="mr-1"
+          />
           SBC Impact Designer
           <!-- </a> -->
         </div>
@@ -75,18 +84,28 @@ async function signOut() {
           <div class="bar3"></div>
         </div> -->
 
-
-
-
-        <a @click.prevent="showMobileNav = !showMobileNav" class="navbar-burger" :class="{ 'is-active': showMobileNav }"
-          aria-expanded="false" aria-label="menu" data-target="navbarBasic" role="button" ref="navbarBurgerRef">
+        <a
+          @click.prevent="showMobileNav = !showMobileNav"
+          class="navbar-burger"
+          :class="{ 'is-active': showMobileNav }"
+          aria-expanded="false"
+          aria-label="menu"
+          data-target="navbarBasic"
+          role="button"
+          ref="navbarBurgerRef"
+        >
           <span aria-hidden="true"></span>
           <span aria-hidden="true"></span>
           <span aria-hidden="true"></span>
         </a>
       </div>
 
-      <div id="navbarBasic" class="navbar-menu" :class="[{ 'is-active': showMobileNav }]" ref="navbarMenuRef">
+      <div
+        id="navbarBasic"
+        class="navbar-menu"
+        :class="[{ 'is-active': showMobileNav }]"
+        ref="navbarMenuRef"
+      >
         <div class="navbar-end" v-if="userStore.loggedIn">
           <!-- <RouterLink @click="showMobileNav = false" to="/projects" class="navbar-item" active-class="is-active">
             Projects
@@ -116,8 +135,6 @@ async function signOut() {
             </a>
 
             <div class="navbar-dropdown">
-
-
               <RouterLink v-if="projectStore.prj_id" to="/drivers" class="navbar-item">
                 <span class="icon mr-1">
                   <i class="fas fa-book"></i>
@@ -144,7 +161,12 @@ async function signOut() {
                 About
               </RouterLink>
 
-              <hr class="navbar-divider">
+              <span @click="profileVisible = true" role="link" class="navbar-item">
+                <UserOutlined class="mr-1"></UserOutlined>
+                Profile
+              </span>
+
+              <hr class="navbar-divider" />
               <div v-if="userStore.loggedIn">
                 <!-- FIX: fix user logout -->
                 <a @click="signOut" class="navbar-item">
@@ -160,12 +182,12 @@ async function signOut() {
           <!-- <div class="navbar-item">
             <img :src="LogoWhite" alt="Logo" />
           </div> -->
-
-
         </div>
       </div>
     </div>
   </nav>
+
+  <Profile :visible="profileVisible" @close="profileVisible = false"></Profile>
 </template>
 
 <style>
@@ -193,7 +215,7 @@ async function signOut() {
 .bar1 {
   width: 35px;
   height: 4px;
-  background-color: #FFF;
+  background-color: #fff;
   margin: 5px 0;
   margin-top: 15px;
   transition: 0.4s;
@@ -203,7 +225,7 @@ async function signOut() {
 .bar2 {
   width: 35px;
   height: 4px;
-  background-color: #FFF;
+  background-color: #fff;
   margin: 5px 0;
   transition: 0.4s;
   opacity: 0;
@@ -212,7 +234,7 @@ async function signOut() {
 .bar3 {
   width: 35px;
   height: 4px;
-  background-color: #FFF;
+  background-color: #fff;
   margin: 5px 0;
   transition: 0.4s;
   transform: translate(0, -8px) rotate(45deg);
@@ -232,14 +254,11 @@ async function signOut() {
 
 .custom-link {
   font-family:
-    /* Your desired font-family */
-  ;
+    /* Your desired font-family */ ;
   font-size:
-    /* Your desired font-size */
-  ;
+    /* Your desired font-size */ ;
   font-weight:
-    /* Your desired font-weight */
-  ;
+    /* Your desired font-weight */ ;
   color: inherit;
   text-decoration: none;
 }

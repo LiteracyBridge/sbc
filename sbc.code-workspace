@@ -10,7 +10,8 @@
 		"vue.server.petiteVue.supportHtmlFile": true,
 		"cSpell.words": [
 			"joinedload",
-			"organisation"
+			"organisation",
+			"sqlalchemy"
 		],
 		"typescript.tsdk": "frontend/node_modules/typescript/lib",
 		"[python]": {
