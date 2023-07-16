@@ -596,6 +596,32 @@ class Stakeholder(Base, SoftDeleteMixin):
     project: Mapped["Project"] = relationship("Project", back_populates="stakeholders")
 
 
+class Feedback(Base, SoftDeleteMixin):
+    __tablename__ = "feedbacks"
+
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    type: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    title: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    files: Mapped[List[str]] = mapped_column(
+        MutableList.as_mutable(ARRAY(String)), nullable=True, default=[]
+    )
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL"), nullable=False
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=func.now()
+    )
+    deleted_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+
+    user: Mapped["User"] = relationship("User")
+
+
 Base.metadata.create_all(bind=engine)
 
 

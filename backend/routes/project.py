@@ -327,7 +327,7 @@ def update_or_add_stakeholder(
     record.sms = dto.sms
     record.whatsapp = dto.whatsapp
     record.email = dto.email
-    record.editing_user_id = dto.editing_user_id
+    record.user_id = dto.editing_user_id
     record.updated_at = datetime.now()
 
     db.add(record)

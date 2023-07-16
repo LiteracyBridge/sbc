@@ -3,10 +3,12 @@ import { useUserStore } from '@/stores/user';
 import { InboxOutlined } from '@ant-design/icons-vue';
 import {
   Modal, type FormInstance, Select, SelectOption,
-  Space, Button, Form, FormItem, Input, Textarea, UploadDragger, type UploadProps
+  Space, Button, Form, FormItem, Input, Textarea,
+  UploadDragger, type UploadProps, message,
+  Spin,
  } from 'ant-design-vue';
 import axios from 'axios';
-import { reactive, ref, watch } from 'vue';
+import { ref, watch } from 'vue';
 
 class Feedback {
   type: string;
@@ -42,38 +44,23 @@ function closeModal() {
   feedbackFormRef.value.resetFields();
   config.value.form = new Feedback();
   config.value.visible = false;
+  fileList.value = [];
+
   emit('close');
 }
 
 function saveForm(){
-  console.log(fileList.value);
-
-  const formData = new FormData();
-  fileList.value.forEach((file: UploadProps['fileList'][number]) => {
-    console.log(file)
-    formData.append('files', file.originFileObj as any);
-  });
-
-
-  axios.post(`${import.meta.env.VITE_SBC_API_URL}/feedback`, formData)
-        .then((resp) => {
-          console.log(resp);
-          config.value.loading = false;
-          closeModal();
-        })
-        .catch(() => {
-          config.value.loading = false;
-        });
-
   feedbackFormRef.value.validateFields()
-    .then((values: any) => {
+    .then((_: any) => {
       config.value.loading = true;
 
       const form = config.value.form;
       form.editing_user_id = userStore.id;
 
-
-      // Upload form with files to backend using axios
+      const formData = new FormData();
+      fileList.value.forEach((file: UploadProps['fileList'][number]) => {
+        formData.append('files', file.originFileObj as any);
+      });
       Object.keys(form).forEach((key) => {
         // @ts-ignore
         formData.append(key, form[key]);
@@ -81,15 +68,15 @@ function saveForm(){
 
       axios.post(`${import.meta.env.VITE_SBC_API_URL}/feedback`, formData)
         .then((resp) => {
-          console.log(resp);
-          config.value.loading = false;
+          message.success('Your feedback has been submitted successfully!');
           closeModal();
         })
-        .catch(() => {
+        .catch((err) => {
+          message.error('There was an error submitting your feedback. Please try again:' + err.message);
+        })
+        .finally(() => {
           config.value.loading = false;
         });
-
-
     });
 }
 
@@ -164,7 +151,7 @@ const beforeUpload: UploadProps['beforeUpload'] = file => {
             },
           ]"
         >
-          <Textarea v-model:value="config.form.description"></Textarea>
+          <Textarea v-model:value="config.form.description" :rows="5"></Textarea>
         </FormItem>
 
         <FormItem label="Upload screenshots">
