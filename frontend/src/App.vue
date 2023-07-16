@@ -69,37 +69,43 @@ onMounted(async () => {
     <!-- <GridLoader :loading="appStore.isLoading"></GridLoader> -->
   </div>
 
-  <Layout v-else>
-    <Sidebar></Sidebar>
-    <!-- <LayoutSider>
+  <div v-else>
+    <div v-if="!userStore.loggedIn">
+      <router-view :key="$route.fullPath"></router-view>
+    </div>
+
+    <Layout v-else>
+      <Sidebar></Sidebar>
+      <!-- <LayoutSider>
       <LeftSideNav v-if="showSideNav" v-model="showSideNav" />
     </LayoutSider> -->
 
-    <Layout>
-      <!-- <LayoutHeader :has-sider="true" style="background: #ffffff; padding: 0px 16px 0px 0px;">
+      <Layout>
+        <!-- <LayoutHeader :has-sider="true" style="background: #ffffff; padding: 0px 16px 0px 0px;">
         <MenuUnfoldOutlined v-if="sideNavStore.visible" class="trigger"
           @click="() => (sideNavStore.visible = !sideNavStore.visible)" />
         <MenuUnfoldOutlined v-else class="trigger" @click="() => (sideNavStore.visible = !sideNavStore.visible)" /> -->
 
-      <!-- Place a dropdown at the end of the header -->
+        <!-- Place a dropdown at the end of the header -->
 
-      <Header></Header>
-      <!-- </LayoutHeader> -->
+        <Header></Header>
+        <!-- </LayoutHeader> -->
 
-      <LayoutContent
-        :style="{
-          margin: '24px 16px 0px 16px',
-          padding: '24px',
-          background: '#ffffff',
-          minHeight: '280px',
-        }"
-      >
-        <router-view :key="$route.fullPath"></router-view>
-      </LayoutContent>
+        <LayoutContent
+          :style="{
+            margin: '24px 16px 0px 16px',
+            padding: '24px',
+            background: '#ffffff',
+            minHeight: '280px',
+          }"
+        >
+          <router-view :key="$route.fullPath"></router-view>
+        </LayoutContent>
 
-      <LayoutFooter>Footer</LayoutFooter>
+        <LayoutFooter>Footer</LayoutFooter>
+      </Layout>
     </Layout>
-  </Layout>
+  </div>
 </template>
 
 <style>
@@ -122,7 +128,6 @@ html {
 .trigger:hover {
   color: #1890ff;
 }
-
 
 .site-layout .site-layout-background {
   background: #ffffff;
