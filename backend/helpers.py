@@ -1,3 +1,5 @@
+from datetime import date
+from datetime import datetime
 from typing import Any, Optional, List
 from pydantic import BaseModel
 from models import TheoryOfChange
@@ -5,7 +7,7 @@ from fastapi import Depends, UploadFile
 from sqlalchemy.orm import Session
 import boto3
 from botocore.exceptions import ClientError
-import os
+from uuid import uuid4
 import sentry_sdk
 
 
@@ -56,7 +58,9 @@ def upload_to_s3(files: list[UploadFile], bucket_name, folder_name=None) -> List
     file_urls: List[str] = []
 
     for f in files:
-        object_name = f.filename
+        object_name = (
+            f"{datetime.now().strftime('%Y%m%d%H%M%S')}_{uuid4()}_{f.filename}"
+        )
 
         if folder_name is not None:
             object_name = f"{folder_name}/{f.filename}"
