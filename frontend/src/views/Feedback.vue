@@ -104,7 +104,7 @@ const beforeUpload: UploadProps['beforeUpload'] = file => {
           Submit Feedback
         </Button>
 
-        <Button @click="closeModal()" :loading="config.loading">Cancel</Button>
+        <Button @click="closeModal()" :disabled="config.loading">Cancel</Button>
       </Space>
     </template>
 

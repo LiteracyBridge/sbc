@@ -63,7 +63,7 @@ def upload_to_s3(files: list[UploadFile], bucket_name, folder_name=None) -> List
         )
 
         if folder_name is not None:
-            object_name = f"{folder_name}/{f.filename}"
+            object_name = f"{folder_name}/{object_name}"
 
         try:
             s3_client.upload_fileobj(f.file, bucket_name, object_name)
