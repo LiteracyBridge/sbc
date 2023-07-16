@@ -59,7 +59,7 @@ def upload_to_s3(files: list[UploadFile], bucket_name, folder_name=None) -> List
 
     for f in files:
         object_name = (
-            f"{datetime.now().strftime('%Y%m%d%H%M%S')}_{uuid4()}_{f.filename}"
+            f"{uuid4()}_{f.filename}"
         )
 
         if folder_name is not None:
