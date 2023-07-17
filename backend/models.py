@@ -398,7 +398,7 @@ class Risk(Base, SoftDeleteMixin):
     )
 
 
-class Activity(Base):
+class Activity(Base, SoftDeleteMixin):
     __tablename__ = "activities"
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)

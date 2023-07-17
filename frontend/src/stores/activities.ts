@@ -124,29 +124,16 @@ export const useActivityStore = defineStore({
     },
 
     async deleteIntervention(interventionId: number) {
-      // Delete an activity from an intervention id ONLY IF:
-      //    - it has no schedules
-      //    - it has no notes
-      //    - it has no child activities
-      // If these conditions are not met, return false.  deleteActivity() should be used instead.
-
-      // find all activities linked to the intervention
-      const removeActivities = this.activities.filter(
-        (a, idx, arr) =>
-          a.intervention_id === interventionId &&
-          this.schedules.filter((s) => s.activity_id == a.id).length == 0 &&
-          (!a.notes || a.notes == "") &&
-          !arr.filter((b) => b.parent_id == a.id).length
+      const activity = this.activities.find(
+        (i) => i.intervention_id == interventionId
       );
-      const deleteIds = removeActivities.map((a) => a.id);
-      // console.log('deleteIds:');
-      // console.log(deleteIds);
-      const table = "activities";
-      api.remove(table, deleteIds);
 
-      this.activities = this.activities.filter(
-        (a) => !removeActivities.includes(a)
-      );
+      if (activity == null) {
+        message.error("An activity with this intervention does not exist!");
+        return;
+      }
+
+      return this.deleteActivity(activity.id);
     },
   },
 });

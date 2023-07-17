@@ -1,5 +1,5 @@
 from typing import Dict, List, Optional
-from model_events import theory_of_change_deleted
+from model_events import delete_activity, delete_theory_of_change
 from models import ProjectIndicators, TheoryOfChange, TheoryOfChangeIndicator
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
@@ -152,13 +152,20 @@ def delete_item(
     if record is None:
         raise HTTPException(status_code=404, detail="Item not found")
 
+    # Delete linked activity
+    activity = (
+        db.query(Activity).filter(Activity.theory_of_change_id == record.id).first()
+    )
+    if activity is not None:
+        delete_activity(activity, db)
+
     # Handle related items deletion in event
-    theory_of_change_deleted(record, db)
+    delete_theory_of_change(record, db)
 
-    # Delete the record
-    record.delete()
+    # # Delete the record
+    # record.delete()
 
-    db.commit()
+    # db.commit()
 
     return get_by_project_id(project_id, db)
 

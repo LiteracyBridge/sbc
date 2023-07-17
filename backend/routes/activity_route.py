@@ -3,6 +3,7 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session, joinedload, subqueryload
+from model_events import delete_activity
 
 from helpers import ToCItemDto, create_toc_item
 import models
@@ -142,7 +143,7 @@ def get_activities(projectId: int, db: Session = Depends(models.get_db)):
 
 
 @router.delete("/{project_id}/{id}", response_model=ApiResponse)
-def delete_activity(project_id: int, id: int, db: Session = Depends(models.get_db)):
+def delete(project_id: int, id: int, db: Session = Depends(models.get_db)):
     activity = (
         db.query(Activity)
         .filter(Activity.id == id, Activity.prj_id == project_id)
@@ -152,7 +153,8 @@ def delete_activity(project_id: int, id: int, db: Session = Depends(models.get_d
     if activity is None:
         return HTTPException(status_code=400, detail="Account cannot be created")
 
-    db.delete(activity)
-    db.commit()
+    delete_activity(activity, db)
 
-    return get_project_activities(project_id=activity.prj_id, db=db)
+    # db.commit()
+
+    return get_project_activities(project_id=project_id, db=db)
