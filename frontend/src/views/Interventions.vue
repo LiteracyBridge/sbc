@@ -12,6 +12,7 @@ import {
   Tabs,
   Typography,
   Card,
+  Popconfirm
 } from "ant-design-vue";
 import { DeleteOutlined, PlusCircleOutlined } from "@ant-design/icons-vue";
 import { groupBy } from "lodash-es";
@@ -113,19 +114,25 @@ onMounted(() => {
                     Add
                   </Button>
 
-                  <Button
-                    v-if="interventionStore.activityIds(intervention.id).length"
-                    @click="activityStore.deleteIntervention(intervention.id)"
-                    type="primary"
-                    :ghost="true"
-                    :danger="true"
-                    size="small"
+                  <Popconfirm
+                    title="Are you sure to delete this intervention? All associated tasks will be deleted as well!"
+                    ok-text="Yes"
+                    cancel-text="No"
+                    @confirm="activityStore.deleteIntervention(intervention.id)"
                   >
-                    <template #icon>
-                      <DeleteOutlined />
-                    </template>
-                    Remove
-                  </Button>
+                    <Button
+                      v-if="interventionStore.activityIds(intervention.id).length"
+                      type="primary"
+                      :ghost="true"
+                      :danger="true"
+                      size="small"
+                    >
+                      <template #icon>
+                        <DeleteOutlined />
+                      </template>
+                      Remove
+                    </Button>
+                  </Popconfirm>
                 </template>
 
                 <p class="is-italic">{{ intervention.text_short }}</p>
