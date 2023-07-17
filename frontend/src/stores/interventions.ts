@@ -57,12 +57,12 @@ export const useInterventionStore = defineStore({
   actions: {
     clear() {
       this.$state.interventions = [];
-      // for (const property of Object.keys(this.$state)) {
-      //   this.$state.[property] = [];
-      // }
     },
     download() {
-      return downloadObjects(init_objects, this, "lu_");
+      this.$state.loading = true;
+      return downloadObjects(init_objects, this, "lu_").finally(
+        () => (this.$state.loading = false)
+      );
     },
     // Download data
     downloadProjectDrivers() {

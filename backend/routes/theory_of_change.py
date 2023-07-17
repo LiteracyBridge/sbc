@@ -36,6 +36,10 @@ class TheoryOfChangeItemDto(BaseModel):
     description: Optional[str]
     editing_user_id: Optional[int]
 
+    # Activity related fields
+    intervention_id: Optional[int]
+    driver_ids: Optional[List[int]]
+
 
 class NewTheoryOfChangeDto(BaseModel):
     name: str
@@ -82,7 +86,7 @@ def get_by_project_id(projectId: int, db: Session = Depends(models.get_db)):
 def create_item(
     project_id: int, dto: TheoryOfChangeItemDto, db: Session = Depends(models.get_db)
 ):
-    toc: TheoryOfChange = TheoryOfChange()
+    toc = TheoryOfChange()
     toc.name = dto.name
     toc.type_id = dto.type_id
     toc.links_to = dto.links_to
@@ -104,6 +108,7 @@ def create_item(
         new_activity.status_id = 1
         new_activity.editing_user_id = dto.editing_user_id
         new_activity.theory_of_change_id = toc.id
+        new_activity.intervention_id = dto.intervention_id
 
         db.add(new_activity)
         db.commit()

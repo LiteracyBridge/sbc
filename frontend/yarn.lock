@@ -2545,7 +2545,7 @@ ansi-styles@^4.0.0, ansi-styles@^4.1.0:
   dependencies:
     color-convert "^2.0.1"
 
-ant-design-vue@4:
+ant-design-vue@^4.0.0:
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/ant-design-vue/-/ant-design-vue-4.0.0.tgz#82ea182d44530d7663c999d9b4d594206524b21a"
   integrity sha512-6V8DxHPv3HJYDdv48W/KFOUjeZDsYJhFlk13HFSKCJSR2MQs4YnPIAC+rWie9vYcVEKbO+cQDqiOM3cBoHMNUQ==

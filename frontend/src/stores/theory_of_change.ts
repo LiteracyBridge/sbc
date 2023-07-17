@@ -186,5 +186,30 @@ export const useTheoryOfChangeStore = defineStore({
         })
         .finally(() => (this.$state.isLoading = false));
     },
+    async addTocItem(
+      form: Partial<
+        TheoryOfChange & {
+          intervention_id: number;
+          editing_user_id: number;
+          driver_ids: number[];
+        }
+      >
+    ) {
+      this.$state.isLoading = true;
+      return ApiRequest.post<TheoryOfChange>(
+        `theory-of-change/${useProjectStore().prj_id}/item`,
+        form
+      )
+        .then((resp) => {
+          this.$state.theory_of_change = resp;
+          message.success(
+            `Theory of change item ${
+              form.id != null ? "updated" : "added"
+            } successfully`
+          );
+          return resp;
+        })
+        .finally(() => (this.$state.isLoading = false));
+    },
   },
 });

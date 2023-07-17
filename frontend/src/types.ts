@@ -1,5 +1,13 @@
 import type { Dayjs } from "dayjs";
 
+export enum TheoryOfChangeType {
+  Input = 1,
+  Activity = 2,
+  Output = 3,
+  Outcome = 4,
+  Impact = 5,
+}
+
 export const THEORY_OF_CHANGE_TYPES: Record<string, string> = {
   "1": "Input",
   "2": "Activity",
@@ -183,8 +191,9 @@ export class TheoryOfChangeItem {
 export class TheoryOfChange {
   id: number;
   name: string = "";
-  assumptions: string = "";
+  // assumptions: string = "";
   description: string = "";
+  editing_user_id?: number;
   type_id: number = undefined;
   from_id?: number = undefined;
   to_id?: number = undefined;

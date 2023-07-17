@@ -407,21 +407,25 @@ class Activity(Base):
     notes: Mapped[Optional[str]]
 
     prj_id: Mapped[int] = mapped_column(ForeignKey("projects.id"), nullable=False)
-    editing_user_id: Mapped[int] = mapped_column(
+    editing_user_id: Mapped[Optional[int]] = mapped_column(
         ForeignKey("project_users.id"), nullable=True
     )
     theory_of_change_id: Mapped[int] = mapped_column(
         ForeignKey("theory_of_change.id"), nullable=True
     )
-    parent_id: Mapped[int] = mapped_column(ForeignKey("activities.id"), nullable=True)
-    intervention_id: Mapped[int] = mapped_column(
+    parent_id: Mapped[Optional[int]] = mapped_column(
+        ForeignKey("activities.id"), nullable=True
+    )
+    intervention_id: Mapped[Optional[int]] = mapped_column(
         ForeignKey("lu_interventions.id"), nullable=True
     )
     owner_id: Mapped[int] = mapped_column(ForeignKey("project_users.id"), nullable=True)
     status_id: Mapped[int] = mapped_column(
         ForeignKey("lu_activity_status.id"), nullable=True
     )
-    driver_ids: Mapped[int] = mapped_column(default=[], nullable=True)
+    driver_ids: Mapped[Optional[List]] = mapped_column(
+        MutableList.as_mutable(ARRAY(Integer)), default=[], nullable=True
+    )
     start_date: Mapped[Optional[DateTime]] = mapped_column(
         DateTime(timezone=True), default=func.now()
     )

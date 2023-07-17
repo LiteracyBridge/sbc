@@ -15,12 +15,16 @@ import {
 } from "ant-design-vue";
 import { DeleteOutlined, PlusCircleOutlined } from "@ant-design/icons-vue";
 import { groupBy } from "lodash-es";
+import { useTheoryOfChangeStore } from "@/stores/theory_of_change";
+import { TheoryOfChangeType } from "@/types";
+import { useUserStore } from "@/stores/user";
 
 const config = ref({
   activePanel: "",
   activeTab: "",
 });
 
+const tocStore = useTheoryOfChangeStore();
 const activityStore = useActivityStore();
 const interventionStore = useInterventionStore();
 const selectedPrjDriver = ref(null);
@@ -30,11 +34,16 @@ function addIntervention(intervention: { name: string; id: number }) {
   if (selectedPrjDriver.value) {
     driver_ids = [selectedPrjDriver.value.id];
   }
-  activityStore.updateOrCreate({
-    name: intervention.name,
-    driver_ids,
-    intervention_id: intervention.id,
-  });
+
+  tocStore
+    .addTocItem({
+      name: intervention.name,
+      type_id: TheoryOfChangeType.Activity,
+      intervention_id: intervention.id,
+      driver_ids,
+      editing_user_id: useUserStore().id,
+    })
+    .then(() => activityStore.download());
 }
 
 const drivers = computed(() => {
@@ -68,7 +77,7 @@ onMounted(() => {
 
 <template>
   <Card title="SBC Approaches">
-    <Spin :spinning="interventionStore.loading || activityStore.isLoading">
+    <Spin :spinning="interventionStore.loading || tocStore.isLoading">
       <Empty v-if="drivers.length == 0">
         <template #description>
           <span>No intervention found!</span> <br />
