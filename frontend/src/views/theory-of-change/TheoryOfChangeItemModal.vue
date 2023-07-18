@@ -80,36 +80,16 @@ function saveFormItem() {
     editing_user_id: useUserStore().id,
   };
 
-  config.value.loading = true;
-  if (!isNew.value) {
-    // Update item
-    ApiRequest.put<TheoryOfChange>(
-      `theory-of-change/${projectStore.prj_id}/item/${props.toc?.id}`,
-      data
-    )
-      .then((resp) => {
-        store.theory_of_change = resp;
+  config.value.loading = store.isLoading;
 
-        emit("saved", resp);
-        closeModal();
-        message.success("Item updated successfully");
-      })
-      .finally(() => {
-        config.value.loading = false;
-      });
-  } else {
-    //  Create item
-    ApiRequest.post<TheoryOfChange>(`theory-of-change/${projectStore.prj_id}/item`, data)
-      .then((resp) => {
-        store.theory_of_change = resp;
-        emit("saved", resp);
-        closeModal();
-        message.success("Item created successfully");
-      })
-      .finally(() => {
-        config.value.loading = false;
-      });
-  }
+  store
+    .addTocItem(data)
+    .then((resp) => {
+      store.theory_of_change = resp;
+      emit("saved", resp);
+      closeModal();
+    })
+    .finally(() => (config.value.loading = store.isLoading));
 }
 
 function deleteItem() {
@@ -145,7 +125,7 @@ function deleteIndicator(id: number) {
 
 <template>
   <Modal
-    v-model:visible="config.visible"
+    v-model:open="config.visible"
     @cancel="closeModal()"
     @ok="closeModal()"
     width="700px"

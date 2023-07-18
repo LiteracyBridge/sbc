@@ -1,4 +1,5 @@
 from typing import Dict, List, Optional
+from datetime import datetime
 from model_events import delete_activity, delete_theory_of_change
 from models import ProjectIndicators, TheoryOfChange, TheoryOfChangeIndicator
 from fastapi import APIRouter, Depends, HTTPException
@@ -26,6 +27,7 @@ class IndicatorDto(BaseModel):
 
 
 class TheoryOfChangeItemDto(BaseModel):
+    id: Optional[int]
     type_id: int
     # from_id: Optional[str | int]
     to_id: Optional[str | int]
@@ -83,24 +85,36 @@ def get_by_project_id(projectId: int, db: Session = Depends(models.get_db)):
 
 
 @router.post("/{project_id}/item", response_model=ApiResponse)
-def create_item(
+def update_or_create_item(
     project_id: int, dto: TheoryOfChangeItemDto, db: Session = Depends(models.get_db)
 ):
     toc = TheoryOfChange()
+
+    if dto.id is not None:
+        toc = db.query(TheoryOfChange).filter(TheoryOfChange.id == dto.id).first()
+
+        if toc is None:
+            raise HTTPException(status_code=404, detail="Item not found")
+    else:
+        # Name & type cannot be updated
+        toc.type_id = dto.type_id
+        toc.updated_at = datetime.now()
+
     toc.name = dto.name
-    toc.type_id = dto.type_id
     toc.links_to = dto.links_to
     toc.sem_id = dto.sem_id
     toc.description = dto.description
     toc.project_id = project_id
+    toc.is_validated = dto.is_validated
 
-    # todo: use helper method
-    db.add(toc)
+    if dto.id is None:
+        db.add(toc)
+
     db.commit()
     db.refresh(toc)
 
     # Create activity item
-    if toc.type_id == 2:
+    if toc.type_id == 2 and dto.id is None:
         new_activity: Activity = Activity()
         new_activity.name = toc.name
         new_activity.notes = toc.description
@@ -114,31 +128,6 @@ def create_item(
         db.commit()
 
     return ApiResponse(data=get_toc_by_project_id(project_id, db))
-
-
-@router.put("/{project_id}/item/{itemId}", response_model=ApiResponse)
-def update_item(
-    project_id: int,
-    itemId: int,
-    dto: TheoryOfChangeItemDto,
-    db: Session = Depends(models.get_db),
-):
-    record = db.query(TheoryOfChange).filter(TheoryOfChange.id == itemId).first()
-
-    if record is None:
-        raise HTTPException(status_code=404, detail="Item not found")
-
-    record.name = dto.name
-    # record.type_id = dto.type_id
-    # record.from_id = dto.from_id
-    record.links_to = dto.links_to
-    record.sem_id = dto.sem_id
-    record.description = dto.description
-    record.is_validated = dto.is_validated
-
-    db.commit()
-
-    return get_by_project_id(project_id, db)
 
 
 @router.delete("/{project_id}/item/{itemId}", response_model=ApiResponse)
@@ -161,11 +150,6 @@ def delete_item(
 
     # Handle related items deletion in event
     delete_theory_of_change(record, db)
-
-    # # Delete the record
-    # record.delete()
-
-    # db.commit()
 
     return get_by_project_id(project_id, db)
 
