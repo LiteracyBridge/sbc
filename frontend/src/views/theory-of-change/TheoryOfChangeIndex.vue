@@ -2,12 +2,7 @@
 import mermaid from "mermaid";
 
 import { onMounted, onUnmounted, reactive, ref, computed } from "vue";
-import {
-  Risk,
-  SEMS,
-  THEORY_OF_CHANGE_TYPES,
-  TheoryOfChange,
-} from "@/types";
+import { Risk, SEMS, THEORY_OF_CHANGE_TYPES, TheoryOfChange } from "@/types";
 import {
   Button,
   Card,
@@ -210,9 +205,9 @@ const diagram = reactive({
     if (edge == null) return;
 
     if (fromOrTo == "from") {
-      return this.nodes[edge.fromId].label;
+      return this.nodes[edge.fromId]?.label || "N/A";
     }
-    return this.nodes[edge.toId].label;
+    return this.nodes[edge.toId]?.label || "N/A";
   },
   orientation: function () {
     return this.orientationOptions[this.orientationIndex];
@@ -347,7 +342,9 @@ onMounted(() => {
 
   window.addEventListener("keydown", escapeKeyHandler);
 
-  window.edgeDoubleClick = function (fromNodeId, toNodeId) {
+  // @ts-ignore
+  window.edgeDoubleClick = function (fromNodeId: number, toNodeId: number) {
+    console.log(fromNodeId, toNodeId);
     const edgeIndex = diagram.edges.findIndex(
       (e) => e.fromId == fromNodeId && e.toId == toNodeId
     );
@@ -357,6 +354,7 @@ onMounted(() => {
     risksModalConfig.form.toc_to_id = toNodeId;
     risksModalConfig.showModal();
   };
+
   window.nodeDoubleClick = function (nodeId) {
     fromNodeId.value = null;
     selectedNodeId.value = nodeId;
@@ -458,20 +456,6 @@ const risksModalConfig = reactive({
     risksModalConfig.form = new Risk();
   },
   saveForm: async () => {
-    // const tocId = theoryOfChangeModel.value?.data?.id;
-    // if (tocId == null) {
-    //   return;
-    // }
-
-    const data = {
-      id: risksModalConfig.form.id,
-      name: risksModalConfig.form.name,
-      assumptions: risksModalConfig.form.assumptions,
-      risks: risksModalConfig.form.risks,
-      toc_to_id: risksModalConfig.form.toc_to_id,
-      toc_from_id: risksModalConfig.form.toc_from_id ?? undefined,
-    };
-
     risksModalConfig.isSaving = true;
     store
       .saveRisk(risksModalConfig.form)
