@@ -1,5 +1,9 @@
 Today:
     ✔ Open indicator panel when tag clicked (toc modal) @done(23-07-07 23:02)
+    ☐ Toc logic view bug when input item is added
+    ☐ Project drivers
+        ☐ 'add' button state not changed after adding a driver
+
     ☐ All editing of indicator item (indicator browser)
         ☐ use ng typography
     ☐ move indicator deletion to panel
