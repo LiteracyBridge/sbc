@@ -469,10 +469,7 @@ const tocItemModalClosed = (redraw = true, data?: TheoryOfChange[]) => {
     <RiskModal
       :visible="risksModalConfig.visible"
       @close="closeRiskModal()"
-      :edge="{
-        toc_from_id: risksModalConfig.risk.toc_from_id,
-        toc_to_id: risksModalConfig.risk.toc_to_id,
-      }"
+      :edge="risksModalConfig.risk"
     ></RiskModal>
 
     <!-- Theory of Change examples browser panel -->

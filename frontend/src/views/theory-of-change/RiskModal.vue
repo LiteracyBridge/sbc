@@ -72,7 +72,7 @@ const getLabel = computed(() => {
 </script>
 
 <template>
-  <Modal v-model:visible="config.visible" @ok="closeModal()" @on-cancel="closeModal()">
+  <Modal v-model:open="config.visible" @ok="closeModal()" @on-cancel="closeModal()" :closable="false" :mask-closable="false">
     <template #title>
       <span>
         {{ getLabel(edge.toc_from_id) }}
