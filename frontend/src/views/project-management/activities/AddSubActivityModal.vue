@@ -99,7 +99,7 @@ watch(props, (newProps) => {
     @ok="saveForm()"
   >
     <template #title>
-      <span>{{ isEditing ? "Update" : "Add" }} Task</span>
+      <span>{{ isEditing ? "Update" : "Add" }} {{ isActivity ? 'Activity' : 'Task' }}</span>
     </template>
 
     <template #footer>

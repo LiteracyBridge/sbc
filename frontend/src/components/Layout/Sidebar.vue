@@ -104,23 +104,23 @@ watch(projectSelected, (newVal) => {
     v-model:collapsed="store.visible"
     :trigger="null"
     collapsible
-    :style="{ minHeight: '100vh' }"
+    :style="{ minHeight: '100vh', backgroundColor: 'white' }"
     breakpoint="lg"
     :collapsed-width="0"
     width="250px"
   >
     <div class="logo">
-      <Avatar id="logo-image">
-        <template #icon><UserOutlined /></template>
-      </Avatar>
+      <!-- <Avatar id="logo-image">
+        <template #icon><CompassOutlined /></template>
+      </Avatar> -->
 
-      <span style="color: white">
+      <span>
         {{ projectStore.current_project.organisation?.name }}
       </span>
     </div>
     <Divider :style="{ backgroundColor: 'white' }"></Divider>
 
-    <Menu v-model:selectedKeys="config.activeMenu" theme="dark" mode="inline">
+    <Menu v-model:selectedKeys="config.activeMenu" theme="light" mode="inline">
       <MenuItem v-for="(item, index) in menuItems" :key="index">
         <router-link v-if="item.name" :to="'/forms/' + item.params?.module">
           <span role="link">
@@ -149,9 +149,9 @@ watch(projectSelected, (newVal) => {
   /* background: rgba(255, 255, 255, 0.3); */
   margin: 10px;
   padding-top: 8px;
-  color: white;
+  /* color: white; */
   text-align: center;
-  font-size: 18px;
+  font-size: 25px;
 }
 
 #logo-image {

@@ -9,8 +9,11 @@ import { useUserStore } from "@/stores/user";
 const columns = [
   {
     title: "Name",
-    dataIndex: "name",
     key: "name",
+  },
+  {
+    title: "Activity",
+    key: "activity",
   },
   {
     title: "Deadline",
@@ -78,7 +81,10 @@ onMounted(() => {
         </Tag>
       </template>
 
-      <!-- TODO: add activity column -->
+      <template v-if="column.key === 'activity'">
+        <Button type="text">{{ activityStore.activityById(activity.parent_id)?.name || 'N/A' }}</Button>
+      </template>
+
 
       <template v-if="column.key === 'deadline'">
         {{ formatDate(activity.end_date) || "N/A" }}
