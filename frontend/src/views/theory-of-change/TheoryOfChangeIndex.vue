@@ -18,6 +18,7 @@ import {
 } from "ant-design-vue";
 import TheoryOfChangeExamplesBrowser from "./TheoryOfChangeExamplesBrowser.vue";
 import TheoryOfChangeItemModal from "./TheoryOfChangeItemModal.vue";
+import RiskModal from "./RiskModal.vue";
 import {
   DeleteOutlined,
   PlusCircleOutlined,
@@ -26,6 +27,7 @@ import {
   SwapOutlined,
 } from "@ant-design/icons-vue";
 import { useTheoryOfChangeStore } from "@/stores/theory_of_change";
+import { uploadListProps } from "ant-design-vue/es/upload/interface";
 
 const showIndicatorModal = ref(false);
 const theoryOfChangeModel = ref<{
@@ -40,11 +42,6 @@ const tocItemModalConfig = ref({
   toc: new TheoryOfChange(),
 });
 
-const config = reactive({
-  isLoading: true,
-  isExamplePanelVisible: false,
-});
-
 const store = useTheoryOfChangeStore();
 
 const diagramContainer = ref(null);
@@ -53,6 +50,40 @@ const selectedNodeId = ref(null);
 const selectedEdge = ref(null);
 const selectedNode = ref(null);
 const logicModelView = ref(false);
+
+const config = reactive({
+  isLoading: true,
+  isExamplePanelVisible: false,
+});
+
+// === START: Risks Modal functions
+const risksModalConfig = ref({
+  visible: false,
+  risk: {
+    toc_from_id: null,
+    toc_to_id: null,
+  },
+});
+
+function showRiskModal(edge?: { fromId?: number; toId?: number }) {
+  if (edge == null) {
+    return;
+  }
+
+  risksModalConfig.value.risk = {
+    toc_from_id: edge.fromId,
+    toc_to_id: edge.toId,
+  };
+  risksModalConfig.value.visible = true;
+}
+function closeRiskModal() {
+  risksModalConfig.value.visible = false;
+  risksModalConfig.value.risk = {
+    toc_from_id: null,
+    toc_to_id: null,
+  };
+}
+// === END: Risks Modal functions
 
 const mermaidConfig = {
   startOnLoad: true,
@@ -344,15 +375,7 @@ onMounted(() => {
 
   // @ts-ignore
   window.edgeDoubleClick = function (fromNodeId: number, toNodeId: number) {
-    console.log(fromNodeId, toNodeId);
-    const edgeIndex = diagram.edges.findIndex(
-      (e) => e.fromId == fromNodeId && e.toId == toNodeId
-    );
-
-    selectedEdge.value = diagram.edges[edgeIndex];
-    risksModalConfig.form.toc_from_id = fromNodeId;
-    risksModalConfig.form.toc_to_id = toNodeId;
-    risksModalConfig.showModal();
+    showRiskModal({ fromId: fromNodeId, toId: toNodeId });
   };
 
   window.nodeDoubleClick = function (nodeId) {
@@ -414,7 +437,6 @@ const newTocItem = () => {
 
 const tocItemModalClosed = (redraw = true, data?: TheoryOfChange[]) => {
   selectedNodeId.value = null;
-  selectedEdge.value = null;
   showIndicatorModal.value = false;
 
   tocItemModalConfig.value.visible = false;
@@ -430,44 +452,6 @@ const tocItemModalClosed = (redraw = true, data?: TheoryOfChange[]) => {
 };
 
 //=== END: Theory of Change Item Modal functions
-
-// === START: Risks Modal functions
-const risksModalConfig = reactive({
-  visible: false,
-  isSaving: false,
-  form: new Risk(),
-  showModal: () => {
-    const edge = selectedEdge?.value;
-    if (edge == null) {
-      return;
-    }
-
-    const existingRisk = store.risks.find(
-      (i) => i.toc_from_id == edge.fromId && i.toc_to_id == edge.toId
-    );
-    risksModalConfig.form = existingRisk ?? new Risk();
-    risksModalConfig.form.toc_from_id ??= edge.fromId;
-    risksModalConfig.form.toc_to_id ??= edge.toId;
-    risksModalConfig.visible = true;
-  },
-  closeModal: () => {
-    risksModalConfig.visible = false;
-    selectedEdge.value = null;
-    risksModalConfig.form = new Risk();
-  },
-  saveForm: async () => {
-    risksModalConfig.isSaving = true;
-    store
-      .saveRisk(risksModalConfig.form)
-      .then((resp) => {
-        risksModalConfig.closeModal();
-      })
-      .finally(() => {
-        risksModalConfig.isSaving = false;
-      });
-  },
-});
-// === END: Risks Modal functions
 </script>
 
 <template>
@@ -480,6 +464,16 @@ const risksModalConfig = reactive({
       @saved="tocItemModalClosed(false, $event)"
       @deleted="deleteNode($event)"
     ></TheoryOfChangeItemModal>
+
+    <!-- Risk Modal -->
+    <RiskModal
+      :visible="risksModalConfig.visible"
+      @close="closeRiskModal()"
+      :edge="{
+        toc_from_id: risksModalConfig.risk.toc_from_id,
+        toc_to_id: risksModalConfig.risk.toc_to_id,
+      }"
+    ></RiskModal>
 
     <!-- Theory of Change examples browser panel -->
     <TheoryOfChangeExamplesBrowser
@@ -529,76 +523,6 @@ const risksModalConfig = reactive({
       </div>
 
       <Divider></Divider>
-
-      <!-- ======== START: Risks Modal ======= -->
-      <Modal
-        v-model:visible="risksModalConfig.visible"
-        @ok="risksModalConfig.closeModal()"
-        @cancel="tocItemModalClosed()"
-      >
-        <template #title>
-          <span>
-            {{ diagram.edgeLabel(selectedEdge, "from") }}
-            <SwapOutlined />
-            {{ diagram.edgeLabel(selectedEdge, "to") }}
-          </span>
-        </template>
-
-        <template #footer>
-          <Space>
-            <Button
-              :disabled="risksModalConfig.isSaving"
-              @click="risksModalConfig.closeModal()"
-              >Cancel</Button
-            >
-
-            <Button
-              :loading="risksModalConfig.isSaving"
-              @click="risksModalConfig.saveForm()"
-              type="primary"
-            >
-              {{ risksModalConfig.form?.id ? "Update" : "Save" }}
-            </Button>
-          </Space>
-        </template>
-
-        <Form layout="vertical" :model="risksModalConfig.form">
-          <Spin :spinning="risksModalConfig.isSaving">
-            <FormItem
-              label="Name"
-              name="name"
-              :rules="[{ require: true, message: 'Enter risk name!' }]"
-              has-feedback
-            >
-              <Input v-model:value="risksModalConfig.form.name" placeholder="" />
-            </FormItem>
-
-            <FormItem label="Assumptions" name="assumptions">
-              <Textarea
-                v-model:value="risksModalConfig.form.assumptions"
-                placeholder=""
-              ></Textarea>
-            </FormItem>
-
-            <FormItem label="Risks" name="risks">
-              <Textarea
-                v-model:value="risksModalConfig.form.risks"
-                placeholder=""
-              ></Textarea>
-            </FormItem>
-
-            <FormItem label="Mitigation" name="mitigation">
-              <Textarea
-                v-model:value="risksModalConfig.form.mitigation"
-                placeholder=""
-              ></Textarea>
-            </FormItem>
-          </Spin>
-        </Form>
-      </Modal>
-      <!-- ======== END: Risks Modal ======= -->
-
-      <!-- TODO: add edge modal -->
 
       <div class="mt-4">
         <div

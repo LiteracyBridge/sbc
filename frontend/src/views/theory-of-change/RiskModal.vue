@@ -50,18 +50,21 @@ function saveForm() {
     });
 }
 
-watch(props, (newProps) => {
-  config.value.visible = newProps.visible;
-  const edge = newProps.edge;
+watch(
+  props,
+  (newProps) => {
+    const edge = newProps.edge;
 
-  const existingRisk = store.risks.find(
-    (i) => i.toc_from_id == edge.toc_from_id && i.toc_to_id == edge.toc_to_id
-  );
-  config.value.form = existingRisk ?? new Risk();
-  config.value.form.toc_from_id ??= edge.toc_from_id;
-  config.value.form.toc_to_id ??= edge.toc_to_id;
-  config.value.visible = true;
-});
+    const existingRisk = store.risks.find(
+      (i) => i.toc_from_id == edge.toc_from_id && i.toc_to_id == edge.toc_to_id
+    );
+    config.value.form = existingRisk ?? new Risk();
+    config.value.form.toc_from_id ??= edge.toc_from_id;
+    config.value.form.toc_to_id ??= edge.toc_to_id;
+    config.value.visible = newProps.visible;
+  },
+  { deep: true }
+);
 
 const getLabel = computed(() => {
   return (tocId: number) => store.theory_of_change.find((i) => i.id == tocId)?.name;
@@ -69,7 +72,7 @@ const getLabel = computed(() => {
 </script>
 
 <template>
-  <Modal v-model:open="config.visible" @ok="closeModal()" @cancel="closeModal()">
+  <Modal v-model:visible="config.visible" @ok="closeModal()" @on-cancel="closeModal()">
     <template #title>
       <span>
         {{ getLabel(edge.toc_from_id) }}
