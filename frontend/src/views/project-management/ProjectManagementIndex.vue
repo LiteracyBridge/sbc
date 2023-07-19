@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import { onMounted, ref, reactive, watch } from "vue";
-import { Button, TabPane, Card, Tabs, Tag, Typography } from "ant-design-vue";
+import { ref } from "vue";
+import { Button, TabPane, Card, Tabs, } from "ant-design-vue";
 
 import ActivitiesTable from "./activities/ActivitiesTable.vue";
 import RiskMitigation from "./RiskMitigation.vue";
@@ -8,14 +8,13 @@ import SustainabilityStrategy from './SustainabilityStrategy.vue';
 import MyTasks from "./activities/MyTasks.vue";
 
 const config = ref({
-  activeTab: 'activities'
+  activeTab: 'tasks'
 })
-
 
 </script>
 
 <template>
-  <Card title="Project Management">
+  <Card title="Project Management" :bordered="false">
     <Tabs v-model:activeKey="config.activeTab" centered>
       <TabPane key="tasks" tab="My Tasks">
         <MyTasks></MyTasks>

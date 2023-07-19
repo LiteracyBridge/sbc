@@ -24,6 +24,7 @@ import {
   Button,
   message,
   Divider,
+  Tooltip,
 } from "ant-design-vue";
 import { useProjectStore } from "@/stores/projects";
 import Profile from "@/views/Profile.vue";
@@ -66,7 +67,10 @@ function changeProject(prjId: number) {
 <template>
   <Profile :visible="profileVisible" @close="profileVisible = false"></Profile>
 
-  <LayoutHeader :has-sider="true" style="background: #ffffff; padding: 0px 16px 0px 0px">
+  <LayoutHeader
+    :has-sider="true"
+    style="background: #289b6a; padding: 0px 16px 0px 0px; color: white"
+  >
     <div id="header-items">
       <span>
         <MenuUnfoldOutlined
@@ -80,11 +84,13 @@ function changeProject(prjId: number) {
       /></span>
 
       <div>
-        <Dropdown>
-          <a @click.prevent style="color: inherit">
-            {{ projectStore.projectName }}
-            <DownOutlined />
-          </a>
+        <Dropdown :trigger="['click']">
+          <Tooltip title="Click to change project">
+            <a @click.prevent style="color: inherit">
+              {{ projectStore.projectName }}
+              <DownOutlined />
+            </a>
+          </Tooltip>
 
           <template #overlay>
             <Menu>

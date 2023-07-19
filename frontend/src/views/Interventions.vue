@@ -77,7 +77,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <Card title="SBC Approaches">
+  <Card title="SBC Approaches" :bordered="false">
     <Spin :spinning="interventionStore.loading || tocStore.isLoading">
       <Empty v-if="drivers.length == 0">
         <template #description>

@@ -6,7 +6,7 @@ import { useInterventionStore } from "../stores/interventions";
 import { ref, onMounted } from "vue";
 import { useUserStore } from "@/stores/user";
 import { useRouter } from "vue-router";
-import { SelectOption, Select, Row, Col } from "ant-design-vue";
+import { SelectOption, Select, Card, Row, Col } from "ant-design-vue";
 import { Driver } from "@/types";
 
 const userStore = useUserStore();
@@ -88,8 +88,7 @@ function clearSelection() {
 </script>
 
 <template>
-  <section ref="top" class="section">
-    <div class="">
+      <Card title="Behavioral Drivers" ref="top"  :bordered="false">
       <Row :gutter="8">
         <Col :span="5">
           <Select
@@ -341,8 +340,7 @@ function clearSelection() {
           <main></main>
         </div>
       </div>
-    </div>
-  </section>
+    </Card>
 </template>
 
 <style>

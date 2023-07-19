@@ -455,7 +455,7 @@ const tocItemModalClosed = (redraw = true, data?: TheoryOfChange[]) => {
 </script>
 
 <template>
-  <Card title="Theory of Change" :loading="config.isLoading">
+  <Card title="Theory of Change" :bordered="false" :loading="config.isLoading">
     <!-- Theory of Change Item Modal -->
     <TheoryOfChangeItemModal
       :visible="tocItemModalConfig.visible"

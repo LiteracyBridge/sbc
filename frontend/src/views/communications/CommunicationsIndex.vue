@@ -91,7 +91,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <Card title="Communications and Messaging">
+  <Card title="Communications and Messaging" :bordered="false">
     <template #extra>
       <Button type="primary" @click="config.modal.visible = true">
         <template #icon>

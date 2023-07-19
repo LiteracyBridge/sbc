@@ -26,7 +26,7 @@ import {
 
 import Header from "./components/Layout/Header.vue";
 import Sidebar from "./components/Layout/Sidebar.vue";
-import { MenuUnfoldOutlined } from "@ant-design/icons-vue";
+import { MenuUnfoldOutlined, WechatOutlined } from "@ant-design/icons-vue";
 import Feedback from "./views/Feedback.vue";
 
 const userStore = useUserStore();
@@ -82,15 +82,13 @@ onMounted(async () => {
       v-else
       :theme="{
         token: {
-          colorPrimary: '#51be8d',
+          colorPrimary: '#289b6a',
         },
       }"
     >
       <Layout>
-        <Feedback
-          :visible="feedbackModalVisible"
-          @close="feedbackModalVisible = false"
-        ></Feedback>
+        <Feedback :visible="feedbackModalVisible" @close="feedbackModalVisible = false">
+        </Feedback>
 
         <Sidebar></Sidebar>
         <!-- <LayoutSider>
@@ -122,9 +120,9 @@ onMounted(async () => {
               tooltip="Send us Feedback"
               @click.prevent="feedbackModalVisible = true"
             >
-              <!-- <template #icon>
-
-            </template> -->
+              <template #icon>
+                <WechatOutlined />
+              </template>
             </FloatButton>
           </LayoutContent>
 

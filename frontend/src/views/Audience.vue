@@ -228,7 +228,7 @@ onMounted(() => {
   >
   </GPTSuggestionPanel>
 
-  <Card class="section" title="Project Audiences" :loading="store.loading">
+  <Card title="Project Audiences" :bordered="false" :loading="store.loading">
     <template #extra>
       <Button type="primary" :loading="store.loading" @click="saveForms()"
         >Save Changes</Button

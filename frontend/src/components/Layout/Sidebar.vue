@@ -107,7 +107,7 @@ watch(projectSelected, (newVal) => {
     :style="{ minHeight: '100vh', backgroundColor: 'white' }"
     breakpoint="lg"
     :collapsed-width="0"
-    width="250px"
+    width="260px"
   >
     <div class="logo">
       <!-- <Avatar id="logo-image">
@@ -135,10 +135,7 @@ watch(projectSelected, (newVal) => {
         </router-link>
       </MenuItem>
 
-      <Divider :style="{ 'background-color': 'white' }"></Divider>
-      <MenuItem key="3">
-        <span>nav 1</span>
-      </MenuItem>
+      <!-- <Divider :style="{ 'background-color': 'white' }"></Divider> -->
     </Menu>
   </LayoutSider>
 </template>
