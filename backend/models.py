@@ -483,13 +483,13 @@ class Communication(Base):
     format: Mapped[Optional[str]]
     key_points: Mapped[Optional[str]]
     contents: Mapped[Optional[str]]
-    created_at: Mapped[DateTime] = mapped_column(
+    created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=func.now()
     )
-    updated_at: Mapped[DateTime] = mapped_column(
+    updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), onupdate=func.now()
     )
-    deleted_at: Mapped[Optional[DateTime]] = mapped_column(
+    deleted_at: Mapped[Optional[datetime]] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
 
@@ -498,7 +498,7 @@ class Communication(Base):
     )
 
     drivers: Mapped[ARRAY] = relationship("CommunicationDriver")
-    target_audiences: Mapped[ARRAY] = relationship("CommunicationAudience")
+    target_audiences: Mapped[List["CommunicationAudience"]] = relationship("CommunicationAudience")
     indicators: Mapped[ARRAY] = relationship("CommunicationIndicator")
     project_objectives: Mapped[ARRAY] = relationship("CommunicationObjective")
 

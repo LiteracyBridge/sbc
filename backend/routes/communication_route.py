@@ -1,7 +1,7 @@
 from typing import Optional, List
 
 import models
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from models import (
     Communication,
     CommunicationAudience,
@@ -63,12 +63,12 @@ def update_or_create(
     project_id: int, dto: CommunicationDto, db: Session = Depends(models.get_db)
 ):
     updating = dto.id is not None
-    comm: CommunicationDto = Communication()
+    comm = Communication()
 
     if updating:
         comm = (
             db.query(Communication)
-            .filter(Communication.id == dto.id and Communication.project_id == dto.id)
+            .filter(Communication.id == dto.id, Communication.project_id == project_id)
             .options(
                 subqueryload(Communication.target_audiences),
                 subqueryload(Communication.indicators),
@@ -79,7 +79,7 @@ def update_or_create(
         )
 
         if comm is None:
-            return ApiResponse(success=False, message="Communication not found")
+            raise HTTPException(status_code=404, detail="Communication not found")
 
     comm.project_id = project_id
     comm.title = dto.title
@@ -88,7 +88,7 @@ def update_or_create(
     comm.key_points = dto.key_points
     comm.contents = dto.contents
     comm.delivery_platforms = dto.delivery_platforms
-    comm.updated_at = datetime.now().isoformat()
+    comm.updated_at = datetime.now()
 
     if not updating:
         db.add(comm)
@@ -99,12 +99,15 @@ def update_or_create(
     # Delete audiences that are not in the new list
     for audience in comm.target_audiences:
         if not any(id == audience.audience_id for id in dto.target_audiences):
-            db.delete(audience)
+            db.query(CommunicationAudience).filter(
+                CommunicationAudience.id == audience.id
+            ).delete()
+            # db.delete(audience)
 
     # Create or update target audiences
-    audiences: List[CommunicationIndicator] = []
+    audiences: List[CommunicationAudience] = []
     for id in dto.target_audiences:
-        if not any(d.id == id for d in comm.target_audiences):
+        if not any(d.audience_id == id for d in comm.target_audiences):
             audience: CommunicationAudience = CommunicationAudience()
             audience.communication_id = comm.id
             audience.audience_id = id
@@ -119,7 +122,7 @@ def update_or_create(
     # Update or create indicators
     indicators: List[CommunicationIndicator] = []
     for id in dto.indicators:
-        if not any(d.id == id for d in comm.indicators):
+        if not any(d.indicator_id == id for d in comm.indicators):
             indicator = CommunicationIndicator()
             indicator.communication_id = comm.id
             indicator.indicator_id = id
@@ -134,7 +137,7 @@ def update_or_create(
     # Update or create objectives
     objectives: List[CommunicationObjective] = []
     for id in dto.project_objectives:
-        if not any(d.id == id for d in comm.project_objectives):
+        if not any(d.objective_id == id for d in comm.project_objectives):
             objective = CommunicationObjective()
             objective.communication_id = comm.id
             objective.objective_id = id
@@ -149,7 +152,7 @@ def update_or_create(
     # Update or create drivers
     drivers: List[CommunicationDriver] = []
     for id in dto.drivers:
-        if not any(d.id == id for d in comm.drivers):
+        if not any(d.driver_id == id for d in comm.drivers):
             driver = CommunicationDriver()
             driver.communication_id = comm.id
             driver.driver_id = id
