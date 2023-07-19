@@ -271,7 +271,8 @@ onMounted(() => {
             />
 
             <Button
-              type="ghost"
+              type="primary"
+              :ghost="true"
               :danger="true"
               size="small"
               v-if="primaryAudienceForm.audiences.length > 1"
@@ -345,7 +346,8 @@ onMounted(() => {
             </Input>
 
             <Button
-              type="ghost"
+              type="primary"
+              :ghost="true"
               :danger="true"
               size="small"
               v-if="secondaryAudienceForm.audiences.length > 1"
