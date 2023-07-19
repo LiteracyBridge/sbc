@@ -3,6 +3,7 @@ Today:
     ☐ Toc logic view bug when input item is added
     ☐ Project drivers
         ☐ 'add' button state not changed after adding a driver
+    ☐ Implement removing users from project users
 
     ☐ All editing of indicator item (indicator browser)
         ☐ use ng typography

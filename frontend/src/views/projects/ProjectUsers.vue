@@ -138,7 +138,7 @@ function filterUser(input: string, option: any) {
       </template>
 
       <template v-if="column.key == 'role'">
-        <Select
+        <!-- <Select
           :value="user.access_id"
           @change="projectStore.updateAccess($event, user.id)"
           v-if="projectStore.userById(userStore.id).access_id == 0"
@@ -151,20 +151,20 @@ function filterUser(input: string, option: any) {
           >
             {{ access.name }}
           </SelectOption>
-        </Select>
+        </Select> -->
 
-        <span v-else>
+        <span>
           {{ lookupStore.lookupNameById("access_types", user.access_id) }}
         </span>
       </template>
 
       <template v-if="column.key === 'actions'">
-        <Button type="primary" :disabled="true" :ghost="true" :danger="true">
+        <!-- <Button type="primary" :disabled="true" :ghost="true" :danger="true">
           <template #icon>
             <DeleteOutlined />
           </template>
           Remove
-        </Button>
+        </Button> -->
       </template>
     </template>
   </Table>
