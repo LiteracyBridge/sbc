@@ -8,7 +8,7 @@ import { useParticipantStore } from "./participants";
 import router from "@/router";
 import { useLookupStore } from "./lookups";
 import { useProjectDataStore } from "./projectData";
-import { Project, Stakeholder } from "@/types";
+import { Project, ProjectUser, Stakeholder } from "@/types";
 import { ApiRequest } from "@/apis/api";
 import { message } from "ant-design-vue";
 import { AppStore } from "./app.store";
@@ -70,7 +70,7 @@ export const useProjectStore = defineStore({
   state: () => ({
     loading: false,
     prj_id: null,
-    users_in_project: [],
+    users_in_project: [] as ProjectUser[],
     user_projects: [],
     current_project: {} as Project,
   }),
@@ -269,7 +269,7 @@ export const useProjectStore = defineStore({
           "prj_id=" + this.prj_id,
           true
         );
-        this.users_in_project = response;
+        this.users_in_project = response as ProjectUser[];
       }
       if (useUserStore().id) {
         let response = await api.downloadObject(

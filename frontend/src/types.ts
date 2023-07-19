@@ -78,6 +78,12 @@ export class Project extends Timestamps {
   stakeholders: Stakeholder[] = [];
 }
 
+export class ProjectUser extends User {
+  // prj_id: number;
+  access_id: number;
+  user_id: number;
+}
+
 export class LuIndiKit {
   id: number;
   name: string;
