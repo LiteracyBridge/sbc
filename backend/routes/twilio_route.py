@@ -11,6 +11,7 @@ from pg8000.native import identifier, literal
 from botocore.exceptions import ClientError
 from pg8000.native import Connection
 from sqlalchemy import select, or_
+from twilio.http import response
 from twilio.rest import Client
 from twilio.base.exceptions import TwilioRestException
 from sqlalchemy.orm import Session, joinedload, subqueryload
@@ -47,6 +48,22 @@ def get_db_connection():
 ########################################################################################################################
 
 
+def send_twilio(to_number, message, channel):
+    client = Client(settings.twilio_account_sid, settings.twilio_auth_token)
+    from_number = settings.twilio_whatapp_number
+
+    if channel != "w":  # to_number.startswith("whatsapp:"):
+        from_number = settings.twilio_sms_number
+
+    try:
+        resp = client.messages.create(body=message, from_=from_number, to=to_number)
+        print(resp)
+        return {"success": True, "response": resp}
+    except TwilioRestException as e:
+        print(f"Error: {e.msg}")
+        return {"success": False, "response": {}}
+
+
 def setupTwilio():
     client = Client(settings.twilio_account_sid, settings.twilio_auth_token)
 
@@ -57,7 +74,8 @@ def setupTwilio():
             from_number = settings.twilio_sms_number
 
         try:
-            client.messages.create(body=message, from_=from_number, to=to_number)
+            resp = client.messages.create(body=message, from_=from_number, to=to_number)
+            print(resp)
             return True
         except TwilioRestException as e:
             print(f"Error: {e.msg}")
@@ -246,6 +264,7 @@ def send_message(
 
     for user in receivers:
         in_window = False
+        message_sid = None
 
         # Check if last message was sent within the last 24 hours
         if user.whatsapp_last_received is not None:
@@ -267,9 +286,12 @@ def send_message(
             declined = False
         else:
             full_message = notify_message(sender, project.name, record.related_item)
-            success = sendTwilio(phone, full_message, channel)
+            resp = send_twilio(phone, full_message, channel)
+
+            success = resp.get("success", False)
             waiting = True
             declined = None
+            message_sid = resp.response.sid if success else None
 
         # Save to message sent to users table
         msg_sent = MessageSentToUser()
@@ -279,6 +301,7 @@ def send_message(
         msg_sent.channel = channel
         msg_sent.waiting = waiting
         msg_sent.declined = declined
+        msg_sent.message_sid = message_sid
         msg_sent.stakeholder_id = user.id if to_stakeholders else None
 
         db.add(msg_sent)
@@ -347,6 +370,7 @@ def broadcast_message(
             to_stakeholders=True,
         )
 
+
 # ============= END: Message broadcast route =============
 
 
@@ -403,6 +427,7 @@ def handler(body: Dict[Any, Any], request: Request, db: Session = Depends(get_db
             # API called by Twilio after receipt of message
             print("body", body)
             params = request.query_params
+
             # Twilio webhook for SMS/Whatsapp
             phone_number = params["From"]
             (
