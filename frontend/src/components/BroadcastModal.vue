@@ -131,18 +131,18 @@ const usersRowSelection: TableProps['rowSelection'] = {
     </template>
 
     <Spin :spinning="store.loading">
-      <Steps :current="config.currentStep" :items="steps"> </Steps>
+      <Steps :current="config.currentStep" :items="steps" size="small"> </Steps>
 
       <div class="steps-content">
         <!-- Preview step -->
-        <div v-if="config.currentStep == 0">
+        <div v-show="config.currentStep == 0">
           <p class="preserve-whitespace">
             {{ store.buildBroadcastMessage(props.module) }}
           </p>
         </div>
 
         <!-- Project users selection -->
-        <div v-else-if="config.currentStep == 1">
+        <div v-show="config.currentStep == 1">
           <Table
             size="small"
             :row-selection="usersRowSelection"
@@ -153,7 +153,7 @@ const usersRowSelection: TableProps['rowSelection'] = {
         </div>
 
         <!-- Stakeholders selection -->
-        <div v-else>
+        <div v-show="config.currentStep == 2">
           <Table
             size="small"
             :row-selection="stakeholdersRowSelection"

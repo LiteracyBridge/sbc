@@ -245,7 +245,6 @@ def send_message(
     sendTwilio = setupTwilio()
 
     for user in receivers:
-        print(user)
         in_window = False
 
         # Check if last message was sent within the last 24 hours
@@ -305,20 +304,6 @@ def broadcast_message(
     db.commit()
     db.refresh(record)
 
-    # insert_sql = (
-    #     "INSERT INTO msgs_sent (prj_id, message, user_id_sending, related_item) VALUES ("
-    #     + str(prj_id)
-    #     + ","
-    #     + literal(message)
-    #     + ","
-    #     + str(user_id)
-    #     + ","
-    # )
-    # insert_sql += "NULL" if related_item is None else literal(related_item)
-    # insert_sql += ") RETURNING id"
-    # print(insert_sql)
-    # msg_id = connection.run(insert_sql)[0][0]
-
     sender: User | None = db.query(User).filter(User.id == body.user_id_sending).first()
     project: Project | None = db.query(Project).filter(Project.id == project_id).first()
 
@@ -361,16 +346,6 @@ def broadcast_message(
             db=db,
             to_stakeholders=True,
         )
-
-    # for user in users + stakeholders:
-    # sql = (
-    #     "SELECT id, address_as, phone, in_window FROM users_w_numbers WHERE prj_id = "
-    #     + literal(prj_id)
-    # )
-    # connection: Connection = get_db_connection()
-    # results = connection.run(sql)
-    # print(results)
-
 
 # ============= END: Message broadcast route =============
 

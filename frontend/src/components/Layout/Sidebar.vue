@@ -3,8 +3,17 @@ import { computed, ref, watch } from "vue";
 import { useProjectStore } from "@/stores/projects";
 import { useSideNavStore } from "@/stores/sideNav";
 import { useRouter } from "vue-router";
-import { MenuItem, LayoutSider, Menu, Divider, Typography, Avatar } from "ant-design-vue";
+import {
+  MenuItem,
+  Image,
+  LayoutSider,
+  Menu,
+  Divider,
+  Typography,
+  Avatar,
+} from "ant-design-vue";
 import { UserOutlined } from "@ant-design/icons-vue";
+import LogoLarge from "@/assets/logo-large.png";
 
 const router = useRouter();
 
@@ -110,13 +119,11 @@ watch(projectSelected, (newVal) => {
     width="260px"
   >
     <div class="logo">
-      <!-- <Avatar id="logo-image">
-        <template #icon><CompassOutlined /></template>
-      </Avatar> -->
+      <Image style="height: 50px; padding-right: 10px" :src="LogoLarge">
+        <!-- <template #icon><CompassOutlined /></template> -->
+      </Image>
 
-      <span>
-        {{ projectStore.current_project.organisation?.name }}
-      </span>
+      <span> Amplio </span>
     </div>
     <Divider :style="{ backgroundColor: 'white' }"></Divider>
 
@@ -143,15 +150,21 @@ watch(projectSelected, (newVal) => {
 <style scoped>
 .logo {
   height: 48px;
+  display: inline-flex;
   /* background: rgba(255, 255, 255, 0.3); */
   margin: 10px;
-  padding-top: 8px;
+  margin-top: 20px;
+  margin-left: 40px;
+  /* padding-top: 8px; */
   /* color: white; */
   text-align: center;
-  font-size: 25px;
+  font-size: 30px;
 }
 
 #logo-image {
-  margin-right: 8px;
+  max-width: fit-content;
+  max-height: fit-content;
+  height: 50px;
+  padding-right: 8px;
 }
 </style>
