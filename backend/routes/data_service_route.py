@@ -30,10 +30,6 @@ router = APIRouter()
 
 
 def get_db_connection():
-    # global _db_connection
-    # if _db_connection is None:
-    #     secret = _get_secret()
-
     parms = {
         "database": settings.db_name,
         "user": settings.db_user,

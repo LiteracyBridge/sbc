@@ -5,10 +5,11 @@ const LOG = true;
 
 // const SBC_DS_URL = 'http://localhost:9000/2015-03-31/functions/function/invocations';
 const SBC_DS_URL = `${import.meta.env.VITE_SBC_API_URL}/data-service`;
+export const  SBC_TW_URL = `${import.meta.env.VITE_SBC_API_URL}/twilio`;
 // 'https://w75w7350kh.execute-api.us-west-2.amazonaws.com/production/sbcDataService';
 
-export const SBC_TW_URL =
-  "https://w75w7350kh.execute-api.us-west-2.amazonaws.com/production/sbcTwilio";
+// export const SBC_TW_URL =
+  // "https://w75w7350kh.execute-api.us-west-2.amazonaws.com/production/sbcTwilio";
 const SBC_GET_BUCKET =
   "https://w75w7350kh.execute-api.us-west-2.amazonaws.com/production/sbcGetBucket";
 const SBC_AI_URL =

@@ -1,17 +1,20 @@
+from datetime import datetime
 import string
 import time
 import json
 from json import JSONDecodeError
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 
 import boto3 as boto3
 import pg8000.native
 from pg8000.native import identifier, literal
 from botocore.exceptions import ClientError
 from pg8000.native import Connection
+from sqlalchemy import select, or_
 from twilio.rest import Client
 from twilio.base.exceptions import TwilioRestException
-
+from sqlalchemy.orm import Session, joinedload, subqueryload
+from models import ProjectUser, User, get_db, MessageReceived, MessageSent
 from functools import reduce
 from fastapi import APIRouter, Depends, HTTPException, Request
 from config import settings
@@ -157,7 +160,9 @@ def notify_message(sender, project_name, related_item):
     return message
 
 
-def log_msg_sent_user(connection, user_id, msg_id, success, channel, waiting, declined):
+def log_msg_sent_user(
+    connection, user_id, msg_id, success, channel, waiting, declined, db: Session
+):
     if declined is None:
         declined_string = "NULL"
     else:
@@ -219,51 +224,93 @@ def chunk_string(s, max_chunk):
         start = new_start
 
 
+# TODO: move this into a separte route
+# TODO: accept list of users & stakeholders in body
 def outgoingMessage(
-    connection, user_id, sender, prj_id, message, project_name, related_item=None
+    connection,
+    user_id,
+    sender,
+    prj_id,
+    message,
+    project_name,
+    db: Session,
+    related_item=None,
 ):
-    sendTwilio = setupTwilio()
-    insert_sql = (
-        "INSERT INTO msgs_sent (prj_id, message, user_id_sending, related_item) VALUES ("
-        + str(prj_id)
-        + ","
-        + literal(message)
-        + ","
-        + str(user_id)
-        + ","
-    )
-    insert_sql += "NULL" if related_item is None else literal(related_item)
-    insert_sql += ") RETURNING id"
-    print(insert_sql)
-    msg_id = connection.run(insert_sql)[0][0]
+    # Save the message in the database
+    record: MessageSent = MessageSent()
+    record.prj_id = prj_id
+    record.message = message
+    record.user_id_sending = user_id
+    record.related_item = related_item
+    record.sent_time = datetime.now()
+    db.add(record)
+    db.commit()
+    db.refresh(record)
 
-    sql = (
-        "SELECT id, address_as, phone, in_window FROM users_w_numbers WHERE prj_id = "
-        + literal(prj_id)
+    # insert_sql = (
+    #     "INSERT INTO msgs_sent (prj_id, message, user_id_sending, related_item) VALUES ("
+    #     + str(prj_id)
+    #     + ","
+    #     + literal(message)
+    #     + ","
+    #     + str(user_id)
+    #     + ","
+    # )
+    # insert_sql += "NULL" if related_item is None else literal(related_item)
+    # insert_sql += ") RETURNING id"
+    # print(insert_sql)
+    # msg_id = connection.run(insert_sql)[0][0]
+
+    # Send whatsapp messages to users with whatsapp numbers
+    sendTwilio = setupTwilio()
+
+    project_users_query = (
+        db.query(ProjectUser.user_id).filter(ProjectUser.prj_id == prj_id).subquery()
     )
-    connection: Connection = get_db_connection()
-    results = connection.run(sql)
-    print(results)
-    for result in results:
-        print(result)
-        user_id = result[0]
-        address_as = result[1]
-        phone = result[2]
-        in_window = result[3]
-        channel = "w" if phone.startswith("whatsapp") else "s"
+    whatsapp_users: List[User] = (
+        db.query(User)
+        .filter(
+            ((User.notify_whatsapp == True) & (User.whatsapp != None))
+            | ((User.notify_sms == True) & (User.sms != None)),
+        )
+        .filter(User.id.in_(select(project_users_query)))
+        .all()
+    )
+
+    # sql = (
+    #     "SELECT id, address_as, phone, in_window FROM users_w_numbers WHERE prj_id = "
+    #     + literal(prj_id)
+    # )
+    # connection: Connection = get_db_connection()
+    # results = connection.run(sql)
+    # print(results)
+    for user in whatsapp_users:
+        print(user)
+        # user_id = result[0]
+        # address_as = result[1]
+        # phone = result[2]
+        in_window = False
+
+        # Check if last message was sent within the last 24 hours
+        if user.whatsapp_last_received is not None:
+            duration_in_s = time.time() - user.whatsapp_last_received.timestamp()
+            in_window = divmod(duration_in_s, 3600)[0] < 24
+
+        channel = "w" if user.whatsapp is not None else "s"
         if in_window:
             success = update_message(
-                address_as, sender, project_name, message, phone, channel
+                user.address_as, sender, project_name, message, user.whatsapp, channel
             )
             waiting = False
             declined = False
         else:
             full_message = notify_message(sender, project_name, related_item)
-            success = sendTwilio(phone, full_message, channel)
+            success = sendTwilio(user.whatsapp, full_message, channel)
             waiting = True
             declined = None
+
         log_msg_sent_user(
-            connection, user_id, msg_id, success, channel, waiting, declined
+            connection, user_id, record.id, success, channel, waiting, declined, db
         )
 
 
@@ -297,7 +344,7 @@ def getMessages(connection, prj_id, related_item, since_sent_id, since_received_
 
 @router.post("")
 @router.get("")
-def handler(body: Dict[Any, Any], request: Request):
+def handler(body: Dict[Any, Any], request: Request, db: Session = Depends(get_db)):
     connection = get_db_connection()
 
     if request.method == "GET":
@@ -371,9 +418,17 @@ def handler(body: Dict[Any, Any], request: Request):
             message = params["message"]
             project_name = params["prj_name"]
             related_item = params["related_item"] if "related_item" in params else None
+
             outgoingMessage(
-                connection, user_id, sender, prj_id, message, project_name, related_item
+                connection,
+                user_id,
+                sender,
+                prj_id,
+                message,
+                project_name,
+                db,
+                related_item,
             )
 
     # Return the response object
-    return {"result": result}
+    return {}
