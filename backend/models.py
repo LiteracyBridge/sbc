@@ -9,7 +9,7 @@ from sqlalchemy import (
     String,
     Text,
 )
-from sqlalchemy.orm import relationship, mapped_column
+from sqlalchemy.orm import relationship, mapped_column, synonym
 from sqlalchemy.orm import Mapped
 from sqlalchemy.dialects.postgresql import JSONB, ARRAY
 from sqlalchemy.ext.mutable import MutableList
@@ -613,6 +613,8 @@ class Stakeholder(Base, SoftDeleteMixin):
 
     project: Mapped["Project"] = relationship("Project", back_populates="stakeholders")
 
+    address_as = synonym("name")
+
 
 class Feedback(Base, SoftDeleteMixin):
     __tablename__ = "feedbacks"
@@ -663,11 +665,11 @@ class MessageReceived(Base):
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
     message: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     channel: Mapped[Optional[str]] = mapped_column(String, nullable=True)
-    user_id: Mapped[int] = mapped_column(
-        ForeignKey("users.id", ondelete="SET NULL"), nullable=False
+    user_id: Mapped[Optional[int]] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL"), nullable=True
     )
-    stakeholder_id: Mapped[int] = mapped_column(
-        ForeignKey("stakeholders.id", ondelete="SET NULL"), nullable=False
+    stakeholder_id: Mapped[Optional[int]] = mapped_column(
+        ForeignKey("stakeholders.id", ondelete="SET NULL"), nullable=True
     )
     related_msg_id: Mapped[int] = mapped_column(
         ForeignKey("msgs_sent.id", ondelete="SET NULL"), nullable=False
@@ -685,11 +687,11 @@ class MessageSentToUser(Base):
     msg_sent_id: Mapped[int] = mapped_column(
         ForeignKey("msgs_sent.id", ondelete="CASCADE"), nullable=False
     )
-    user_id: Mapped[int] = mapped_column(
-        ForeignKey("users.id", ondelete="SET NULL"), nullable=False
+    user_id: Mapped[Optional[int]] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL"), nullable=True
     )
-    stakeholder_id: Mapped[int] = mapped_column(
-        ForeignKey("stakeholders.id", ondelete="SET NULL"), nullable=False
+    stakeholder_id: Mapped[Optional[int]] = mapped_column(
+        ForeignKey("stakeholders.id", ondelete="SET NULL"), nullable=True
     )
 
 

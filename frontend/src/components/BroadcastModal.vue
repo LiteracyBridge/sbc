@@ -1,8 +1,11 @@
 <script setup lang="ts">
+import { SBC_TW_URL } from "@/apis/lambda";
 import { useProjectDataStore } from "@/stores/projectData";
 import { useProjectStore } from "@/stores/projects";
+import { useUserStore } from "@/stores/user";
 import { Stakeholder, ProjectUser } from "@/types";
 import { Button, Modal, message, Spin, Steps, Step, Table, type TableProps } from "ant-design-vue";
+import axios from "axios";
 import { computed, ref, watch } from "vue";
 
 const props = defineProps<{
@@ -37,8 +40,21 @@ const steps = [
   },
 ];
 
-function broadcast() {
-  store.broadcastPage(props.module);
+async function broadcast() {
+  store.loading = true;
+
+  message.info("Broadcasting message to all users in the project");
+  const response = await axios.post(`${SBC_TW_URL}/broadcast`, {
+    project_id: projectStore.prj_id,
+    message:  store.buildBroadcastMessage(props.module),
+    related_item: props.module,
+    stakeholder_ids: config.value.stakeholders.map((s) => s.id),
+    user_ids: config.value.users.map((s) => s.user_id),
+    user_id_sending: useUserStore().id,
+  });
+  console.log(response)
+  store.loading = false;
+
   emit("close");
 }
 

@@ -247,7 +247,7 @@ export async function twilioBroadcast(message, topic) {
     console.log("characters in message:", message.length);
     console.log(payload);
   }
-  const response = await axios.post(SBC_TW_URL, payload);
+  const response = await axios.post(`${SBC_TW_URL}`, payload);
   if (LOG) console.log(response);
 }
 

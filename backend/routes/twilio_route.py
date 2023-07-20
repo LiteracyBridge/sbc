@@ -4,7 +4,7 @@ import time
 import json
 from json import JSONDecodeError
 from typing import Optional, Dict, Any, List
-
+from pydantic import BaseModel
 import boto3 as boto3
 import pg8000.native
 from pg8000.native import identifier, literal
@@ -14,7 +14,16 @@ from sqlalchemy import select, or_
 from twilio.rest import Client
 from twilio.base.exceptions import TwilioRestException
 from sqlalchemy.orm import Session, joinedload, subqueryload
-from models import ProjectUser, User, get_db, MessageReceived, MessageSent
+from models import (
+    MessageSentToUser,
+    ProjectUser,
+    Stakeholder,
+    User,
+    get_db,
+    MessageReceived,
+    MessageSent,
+    Project,
+)
 from functools import reduce
 from fastapi import APIRouter, Depends, HTTPException, Request
 from config import settings
@@ -42,10 +51,11 @@ def setupTwilio():
     client = Client(settings.twilio_account_sid, settings.twilio_auth_token)
 
     def sendTwilio(to_number, message, channel):
-        if channel == "w":  # to_number.startswith("whatsapp:"):
-            from_number = settings.twilio_whatapp_number
-        else:
+        from_number = settings.twilio_whatapp_number
+
+        if channel != "w":  # to_number.startswith("whatsapp:"):
             from_number = settings.twilio_sms_number
+
         try:
             client.messages.create(body=message, from_=from_number, to=to_number)
             return True
@@ -160,18 +170,6 @@ def notify_message(sender, project_name, related_item):
     return message
 
 
-def log_msg_sent_user(
-    connection, user_id, msg_id, success, channel, waiting, declined, db: Session
-):
-    if declined is None:
-        declined_string = "NULL"
-    else:
-        declined_string = str(declined)
-    insert_sql = f"INSERT INTO msgs_sent_users (msg_sent_id,user_id,success,channel, waiting, declined) VALUES ({str(msg_id)},{str(user_id)},{str(success)},{literal(channel)},{str(waiting)},{declined_string})"
-    print(insert_sql)
-    connection.run(insert_sql)
-
-
 def update_log_msg_sent_user(
     connection, msu_id, success, channel, waiting, declined=None
 ):
@@ -226,23 +224,83 @@ def chunk_string(s, max_chunk):
 
 # TODO: move this into a separte route
 # TODO: accept list of users & stakeholders in body
-def outgoingMessage(
-    connection,
-    user_id,
-    sender,
-    prj_id,
-    message,
-    project_name,
+# ============= Message Broadcast Route =============
+class MessageBroadcastDto(BaseModel):
+    project_id: int
+    message: str
+    related_item: Optional[str]
+    stakeholder_ids: List[int]
+    user_ids: List[int]
+    user_id_sending: int
+
+
+def send_message(
+    receivers: List[User | Stakeholder],
+    record: MessageSent,
+    project: Project,
+    sender: str,
     db: Session,
-    related_item=None,
+    to_stakeholders: bool = False,
 ):
+    sendTwilio = setupTwilio()
+
+    for user in receivers:
+        print(user)
+        in_window = False
+
+        # Check if last message was sent within the last 24 hours
+        if user.whatsapp_last_received is not None:
+            duration_in_s = time.time() - user.whatsapp_last_received.timestamp()
+            in_window = divmod(duration_in_s, 3600)[0] < 24
+
+        channel = "w" if user.whatsapp is not None else "s"
+        phone = f"whatsapp:{user.whatsapp}" if channel == "w" else f"sms:{user.sms}"
+        if in_window:
+            success = update_message(
+                user.address_as if user.address_as is not None else user.name,
+                sender,
+                project.name,
+                record.message,
+                phone,
+                channel,
+            )
+            waiting = False
+            declined = False
+        else:
+            full_message = notify_message(sender, project.name, record.related_item)
+            success = sendTwilio(phone, full_message, channel)
+            waiting = True
+            declined = None
+
+        # Save to message sent to users table
+        msg_sent = MessageSentToUser()
+        msg_sent.msg_sent_id = record.user_id_sending
+        msg_sent.user_id = None if to_stakeholders else user.id
+        msg_sent.success = success
+        msg_sent.channel = channel
+        msg_sent.waiting = waiting
+        msg_sent.declined = declined
+        msg_sent.stakeholder_id = user.id if to_stakeholders else None
+
+        db.add(msg_sent)
+        db.commit()
+
+
+@router.post("/broadcast")
+def broadcast_message(
+    body: MessageBroadcastDto,
+    db: Session = Depends(get_db),
+):
+    project_id = body.project_id
+
     # Save the message in the database
     record: MessageSent = MessageSent()
-    record.prj_id = prj_id
-    record.message = message
-    record.user_id_sending = user_id
-    record.related_item = related_item
+    record.prj_id = project_id
+    record.message = body.message
+    record.user_id_sending = body.user_id_sending
+    record.related_item = body.related_item
     record.sent_time = datetime.now()
+
     db.add(record)
     db.commit()
     db.refresh(record)
@@ -261,22 +319,50 @@ def outgoingMessage(
     # print(insert_sql)
     # msg_id = connection.run(insert_sql)[0][0]
 
+    sender: User | None = db.query(User).filter(User.id == body.user_id_sending).first()
+    project: Project | None = db.query(Project).filter(Project.id == project_id).first()
+
     # Send whatsapp messages to users with whatsapp numbers
-    sendTwilio = setupTwilio()
-
-    project_users_query = (
-        db.query(ProjectUser.user_id).filter(ProjectUser.prj_id == prj_id).subquery()
-    )
-    whatsapp_users: List[User] = (
-        db.query(User)
-        .filter(
-            ((User.notify_whatsapp == True) & (User.whatsapp != None))
-            | ((User.notify_sms == True) & (User.sms != None)),
+    users: List[User] = []
+    if len(body.user_ids) > 0:
+        users = (
+            db.query(User)
+            .filter(
+                ((User.notify_whatsapp == True) & (User.whatsapp != None))
+                | ((User.notify_sms == True) & (User.sms != None))
+            )
+            .filter(User.id.in_(body.user_ids))
+            .all()
         )
-        .filter(User.id.in_(select(project_users_query)))
-        .all()
-    )
 
+        send_message(
+            receivers=users,
+            record=record,
+            project=project,
+            sender=sender.name,
+            db=db,
+            to_stakeholders=False,
+        )
+
+    stakeholders: List[Stakeholder] = []
+    if len(body.stakeholder_ids) > 0:
+        stakeholders = (
+            db.query(Stakeholder)
+            .filter((User.whatsapp != None) | ((User.sms != None)))
+            .filter(Stakeholder.id.in_(body.stakeholder_ids))
+            .all()
+        )
+
+        send_message(
+            receivers=stakeholders,
+            record=record,
+            project=project,
+            sender=sender.name,
+            db=db,
+            to_stakeholders=True,
+        )
+
+    # for user in users + stakeholders:
     # sql = (
     #     "SELECT id, address_as, phone, in_window FROM users_w_numbers WHERE prj_id = "
     #     + literal(prj_id)
@@ -284,34 +370,9 @@ def outgoingMessage(
     # connection: Connection = get_db_connection()
     # results = connection.run(sql)
     # print(results)
-    for user in whatsapp_users:
-        print(user)
-        # user_id = result[0]
-        # address_as = result[1]
-        # phone = result[2]
-        in_window = False
 
-        # Check if last message was sent within the last 24 hours
-        if user.whatsapp_last_received is not None:
-            duration_in_s = time.time() - user.whatsapp_last_received.timestamp()
-            in_window = divmod(duration_in_s, 3600)[0] < 24
 
-        channel = "w" if user.whatsapp is not None else "s"
-        if in_window:
-            success = update_message(
-                user.address_as, sender, project_name, message, user.whatsapp, channel
-            )
-            waiting = False
-            declined = False
-        else:
-            full_message = notify_message(sender, project_name, related_item)
-            success = sendTwilio(user.whatsapp, full_message, channel)
-            waiting = True
-            declined = None
-
-        log_msg_sent_user(
-            connection, user_id, record.id, success, channel, waiting, declined, db
-        )
+# ============= END: Message broadcast route =============
 
 
 def getMessages(connection, prj_id, related_item, since_sent_id, since_received_id):
@@ -410,25 +471,25 @@ def handler(body: Dict[Any, Any], request: Request, db: Session = Depends(get_db
                         connection, msu_id, success, channel, waiting, declined=False
                     )
 
-        else:
-            # Message broadcast from SBC web app
-            prj_id = int(params["prj_id"])
-            user_id = int(params["user_id"])
-            sender = params["user_name"]
-            message = params["message"]
-            project_name = params["prj_name"]
-            related_item = params["related_item"] if "related_item" in params else None
+        # else:
+        #     # Message broadcast from SBC web app
+        #     prj_id = int(params["prj_id"])
+        #     user_id = int(params["user_id"])
+        #     sender = params["user_name"]
+        #     message = params["message"]
+        #     project_name = params["prj_name"]
+        #     related_item = params["related_item"] if "related_item" in params else None
 
-            outgoingMessage(
-                connection,
-                user_id,
-                sender,
-                prj_id,
-                message,
-                project_name,
-                db,
-                related_item,
-            )
+        #     broadcast_message(
+        #         connection,
+        #         user_id,
+        #         sender,
+        #         prj_id,
+        #         message,
+        #         project_name,
+        #         db,
+        #         related_item,
+        #     )
 
     # Return the response object
     return {}
