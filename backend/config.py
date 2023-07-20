@@ -30,6 +30,11 @@ class Settings:
     db_port: Optional[str] = "5432"
     open_ai_key: Optional[str] = None
 
+    twilio_account_sid: Optional[str] = None
+    twilio_auth_token: Optional[str] = None
+    twilio_whatapp_number: Optional[str] = None
+    twilio_sms_number: Optional[str] = None
+
     sentry_dsn: Optional[str] = None
 
     is_local: bool = False
@@ -46,6 +51,11 @@ class Settings:
             self.db_port = getenv("DB_PORT", "5432")
             self.sentry_dsn = getenv("SENTRY_DSN", None)
             self.open_ai_key = getenv("OPEN_AI_KEY", None)
+
+            self.twilio_account_sid = getenv("TWILIO_ACCOUNT_SID", None)
+            self.twilio_auth_token = getenv("TWILIO_AUTH_TOKEN", None)
+            self.twilio_whatapp_number = getenv("TWILIO_WHATSAPP_NUMBER", None)
+            self.twilio_sms_number = getenv("TWILIO_SMS_NUMBER", None)
         else:
             self.load_aws_secrets()
 
@@ -75,6 +85,14 @@ class Settings:
             secret_string = client.get_secret_value(SecretId="openai")["SecretString"]
             secrets = json.loads(secret_string)
             self.open_ai_key = secrets["Authorization"]
+
+            # Load Twilio secrets
+            secret_string = client.get_secret_value(SecretId="twilio")["SecretString"]
+            secrets = json.loads(secret_string)
+            self.twilio_account_sid = secrets["account_sid"]
+            self.twilio_auth_token = secrets["auth_token"]
+            self.twilio_whatapp_number = secrets["from_whatsapp"]
+            self.twilio_sms_number = secrets["from_sms"]
 
         except Exception as err:
             raise err

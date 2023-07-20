@@ -17,7 +17,8 @@ from routes import (
     communication_route,
     data_service_route,
     open_ai_route,
-    feedback_route
+    feedback_route,
+    twilio_route,
 )
 from monitoring import logging_config
 from middlewares.correlation_id_middleware import CorrelationIdMiddleware
@@ -158,6 +159,12 @@ app.include_router(
     feedback_route.router,
     prefix="/feedback",
     tags=["feedback"],
+    dependencies=[Depends(models.get_db)],
+)
+app.include_router(
+    twilio_route.router,
+    prefix="/twilio",
+    tags=["twilio"],
     dependencies=[Depends(models.get_db)],
 )
 

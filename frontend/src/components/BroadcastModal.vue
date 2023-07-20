@@ -75,7 +75,7 @@ const getStakeHolders = computed(() => {
 });
 
 const stakeholdersRowSelection: TableProps['rowSelection'] = {
-  onChange: (selectedRowKeys: string[], selectedRows: Stakeholder[]) => {
+  onChange: (_selectedRowKeys: string[], selectedRows: Stakeholder[]) => {
     config.value.stakeholders = selectedRows;
   },
   getCheckboxProps: (record: Stakeholder) => ({
@@ -114,69 +114,64 @@ const usersRowSelection: TableProps['rowSelection'] = {
       <Button :disabled="store.loading" @click="cancel()">Cancel</Button>
     </template>
 
-    <Steps :current="config.currentStep" :items="steps">
-      <!-- <Step
-        title="Message Preview"
-        description="What you see is what your users will receive."
-      >
-        <h1>sdflskdf</h1>
-      </Step> -->
-    </Steps>
+    <Spin :spinning="store.loading">
+      <Steps :current="config.currentStep" :items="steps"> </Steps>
 
-    <div class="steps-content">
-      <!-- Preview step -->
-      <div v-if="config.currentStep == 0">
-        <p class="preserve-whitespace">{{ store.buildBroadcastMessage(props.module) }}</p>
+      <div class="steps-content">
+        <!-- Preview step -->
+        <div v-if="config.currentStep == 0">
+          <p class="preserve-whitespace">
+            {{ store.buildBroadcastMessage(props.module) }}
+          </p>
+        </div>
+
+        <!-- Project users selection -->
+        <div v-else-if="config.currentStep == 1">
+          <Table
+            size="small"
+            :row-selection="usersRowSelection"
+            :columns="columns"
+            :data-source="getUsers"
+          >
+          </Table>
+        </div>
+
+        <!-- Stakeholders selection -->
+        <div v-else>
+          <Table
+            size="small"
+            :row-selection="stakeholdersRowSelection"
+            :columns="columns"
+            :data-source="getStakeHolders"
+          >
+          </Table>
+        </div>
       </div>
 
-      <!-- Project users selection -->
-      <div v-else-if="config.currentStep == 1">
-        <Table
-          size="small"
-          :row-selection="usersRowSelection"
-          :columns="columns"
-          :data-source="getUsers"
+      <div class="steps-action">
+        <Button
+          v-if="config.currentStep < steps.length - 1"
+          type="primary"
+          @click="config.currentStep++"
         >
-        </Table>
-      </div>
+          Next
+        </Button>
 
-      <!-- Stakeholders selection -->
-      <div v-else>
-        <Table
-          size="small"
-          :row-selection="stakeholdersRowSelection"
-          :columns="columns"
-          :data-source="getStakeHolders"
+        <Button
+          v-if="config.currentStep == steps.length - 1"
+          type="primary"
+          @click="message.success('Processing complete!')"
         >
-        </Table>
+          Broadcast Now
+        </Button>
+
+        <Button
+          v-if="config.currentStep > 0"
+          style="margin-left: 8px"
+          @click="config.currentStep--"
+          >Previous
+        </Button>
       </div>
-    </div>
-
-    <div class="steps-action">
-      <Button
-        v-if="config.currentStep < steps.length - 1"
-        type="primary"
-        @click="config.currentStep++"
-      >
-        Next
-      </Button>
-
-      <Button
-        v-if="config.currentStep == steps.length - 1"
-        type="primary"
-        @click="message.success('Processing complete!')"
-      >
-        Broadcast Now
-      </Button>
-
-      <Button
-        v-if="config.currentStep > 0"
-        style="margin-left: 8px"
-        @click="config.currentStep--"
-        >Previous
-      </Button>
-    </div>
-
-    <Spin :spinning="store.loading"> </Spin>
+    </Spin>
   </Modal>
 </template>

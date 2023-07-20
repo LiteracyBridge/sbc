@@ -498,7 +498,9 @@ class Communication(Base):
     )
 
     drivers: Mapped[ARRAY] = relationship("CommunicationDriver")
-    target_audiences: Mapped[List["CommunicationAudience"]] = relationship("CommunicationAudience")
+    target_audiences: Mapped[List["CommunicationAudience"]] = relationship(
+        "CommunicationAudience"
+    )
     indicators: Mapped[ARRAY] = relationship("CommunicationIndicator")
     project_objectives: Mapped[ARRAY] = relationship("CommunicationObjective")
 
@@ -558,13 +560,13 @@ class AccessRequest(Base):
     email: Mapped[str]
     name: Mapped[str]
     notes: Mapped[str]
-    created_at: Mapped[DateTime] = mapped_column(
+    created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=func.now()
     )
-    updated_at: Mapped[DateTime] = mapped_column(
+    updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=func.now()
     )
-    deleted_at: Mapped[Optional[DateTime]] = mapped_column(
+    deleted_at: Mapped[Optional[datetime]] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
 
@@ -624,6 +626,40 @@ class Feedback(Base, SoftDeleteMixin):
     )
 
     user: Mapped["User"] = relationship("User")
+
+
+class MessageSent(Base):
+    __tablename__ = "msgs_sent"
+
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    message: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    sent_time: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    related_item: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    user_id_sending: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL"), nullable=False
+    )
+    prj_id: Mapped[int] = mapped_column(
+        ForeignKey("projects.id", ondelete="CASCADE"), nullable=False
+    )
+
+
+class MessageReceived(Base):
+    __tablename__ = "msgs_received"
+
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    message: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    channel: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL"), nullable=False
+    )
+    stakeholder_id: Mapped[int] = mapped_column(
+        ForeignKey("stakeholders.id", ondelete="SET NULL"), nullable=False
+    )
+    related_msg_id: Mapped[int] = mapped_column(
+        ForeignKey("msgs_sent.id", ondelete="SET NULL"), nullable=False
+    )
 
 
 Base.metadata.create_all(bind=engine)
