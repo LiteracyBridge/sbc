@@ -4,7 +4,7 @@ import { useProjectDataStore } from "@/stores/projectData";
 import { useProjectStore } from "@/stores/projects";
 import { useUserStore } from "@/stores/user";
 import { Stakeholder, ProjectUser } from "@/types";
-import { Button, Modal, message, Spin, Steps, Step, Table, type TableProps } from "ant-design-vue";
+import { Button, Modal, message, Spin, Steps, Step, Table, type TableProps, Drawer, Space, Popconfirm } from "ant-design-vue";
 import axios from "axios";
 import { computed, ref, watch } from "vue";
 
@@ -40,7 +40,23 @@ const steps = [
   },
 ];
 
+
+function closeModal() {
+  config.value = {
+    visible: false,
+    currentStep: 0,
+    stakeholders: [] as Stakeholder[],
+    users: [] as ProjectUser[]
+  };
+  emit("close");
+}
+
 async function broadcast() {
+  if(config.value.stakeholders.length == 0 && config.value.users.length == 0) {
+    message.error("Please select at least one user or stakeholder to broadcast to.");
+    return;
+  }
+
   store.loading = true;
 
   message.info("Broadcasting message to all users in the project");
@@ -55,12 +71,7 @@ async function broadcast() {
   console.log(response)
   store.loading = false;
 
-  emit("close");
-}
-
-function cancel() {
-  config.value.visible = false;
-  emit("close");
+  closeModal()
 }
 
 watch(props, (newProps) => {
@@ -117,23 +128,56 @@ const usersRowSelection: TableProps['rowSelection'] = {
 </script>
 
 <template>
-  <Modal
+  <Drawer
     title="Are you sure to broadcast this message?"
     v-model:open="config.visible"
-    @cancel="cancel()"
-    width="80vw"
+    @cancel="closeModal()"
+    width="60vw"
   >
     <template #footer>
-      <Button type="primary" :danger="true" @click="broadcast()" :loading="store.loading"
+      <!-- <Button type="primary" :danger="true" @click="broadcast()" :loading="store.loading"
         >Broadcast</Button
       >
-      <Button :disabled="store.loading" @click="cancel()">Cancel</Button>
+      <Button :disabled="store.loading" @click="cancel()">Cancel</Button> -->
+
+      <div class="steps-action" style="justify-content: space-between; display: flex">
+        <Button :disabled="store.loading" @click="closeModal()">Cancel</Button>
+
+        <Space>
+          <Button v-if="config.currentStep > 0" @click="config.currentStep--">
+            Previous
+          </Button>
+
+          <Popconfirm
+            v-if="config.currentStep == steps.length - 1"
+            ok-text="Broadcast"
+            @confirm="broadcast()"
+            title="This will broadcast the message to all selected users."
+          >
+            <Button
+              v-if="config.currentStep == steps.length - 1"
+              type="primary"
+              :danger="true"
+            >
+              Broadcast Now
+            </Button>
+          </Popconfirm>
+
+          <Button
+            v-if="config.currentStep < steps.length - 1"
+            type="primary"
+            @click="config.currentStep++"
+          >
+            Next
+          </Button>
+        </Space>
+      </div>
     </template>
 
     <Spin :spinning="store.loading">
       <Steps :current="config.currentStep" :items="steps" size="small"> </Steps>
 
-      <div class="steps-content">
+      <div class="steps-content" style="padding-top: 20px">
         <!-- Preview step -->
         <div v-show="config.currentStep == 0">
           <p class="preserve-whitespace">
@@ -163,31 +207,6 @@ const usersRowSelection: TableProps['rowSelection'] = {
           </Table>
         </div>
       </div>
-
-      <div class="steps-action">
-        <Button
-          v-if="config.currentStep < steps.length - 1"
-          type="primary"
-          @click="config.currentStep++"
-        >
-          Next
-        </Button>
-
-        <Button
-          v-if="config.currentStep == steps.length - 1"
-          type="primary"
-          @click="message.success('Processing complete!')"
-        >
-          Broadcast Now
-        </Button>
-
-        <Button
-          v-if="config.currentStep > 0"
-          style="margin-left: 8px"
-          @click="config.currentStep--"
-          >Previous
-        </Button>
-      </div>
     </Spin>
-  </Modal>
+  </Drawer>
 </template>

@@ -290,7 +290,7 @@ def send_message(
             success = resp.get("success", False)
             waiting = True
             declined = None
-            message_sid = resp.response.sid if success else None
+            message_sid = resp["response"].sid if success else None
 
         # Save to message sent to users table
         msg_sent = MessageSentToUser()
@@ -520,6 +520,7 @@ async def webhook_handler(request: Request, db: Session = Depends(get_db)):
         else stakeholder.msg_sent.user.address_as
     )
 
+    # FIXME: same message sent to user after reply
     print("first_word", first_word)
     if waiting and first_word == "no":
         update_log_msg_sent_user(
@@ -650,4 +651,4 @@ def handler(request: Request, db: Session = Depends(get_db)):
     #     )
 
     # Return the response object
-    return {}
+    return result
