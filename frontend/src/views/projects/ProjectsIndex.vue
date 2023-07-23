@@ -35,15 +35,14 @@ onMounted(() => {
     <Tabs v-model:activeKey="activeTab" centered>
       <TabPane key="users" tab="Project Users">
         <ProjectUsers></ProjectUsers>
+        <Divider></Divider>
+
+        <ProjectsTable></ProjectsTable>
       </TabPane>
 
       <TabPane key="stakeholders" tab="Project Stakeholders">
         <ProjectStakeholders></ProjectStakeholders>
       </TabPane>
     </Tabs>
-
-    <Divider></Divider>
-
-    <ProjectsTable></ProjectsTable>
   </Card>
 </template>
