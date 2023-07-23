@@ -121,6 +121,13 @@ function deleteIndicator(id: number) {
       message.success("Indicator deleted successfully");
     });
 }
+
+const getTocList = computed(() => {
+  if (config.value.form?.type_id == null) {
+    return store.data;
+  }
+  return store.data.filter((item) => item.type_id > config.value.form?.type_id);
+});
 </script>
 
 <template>
@@ -188,16 +195,6 @@ function deleteIndicator(id: number) {
         </FormItem>
 
         <Row :gutter="8">
-          <!-- <Col :span="12">
-            <FormItem label="Links From" name="from_id">
-              <Select v-model:value="config.form.from_id" :allow-clear="true">
-                <SelectOption v-for="item in store?.data" :key="item.id" :value="item.id">
-                  {{ item.name }}
-                </SelectOption>
-              </Select>
-            </FormItem>
-          </Col> -->
-
           <Col :span="12">
             <FormItem label="Links To" name="links_to">
               <!-- TODO: show list of existing indicators -->
@@ -206,7 +203,7 @@ function deleteIndicator(id: number) {
                 :allow-clear="true"
                 mode="multiple"
               >
-                <SelectOption v-for="item in store?.data" :key="item.id" :value="item.id">
+                <SelectOption v-for="item in getTocList" :key="item.id" :value="item.id">
                   {{ item.name }}
                 </SelectOption>
               </Select>
@@ -270,8 +267,9 @@ function deleteIndicator(id: number) {
           label="Description"
           has-feedback
           :rules="[{ required: false }]"
+          :show-count="false"
         >
-          <Textarea v-model:value="config.form.description"> </Textarea>
+          <Textarea v-model:value="config.form.description" :show-count="false"> </Textarea>
         </FormItem>
 
         <!-- Indicators -->
@@ -315,5 +313,3 @@ function deleteIndicator(id: number) {
     </Spin>
   </Modal>
 </template>
-
-<style></style>
