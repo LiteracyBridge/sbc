@@ -71,12 +71,19 @@ export const useUserStore = defineStore({
       }
     },
 
-    async updateProfile() {
+    async updateProfile(form?: {
+      name?: string;
+      email?: string;
+      address_as?: string;
+      sms?: string;
+      whatsapp?: string;
+    }) {
       return ApiRequest.put<User>(`users/${this.$state.id}`, {
-        name: this.$state.name,
-        address_as: this.$state.address_as,
-        sms: this.$state.sms,
-        whatsapp: this.whatsapp,
+        name: form?.name || this.$state.name,
+        address_as: form.address_as || this.$state.address_as,
+        sms: form.sms || this.$state.sms,
+        email: form.email || this.$state.email,
+        whatsapp: form.whatsapp || this.whatsapp,
       })
         .then((resp) => {
           message.success("Profile updated successfully!");

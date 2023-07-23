@@ -8,10 +8,11 @@ import {
   Modal, Button, Tag,
   Typography, Form, type FormInstance, FormItem, Input,
   Select,
+  SelectOption,
   message,
-  SelectOption
+  Tooltip
 } from "ant-design-vue";
-import { DeleteOutlined, PlusCircleOutlined } from "@ant-design/icons-vue";
+import { DeleteOutlined, InfoCircleOutlined, PlusCircleOutlined } from "@ant-design/icons-vue";
 import { useUserStore } from "@/stores/user";
 import { ApiRequest } from "@/apis/api";
 import { User } from "@/types";
@@ -23,13 +24,13 @@ const userStore = useUserStore();
 const allUsers = ref<User[]>([]);
 const config = ref({
   loading: false,
-  userModal: {
     visible: false,
     form: {
       role_id: null,
       email: null,
+      sms: null,
+      whatsapp: null,
     }
-  }
 });
 const projectUserFormRef = ref<FormInstance>();
 
@@ -59,17 +60,25 @@ const columns = [
 
 function closeModal() {
   projectUserFormRef.value.resetFields();
-  config.value.userModal.visible = false;
+  config.value.visible = false;
 }
 
 function saveNewUser() {
   projectUserFormRef.value.validateFields().then((_) => {
-    const form = config.value.userModal.form;
+    const form = config.value.form;
     const user = allUsers.value.find(user => user.email == form.email)
 
     projectStore.addUser(user.name ?? 'N/A', form.email, form.role_id, user.address_as);
 
     message.success(`Added ${user.name} to project ${projectStore.projectName}`);
+
+    if(form.whatsapp != null || form.sms != null) {
+      userStore.updateProfile({
+        email: form.email,
+        sms: form.sms,
+        whatsapp: form.whatsapp,
+      })
+    }
     closeModal();
   });
 }
@@ -115,7 +124,7 @@ function filterUser(input: string, option: any) {
         </span>
 
         <!-- TODO: implement creating new project in a modal -->
-        <Button type="primary" @click="config.userModal.visible = true">
+        <Button type="primary" @click="config.visible = true">
           <template #icon>
             <PlusCircleOutlined />
           </template>
@@ -170,7 +179,7 @@ function filterUser(input: string, option: any) {
   </Table>
 
   <Modal
-    v-model:visible="config.userModal.visible"
+    v-model:visible="config.visible"
     @cancel="closeModal()"
     title="New Project User"
     ok-text="Add User"
@@ -181,11 +190,11 @@ function filterUser(input: string, option: any) {
     <Form
       name="new-user-form"
       ref="projectUserFormRef"
-      :model="config.userModal.form"
+      :model="config.form"
       layout="vertical"
     >
       <!-- <FormItem label="Full Name" name="name" :rules="[{ required: true, message: 'Please enter full name!' }]">
-          <Input v-model:value="config.userModal.form.name" />
+          <Input v-model:value="config.form.name" />
         </FormItem> -->
 
       <FormItem
@@ -195,7 +204,7 @@ function filterUser(input: string, option: any) {
         :rules="[{ required: true, message: 'Please select a email!' }]"
       >
         <Select
-          v-model:value="config.userModal.form.email"
+          v-model:value="config.form.email"
           placeholder="Select email"
           :allow-clear="true"
           :options="usersDropdownOptions"
@@ -211,12 +220,42 @@ function filterUser(input: string, option: any) {
         has-feedback
         :rules="[{ required: true, message: 'Please select a role!' }]"
       >
-        <Select v-model:value="config.userModal.form.role_id" placeholder="Select role">
+        <Select v-model:value="config.form.role_id" placeholder="Select role">
           <SelectOption v-for="access in projectStore.grantableAccess" :key="access.id">
             {{ access.name }}
           </SelectOption>
         </Select>
       </FormItem>
+
+      <div v-if="config.form.email != null">
+        <FormItem label="SMS Phone Number" name="sms">
+          <Input
+            v-model:value="config.form.sms"
+            type="tel"
+          >
+            <template #suffix>
+              <Tooltip title="This number will be used to send you SMS notifications">
+                <InfoCircleOutlined />
+              </Tooltip>
+            </template>
+          </Input>
+        </FormItem>
+
+        <FormItem label="WhatsApp Number" name="whatsapp">
+          <Input
+            v-model:value="config.form.whatsapp"
+            type="tel"
+          >
+            <template #suffix>
+              <Tooltip
+                title="This number will be used to send you Whatsapp notifications"
+              >
+                <InfoCircleOutlined />
+              </Tooltip>
+            </template>
+          </Input>
+        </FormItem>
+      </div>
     </Form>
   </Modal>
 </template>

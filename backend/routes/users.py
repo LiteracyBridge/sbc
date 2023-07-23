@@ -99,10 +99,14 @@ def update_user(id: int, dto: UpdateUserDto, db: Session = Depends(get_db)):
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
 
-    user.name = dto.name
-    user.address_as = dto.address_as
-    user.sms = dto.sms
-    user.whatsapp = dto.whatsapp
+    if dto.name is not None:
+        user.name = dto.name
+    if dto.address_as is not None:
+        user.address_as = dto.address_as
+    if dto.sms is not None:
+        user.sms = dto.sms
+    if dto.whatsapp is not None:
+        user.whatsapp = dto.whatsapp
 
     db.commit()
     return ApiResponse(data=[user])
