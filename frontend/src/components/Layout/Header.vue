@@ -72,18 +72,18 @@ function changeProject(prjId: number) {
     style="background: #289b6a; padding: 0px 16px 0px 0px; color: white"
   >
     <div id="header-items">
-      <span>
+      <div>
         <MenuUnfoldOutlined
           v-if="sideNavStore.visible"
           class="trigger"
-          @click="() => (sideNavStore.visible = !sideNavStore.visible)" />
+          @click="() => (sideNavStore.visible = !sideNavStore.visible)"
+        />
         <MenuUnfoldOutlined
           v-else
           class="trigger"
           @click="() => (sideNavStore.visible = !sideNavStore.visible)"
-      /></span>
+        />
 
-      <div>
         <Dropdown :trigger="['click']">
           <Tooltip title="Click to change project">
             <a @click.prevent style="color: inherit">
@@ -108,6 +108,7 @@ function changeProject(prjId: number) {
           </template>
         </Dropdown>
       </div>
+
 
       <div>
         <Space style="padding-right: 52px">
