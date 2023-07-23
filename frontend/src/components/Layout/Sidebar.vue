@@ -13,7 +13,7 @@ import {
   Avatar,
 } from "ant-design-vue";
 import { UserOutlined } from "@ant-design/icons-vue";
-import LogoLarge from "@/assets/logo-large.png";
+import LogoLarge from "@/assets/logo-color.png";
 
 const router = useRouter();
 
@@ -119,13 +119,13 @@ watch(projectSelected, (newVal) => {
     width="260px"
   >
     <div class="logo">
-      <Image style="height: 50px; padding-right: 10px" :src="LogoLarge">
+      <Image  :src="LogoLarge">
         <!-- <template #icon><CompassOutlined /></template> -->
       </Image>
 
-      <span> Amplio </span>
+      <!-- <span> Amplio </span> -->
     </div>
-    <Divider :style="{ backgroundColor: 'white' }"></Divider>
+    <Divider></Divider>
 
     <Menu v-model:selectedKeys="config.activeMenu" theme="light" mode="inline">
       <MenuItem v-for="(item, index) in menuItems" :key="index">
@@ -152,13 +152,13 @@ watch(projectSelected, (newVal) => {
   height: 48px;
   display: inline-flex;
   /* background: rgba(255, 255, 255, 0.3); */
-  margin: 10px;
-  margin-top: 20px;
-  margin-left: 40px;
+  margin: 20px;
+  margin-bottom: 0px;
+  /* margin-left: 40px; */
   /* padding-top: 8px; */
   /* color: white; */
   text-align: center;
-  font-size: 30px;
+  /* font-size: 30px; */
 }
 
 #logo-image {
