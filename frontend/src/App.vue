@@ -27,7 +27,7 @@ import {
 import Header from "./components/Layout/Header.vue";
 import Sidebar from "./components/Layout/Sidebar.vue";
 import { MenuUnfoldOutlined, WechatOutlined } from "@ant-design/icons-vue";
-import Feedback from "./views/Feedback.vue";
+import FeedbackModal from "@/components/FeedbackModal.vue";
 
 const userStore = useUserStore();
 const appStore = AppStore();
@@ -87,8 +87,8 @@ onMounted(async () => {
       }"
     >
       <Layout>
-        <Feedback :visible="feedbackModalVisible" @close="feedbackModalVisible = false">
-        </Feedback>
+        <FeedbackModal :visible="feedbackModalVisible" @close="feedbackModalVisible = false">
+        </FeedbackModal>
 
         <Sidebar></Sidebar>
         <!-- <LayoutSider>

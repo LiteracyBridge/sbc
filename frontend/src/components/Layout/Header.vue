@@ -28,13 +28,15 @@ import {
 } from "ant-design-vue";
 import { useProjectStore } from "@/stores/projects";
 import Profile from "@/views/Profile.vue";
+import FeedbackModal from "@/components/FeedbackModal.vue";
 
 const router = useRouter();
 const userStore = useUserStore();
 const sideNavStore = useSideNavStore();
 const projectStore = useProjectStore();
 
-const profileVisible = ref(false);
+const profileVisible = ref(false),
+  feedbackModalVisible = ref(false);
 
 async function signOut() {
   try {
@@ -66,6 +68,9 @@ function changeProject(prjId: number) {
 
 <template>
   <Profile :visible="profileVisible" @close="profileVisible = false"></Profile>
+
+  <FeedbackModal :visible="feedbackModalVisible" @close="feedbackModalVisible = false">
+  </FeedbackModal>
 
   <LayoutHeader
     :has-sider="true"
@@ -109,12 +114,20 @@ function changeProject(prjId: number) {
         </Dropdown>
       </div>
 
-
       <div>
         <Space style="padding-right: 52px">
           <span>Resources</span>
           <span>Help</span>
           <span>About</span>
+
+          <Divider type="vertical" style="background-color: white" />
+          <Button
+            type="link"
+            size="small"
+            class="text-white"
+            @click.prevent="feedbackModalVisible = true"
+            >Contact Us</Button
+          >
         </Space>
 
         <Dropdown trigger="hover">
