@@ -1,8 +1,10 @@
 from typing import Optional
 
-import models
+from sqlalchemy.sql import select
+
+from models import get_db, Organisation, User, AccessRequest
 from fastapi import APIRouter, Depends
-from models import AccessRequest
+from models import AccessRequest, User
 from pydantic import BaseModel
 from schema import ApiResponse
 from sqlalchemy.orm import Session
@@ -16,8 +18,22 @@ class AccessRequestDto(BaseModel):
     email: Optional[str]
 
 
+@router.get("/{user_id}", response_model=ApiResponse)
+def get_org_details(user_id: int, db: Session = Depends(get_db)):
+    org = (
+        db.query(Organisation)
+        .filter(
+            Organisation.id.in_(
+                select(db.query(User.organisation_id).filter(User.id == user_id).subquery())
+            )
+        )
+        .first()
+    )
+    return ApiResponse(data=[org])
+
+
 @router.post("/access-request", response_model=ApiResponse)
-def create(dto: AccessRequestDto, db: Session = Depends(models.get_db)):
+def create(dto: AccessRequestDto, db: Session = Depends(get_db)):
     item: AccessRequest = AccessRequest()
     item.notes = dto.notes
     item.email = dto.email

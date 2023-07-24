@@ -34,6 +34,9 @@ class Timestamps {
 export class Organisation extends Timestamps {
   id: number;
   name: string;
+  email?: string;
+  website?: string;
+  logo?: string;
   country_id: number;
 
   users: User[];

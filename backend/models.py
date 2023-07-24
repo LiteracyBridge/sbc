@@ -70,6 +70,9 @@ class Organisation(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
     name: Mapped[str]
+    email: Mapped[Optional[str]]
+    website: Mapped[Optional[str]]
+    logo: Mapped[Optional[str]]
     country_id: Mapped[int] = mapped_column(ForeignKey("lu_countries.id"))
 
     users: Mapped[List["User"]] = relationship(
@@ -570,9 +573,9 @@ class AccessRequest(Base):
     __tablename__ = "access_requests"
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
-    email: Mapped[str]
+    email: Mapped[Optional[str]]
     name: Mapped[str]
-    notes: Mapped[str]
+    notes: Mapped[Optional[str]]
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=func.now()
     )
