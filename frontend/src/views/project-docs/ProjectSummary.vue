@@ -69,8 +69,8 @@ const project = computed(() => projectStore.current_project);
     <hr />
     <div class="twoColumns">
       <dl>
-        <dt>Project Information</dt>
-        <dd></dd>
+        <dt>01</dt>
+        <dd>Project Information</dd>
 
         <dt>Background and Context</dt>
         <dd></dd>
@@ -93,13 +93,14 @@ const project = computed(() => projectStore.current_project);
       />
     </div>
   </div>
+
   <!--
     Each chapter of the book is wrapped by a <div> with the .chapterPage class.
     Each chapter has a title <h1> element a line below and then some highlighted text.
     In this chapter we also have light highlighted text (blue but not bold) and a two column text.
 -->
   <div class="chapterPage">
-    <h1>Project Information</h1>
+    <h1 class="highlight">Project Information</h1>
     <hr />
 
     <!-- <p class="highlight">
@@ -110,13 +111,97 @@ const project = computed(() => projectStore.current_project);
       Aenean convallis lorem diam, ut imperdiet lectus ornare eget. Vestibulum consequat
     </p> -->
 
-    <div class="">
-      <div v-for="(q, count) in store.questionsForTopic('basic')">
-        <h3 class="highlight">{{ q.q2u }}</h3>
-        <p style="margin-bottom: 10px;">
-          {{ store.getData(q.id) }}
-        </p>
-      </div>
+    <div v-for="(q, count) in store.questionsForTopic('basic')">
+      <h4 class="bold">{{ q.q2u }}</h4>
+
+      <p style="margin-bottom: 10px">
+        {{ store.getData(q.id) }}
+      </p>
+    </div>
+  </div>
+
+  <div class="chapterPage">
+    <h1 class="highlight">Background and Context</h1>
+    <hr />
+
+    <div v-for="(q, count) in store.questionsForTopic('background')">
+      <h4 class="bold">{{ q.q2u }}</h4>
+
+      <p style="margin-bottom: 10px">
+        {{ store.getData(q.id) }}
+      </p>
+    </div>
+  </div>
+
+  <div class="chapterPage">
+    <h1 class="bold highlight">Project Objectives</h1>
+    <hr />
+
+    <div v-for="(q, count) in store.questionsForTopic('objectives')">
+      <h4 class="bold">{{ q.q2u }}</h4>
+
+      <p style="margin-bottom: 10px">
+        {{ store.getData(q.id) }}
+      </p>
+    </div>
+
+    <div>
+      <h4 class="bold">
+        What specific objective(s) will your project achieve? What changes will your
+        project make happen?
+      </h4>
+
+      <ol style="margin-bottom: 10px; margin-left: 0.5cm">
+        <li
+          v-for="item in store.new_project_data.filter((p) => p.module == 'objectives')"
+        >
+          {{ item.data }}
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="chapterPage">
+    <h1 class="highlight bold">Audiences</h1>
+    <hr />
+
+    <div>
+      <h4 class="bold">
+        Who is the primary target audience for your project? Who will be adopting the
+        behavior you want to influence?
+      </h4>
+
+      <ol style="margin-bottom: 10px; margin-left: 0.5cm">
+        <li
+          v-for="item in store.new_project_data.filter(
+            (p) => p.name == 'primary_audience'
+          )"
+        >
+          {{ item.data }}
+        </li>
+      </ol>
+    </div>
+
+    <div>
+      <h4 class="bold">Who else influences the actions of your main target audience?</h4>
+
+      <ol style="margin-bottom: 10px; margin-left: 0.5cm">
+        <li
+          v-for="item in store.new_project_data.filter(
+            (p) => p.name == 'secondary_audience'
+          )"
+        >
+          {{ item.data }}
+        </li>
+      </ol>
+    </div>
+
+    <div v-for="(q, count) in store.questionsForTopic('audiences')">
+      <h4 class="bold">{{ q.q2u }}</h4>
+
+      <p style="margin-bottom: 10px">
+        {{ store.getData(q.id) }}
+      </p>
     </div>
   </div>
 
@@ -415,7 +500,7 @@ const project = computed(() => projectStore.current_project);
   </div>
 </template>
 
-<style scoped>
+<style>
 /*
 Import the desired font from Google fonts.
 */
@@ -424,12 +509,12 @@ Import the desired font from Google fonts.
 /*
 Define all colors used in this template
 */
-/* :root {
+:root {
   --highlight-color-one: #1fc2de;
   --highlight-color-one-transparent: #1fc2deb3;
   --text-color: #303e48;
   --table-row-separator-color: #cec3ba;
-} */
+}
 
 @page {
   /*
@@ -534,7 +619,7 @@ hr {
   height: 0;
   border: 0;
   border-top: 0.75mm solid var(--highlight-color-one);
-  margin: 1cm 0 1cm 0;
+  margin: 0.5cm 0 0.5cm 0;
 }
 
 /*
@@ -837,5 +922,9 @@ is that a different HTML element is used for the running position.
 */
 .footerBibliography {
   position: running(footerBibliography);
+}
+
+.bold {
+  font-weight: bold;
 }
 </style>
