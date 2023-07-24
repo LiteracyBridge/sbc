@@ -14,7 +14,7 @@ const project = computed(() => projectStore.current_project);
 
 <template>
   <!-- The header of the content pages is only a line so we have no content here but add the line with our CSS. -->
-  <header></header>
+  <header style="visibility: hidden;"></header>
   <!-- The footer for all content pages contains the link to the website and a line next to it. -->
   <footer class="footerStandard" v-if="organisation.website">
     <a :href="organisation.website">
@@ -209,8 +209,8 @@ Import the desired font from Google fonts.
 Define all colors used in this template
 */
 :root {
-  --highlight-color-one: #1fc2de;
-  --highlight-color-one-transparent: #1fc2deb3;
+  --highlight-color-one: #289b6a;
+  --highlight-color-one-transparent: #289b6a;
   --text-color: #303e48;
   --table-row-separator-color: #cec3ba;
 }
