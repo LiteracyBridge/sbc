@@ -10,6 +10,9 @@ import BroadcastComponent from '@/components/BroadcastComponent.vue';
 
 import { DeleteOutlined, MinusCircleOutlined, PlusOutlined } from '@ant-design/icons-vue';
 import { useUserStore } from '@/stores/user';
+import { ApiRequest } from '@/apis/api';
+import { useProjectStore } from '@/stores/projects';
+import type { ProjectData } from '@/types';
 
 interface Objective {
   value: string;
@@ -122,6 +125,39 @@ function fetchData() {
   });
 }
 
+function deleteObj(id: number | string, name: string,  q_id: number, event: InputEvent){
+  ApiRequest.delete<ProjectData>(`project/${useProjectStore().prj_id}/data/${id}`).then((resp) => {
+    if(resp.length > 0){
+      const temp = dynamicValidateForm.objectives;
+      const index = temp.findIndex(i => i.id == id);
+      temp.splice(index, 1);
+
+      dynamicValidateForm.objectives = temp;
+    }
+    // message.success("Changes saved successfully");
+  });
+}
+
+function saveChanges(id: number, name: string,  q_id: number, event: InputEvent){
+  ApiRequest.post<ProjectData>(`project/${useProjectStore().prj_id}/data`, {
+    name,
+    q_id,
+    id,
+    data: (event.target as HTMLInputElement).value,
+    module: "objectives",
+    editing_user_id: useUserStore().id,
+  }).then((resp) => {
+    if(resp.length > 0){
+      const temp = dynamicValidateForm.objectives;
+      const index = temp.findIndex(i => i.id == id);
+      temp[index] = {value: resp[0].data, id: resp[0].id, is_new: false};
+
+      dynamicValidateForm.objectives = temp;
+    }
+    // message.success("Changes saved successfully");
+  });
+}
+
 onMounted(() => {
   fetchData();
 });
@@ -223,6 +259,7 @@ onMounted(() => {
           v-model:value="objective.value"
           placeholder="Enter objective"
           style="width: 60%"
+          @change="saveChanges(objective.id, 'specific_objective', 10, $event)"
         />
 
         <Button
@@ -232,7 +269,7 @@ onMounted(() => {
           v-if="dynamicValidateForm.objectives.length > 1"
           class="ml-2"
           :disabled="dynamicValidateForm.objectives.length === 1"
-          @click="removeObjective(objective)"
+          @click="deleteObj(objective.id, 'specific_objective', 10, $event)"
         >
           <template #icon>
             <DeleteOutlined />

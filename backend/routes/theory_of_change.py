@@ -130,13 +130,13 @@ def update_or_create_item(
     return ApiResponse(data=get_toc_by_project_id(project_id, db))
 
 
-@router.delete("/{project_id}/item/{itemId}", response_model=ApiResponse)
+@router.delete("/{project_id}/item/{item_id}", response_model=ApiResponse)
 def delete_item(
     project_id: int,
-    itemId: int,
+    item_id: int,
     db: Session = Depends(models.get_db),
 ):
-    record = db.query(TheoryOfChange).filter(TheoryOfChange.id == itemId).first()
+    record = db.query(TheoryOfChange).filter(TheoryOfChange.id == item_id).first()
 
     if record is None:
         raise HTTPException(status_code=404, detail="Item not found")

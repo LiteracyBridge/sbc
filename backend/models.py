@@ -174,7 +174,7 @@ class ProjectData(Base):
     name: Mapped[Optional[str]]
 
     prj_id: Mapped[int] = mapped_column(ForeignKey("projects.id"), nullable=True)
-    editing_user_id: Mapped[int] = mapped_column(ForeignKey("project_users.id"))
+    editing_user_id: Mapped[Optional[int]] = mapped_column(ForeignKey("project_users.id"))
     theory_of_change_id: Mapped[int] = mapped_column(
         ForeignKey("theory_of_change.id", ondelete="CASCADE"), nullable=True
     )

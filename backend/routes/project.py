@@ -1,15 +1,16 @@
 from typing import List, Optional, Dict, Annotated
 from datetime import datetime
 from sqlalchemy import text
-from models import LuDriver, ProjectDriver, Stakeholder
+from models import LuDriver, ProjectDriver, Stakeholder, TheoryOfChange, get_db
 from helpers import ToCItemDto, create_toc_item
 
 import models
-from fastapi import APIRouter, Depends, HTTPException, Body
+from fastapi import APIRouter, Depends, HTTPException, Body, Request, Response
 from models import ProjectData, Project
 from pydantic import BaseModel
 from schema import ApiResponse
 from sqlalchemy.orm import Session, subqueryload
+from routes.theory_of_change import delete_item
 
 router = APIRouter()
 
@@ -205,6 +206,122 @@ def get_project_data(project_id: int, db: Session = Depends(models.get_db)):
     )
 
 
+# ===== START: PROJECT DATA ===== #
+class ProjectDataDto(BaseModel):
+    id: Optional[int]
+    q_id: Optional[int]
+    data: Optional[str]
+    module: Optional[str]
+    name: Optional[str]
+    editing_user_id: Optional[int]
+
+
+@router.post("/{project_id}/data", response_model=ApiResponse)
+@router.put("/{project_id}/data", response_model=ApiResponse)
+@router.get("/{project_id}/data", response_model=ApiResponse)
+def update_or_create_data(
+    project_id: int,
+    dto: Optional[ProjectDataDto],
+    request: Request,
+    db: Session = Depends(get_db),
+):
+    """Manage project objectives"""
+
+    if request.method == "POST" or request.method == "PUT":
+        record = ProjectData()
+        is_new = True
+
+        if dto.id is not None:
+            _temp: ProjectData | None = (
+                db.query(ProjectData).filter(ProjectData.id == dto.id).first()
+            )
+
+            if _temp is not None:
+                is_new = False
+                record = _temp
+
+        record.q_id = dto.q_id
+        record.data = dto.data
+        record.module = dto.module
+        record.name = dto.name
+        record.prj_id = project_id
+        record.editing_user_id = dto.editing_user_id
+
+        if is_new:
+            db.add(record)
+
+        db.commit()
+        db.refresh(record)
+
+        # Update or create toc item
+        if dto.module == "objectives":
+            # Create theory of change objective item
+            toc = create_toc_item(
+                ToCItemDto(
+                    project_id=project_id,
+                    name=record,
+                    reference=record,
+                    type="objective",
+                ),
+                db=db,
+            )
+
+            record.theory_of_change_id = toc.id
+            db.commit()
+
+        return ApiResponse(data=[record])
+
+    if request.method == "DELETE":
+        item: ProjectData | None = (
+            db.query(ProjectData).filter(ProjectData.id == dto.id).first()
+        )
+
+        if item is None:
+            return ApiResponse(data=[])
+
+        item.delete()
+        db.commit()
+
+        # If project data is an objective, delete corresponding theory of change item
+        if (
+            item.module == "objectives" or item.name == "specific_objective"
+        ) and item.theory_of_change_id is not None:
+            delete_item(project_id=project_id, item_id=item.theory_of_change_id, db=db)
+
+        return ApiResponse(data=[item])
+
+    return ApiResponse(
+        data=db.query(ProjectData).filter(ProjectData.prj_id == project_id).all()
+    )
+
+
+@router.delete("/{project_id}/data/{id}", response_model=ApiResponse)
+def delete_project_data_item(
+    project_id: int,
+    id: int,
+    db: Session = Depends(get_db),
+):
+    item: ProjectData | None = (
+        db.query(ProjectData).filter(ProjectData.id == id).first()
+    )
+
+    if item is None:
+        return ApiResponse(data=[])
+
+    theory_of_change_id = item.theory_of_change_id
+    # TODO: implement soft delete
+    db.delete(item)
+    db.commit()
+
+    # If project data is an objective, delete corresponding theory of change item
+    if (
+        item.module == "objectives" or item.name == "specific_objective"
+    ) and item.theory_of_change_id is not None:
+        delete_item(project_id=project_id, item_id=theory_of_change_id, db=db)
+
+    return ApiResponse(data=[item])
+
+
 @router.post("/{project_id}/data", response_model=ApiResponse)
 def update_data(
     project_id: int, dto: ProjectObjectiveDto, db: Session = Depends(models.get_db)
@@ -263,6 +380,9 @@ def update_data(
     return ApiResponse(
         data=db.query(ProjectData).filter(ProjectData.prj_id == project_id).all()
     )
+
+
+# ===== END: PROJECT DATA ===== #
 
 
 # ================== START: PROJECT STAKEHOLDERS ================== ##
