@@ -57,7 +57,7 @@ const menuItems = [
     label: "Project Management",
     path: "/project-management",
   },
-  { label: "Project Documents", name: "forms", params: { module: "prjdocs" } },
+  { label: "Project Documents", path: "/project-documents" },
 ];
 
 const projectSelected = computed(
@@ -119,7 +119,7 @@ watch(projectSelected, (newVal) => {
     width="260px"
   >
     <div class="logo">
-      <Image  :src="LogoLarge">
+      <Image :src="LogoLarge">
         <!-- <template #icon><CompassOutlined /></template> -->
       </Image>
 

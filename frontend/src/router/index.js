@@ -21,6 +21,7 @@ import Audience from "@/views/Audience.vue";
 import CommunicationsIndex from "@/views/communications/CommunicationsIndex.vue";
 import ProjectInfo from "@/views/ProjectInfo.vue";
 import Partners from "@/views/Partners.vue";
+import ProjectDocsIndex from "@/views/project-docs/ProjectDocsIndex.vue";
 
 let user;
 
@@ -181,6 +182,7 @@ const router = createRouter({
       component: AccessRequest,
     },
     { path: "/partners", name: "partners", component: Partners },
+    { path: "/project-documents", name: "docs", component: ProjectDocsIndex },
   ],
 });
 
