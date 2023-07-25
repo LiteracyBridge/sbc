@@ -14,6 +14,7 @@ import {
   Row,
   Col,
 Divider,
+message,
 } from "ant-design-vue";
 import { CheckOutlined } from "@ant-design/icons-vue";
 
@@ -114,8 +115,10 @@ watch(
   { deep: true }
 );
 
-function onInputChange(event: any) {
-  formInput.value = event.target.value;
+function acceptSuggestion() {
+  formInput.value = formInput.value + '\n\n' + gptResponse.value?.answer;
+
+  message.info("Suggestion has been added to the text box")
 }
 </script>
 
@@ -163,7 +166,7 @@ function onInputChange(event: any) {
             <!-- FIXME: hide this button if chatgpt throws error -->
             <Button
               type="primary"
-              @click="formInput = formInput + '\n\n' + gptResponse?.answer"
+              @click="acceptSuggestion()"
               :class="{
                 disabled: gptResponse.isLoading || gptResponse?.answer == undefined,
               }"
@@ -192,7 +195,7 @@ function onInputChange(event: any) {
       <Col :span="24" style="margin-top: 50px;">
         <Form layout="vertical">
           <FormItem :label="moduleQuestion?.q2u">
-            <Textarea v-model:value="formInput" :rows="25" :cols="10"></Textarea>
+            <Textarea v-model:value="formInput" :rows="23" :cols="10"></Textarea>
           </FormItem>
         </Form>
       </Col>
