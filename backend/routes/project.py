@@ -208,82 +208,83 @@ class ProjectDataDto(BaseModel):
     editing_user_id: Optional[int]
 
 
-@router.post("/{project_id}/data", response_model=ApiResponse)
-@router.put("/{project_id}/data", response_model=ApiResponse)
+# Project objectives route
 @router.get("/{project_id}/data", response_model=ApiResponse)
-def update_or_create_data(
-    project_id: int,
-    dto: ProjectDataDto,
-    request: Request,
-    db: Session = Depends(get_db),
-):
-    """Manage project objectives"""
-
-    if request.method == "POST" or request.method == "PUT":
-        record = ProjectData()
-        is_new = True
-
-        if dto.id is not None:
-            _temp: ProjectData | None = (
-                db.query(ProjectData).filter(ProjectData.id == dto.id).first()
-            )
-
-            if _temp is not None:
-                is_new = False
-                record = _temp
-
-        record.q_id = dto.q_id
-        record.data = dto.data
-        record.module = dto.module
-        record.name = dto.name
-        record.prj_id = project_id
-        record.editing_user_id = dto.editing_user_id
-
-        if is_new:
-            db.add(record)
-
-        db.commit()
-        db.refresh(record)
-
-        # Update or create toc item
-        if dto.module == "objectives" and is_new and dto.data is not None:
-            # Create theory of change objective item
-            toc = TheoryOfChange()
-            toc.name = dto.data
-            toc.links_to = []
-            toc.sem_id = None
-            toc.description = None
-            toc.project_id = project_id
-            toc.is_validated = False
-            toc.type_id = 4
-
-            db.add(toc)
-            db.commit()
-            db.refresh(toc)
-
-            record.theory_of_change_id = toc.id
-            db.commit()
-            db.refresh(record)
-        elif (
-            dto.module == "objectives"
-            and not is_new
-            and record.theory_of_change_id is not None
-        ):
-            # Update theory of change objective item
-            toc = (
-                db.query(TheoryOfChange)
-                .filter(TheoryOfChange.id == record.theory_of_change_id)
-                .first()
-            )
-            toc.name = dto.data
-            db.commit()
-
-        db.refresh(record)
-        return ApiResponse(data=[record])
-
+def get_project_data(project_id: int, db: Session = Depends(models.get_db)):
     return ApiResponse(
         data=db.query(ProjectData).filter(ProjectData.prj_id == project_id).all()
     )
+
+
+@router.post("/{project_id}/data", response_model=ApiResponse)
+@router.put("/{project_id}/data", response_model=ApiResponse)
+def update_or_create_data(
+    project_id: int,
+    dto: ProjectDataDto,
+    db: Session = Depends(get_db),
+):
+    """Add or update project data"""
+
+    record = ProjectData()
+    is_new = True
+
+    if dto.id is not None:
+        _temp: ProjectData | None = (
+            db.query(ProjectData).filter(ProjectData.id == dto.id).first()
+        )
+
+        if _temp is not None:
+            is_new = False
+            record = _temp
+
+    record.q_id = dto.q_id
+    record.data = dto.data
+    record.module = dto.module
+    record.name = dto.name
+    record.prj_id = project_id
+    record.editing_user_id = dto.editing_user_id
+
+    if is_new:
+        db.add(record)
+
+    db.commit()
+    db.refresh(record)
+
+    # Update or create toc item
+    if dto.module == "objectives" and is_new and dto.data is not None:
+        # Create theory of change objective item
+        toc = TheoryOfChange()
+        toc.name = dto.data
+        toc.links_to = []
+        toc.sem_id = None
+        toc.description = None
+        toc.project_id = project_id
+        toc.is_validated = False
+        toc.type_id = 4
+
+        db.add(toc)
+        db.commit()
+        db.refresh(toc)
+
+        record.theory_of_change_id = toc.id
+        db.commit()
+        db.refresh(record)
+    elif (
+        dto.module == "objectives"
+        and not is_new
+        and record.theory_of_change_id is not None
+    ):
+        # Update theory of change objective item
+        toc = (
+            db.query(TheoryOfChange)
+            .filter(TheoryOfChange.id == record.theory_of_change_id)
+            .first()
+        )
+        toc.name = dto.data
+        db.commit()
+
+    db.refresh(record)
+    return ApiResponse(data=[record])
 
 
 @router.delete("/{project_id}/data/{id}", response_model=ApiResponse)
@@ -311,6 +312,7 @@ def delete_project_data_item(
         delete_item(project_id=project_id, item_id=theory_of_change_id, db=db)
 
     return ApiResponse(data=[item])
+
 
 # ===== END: PROJECT DATA ===== #
 
