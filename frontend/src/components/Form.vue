@@ -141,7 +141,6 @@ async function submitContextAndPrompt(id: number, topic: string) {
       @is-closed="suggestionsPanelHandler.isOpened = false"
       :question-id="suggestionsPanelHandler.questionId"
       :module="suggestionsPanelHandler.module"
-      v-if="suggestionsPanelHandler.module"
     >
     </GPTSuggestionPanel>
 
