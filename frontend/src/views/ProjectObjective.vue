@@ -138,7 +138,7 @@ function deleteObj(id: number | string, name: string,  q_id: number, event: Inpu
   });
 }
 
-function saveChanges(id: number, name: string,  q_id: number, event: InputEvent){
+function saveChanges(id: number|string, name: string,  q_id: number, event: InputEvent){
   ApiRequest.post<ProjectData>(`project/${useProjectStore().prj_id}/data`, {
     name,
     q_id,
@@ -148,13 +148,10 @@ function saveChanges(id: number, name: string,  q_id: number, event: InputEvent)
     editing_user_id: useUserStore().id,
   }).then((resp) => {
     if(resp.length > 0){
-      const temp = dynamicValidateForm.objectives;
-      const index = temp.findIndex(i => i.id == id);
-      temp[index] = {value: resp[0].data, id: resp[0].id, is_new: false};
+      const index = dynamicValidateForm.objectives.findIndex(i => i.id == id);
 
-      dynamicValidateForm.objectives = temp;
+      dynamicValidateForm.objectives[index] = {value: resp[0].data, id: resp[0].id, is_new: false};
     }
-    // message.success("Changes saved successfully");
   });
 }
 
@@ -263,7 +260,8 @@ onMounted(() => {
         />
 
         <Button
-          type="ghost"
+          type="primary"
+          :ghost="true"
           :danger="true"
           size="small"
           v-if="dynamicValidateForm.objectives.length > 1"

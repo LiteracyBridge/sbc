@@ -5,7 +5,6 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session, joinedload, subqueryload
 from model_events import delete_activity
 
-from helpers import ToCItemDto, create_toc_item
 import models
 from models import Activity
 from models import TheoryOfChange
@@ -101,39 +100,6 @@ def update_or_create(dto: ActivityDto, db: Session = Depends(models.get_db)):
     db.commit()
     db.refresh(new_activity)
 
-    # if not dto.is_task:
-    #     create_toc_item(
-    #         dto=ToCItemDto(
-    #             project_id=dto.prj_id,
-    #             type="activity",
-    #             name=dto.name,
-    #             reference=new_activity,
-    #         ),
-    #         db=db,
-    #     )
-    # new_activity.toc_item_id = theory_of_change.id
-
-    # # Create a new record in the toc graph table
-    # toc_item = TheoryOfChange()
-    # toc_item.name = dto.name
-    # toc_item.project_id = dto.prj_id
-    # # TODO: make this optional
-    # toc_item.type_id = 2  # id of the activity type
-    # toc_item.from_id = None
-    # toc_item.to_id = None
-    # # TODO: make this optional
-    # toc_item.sem_id = 1  # id of the sem type.
-    # toc_item.description = dto.notes
-    # # toc_item.theory_of_change_id = get_toc_by_project_id(dto.prj_id, db).id
-
-    # db.add(toc_item)
-    # db.commit()
-
-    # # Update the activity with the toc_item id
-    # new_activity.toc_item_id = toc_item.id
-    # db.commit()
-
-    # return ApiResponse(data=[record])
     return get_project_activities(new_activity.prj_id, db)
 
 

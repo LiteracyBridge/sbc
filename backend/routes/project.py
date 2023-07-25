@@ -221,7 +221,7 @@ class ProjectDataDto(BaseModel):
 @router.get("/{project_id}/data", response_model=ApiResponse)
 def update_or_create_data(
     project_id: int,
-    dto: Optional[ProjectDataDto],
+    dto: ProjectDataDto,
     request: Request,
     db: Session = Depends(get_db),
 ):
@@ -254,41 +254,40 @@ def update_or_create_data(
         db.refresh(record)
 
         # Update or create toc item
-        if dto.module == "objectives":
+        if dto.module == "objectives" and is_new and dto.data is not None:
             # Create theory of change objective item
-            toc = create_toc_item(
-                ToCItemDto(
-                    project_id=project_id,
-                    name=record,
-                    reference=record,
-                    type="objective",
-                ),
-                db=db,
-            )
+            toc = TheoryOfChange()
+            toc.name = dto.data
+            toc.links_to = []
+            toc.sem_id = None
+            toc.description = None
+            toc.project_id = project_id
+            toc.is_validated = False
+            toc.type_id = 4
+
+            db.add(toc)
+            db.commit()
+            db.refresh(toc)
 
             record.theory_of_change_id = toc.id
             db.commit()
+            db.refresh(record)
+        elif (
+            dto.module == "objectives"
+            and not is_new
+            and record.theory_of_change_id is not None
+        ):
+            # Update theory of change objective item
+            toc = (
+                db.query(TheoryOfChange)
+                .filter(TheoryOfChange.id == record.theory_of_change_id)
+                .first()
+            )
+            toc.name = dto.data
+            db.commit()
 
+        db.refresh(record)
         return ApiResponse(data=[record])
-
-    if request.method == "DELETE":
-        item: ProjectData | None = (
-            db.query(ProjectData).filter(ProjectData.id == dto.id).first()
-        )
-
-        if item is None:
-            return ApiResponse(data=[])
-
-        item.delete()
-        db.commit()
-
-        # If project data is an objective, delete corresponding theory of change item
-        if (
-            item.module == "objectives" or item.name == "specific_objective"
-        ) and item.theory_of_change_id is not None:
-            delete_item(project_id=project_id, item_id=item.theory_of_change_id, db=db)
-
-        return ApiResponse(data=[item])
 
     return ApiResponse(
         data=db.query(ProjectData).filter(ProjectData.prj_id == project_id).all()
