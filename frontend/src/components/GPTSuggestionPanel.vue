@@ -1,10 +1,19 @@
 <script lang="ts" setup>
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, onMounted } from "vue";
 
 import { useProjectDataStore } from "@/stores/projectData";
 import * as lambda from "@/apis/lambda";
 import PulseLoaderVue from "./spinners/PulseLoader.vue";
-import { Drawer, Form, Button, Space, FormItem, Textarea, Row, Col } from "ant-design-vue";
+import {
+  Drawer,
+  Form,
+  Button,
+  Space,
+  FormItem,
+  Textarea,
+  Row,
+  Col,
+} from "ant-design-vue";
 import { CheckOutlined } from "@ant-design/icons-vue";
 
 const emit = defineEmits<{
@@ -16,6 +25,7 @@ const props = defineProps<{
   module?: string;
   questionId?: number;
   ai?: {
+    defaultValue?: string;
     prompt: string;
     context: string;
     format: string;
@@ -71,11 +81,19 @@ async function submitContextAndPrompt() {
   gptResponse.value.isLoading = false;
 }
 
-const closeButton = () => {
+const closeDrawer = () => {
   gptResponse.value.answer = null;
   formInput.value = "";
 
   emit("isClosed");
+};
+
+const saveAndClose = () => {
+  if (props.ai == null) {
+    projectStore.setData(props.questionId, formInput.value);
+  }
+  emit("saved", formInput.value);
+  closeDrawer();
 };
 
 watch(
@@ -84,11 +102,13 @@ watch(
     config.value.visible = newProps.isVisible;
     gptResponse.value.answer = null;
 
-    submitContextAndPrompt();
-
     if (newProps.ai == null) {
       formInput.value = projectStore.getData(newProps.questionId);
+    } else {
+      formInput.value = newProps.ai.defaultValue;
     }
+
+    submitContextAndPrompt();
   },
   { deep: true }
 );
@@ -104,7 +124,7 @@ function onInputChange(event: any) {
     v-model:open="config.visible"
     :mask-closable="false"
     width="80vw"
-    @close="closeButton"
+    @close="closeDrawer"
   >
     <!-- <div class="level">
       <div class="level-left"></div>
@@ -112,13 +132,7 @@ function onInputChange(event: any) {
 
     <template #extra>
       <Space>
-        <Button
-          type="primary"
-          @click="
-            projectStore.setData(props.questionId, formInput);
-            closeButton();
-          "
-        >
+        <Button type="primary" @click="saveAndClose()">
           <!-- <span class="icon mr-1">
                 <i class="fas fa-save"></i>
               </span> -->
@@ -126,7 +140,7 @@ function onInputChange(event: any) {
           Save and Close
         </Button>
 
-        <Button @click="closeButton">
+        <Button @click="closeDrawer">
           <!-- <span class="icon mr-1">
                 <i class="fas fa-times"></i>
               </span> -->
@@ -188,7 +202,7 @@ function onInputChange(event: any) {
       <Col :span="14">
         <Form layout="vertical">
           <FormItem :label="moduleQuestion?.q2u">
-            <Textarea v-model:value="formInput" rows="15" cols="10"></Textarea>
+            <Textarea v-model:value="formInput" :rows="15" :cols="10"></Textarea>
           </FormItem>
         </Form>
       </Col>

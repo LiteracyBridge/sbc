@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, computed } from 'vue';
 
 import { PlusOutlined } from '@ant-design/icons-vue';
 import {
@@ -16,6 +16,10 @@ import { useTheoryOfChangeStore } from '@/stores/theory_of_change';
 import { useCommunicationStore } from '@/stores/communication.store';
 import { Communication } from '@/types';
 import { useDriverStore } from '@/stores/drivers';
+import GPTSuggestionPanel from '@/components/GPTSuggestionPanel.vue';
+
+const BULB_ICON = "/images/lightbulb.png"
+
 
 const projectDataStore = useProjectDataStore(),
   tocStore = useTheoryOfChangeStore(),
@@ -39,6 +43,16 @@ const config = ref({
       key_points: '',
       contents: '',
       title: '',
+    }
+  },
+  suggestions: {
+    type: null,
+    visible: false,
+    ai: {
+      prompt: '',
+      context: '',
+      format: '',
+      defaultValue: '',
     }
   }
 });
@@ -88,9 +102,59 @@ function onEditClick(item: Communication) {
 onMounted(() => {
   store.download();
 })
+
+const generateAIPrompt = computed(() => {
+  const prompt = "Suggest suitable message contents for the project";
+  let context = "";
+
+  const { form } = config.value.modal;
+  if (form.project_objectives?.length > 0) {
+    context += "The project has the following objectives: " + projectDataStore.specificObjectives
+      .filter(p => form.project_objectives?.includes(p.id)
+      )
+      ?.map((p, i) => `(${i + 1}). ${p.data}`).join(', ') + '.';
+  }
+  if (form.indicators?.length > 0) {
+    context += "The project has the following indicators: " + useTheoryOfChangeStore().allTocIndicators
+      .filter(p => form.indicators?.includes(p.id)
+      )
+      ?.map((p, i) => `(${i + 1}). ${p.name}`).join(', ') + '.';
+  }
+  if (form.target_audiences?.length > 0) {
+    context += "The messages to be delivered has the following target audiences: " + projectDataStore.audiences
+      .filter(p => form.target_audiences?.includes(p.id)
+      )
+      ?.map((p, i) => `(${i + 1}). ${p.data}`).join(', ') + '.';
+  }
+
+  return { prompt, context, format: "paragraph" };
+})
+
+function messageContentSuggestion() {
+  config.value.suggestions = { ai: {
+    ...generateAIPrompt.value, defaultValue: config.value.modal.form.contents
+  },visible: true, type: "content" };
+
+  console.log(config.value.suggestions)
+}
+
+const onSuggestionClosed = (val: string) => {
+  if(config.value.suggestions.type == "content"){
+    config.value.modal.form.contents = val;
+  }
+  config.value.suggestions.visible = false;
+}
 </script>
 
 <template>
+  <GPTSuggestionPanel
+    :is-visible="config.suggestions.visible"
+    @is-closed="config.suggestions.visible = false"
+    @saved="onSuggestionClosed"
+    :ai="config.suggestions.ai"
+  >
+  </GPTSuggestionPanel>
+
   <Card title="Communications and Messaging" :bordered="false">
     <template #extra>
       <Button type="primary" @click="config.modal.visible = true">
@@ -218,7 +282,6 @@ onMounted(() => {
                 {{ item.contents || "N/A" }}
               </span>
             </DescriptionsItem>
-
           </Descriptions>
         </CollapsePanel>
       </Collapse>
@@ -226,7 +289,7 @@ onMounted(() => {
   </Card>
 
   <Drawer
-    v-model:visible="config.modal.visible"
+    v-model:open="config.modal.visible"
     width="60vw"
     :mask-closable="false"
     @close="closeModal"
@@ -395,6 +458,13 @@ onMounted(() => {
           has-feedback
           :rules="[{ required: false, message: 'Please enter message content!' }]"
         >
+          <img
+            :src="BULB_ICON"
+            ref="iconRefs"
+            @click="messageContentSuggestion()"
+            class="image is-32x32"
+          />
+
           <Textarea
             v-model:value="config.modal.form.contents"
             name="contents"
