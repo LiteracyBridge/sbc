@@ -13,6 +13,7 @@ import {
   Textarea,
   Row,
   Col,
+Divider,
 } from "ant-design-vue";
 import { CheckOutlined } from "@ant-design/icons-vue";
 
@@ -132,77 +133,66 @@ function onInputChange(event: any) {
 
     <template #extra>
       <Space>
-        <Button type="primary" @click="saveAndClose()">
-          <!-- <span class="icon mr-1">
-                <i class="fas fa-save"></i>
-              </span> -->
+        <Button type="primary" @click="saveAndClose()"> Save and Close </Button>
 
-          Save and Close
-        </Button>
-
-        <Button @click="closeDrawer">
-          <!-- <span class="icon mr-1">
-                <i class="fas fa-times"></i>
-              </span> -->
-          Cancel
-        </Button>
+        <Button @click="closeDrawer"> Cancel </Button>
       </Space>
     </template>
     <!--
       </div>
     </div> -->
 
-    <Row :gutter="8">
-      <Col :span="10">
-        <div class="mt-2">
-          <!-- Display loading indicator -->
-          <div v-if="gptResponse?.isLoading == true">
-            <PulseLoaderVue :loading="gptResponse?.isLoading"></PulseLoaderVue>
+    <Row>
+      <div class="mt-2">
+        <!-- Display loading indicator -->
+        <div v-if="gptResponse?.isLoading == true">
+          <PulseLoaderVue :loading="gptResponse?.isLoading"></PulseLoaderVue>
 
-            <span>Getting AI suggestions, please wait...</span>
+          <span>Getting AI suggestions, please wait...</span>
+        </div>
+
+        <p v-else style="white-space: pre-wrap">
+          {{
+            gptResponse?.answer ||
+            "No suggestions available. Click on the light bulb to see suggestions"
+          }}
+        </p>
+
+        <div class="field is-grouped mt-3">
+          <div class="control">
+            <!-- FIXME: hide this button if chatgpt throws error -->
+            <Button
+              type="primary"
+              @click="formInput = formInput + '\n\n' + gptResponse?.answer"
+              :class="{
+                disabled: gptResponse.isLoading || gptResponse?.answer == undefined,
+              }"
+              :disabled="gptResponse.isLoading || gptResponse?.answer == undefined"
+            >
+              <CheckOutlined />
+
+              Accept
+            </Button>
           </div>
 
-          <p v-else style="white-space: pre-wrap">
-            {{
-              gptResponse?.answer ||
-              "No suggestions available. Click on the light bulb to see suggestions"
-            }}
-          </p>
-
-          <div class="field is-grouped mt-3">
-            <div class="control">
-              <!-- FIXME: hide this button if chatgpt throws error -->
-              <Button
-                type="primary"
-                @click="formInput = formInput + '\n\n' + gptResponse?.answer"
-                :class="{
-                  disabled: gptResponse.isLoading || gptResponse?.answer == undefined,
-                }"
-                :disabled="gptResponse.isLoading || gptResponse?.answer == undefined"
-              >
-                <CheckOutlined />
-
-                Accept
-              </Button>
-            </div>
-
-            <div class="control">
-              <Button
-                @click="submitContextAndPrompt()"
-                :class="{ 'is-loading disabled': gptResponse.isLoading }"
-                :disabled="gptResponse.isLoading"
-              >
-                Refresh
-              </Button>
-            </div>
+          <div class="control">
+            <Button
+              @click="submitContextAndPrompt()"
+              :class="{ 'is-loading disabled': gptResponse.isLoading }"
+              :disabled="gptResponse.isLoading"
+            >
+              Refresh
+            </Button>
           </div>
         </div>
-      </Col>
+      </div>
+    </Row>
 
-      <Col :span="14">
+    <Row>
+      <Col :span="24" style="margin-top: 50px;">
         <Form layout="vertical">
           <FormItem :label="moduleQuestion?.q2u">
-            <Textarea v-model:value="formInput" :rows="15" :cols="10"></Textarea>
+            <Textarea v-model:value="formInput" :rows="25" :cols="10"></Textarea>
           </FormItem>
         </Form>
       </Col>
