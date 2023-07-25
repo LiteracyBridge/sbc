@@ -81,26 +81,51 @@ function updateData(event: any, id: number) {
 }
 
 // Dynamic objectives forms
-function removeAudience(item: Objective, primary: boolean) {
-  if (primary) {
-    let index = primaryAudienceForm.audiences.indexOf(item);
-    if (index !== -1) {
-      const [el] = primaryAudienceForm.audiences.splice(index, 1);
-      if (!el.is_new) {
-        primaryAudienceForm.deleted.push(el.id);
-      }
-    }
-    return;
-  }
+function saveChanges(id: number|string, name: string,  q_id: number, event: InputEvent, primary: boolean){
+  store.addOrUpdate({id, name, module: "audiences", q_id, value: (event.target as HTMLInputElement).value})
+  .then((resp) => {
+    if(resp != null){
+      const index = (primary? primaryAudienceForm: secondaryAudienceForm).audiences.findIndex(i => i.id == id);
 
-  let index = secondaryAudienceForm.audiences.indexOf(item);
-  if (index !== -1) {
-    const [el] = secondaryAudienceForm.audiences.splice(index, 1);
-    if (!el.is_new) {
-      secondaryAudienceForm.deleted.push(el.id);
+      (primary? primaryAudienceForm: secondaryAudienceForm).audiences[index] = {value: resp.data, id: resp.id, is_new: false};
     }
-  }
+  });
 }
+
+
+function deleteAudience(id: number | string, primary: boolean){
+  store.deleteData(id).then((resp) => {
+    if(resp != null){
+      const temp = (primary? primaryAudienceForm: secondaryAudienceForm).audiences;
+      const index = temp.findIndex(i => i.id == id);
+      temp.splice(index, 1);
+
+      (primary? primaryAudienceForm: secondaryAudienceForm).audiences = temp;
+    }
+  });
+}
+
+
+// function removeAudience(item: Objective, primary: boolean) {
+//   if (primary) {
+//     let index = primaryAudienceForm.audiences.indexOf(item);
+//     if (index !== -1) {
+//       const [el] = primaryAudienceForm.audiences.splice(index, 1);
+//       if (!el.is_new) {
+//         primaryAudienceForm.deleted.push(el.id);
+//       }
+//     }
+//     return;
+//   }
+
+//   let index = secondaryAudienceForm.audiences.indexOf(item);
+//   if (index !== -1) {
+//     const [el] = secondaryAudienceForm.audiences.splice(index, 1);
+//     if (!el.is_new) {
+//       secondaryAudienceForm.deleted.push(el.id);
+//     }
+//   }
+// }
 
 function addAudience(primary: boolean) {
   if (primary) {
@@ -119,48 +144,48 @@ function addAudience(primary: boolean) {
   });
 };
 
-function saveForms() {
-  // Save secondary audience
-  audienceFormRef.value.validateFields().then((values) => {
-    // config.value.loading = true;
+// function saveForms() {
+//   // Save secondary audience
+//   audienceFormRef.value.validateFields().then((values) => {
+//     // config.value.loading = true;
 
-    store.updateData({
-      name: "secondary_audience",
-      editing_user_id: useUserStore().id,
-      added: secondaryAudienceForm.audiences
-        .filter(i => i.is_new).map(i => i.value),
-      updated: secondaryAudienceForm.audiences.filter(i => !i.is_new)
-        .map(i => {
-          const _item: Record<string, any> = {};
-          _item[i.id] = i.value;
-          return _item;
-        }),
-      removed: secondaryAudienceForm.deleted,
-      module: "audiences"
-    })
-  });
+//     store.updateData({
+//       name: "secondary_audience",
+//       editing_user_id: useUserStore().id,
+//       added: secondaryAudienceForm.audiences
+//         .filter(i => i.is_new).map(i => i.value),
+//       updated: secondaryAudienceForm.audiences.filter(i => !i.is_new)
+//         .map(i => {
+//           const _item: Record<string, any> = {};
+//           _item[i.id] = i.value;
+//           return _item;
+//         }),
+//       removed: secondaryAudienceForm.deleted,
+//       module: "audiences"
+//     })
+//   });
 
-  // Save primary audience
-  primaryFormRef.value.validateFields().then((values) => {
-    // config.value.loading = true;
+//   // Save primary audience
+//   primaryFormRef.value.validateFields().then((values) => {
+//     // config.value.loading = true;
 
-    store.updateData({
-      name: "primary_audience",
-      editing_user_id: useUserStore().id,
-      added: primaryAudienceForm.audiences
-        .filter(i => i.is_new).map(i => i.value),
-      updated: primaryAudienceForm.audiences.filter(i => !i.is_new)
-        .map(i => {
-          const _item: Record<string, any> = {};
-          _item[i.id] = i.value;
-          return _item;
-        }),
-      removed: primaryAudienceForm.deleted,
-      module: "audiences"
-    })
-  });
+//     store.updateData({
+//       name: "primary_audience",
+//       editing_user_id: useUserStore().id,
+//       added: primaryAudienceForm.audiences
+//         .filter(i => i.is_new).map(i => i.value),
+//       updated: primaryAudienceForm.audiences.filter(i => !i.is_new)
+//         .map(i => {
+//           const _item: Record<string, any> = {};
+//           _item[i.id] = i.value;
+//           return _item;
+//         }),
+//       removed: primaryAudienceForm.deleted,
+//       module: "audiences"
+//     })
+//   });
 
-}
+// }
 
 // function fetchData() {
 //   config.value.loading = true;
@@ -229,11 +254,6 @@ onMounted(() => {
   </GPTSuggestionPanel>
 
   <Card title="Project Audiences" :bordered="false" :loading="store.loading">
-    <template #extra>
-      <Button type="primary" :loading="store.loading" @click="saveForms()"
-        >Save Changes</Button
-      >
-    </template>
 
     <BroadcastComponent :module="config.suggestions.module"></BroadcastComponent>
 
@@ -244,9 +264,9 @@ onMounted(() => {
       v-bind="formItemLayoutWithOutLabel"
     >
       <Row>
-        <Col :span="16" v-for="(objective, index) in primaryAudienceForm.audiences">
+        <Col :span="16" v-for="(item, index) in primaryAudienceForm.audiences">
           <FormItem
-            :key="objective.id"
+            :key="item.id"
             v-bind="index === 0 ? formItemLayout : {}"
             :name="['audiences', index, 'value']"
             :rules="{
@@ -265,9 +285,10 @@ onMounted(() => {
             </template>
 
             <Input
-              v-model:value="objective.value"
+              v-model:value="item.value"
               placeholder="Enter primary audience"
               style="width: 60%"
+              @change="saveChanges(item.id, 'primary_audience', 11, $event, true)"
             />
 
             <Button
@@ -278,7 +299,7 @@ onMounted(() => {
               v-if="primaryAudienceForm.audiences.length > 1"
               class="ml-2"
               :disabled="primaryAudienceForm.audiences.length === 1"
-              @click="removeAudience(objective, true)"
+              @click="deleteAudience(item.id, true)"
             >
               <template #icon>
                 <DeleteOutlined />
@@ -310,9 +331,9 @@ onMounted(() => {
       v-bind="formItemLayoutWithOutLabel"
     >
       <Row>
-        <Col :span="16" v-for="(objective, index) in secondaryAudienceForm.audiences">
+        <Col :span="16" v-for="(item, index) in secondaryAudienceForm.audiences">
           <FormItem
-            :key="objective.id"
+            :key="item.id"
             v-bind="index === 0 ? formItemLayout : {}"
             :name="['audiences', index, 'value']"
             :rules="{
@@ -332,9 +353,10 @@ onMounted(() => {
             </template>
 
             <Input
-              v-model:value="objective.value"
+              v-model:value="item.value"
               placeholder="please input audience"
               style="width: 60%"
+              @change="saveChanges(item.id, 'secondary_audience', 12, $event, false)"
             >
               <template #suffix>
                 <Tooltip
@@ -353,7 +375,7 @@ onMounted(() => {
               v-if="secondaryAudienceForm.audiences.length > 1"
               class="ml-2"
               :disabled="secondaryAudienceForm.audiences.length === 1"
-              @click="removeAudience(objective, false)"
+              @click="deleteAudience(item.id, false)"
             >
               <template #icon>
                 <DeleteOutlined />
