@@ -67,18 +67,6 @@ function updateData(event: any, id: number) {
   store.setData(id, event.target.value);
 }
 
-// Dynamic objectives forms
-function removeObjective(item: Objective) {
-  let index = dynamicValidateForm.objectives.indexOf(item);
-  if (index !== -1) {
-    const [el] = dynamicValidateForm.objectives.splice(index, 1);
-
-    console.log(el)
-    if (!el.is_new) {
-      dynamicValidateForm.deleted.push(el.id);
-    }
-  }
-}
 
 function addObjective() {
   dynamicValidateForm.objectives.push({
@@ -88,24 +76,6 @@ function addObjective() {
   });
 };
 
-function saveForms() {
-  objectivesFormRef.value.validateFields().then((values) => {
-    store.updateData({
-      name: "specific_objective",
-      module: "objectives",
-      editing_user_id: useUserStore().id,
-      added: dynamicValidateForm.objectives
-        .filter(i => i.is_new).map(i => i.value),
-      updated: dynamicValidateForm.objectives.filter(i => !i.is_new)
-        .map(i => {
-          const _item: Record<string, any> = {};
-          _item[i.id] = i.value;
-          return _item;
-        }),
-      removed: dynamicValidateForm.deleted
-    });
-  });
-}
 
 function fetchData() {
   store.download().then((resp) => {
@@ -126,31 +96,24 @@ function fetchData() {
 }
 
 function deleteObj(id: number | string, name: string,  q_id: number, event: InputEvent){
-  ApiRequest.delete<ProjectData>(`project/${useProjectStore().prj_id}/data/${id}`).then((resp) => {
-    if(resp.length > 0){
+  store.deleteData(id).then((resp) => {
+    if(resp != null){
       const temp = dynamicValidateForm.objectives;
       const index = temp.findIndex(i => i.id == id);
       temp.splice(index, 1);
 
       dynamicValidateForm.objectives = temp;
     }
-    // message.success("Changes saved successfully");
   });
 }
 
 function saveChanges(id: number|string, name: string,  q_id: number, event: InputEvent){
-  ApiRequest.post<ProjectData>(`project/${useProjectStore().prj_id}/data`, {
-    name,
-    q_id,
-    id,
-    data: (event.target as HTMLInputElement).value,
-    module: "objectives",
-    editing_user_id: useUserStore().id,
-  }).then((resp) => {
-    if(resp.length > 0){
+  store.addOrUpdate({id, name, module: "objectives", q_id, value: (event.target as HTMLInputElement).value})
+  .then((resp) => {
+    if(resp != null){
       const index = dynamicValidateForm.objectives.findIndex(i => i.id == id);
 
-      dynamicValidateForm.objectives[index] = {value: resp[0].data, id: resp[0].id, is_new: false};
+      dynamicValidateForm.objectives[index] = {value: resp.data, id: resp.id, is_new: false};
     }
   });
 }
@@ -170,10 +133,6 @@ onMounted(() => {
   </GPTSuggestionPanel>
 
   <Card title="Project Objectives" :bordered="false" :loading="store.loading">
-    <template #extra>
-      <Button type="primary" @click="saveForms()">Save Changes</Button>
-    </template>
-
     <BroadcastComponent :module="config.suggestions.module"></BroadcastComponent>
 
     <Form layout="vertical">

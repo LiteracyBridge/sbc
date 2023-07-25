@@ -318,10 +318,60 @@ export const useProjectDataStore = defineStore({
       }
     },
 
-    async deleteData(id: number) {
-      api.remove("project_data", id);
-      this.project_data = this.project_data.filter((a) => a.id != id);
+    async deleteData(id: number | string) {
+      return ApiRequest.delete<ProjectData>(
+        `project/${useProjectStore().prj_id}/data/${id}`
+      )
+        .then((resp) => {
+          if (resp.length > 0) {
+            this.$state.new_project_data = this.$state.new_project_data?.filter(
+              (i) => i.id != resp[0].id
+            );
+          }
+          return resp[0];
+        })
+        .catch((err) => {
+          message.error(err.message);
+          throw err;
+        });
     },
+
+    async addOrUpdate(form: {
+      id: number | string;
+      name: string;
+      q_id: number;
+      value: string;
+      module: "objectives" | "audiences";
+    }) {
+      return ApiRequest.post<ProjectData>(
+        `project/${useProjectStore().prj_id}/data`,
+        {
+          name: form.name,
+          q_id: form.q_id,
+          id: form.id,
+          data: form.value,
+          module: form.module,
+          editing_user_id: useUserStore().id,
+        }
+      ).then((resp) => {
+        if (resp.length > 0) {
+          const temp = this.$state.new_project_data;
+
+          const index = temp.findIndex((i) => i.id == resp[0].id);
+
+          if (index < 0) {
+            temp.push(resp[0]);
+          } else {
+            temp[index] = resp[0];
+          }
+
+          this.$state.new_project_data = temp;
+        }
+
+        return resp[0];
+      });
+    },
+
     summarizeProject() {
       let summary =
         "\n----\nHere's a summary of the SBC project I want you to analyze:\n";
@@ -394,7 +444,7 @@ export const useProjectDataStore = defineStore({
         for (const o of this.specificObjectives) {
           msg += `  • ${o.data}\n`;
         }
-        msg += '\n';
+        msg += "\n";
       }
 
       // Add audiences to the message
@@ -403,7 +453,7 @@ export const useProjectDataStore = defineStore({
         for (const o of this.primaryAudience) {
           msg += `  • ${o.data}\n`;
         }
-        msg += '\n';
+        msg += "\n";
 
         msg += "Secondary Audiences\n";
         for (const o of this.secondaryAudiences) {
