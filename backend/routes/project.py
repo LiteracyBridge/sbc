@@ -198,14 +198,6 @@ def add_driver_to_project(
 ## ================== END PROJECT DRIVERS ================== ##
 
 
-# Project objectives route
-@router.get("/{project_id}/data", response_model=ApiResponse)
-def get_project_data(project_id: int, db: Session = Depends(models.get_db)):
-    return ApiResponse(
-        data=db.query(ProjectData).filter(ProjectData.prj_id == project_id).all()
-    )
-
-
 # ===== START: PROJECT DATA ===== #
 class ProjectDataDto(BaseModel):
     id: Optional[int]
@@ -319,67 +311,6 @@ def delete_project_data_item(
         delete_item(project_id=project_id, item_id=theory_of_change_id, db=db)
 
     return ApiResponse(data=[item])
-
-
-@router.post("/{project_id}/data", response_model=ApiResponse)
-def update_data(
-    project_id: int, dto: ProjectObjectiveDto, db: Session = Depends(models.get_db)
-):
-    """Manage project objectives"""
-
-    # Remove deleted objectives
-    if len(dto.removed) > 0:
-        db.query(ProjectData).filter(ProjectData.id.in_(dto.removed)).delete()
-
-    # Update existing objectives
-    if len(dto.updated) > 0:
-        for item in dto.updated:
-            [value] = item.values()
-            [key] = item.keys()
-
-            record = db.query(ProjectData).filter(ProjectData.id == int(key)).first()
-
-            if record is None:
-                continue
-
-            # FIXME: Update corresponding theory of change item
-            record.data = value
-            db.commit()
-
-    # Create new objectives
-    if len(dto.added) > 0:
-        for item in dto.added:
-            record: ProjectData = ProjectData()
-            record.q_id = 10
-            record.data = item
-            record.module = dto.module
-            record.name = dto.name
-            record.prj_id = project_id
-            record.editing_user_id = dto.editing_user_id
-
-            db.add(record)
-            db.commit()
-            db.refresh(record)
-
-            if dto.module == "objectives":
-                # Create theory of change objective item
-                toc = create_toc_item(
-                    ToCItemDto(
-                        project_id=project_id,
-                        name=item,
-                        reference=record,
-                        type="objective",
-                    ),
-                    db=db,
-                )
-
-                record.theory_of_change_id = toc.id
-                db.commit()
-
-    return ApiResponse(
-        data=db.query(ProjectData).filter(ProjectData.prj_id == project_id).all()
-    )
-
 
 # ===== END: PROJECT DATA ===== #
 
