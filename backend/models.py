@@ -159,31 +159,6 @@ class Project(Base):
     )
 
 
-class ProjectData(Base):
-    __tablename__ = "project_data"
-
-    id: Mapped[int] = mapped_column(primary_key=True, index=True)
-    # Question id
-    q_id: Mapped[Optional[int]]
-    data: Mapped[Optional[str]]
-
-    # Module of data/question -> driver/objective/background_context
-    module: Mapped[Optional[str]]
-
-    # Module of data/question -> specific_objectives/behavior_influence
-    name: Mapped[Optional[str]]
-
-    prj_id: Mapped[int] = mapped_column(ForeignKey("projects.id"), nullable=True)
-    editing_user_id: Mapped[Optional[int]] = mapped_column(
-        ForeignKey("project_users.id")
-    )
-    theory_of_change_id: Mapped[int] = mapped_column(
-        ForeignKey("theory_of_change.id", ondelete="CASCADE"), nullable=True
-    )
-
-    project = relationship("Project")
-
-
 class ProjectUser(Base):
     __tablename__ = "project_users"
 
@@ -273,6 +248,40 @@ class Indicator(Base):
         back_populates="indicators",
     )
     # TODO: Generate alembic migration to create a table using the sqlalchemy model below
+
+
+class ProjectData(Base, SoftDeleteMixin):
+    __tablename__ = "project_data"
+
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    # Question id
+    q_id: Mapped[Optional[int]]
+    data: Mapped[Optional[str]]
+
+    # Module of data/question -> driver/objective/background_context
+    module: Mapped[Optional[str]]
+
+    # Module of data/question -> specific_objectives/behavior_influence
+    name: Mapped[Optional[str]]
+
+    prj_id: Mapped[int] = mapped_column(ForeignKey("projects.id"), nullable=True)
+    editing_user_id: Mapped[Optional[int]] = mapped_column(
+        ForeignKey("project_users.id")
+    )
+    theory_of_change_id: Mapped[Optional[int]] = mapped_column(
+        ForeignKey("theory_of_change.id", ondelete="CASCADE"), nullable=True
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), onupdate=func.now()
+    )
+    deleted_at: Mapped[Optional[DateTime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+
+    project = relationship("Project")
 
 
 class ProjectDriver(Base):
@@ -382,7 +391,7 @@ class Risk(Base, SoftDeleteMixin):
     __tablename__ = "risks"
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
-    name: Mapped[str]
+    name: Mapped[Optional[str]]
     mitigation: Mapped[Optional[str]]
     assumptions: Mapped[Optional[str]]
     risks: Mapped[Optional[str]]
@@ -391,10 +400,10 @@ class Risk(Base, SoftDeleteMixin):
     driver_id: Mapped[int] = mapped_column(
         ForeignKey("drivers_in_prj.id"), nullable=True
     )
-    toc_from_id: Mapped[int] = mapped_column(
+    toc_from_id: Mapped[Optional[int]] = mapped_column(
         ForeignKey("theory_of_change.id"), nullable=True
     )
-    toc_to_id: Mapped[int] = mapped_column(
+    toc_to_id: Mapped[Optional[int]] = mapped_column(
         ForeignKey("theory_of_change.id"), nullable=True
     )
     created_at: Mapped[DateTime] = mapped_column(
@@ -461,7 +470,7 @@ class Activity(Base, SoftDeleteMixin):
     )
 
 
-class Monitoring(Base):
+class Monitoring(Base, SoftDeleteMixin):
     __tablename__ = "monitoring"
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
@@ -491,7 +500,7 @@ class Monitoring(Base):
     toc_indicator = relationship("TheoryOfChangeIndicator")
 
 
-class Communication(Base):
+class Communication(Base, SoftDeleteMixin):
     __tablename__ = "communications"
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)

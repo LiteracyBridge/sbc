@@ -1,6 +1,6 @@
 from typing import Dict, List, Optional
 from datetime import datetime
-from model_events import delete_activity, delete_theory_of_change
+from model_events import delete_activity, delete_indicator, delete_theory_of_change
 from models import ProjectIndicators, TheoryOfChange, TheoryOfChangeIndicator
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
@@ -131,12 +131,14 @@ def update_or_create_item(
 
 
 @router.delete("/{project_id}/item/{item_id}", response_model=ApiResponse)
-def delete_item(
+def delete_toc_item(
     project_id: int,
     item_id: int,
     db: Session = Depends(models.get_db),
 ):
-    record = db.query(TheoryOfChange).filter(TheoryOfChange.id == item_id).first()
+    record: TheoryOfChange | None = (
+        db.query(TheoryOfChange).filter(TheoryOfChange.id == item_id).first()
+    )
 
     if record is None:
         raise HTTPException(status_code=404, detail="Item not found")
@@ -149,7 +151,7 @@ def delete_item(
         delete_activity(activity, db)
 
     # Handle related items deletion in event
-    delete_theory_of_change(record, db)
+    delete_theory_of_change(record.id, db)
 
     return get_by_project_id(project_id, db)
 
@@ -171,15 +173,8 @@ def update_indicators(
     print(dto)
     # Remove deleted indicators
     if dto.removed is not None:
-        records = (
-            db.query(TheoryOfChangeIndicator)
-            .filter(
-                TheoryOfChangeIndicator.theory_of_change_id == item_id,
-                TheoryOfChangeIndicator.id.in_(dto.removed),
-            )
-            .delete()
-        )
-        db.commit()
+        for id in dto.removed:
+            delete_indicator(id, db)
 
     theory_of_change = (
         db.query(TheoryOfChange).filter(TheoryOfChange.id == item_id).first()
@@ -227,16 +222,16 @@ def update_indicators(
         # Update theory of change indicators
         monitoring_indicators = []
         for i in new_toc_indicators:
-            record: TheoryOfChangeIndicator = TheoryOfChangeIndicator()
-            record.indicator_id = i
-            record.theory_of_change_id = item_id
-            record.project_id = theory_of_change.project_id
-            record.indicator_id = i
+            temp: TheoryOfChangeIndicator = TheoryOfChangeIndicator()
+            temp.indicator_id = i
+            temp.theory_of_change_id = item_id
+            temp.project_id = theory_of_change.project_id
+            temp.indicator_id = i
 
-            db.add(record)
+            db.add(temp)
             db.commit()
-            db.refresh(record)
-            monitoring_indicators.append(record.id)
+            db.refresh(temp)
+            monitoring_indicators.append(temp.id)
 
         # Create monitoring items
         for i in monitoring_indicators:
@@ -274,14 +269,15 @@ def update_or_create_risk(
 ):
     risk: Risk = Risk()
     if dto.id is not None:
-        risk = (
+        temp = (
             db.query(Risk)
-            .filter(Risk.id == dto.id and Risk.project_id == project_id)
+            .filter((Risk.id == dto.id) & (Risk.project_id == project_id))
             .first()
         )
 
-        if risk is None:
+        if temp is None:
             raise HTTPException(status_code=404, detail="Risk not found")
+        risk = temp
 
     risk.name = dto.name
     risk.mitigation = dto.mitigation

@@ -1,21 +1,61 @@
 from typing import List
 from sqlalchemy import event, or_
 from sqlalchemy.orm import Session
-from models import Activity, TheoryOfChange, TheoryOfChangeIndicator, Risk
+from models import (
+    Activity,
+    CommunicationObjective,
+    ProjectData,
+    TheoryOfChange,
+    CommunicationIndicator,
+    Monitoring,
+    TheoryOfChangeIndicator,
+    Risk,
+    CommunicationAudience,
+)
 from datetime import datetime
 
 
-@event.listens_for(TheoryOfChange, "after_insert")
-def toc_created(mapper, connection, target: TheoryOfChange):
-    "listen for the 'after_insert' event"
+def delete_indicator(toc_indicator_id: int, db: Session):
+    """Handle deletion of theory of change indicator related items deletion"""
 
-    # TODO: create associated activity
-    print(target.id)
-    # ... (event handling logic) ...
+    # Delete associated indicator records
+    indicator = (
+        db.query(TheoryOfChangeIndicator)
+        .filter(TheoryOfChangeIndicator.id == toc_indicator_id)
+        .first()
+    )
+
+    if indicator is None:
+        return
+
+    # Delete associated monitoring items
+    monitoring_items = (
+        db.query(Monitoring).filter(Monitoring.toc_indicator_id == indicator.id).all()
+    )
+    for item in monitoring_items:
+        item.delete()
+
+    # Delete associated communication indicators
+    communication_indicators = (
+        db.query(CommunicationIndicator)
+        .filter(CommunicationIndicator.indicator_id == indicator.id)
+        .all()
+    )
+    for item in communication_indicators:
+        item.delete()
+
+    indicator.delete()
+    db.commit()
+
+    return indicator
 
 
-def delete_theory_of_change(item: TheoryOfChange, db: Session):
+def delete_theory_of_change(item_id: int, db: Session):
     """Handle deletion of theory of change related items deletion"""
+
+    item = db.query(TheoryOfChange).filter(TheoryOfChange.id == item_id).first()
+    if item is None:
+        return
 
     # Remove all associated links_to
     matched_items: List[TheoryOfChange] = (
@@ -49,10 +89,48 @@ def delete_theory_of_change(item: TheoryOfChange, db: Session):
         .all()
     )
     for indicator in indicators:
-        indicator.delete()
+        delete_indicator(indicator.id, db)
+        # indicator.delete()
 
     item.delete()
     db.commit()
+
+
+def delete_project_data(item_id: int, db: Session):
+    project_data: ProjectData | None = (
+        db.query(ProjectData).filter(ProjectData.id == item_id).first()
+    )
+
+    if project_data is None:
+        return
+
+    # Delete ref theory of change
+    if project_data.theory_of_change_id is not None:
+        delete_theory_of_change(project_data.theory_of_change_id, db)
+
+    # Delete associated communication audience
+    if project_data.module == "audiences":
+        audience = (
+            db.query(CommunicationAudience)
+            .filter(CommunicationAudience.audience_id == item_id)
+            .all()
+        )
+        for item in audience:
+            item.delete()
+
+    # Delete associated communication objectives
+    if project_data.module == "objectives":
+        objectives = (
+            db.query(CommunicationObjective)
+            .filter(CommunicationObjective.objective_id == item_id)
+            .all()
+        )
+        for item in objectives:
+            item.delete()
+
+    db.commit()
+
+    return project_data
 
 
 def delete_activity(
@@ -63,12 +141,7 @@ def delete_activity(
 
     # Delete associated theory of change, if any
     if item.theory_of_change_id is not None:
-        toc = (
-            db.query(TheoryOfChange)
-            .filter(TheoryOfChange.id == item.theory_of_change_id)
-            .first()
-        )
-        delete_theory_of_change(toc, db)
+        delete_theory_of_change(item.theory_of_change_id, db)
 
     # Delete associated tasks, if parent activity
     if item.parent_id is not None and item.parent_id != 0:

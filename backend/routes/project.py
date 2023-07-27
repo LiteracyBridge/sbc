@@ -10,7 +10,8 @@ from models import ProjectData, Project
 from pydantic import BaseModel
 from schema import ApiResponse
 from sqlalchemy.orm import Session, subqueryload
-from routes.theory_of_change import delete_item
+from routes.theory_of_change import delete_toc_item
+from model_events import delete_project_data
 
 router = APIRouter()
 
@@ -300,16 +301,11 @@ def delete_project_data_item(
     if item is None:
         return ApiResponse(data=[])
 
-    theory_of_change_id = item.theory_of_change_id
-    # TODO: implement soft delete
-    db.delete(item)
-    db.commit()
-
     # If project data is an objective, delete corresponding theory of change item
-    if (
-        item.module == "objectives" or item.name == "specific_objective"
-    ) and item.theory_of_change_id is not None:
-        delete_item(project_id=project_id, item_id=theory_of_change_id, db=db)
+    if item.theory_of_change_id is not None:
+        delete_toc_item(project_id=project_id, item_id=item.theory_of_change_id, db=db)
+
+    delete_project_data(item_id=item.id, db=db)
 
     return ApiResponse(data=[item])
 
@@ -342,7 +338,7 @@ def delete_stakeholder(
 ) -> ApiResponse:
     """Delete a stakeholder from the project"""
 
-    record: Stakeholder = (
+    record: Stakeholder | None = (
         db.query(Stakeholder)
         .filter(Stakeholder.id == stakeholder_id, Stakeholder.project_id == project_id)
         .first()
@@ -366,10 +362,11 @@ def update_or_add_stakeholder(
     record: Stakeholder = Stakeholder()
 
     if dto.id is not None:
-        record = db.query(Stakeholder).filter(Stakeholder.id == dto.id).first()
+        temp = db.query(Stakeholder).filter(Stakeholder.id == dto.id).first()
 
-        if record is None:
+        if temp is None:
             raise HTTPException(status_code=404, detail="Stakeholder not found")
+        record = temp
     else:
         record.project_id = project_id
         record.created_at = datetime.now()
