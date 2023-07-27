@@ -323,12 +323,8 @@ export const useProjectDataStore = defineStore({
         `project/${useProjectStore().prj_id}/data/${id}`
       )
         .then((resp) => {
-          if (resp.length > 0) {
-            this.$state.new_project_data = this.$state.new_project_data?.filter(
-              (i) => i.id != resp[0].id
-            );
-          }
-          return resp[0];
+          this.$state.new_project_data = resp;
+          return resp;
         })
         .catch((err) => {
           message.error(err.message);

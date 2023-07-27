@@ -42,7 +42,7 @@ def delete_indicator(toc_indicator_id: int, db: Session):
         .all()
     )
     for item in communication_indicators:
-        item.delete()
+        db.delete(item)
 
     indicator.delete()
     db.commit()
@@ -116,7 +116,7 @@ def delete_project_data(item_id: int, db: Session):
             .all()
         )
         for item in audience:
-            item.delete()
+            db.delete(item)
 
     # Delete associated communication objectives
     if project_data.module == "objectives":
@@ -126,8 +126,9 @@ def delete_project_data(item_id: int, db: Session):
             .all()
         )
         for item in objectives:
-            item.delete()
+            db.delete(item)
 
+    project_data.delete()
     db.commit()
 
     return project_data

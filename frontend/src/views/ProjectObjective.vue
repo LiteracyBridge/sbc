@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import { Card, Form, FormItem, Image, Textarea, type FormInstance, Input, Button, Divider, message } from 'ant-design-vue';
+import { Card, Form, FormItem, Image, Textarea, type FormInstance, Input, Button, Divider, message, Popconfirm } from 'ant-design-vue';
 import { computed, onMounted, reactive, ref, watch } from 'vue';
 
 import { useProjectDataStore } from '@/stores/projectData';
@@ -133,19 +133,14 @@ onMounted(() => {
   </GPTSuggestionPanel>
 
   <Card title="Project Objectives" :bordered="false" :loading="store.loading">
-    <BroadcastComponent :module="config.suggestions.module"></BroadcastComponent>
+    <template #extra>
+      <BroadcastComponent
+        direction="horizontal"
+        :module="config.suggestions.module"
+      ></BroadcastComponent>
+    </template>
 
     <Form layout="vertical">
-      <!-- <div class="columns mx-4 is-vcentered"> -->
-
-      <!-- <div class="column is-8"> -->
-
-      <!-- <strong>{{ count + 1 }}. {{ q.q2u }} </strong><br />
-      <img v-if="q.bulb" :src="BULB_ICON" ref="iconRefs" @click="submitContextAndPrompt(q.id, topic)"
-        class="image is-32x32" />
-      <textarea @change="updateData($event, q.id)" :value="projectDataStore.getData(q.id)" rows="4" cols="80" /><br />
-      <br /><br /> -->
-
       <FormItem
         :name="`input-${count + 1}`"
         v-for="(q, count) in store.questionsForTopic(config.suggestions.module)"
@@ -154,9 +149,7 @@ onMounted(() => {
         <template #label>
           <span class="font-weight-bold"> {{ count + 1 }}. {{ q.q2u }}</span>
         </template>
-        <!-- <label class="label" :for="`input-${count + 1}`">{{ count + 1 }}. {{ q.q2u }}</label> -->
 
-        <!-- <div class="control"> -->
         <img
           v-if="q.bulb"
           :src="BULB_ICON"
@@ -164,9 +157,7 @@ onMounted(() => {
           @click="showPanel(q.id)"
           class="image is-32x32"
         />
-        <!-- </div> -->
 
-        <!-- <div class="control"> -->
         <Textarea
           @change="updateData($event, q.id)"
           :value="store.getData(q.id)"
@@ -174,12 +165,7 @@ onMounted(() => {
           :cols="40"
           style="width: 70%"
         ></Textarea>
-
-        <!-- </div> -->
       </FormItem>
-      <!-- </div> -->
-
-      <!-- </div> -->
     </Form>
 
     <!-- <Divider>What specific objective(s) will your project achieve? What changes will your project make happen?</Divider> -->
@@ -218,21 +204,25 @@ onMounted(() => {
           @change="saveChanges(objective.id, 'specific_objective', 10, $event)"
         />
 
-        <Button
-          type="primary"
-          :ghost="true"
-          :danger="true"
-          size="small"
-          v-if="dynamicValidateForm.objectives.length > 1"
-          class="ml-2"
-          :disabled="dynamicValidateForm.objectives.length === 1"
-          @click="deleteObj(objective.id, 'specific_objective', 10, $event)"
+        <Popconfirm
+          title="All associated theory of change, communications and indictors will be deleted. Are you sure?"
+          @confirm="deleteObj(objective.id, 'specific_objective', 10, $event)"
         >
-          <template #icon>
-            <DeleteOutlined />
-          </template>
-          Delete
-        </Button>
+          <Button
+            type="primary"
+            :ghost="true"
+            :danger="true"
+            size="small"
+            v-if="dynamicValidateForm.objectives.length > 1"
+            class="ml-2"
+            :disabled="dynamicValidateForm.objectives.length === 1"
+          >
+            <template #icon>
+              <DeleteOutlined />
+            </template>
+            Delete
+          </Button>
+        </Popconfirm>
       </FormItem>
 
       <FormItem v-bind="formItemLayoutWithOutLabel">

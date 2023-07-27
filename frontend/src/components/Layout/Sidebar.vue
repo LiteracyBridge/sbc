@@ -120,11 +120,9 @@ watch(projectSelected, (newVal) => {
   >
     <div class="logo">
       <Image :src="LogoLarge">
-        <!-- <template #icon><CompassOutlined /></template> -->
       </Image>
-
-      <!-- <span> Amplio </span> -->
     </div>
+
     <Divider></Divider>
 
     <Menu v-model:selectedKeys="config.activeMenu" theme="light" mode="inline">
@@ -149,11 +147,10 @@ watch(projectSelected, (newVal) => {
 
 <style scoped>
 .logo {
-  height: 48px;
+  height: 30px;
   display: inline-flex;
   /* background: rgba(255, 255, 255, 0.3); */
-  margin: 20px;
-  margin-bottom: 0px;
+  margin: 20px 20px 0px 20px;
   /* margin-left: 40px; */
   /* padding-top: 8px; */
   /* color: white; */

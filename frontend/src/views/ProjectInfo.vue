@@ -47,7 +47,9 @@ const updateSector = (value: any, id: number) => {
   </GPTSuggestionPanel>
 
   <Card title="Project Info" :loading="config.loading" :bordered="false">
-    <BroadcastComponent :module="config.suggestions.module"></BroadcastComponent>
+  <template #extra >
+    <BroadcastComponent direction="horizontal" :module="config.suggestions.module"></BroadcastComponent>
+  </template>
 
     <Form layout="vertical">
       <Row>

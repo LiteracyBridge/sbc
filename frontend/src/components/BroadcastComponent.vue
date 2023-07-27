@@ -1,18 +1,22 @@
 <script setup lang="ts">
 import { Button, Space } from "ant-design-vue";
-import { ref } from "vue";
+import { computed, ref } from "vue";
 
 import BroadcastModal from "./BroadcastModal.vue";
 import MessagesDrawer from "./MessagesDrawer.vue";
+import { InboxOutlined, ShareAltOutlined } from "@ant-design/icons-vue";
 
 const props = defineProps<{
   module: string;
+  direction?: "horizontal" | "vertical";
 }>();
 
 const config = ref({
   broadcastModal: false,
   messagesModal: false,
 });
+
+const layoutDirection = computed(() => props.direction || "vertical");
 </script>
 
 <template>
@@ -31,14 +35,16 @@ const config = ref({
   ></MessagesDrawer>
 
   <div
-    class="buttons-container is-fixed is-absolute is-flex is-flex-direction-column is-align-items-flex-end m-4 mr-6"
+    class="buttons-container is-fixed is-absolute is-flex is-flex-direction-column is-align-items-flex-end"
   >
-    <Space direction="vertical">
-      <Button @click.prevent="config.broadcastModal = true" type="primary" :ghost="true">
+    <Space :direction="layoutDirection">
+      <Button @click.prevent="config.broadcastModal = true">
+        <ShareAltOutlined />
         Broadcast
       </Button>
 
-      <Button @click.prevent="config.messagesModal = true" type="primary" :ghost="true">
+      <Button @click.prevent="config.messagesModal = true">
+        <InboxOutlined />
         Messages
       </Button>
     </Space>

@@ -302,12 +302,17 @@ def delete_project_data_item(
         return ApiResponse(data=[])
 
     # If project data is an objective, delete corresponding theory of change item
-    if item.theory_of_change_id is not None:
-        delete_toc_item(project_id=project_id, item_id=item.theory_of_change_id, db=db)
+    try:
+        if item.theory_of_change_id is not None:
+            delete_toc_item(
+                project_id=project_id, item_id=item.theory_of_change_id, db=db
+            )
+    except Exception as e:
+        print(e)
 
     delete_project_data(item_id=item.id, db=db)
 
-    return ApiResponse(data=[item])
+    return get_project_data(project_id=project_id, db=db)
 
 
 # ===== END: PROJECT DATA ===== #
