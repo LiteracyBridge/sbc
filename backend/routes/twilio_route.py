@@ -471,11 +471,11 @@ async def webhook_handler(request: Request, db: Session = Depends(get_db)):
 
     original_message_sid = params.get("OriginalRepliedMessageSid")
 
-    message_sent: MessageSentToUser | None = get_user_or_stakeholder_by_phone(
+    user_message: MessageSentToUser | None = get_user_or_stakeholder_by_phone(
         phone_number, db, str(original_message_sid)
     )
 
-    if message_sent is None:
+    if user_message is None:
         # TODO: send payload to sentry
         return "Message not found", 404
 
@@ -484,14 +484,14 @@ async def webhook_handler(request: Request, db: Session = Depends(get_db)):
     # message_sent: MessageSent = (
     #     user.msg_sent if user is not None else stakeholder.msg_sent
     # )
-    channel = message_sent.channel
+    channel = user_message.channel
 
     # Save received message
     record = MessageReceived()
     record.message = message
-    record.user_id = message_sent.user_id
-    record.stakeholder_id = message_sent.stakeholder_id
-    record.related_msg_id = message_sent.msg_sent_id
+    record.user_id = user_message.user_id
+    record.stakeholder_id = user_message.stakeholder_id
+    record.related_msg_id = user_message.msg_sent_id
     record.channel = channel
 
     db.add(record)
@@ -513,21 +513,32 @@ async def webhook_handler(request: Request, db: Session = Depends(get_db)):
     # incomingMessage(connection, user_id, related_msg_id, message, channel)
 
     first_word = message.lstrip().split()[0].lower().rstrip(string.punctuation)
-    waiting = message_sent.waiting
+    waiting = user_message.waiting
     address_as = (
-        message_sent.user.address_as
-        if message_sent.user_id is not None
-        else message_sent.stakeholder.address_as
+        user_message.user.address_as
+        if user_message.user_id is not None
+        else user_message.stakeholder.address_as
     )
-    project = message_sent.project
-    sender = message_sent.msg_sent.user.address_as
+    # project = user_message.project
+
+    message_sent: MessageSent | None = (
+        db.query(MessageSent)
+        .filter(MessageSent.id == user_message.msg_sent_id)
+        .options(subqueryload(MessageSent.user))
+        .first()
+    )
+    project: Project | None = (
+        db.query(Project).filter(Project.id == message_sent.prj_id).first()
+    )
+    outgoing_message = message_sent.message
+    sender = message_sent.user.address_as
 
     # FIXME: same message sent to user after reply
     print("first_word", first_word)
     if waiting and first_word == "no":
         update_log_msg_sent_user(
             connection,
-            message_sent.id,
+            user_message.id,
             success=False,
             channel=record.channel,
             waiting=False,
@@ -550,7 +561,7 @@ async def webhook_handler(request: Request, db: Session = Depends(get_db)):
             waiting = not success
             update_log_msg_sent_user(
                 connection,
-                message_sent.id,
+                user_message.id,
                 success,
                 record.channel,
                 waiting,
