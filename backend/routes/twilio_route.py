@@ -127,7 +127,10 @@ def userFromNumber(connection, from_number):
 
 
 def set_whatsapp_last_received(connection, user_id, stakeholder_id):
-    update_sql = f"UPDATE {'users' if user_id is not None else 'stakeholders'} SET whatsapp_last_received = NOW() WHERE id = {str(user_id)}"
+    update_sql = f"UPDATE users SET whatsapp_last_received = NOW() WHERE id = {user_id}"
+
+    if stakeholder_id is not None:
+        update_sql = f"UPDATE stakeholders SET whatsapp_last_received = NOW() WHERE id = {stakeholder_id}"
 
     print(update_sql)
     connection.run(update_sql)
@@ -355,7 +358,7 @@ def broadcast_message(
     if len(body.stakeholder_ids) > 0:
         stakeholders = (
             db.query(Stakeholder)
-            .filter((User.whatsapp != None) | ((User.sms != None)))
+            .filter((Stakeholder.whatsapp != None) | ((Stakeholder.sms != None)))
             .filter(Stakeholder.id.in_(body.stakeholder_ids))
             .all()
         )
@@ -401,56 +404,54 @@ def getMessages(connection, prj_id, related_item, since_sent_id, since_received_
     return results
 
 
-# ============= START: Twilio Webhook =============
-def get_user_or_stakeholder_by_phone(from_number, db: Session):
+# ============= START: Twilio Webhook Handler =============#
+
+
+def get_user_or_stakeholder_by_phone(
+    from_number, db: Session, original_message_sid: str | None = None
+) -> MessageSentToUser | None:
     """Get user by phone number"""
 
-    phone = from_number[9:] if from_number.startswith("whatsapp:") else from_number
+    phone = from_number[10:] if from_number.startswith("whatsapp:") else from_number
 
-    # First check if the number belongs to a user
-    subquery = (
+    # Query for user/stakeholder
+    user_subquery = (
         db.query(User.id)
         .filter((User.whatsapp == phone) | (User.sms == phone))
         .subquery()
     )
-    user = (
-        db.query(MessageSentToUser)
-        .filter(MessageSentToUser.user_id.in_(select(subquery)))
-        .options(
-            subqueryload(MessageSentToUser.user),
-            subqueryload(MessageSentToUser.msg_sent).options(
-                subqueryload(MessageSent.project),
-                subqueryload(MessageSent.user),
-            ),
-        )
-        .order_by(MessageSentToUser.updated_at.desc())
-        .all()
-    )
-
-    if len(user) > 0:
-        return {"user": user[0], "stakeholder": None}
-
-    # If not, check if the number belongs to a stakeholder
-    subquery = (
+    stakeholder_subquery = (
         db.query(Stakeholder.id)
         .filter((Stakeholder.whatsapp == phone) | (Stakeholder.sms == phone))
         .subquery()
     )
-    stakeholder = (
+    query = (
         db.query(MessageSentToUser)
-        .filter(MessageSentToUser.stakeholder_id.in_(select(subquery)))
+        .filter(
+            (MessageSentToUser.user_id.in_(select(user_subquery)))
+            | (MessageSentToUser.stakeholder_id.in_(select(stakeholder_subquery)))
+        )
         .order_by(MessageSentToUser.updated_at.desc())
         .options(
+            subqueryload(MessageSentToUser.user),
             subqueryload(MessageSentToUser.stakeholder),
             subqueryload(MessageSentToUser.msg_sent).options(
                 subqueryload(MessageSent.project),
                 subqueryload(MessageSent.user),
             ),
         )
-        .order_by(MessageSentToUser.updated_at.desc())
-        .all()
     )
-    return {"user": None, "stakeholder": stakeholder[0]}
+
+    # if original_message_sid is not None:
+    #     query = query.filter(MessageSentToUser.message_sid == original_message_sid)
+
+    msg = query.all()
+
+    if len(msg) > 0:
+        return msg[0]
+
+    # TODO: send error to sentry
+    return None
 
 
 @router.post("/webhook")
@@ -465,28 +466,32 @@ async def webhook_handler(request: Request, db: Session = Depends(get_db)):
     # API called by Twilio after receipt of message
     # print("body", body)
     params = await request.form()
-    phone_number = params["From"]
-    message = params["Body"]
+    phone_number = str(params["From"])
+    message = str(params["Body"])
 
     original_message_sid = params.get("OriginalRepliedMessageSid")
-    data = get_user_or_stakeholder_by_phone(phone_number, db)
-    user = data["user"]
-    stakeholder = data["stakeholder"]
-    message_sent: MessageSent = (
-        user.msg_sent if user is not None else stakeholder.msg_sent
+
+    message_sent: MessageSentToUser | None = get_user_or_stakeholder_by_phone(
+        phone_number, db, str(original_message_sid)
     )
-    channel = user.channel if user is not None else stakeholder.channel
+
+    if message_sent is None:
+        # TODO: send payload to sentry
+        return "Message not found", 404
+
+    # user = data["user"]
+    # stakeholder = data["stakeholder"]
+    # message_sent: MessageSent = (
+    #     user.msg_sent if user is not None else stakeholder.msg_sent
+    # )
+    channel = message_sent.channel
 
     # Save received message
     record = MessageReceived()
     record.message = message
-    record.user_id = user.user_id if user is not None else None
-    record.stakeholder_id = (
-        stakeholder.stakeholder_id if stakeholder is not None else None
-    )
-    record.related_msg_id = (
-        stakeholder.msg_sent_id if stakeholder is not None else user.msg_sent_id
-    )
+    record.user_id = message_sent.user_id
+    record.stakeholder_id = message_sent.stakeholder_id
+    record.related_msg_id = message_sent.msg_sent_id
     record.channel = channel
 
     db.add(record)
@@ -506,19 +511,16 @@ async def webhook_handler(request: Request, db: Session = Depends(get_db)):
     # ) = userFromNumber(connection, phone_number)
 
     # incomingMessage(connection, user_id, related_msg_id, message, channel)
+
     first_word = message.lstrip().split()[0].lower().rstrip(string.punctuation)
-    waiting = user.waiting if user is not None else stakeholder.waiting
+    waiting = message_sent.waiting
     address_as = (
-        user.user.address_as if user is not None else stakeholder.stakeholder.address_as
+        message_sent.user.address_as
+        if message_sent.user_id is not None
+        else message_sent.stakeholder.address_as
     )
-    project = (
-        user.msg_sent.project if user is not None else stakeholder.msg_sent.project
-    )
-    sender = (
-        user.msg_sent.user.address_as
-        if user is not None
-        else stakeholder.msg_sent.user.address_as
-    )
+    project = message_sent.project
+    sender = message_sent.msg_sent.user.address_as
 
     # FIXME: same message sent to user after reply
     print("first_word", first_word)

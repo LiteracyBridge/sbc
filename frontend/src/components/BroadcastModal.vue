@@ -51,7 +51,7 @@ function closeModal() {
   emit("close");
 }
 
-async function broadcast() {
+function broadcast() {
   if(config.value.stakeholders.length == 0 && config.value.users.length == 0) {
     message.error("Please select at least one user or stakeholder to broadcast to.");
     return;
@@ -60,18 +60,18 @@ async function broadcast() {
   store.loading = true;
 
   message.info("Broadcasting message to all users in the project");
-  const response = await axios.post(`${SBC_TW_URL}/broadcast`, {
+  axios.post(`${SBC_TW_URL}/broadcast`, {
     project_id: projectStore.prj_id,
     message:  store.buildBroadcastMessage(props.module),
     related_item: props.module,
     stakeholder_ids: config.value.stakeholders.map((s) => s.id),
     user_ids: config.value.users.map((s) => s.user_id),
     user_id_sending: useUserStore().id,
-  });
-  console.log(response)
-  store.loading = false;
+  }).then((resp) => {
+    console.log(resp)
+    closeModal()
+  }).finally(() => store.loading = false)
 
-  closeModal()
 }
 
 watch(props, (newProps) => {
@@ -113,7 +113,7 @@ const stakeholdersRowSelection: TableProps['rowSelection'] = {
 
 
 const getUsers = computed(() => {
-  return projectStore.users_in_project.map((s) => ({...s, key: s.id}));
+  return projectStore.users_in_project.map((s) => ({...s, key: s.user_id}));
 });
 
 const usersRowSelection: TableProps['rowSelection'] = {

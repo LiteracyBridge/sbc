@@ -80,10 +80,10 @@ export const useUserStore = defineStore({
     }) {
       return ApiRequest.put<User>(`users/${this.$state.id}`, {
         name: form?.name || this.$state.name,
-        address_as: form.address_as || this.$state.address_as,
-        sms: form.sms || this.$state.sms,
-        email: form.email || this.$state.email,
-        whatsapp: form.whatsapp || this.whatsapp,
+        address_as: form?.address_as || this.$state?.address_as,
+        sms: form?.sms || this.$state?.sms,
+        email: form?.email || this.$state?.email,
+        whatsapp: form?.whatsapp || this.$state.whatsapp,
       })
         .then((resp) => {
           message.success("Profile updated successfully!");
