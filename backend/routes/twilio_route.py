@@ -16,6 +16,7 @@ from twilio.http import response
 from twilio.rest import Client
 from twilio.base.exceptions import TwilioRestException
 from sqlalchemy.orm import Session, joinedload, subqueryload
+from schema import ApiResponse
 from models import (
     MessageSentToUser,
     ProjectUser,
@@ -463,6 +464,8 @@ def getMessages(
         .all()
     )
     print(messages)
+
+    return messages
     print(sql)
 
     results = connection.run(sql)
@@ -744,4 +747,4 @@ def handler(request: Request, db: Session = Depends(get_db)):
     #     )
 
     # Return the response object
-    return result
+    return ApiResponse(data=result)

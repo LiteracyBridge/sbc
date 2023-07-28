@@ -362,3 +362,30 @@ export class Communication {
     driver_id: number;
   }> = [];
 }
+
+export class MessageReceived extends Timestamps {
+  id: number;
+  message: string;
+  channel: "w" | "s";
+  user_id: number;
+  message_sid: string;
+  stakeholder_id: number;
+  related_msg_id: number;
+
+  user?: User;
+  stakeholder?: Stakeholder;
+  related_msg?: MessageSent;
+}
+
+export class MessageSent extends Timestamps {
+  id: number;
+  message: string;
+  sent_time: Date;
+  related_item: string;
+  user_id_sending: number;
+  prj_id: number;
+
+  user?: User;
+  project?: Project;
+  replies: MessageReceived[] = [];
+}
