@@ -66,68 +66,6 @@ def send_twilio(to_number, message, channel):
         return {"success": False, "response": {}}
 
 
-def setupTwilio():
-    client = Client(settings.twilio_account_sid, settings.twilio_auth_token)
-
-    def sendTwilio(to_number, message, channel):
-        from_number = settings.twilio_whatapp_number
-
-        if channel != "w":  # to_number.startswith("whatsapp:"):
-            from_number = settings.twilio_sms_number
-
-        try:
-            resp = client.messages.create(body=message, from_=from_number, to=to_number)
-            print(resp)
-            return True
-        except TwilioRestException as e:
-            print(f"Error: {e.msg}")
-            return False
-
-    return sendTwilio
-
-
-def userFromNumber(connection, from_number):
-    sql = """SELECT u.id AS receiver_id, ms.id AS msg_id, u.address_as as receiver, msu.waiting,
-                    u2.address_as AS sender, p.name AS project_name, msu.id AS msu_id, ms.message
-            FROM users u
-            LEFT JOIN msgs_sent_users msu ON msu.user_id = u.id
-            LEFT JOIN msgs_sent ms ON msu.msg_sent_id = ms.id
-            LEFT JOIN users u2 ON ms.user_id_sending = u2.id
-            LEFT JOIN projects p ON  ms.prj_id = p.id
-            """
-    if from_number.startswith("whatsapp:"):
-        sql += "WHERE msu.channel = 'w' AND u.whatsapp = " + literal(from_number[9:])
-        channel = "w"
-    else:
-        sql += "WHERE msu.channel = 's' AND u.sms = " + literal(from_number)
-        channel = "s"
-    sql += "ORDER BY ms.sent_time DESC LIMIT 1"
-    print(sql)
-    result = connection.run(sql)
-
-    if len(result) == 1:
-        receiver_id = result[0][0]
-        related_msg_id = result[0][1]
-        receiver_address_as = result[0][2]
-        waiting = result[0][3]
-        sender = result[0][4]
-        project_name = result[0][5]
-        msu_id = result[0][6]
-        message = result[0][7]
-
-    return (
-        receiver_id,
-        related_msg_id,
-        channel,
-        receiver_address_as,
-        waiting,
-        sender,
-        project_name,
-        msu_id,
-        message,
-    )
-
-
 def set_whatsapp_last_received(connection, user_id, stakeholder_id):
     update_sql = f"UPDATE users SET whatsapp_last_received = NOW() WHERE id = {user_id}"
 
@@ -136,22 +74,6 @@ def set_whatsapp_last_received(connection, user_id, stakeholder_id):
 
     print(update_sql)
     connection.run(update_sql)
-
-
-def incomingMessage(connection, user_id, related_msg_id, message, channel):
-    insert_sql = (
-        "INSERT INTO msgs_received (message,user_id,related_msg_id,channel) VALUES ("
-        + literal(message)
-        + ","
-        + str(user_id)
-        + ","
-        + str(related_msg_id)
-        + ", "
-        + literal(channel)
-        + ")"
-    )
-    print(insert_sql)
-    connection.run(insert_sql)
 
 
 def get_channel(receiver: User | Stakeholder) -> str:
@@ -434,54 +356,6 @@ def broadcast_message(
 # ============= END: Message broadcast route =============
 
 
-def getMessages(
-    connection, prj_id, related_item, since_sent_id, since_received_id, db: Session
-):
-    sql = f"""
-    SELECT
-        s.id, s.sent_time, s.user_id_sending, s.message, r.id, r.received_time, r.user_id, r.stakeholder_id, r.message
-    FROM msgs_sent s
-    LEFT JOIN msgs_received r ON s.id = r.related_msg_id
-    WHERE s.prj_id = {str(prj_id)} AND
-        s.related_item = {literal(related_item)} AND
-        (s.id > {str(since_sent_id)} OR r.id > {str(since_received_id)})
-    ORDER BY s.id DESC, r.id
-    """
-
-    messages = (
-        db.query(MessageSent)
-        .filter(
-            MessageSent.prj_id == prj_id,
-            MessageSent.related_item == related_item,
-        )
-        .options(
-            subqueryload(MessageSent.replies).options(
-                subqueryload(MessageReceived.user),
-                subqueryload(MessageReceived.stakeholder),
-            )
-        )
-        .order_by(MessageSent.id.desc())
-        .all()
-    )
-    print(messages)
-
-    return messages
-    print(sql)
-
-    results = connection.run(sql)
-    last = None
-    for result in results:
-        sent_id = result[0]
-        if last != sent_id and sent_id > since_sent_id:
-            last = sent_id
-        else:
-            result[1] = None
-            result[2] = None
-            result[3] = None
-
-    return results
-
-
 # ============= START: Twilio Webhook Handler =============#
 
 
@@ -541,11 +415,9 @@ async def webhook_handler(request: Request, db: Session = Depends(get_db)):
     connection = get_db_connection()
 
     # API called by Twilio after receipt of message
-    # print("body", body)
     params = await request.form()
     phone_number = str(params["From"])
     message = str(params["Body"])
-
     original_message_sid = params.get("OriginalRepliedMessageSid")
 
     user_message: MessageSentToUser | None = get_user_or_stakeholder_by_phone(
@@ -556,64 +428,28 @@ async def webhook_handler(request: Request, db: Session = Depends(get_db)):
         # TODO: send payload to sentry
         return "Message not found", 404
 
-    # user = data["user"]
-    # stakeholder = data["stakeholder"]
-    # message_sent: MessageSent = (
-    #     user.msg_sent if user is not None else stakeholder.msg_sent
-    # )
     channel = user_message.channel
 
     # Save received message
-    record = MessageReceived()
-    record.message = message
-    record.user_id = user_message.user_id
-    record.stakeholder_id = user_message.stakeholder_id
-    record.related_msg_id = user_message.msg_sent_id
-    record.channel = channel
+    if message.lower() != "yes - send update":
+        record = MessageReceived()
+        record.message = message
+        record.user_id = user_message.user_id
+        record.stakeholder_id = user_message.stakeholder_id
+        record.related_msg_id = user_message.msg_sent_id
+        record.channel = channel
 
-    db.add(record)
-    db.commit()
-    db.refresh(record)
+        db.add(record)
+        db.commit()
+        db.refresh(record)
 
-    # (
-    #     user_id,
-    #     related_msg_id,
-    #     channel,
-    #     address_as,
-    #     waiting,
-    #     sender,
-    #     project_name,
-    #     msu_id,
-    #     outgoing_message,
-    # ) = userFromNumber(connection, phone_number)
+    # Send replies
+    message_sent: MessageSent = user_message.msg_sent
+    project: Project = message_sent.project
 
-    # incomingMessage(connection, user_id, related_msg_id, message, channel)
-
-    first_word = message.lstrip().split()[0].lower().rstrip(string.punctuation)
     waiting = user_message.waiting
-    address_as = (
-        user_message.user.address_as
-        if user_message.user_id is not None
-        else user_message.stakeholder.address_as
-    )
-    # project = user_message.project
+    first_word = message.lstrip().split()[0].lower().rstrip(string.punctuation)
 
-    print(user_message)
-    message_sent: MessageSent | None = (
-        db.query(MessageSent)
-        .filter(MessageSent.id == user_message.msg_sent_id)
-        .options(subqueryload(MessageSent.user))
-        .first()
-    )
-    print(message_sent)
-    project: Project | None = (
-        db.query(Project).filter(Project.id == message_sent.prj_id).first()
-    )
-    outgoing_message = message_sent.message
-    sender = message_sent.user.address_as
-
-    # FIXME: same message sent to user after reply
-    print("first_word", first_word)
     if waiting and first_word == "no":
         update_log_msg_sent_user(
             connection,
@@ -657,12 +493,8 @@ async def webhook_handler(request: Request, db: Session = Depends(get_db)):
 # ============= END: Twilio Webhook =============
 
 
-# @router.post("")
 @router.get("")
 def handler(request: Request, db: Session = Depends(get_db)):
-    connection = get_db_connection()
-
-    # if request.method == "GET":
     # request from SBC web app for list of broadcast and received messages
     params = request.query_params
     prj_id = int(params["prj_id"])
@@ -671,80 +503,21 @@ def handler(request: Request, db: Session = Depends(get_db)):
     since_received_id = (
         int(params["since_received_id"]) if "since_received_id" in params else 0
     )
-    result = getMessages(
-        connection, prj_id, related_item, since_sent_id, since_received_id, db
+
+    result = (
+        db.query(MessageSent)
+        .filter(
+            MessageSent.prj_id == prj_id,
+            MessageSent.related_item == related_item,
+        )
+        .options(
+            subqueryload(MessageSent.replies).options(
+                subqueryload(MessageReceived.user),
+                subqueryload(MessageReceived.stakeholder),
+            )
+        )
+        .order_by(MessageSent.id.desc())
+        .all()
     )
 
-    # elif request.method == "POST":
-    #     try:
-    #         params = body
-    #     except JSONDecodeError as e:
-    #         # API called by Twilio after receipt of message
-    #         print("body", body)
-    #         params = request.query_params
-
-    #         # Twilio webhook for SMS/Whatsapp
-    #         phone_number = params["From"]
-    #         (
-    #             user_id,
-    #             related_msg_id,
-    #             channel,
-    #             address_as,
-    #             waiting,
-    #             sender,
-    #             project_name,
-    #             msu_id,
-    #             outgoing_message,
-    #         ) = userFromNumber(connection, phone_number)
-    #         message = params["Body"]
-    #         incomingMessage(connection, user_id, related_msg_id, message, channel)
-    #         first_word = message.lstrip().split()[0].lower().rstrip(string.punctuation)
-    #         print("first_word", first_word)
-    #         if waiting and first_word == "no":
-    #             update_log_msg_sent_user(
-    #                 connection,
-    #                 msu_id,
-    #                 success=False,
-    #                 channel=channel,
-    #                 waiting=False,
-    #                 declined=True,
-    #             )
-    #         else:
-    #             if channel == "w":
-    #                 set_whatsapp_last_received(connection, user_id)
-    #             if waiting:  # (and first_word != 'no', which is implied)
-    #                 success = update_message(
-    #                     address_as,
-    #                     sender,
-    #                     project_name,
-    #                     outgoing_message,
-    #                     phone_number,
-    #                     channel,
-    #                 )
-    #                 waiting = not success
-    #                 update_log_msg_sent_user(
-    #                     connection, msu_id, success, channel, waiting, declined=False
-    #                 )
-
-    # else:
-    #     # Message broadcast from SBC web app
-    #     prj_id = int(params["prj_id"])
-    #     user_id = int(params["user_id"])
-    #     sender = params["user_name"]
-    #     message = params["message"]
-    #     project_name = params["prj_name"]
-    #     related_item = params["related_item"] if "related_item" in params else None
-
-    #     broadcast_message(
-    #         connection,
-    #         user_id,
-    #         sender,
-    #         prj_id,
-    #         message,
-    #         project_name,
-    #         db,
-    #         related_item,
-    #     )
-
-    # Return the response object
     return ApiResponse(data=result)
