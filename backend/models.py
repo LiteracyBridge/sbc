@@ -684,6 +684,9 @@ class MessageSent(Base):
 
     project: Mapped["Project"] = relationship("Project")
     user: Mapped["User"] = relationship("User")
+    replies: Mapped[List["MessageReceived"]] = relationship(
+        "MessageReceived", back_populates="related_msg"
+    )
 
 
 class MessageReceived(Base):
@@ -712,6 +715,9 @@ class MessageReceived(Base):
 
     user: Mapped["User"] = relationship("User")
     stakeholder: Mapped["Stakeholder"] = relationship("Stakeholder")
+    related_msg: Mapped["MessageSent"] = relationship(
+        "MessageSent", back_populates="replies"
+    )
 
 
 class MessageSentToUser(Base):

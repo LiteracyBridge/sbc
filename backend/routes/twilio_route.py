@@ -10,6 +10,7 @@ import pg8000.native
 from pg8000.native import identifier, literal
 from botocore.exceptions import ClientError
 from pg8000.native import Connection
+from requests import options
 from sqlalchemy import select, or_
 from twilio.http import response
 from twilio.rest import Client
@@ -256,7 +257,7 @@ class MessageBroadcastDto(BaseModel):
 
 def send_message(
     receivers: List[User | Stakeholder],
-    record: MessageSent,
+    message_sent: MessageSent,
     project: Project,
     sender: str,
     db: Session,
@@ -264,30 +265,36 @@ def send_message(
 ):
     sendTwilio = setupTwilio()
 
-    for user in receivers:
+    for receiver in receivers:
         in_window = False
         message_sid = None
 
         # Check if last message was sent within the last 24 hours
-        if user.whatsapp_last_received is not None:
-            duration_in_s = time.time() - user.whatsapp_last_received.timestamp()
+        if receiver.whatsapp_last_received is not None:
+            duration_in_s = time.time() - receiver.whatsapp_last_received.timestamp()
             in_window = divmod(duration_in_s, 3600)[0] < 24
 
-        channel = "w" if user.whatsapp is not None else "s"
-        phone = f"whatsapp:{user.whatsapp}" if channel == "w" else f"sms:{user.sms}"
+        channel = "w" if receiver.whatsapp is not None else "s"
+        phone = (
+            f"whatsapp:{receiver.whatsapp}" if channel == "w" else f"sms:{receiver.sms}"
+        )
         if in_window:
             success = update_message(
-                user.address_as if user.address_as is not None else user.name,
+                receiver.address_as
+                if receiver.address_as is not None
+                else receiver.name,
                 sender,
                 project.name,
-                record.message,
+                message_sent.message,
                 phone,
                 channel,
             )
             waiting = False
             declined = False
         else:
-            full_message = notify_message(sender, project.name, record.related_item)
+            full_message = notify_message(
+                sender, project.name, message_sent.related_item
+            )
             resp = send_twilio(phone, full_message, channel)
 
             success = resp.get("success", False)
@@ -297,14 +304,14 @@ def send_message(
 
         # Save to message sent to users table
         msg_sent = MessageSentToUser()
-        msg_sent.msg_sent_id = record.user_id_sending
-        msg_sent.user_id = None if to_stakeholders else user.id
+        msg_sent.msg_sent_id = message_sent.id
+        msg_sent.user_id = receiver.id if not to_stakeholders else None
         msg_sent.success = success
         msg_sent.channel = channel
         msg_sent.waiting = waiting
         msg_sent.declined = declined
         msg_sent.message_sid = message_sid
-        msg_sent.stakeholder_id = user.id if to_stakeholders else None
+        msg_sent.stakeholder_id = receiver.id if to_stakeholders else None
 
         db.add(msg_sent)
         db.commit()
@@ -347,7 +354,7 @@ def broadcast_message(
 
         send_message(
             receivers=users,
-            record=record,
+            message_sent=record,
             project=project,
             sender=sender.name,
             db=db,
@@ -365,7 +372,7 @@ def broadcast_message(
 
         send_message(
             receivers=stakeholders,
-            record=record,
+            message_sent=record,
             project=project,
             sender=sender.name,
             db=db,
@@ -376,7 +383,9 @@ def broadcast_message(
 # ============= END: Message broadcast route =============
 
 
-def getMessages(connection, prj_id, related_item, since_sent_id, since_received_id):
+def getMessages(
+    connection, prj_id, related_item, since_sent_id, since_received_id, db: Session
+):
     sql = f"""
     SELECT
         s.id, s.sent_time, s.user_id_sending, s.message, r.id, r.received_time, r.user_id, r.stakeholder_id, r.message
@@ -388,6 +397,22 @@ def getMessages(connection, prj_id, related_item, since_sent_id, since_received_
     ORDER BY s.id DESC, r.id
     """
 
+    messages = (
+        db.query(MessageSent)
+        .filter(
+            MessageSent.prj_id == prj_id,
+            MessageSent.related_item == related_item,
+        )
+        .options(
+            subqueryload(MessageSent.replies).options(
+                subqueryload(MessageReceived.user),
+                subqueryload(MessageReceived.stakeholder),
+            )
+        )
+        .order_by(MessageSent.id.desc())
+        .all()
+    )
+    print(messages)
     print(sql)
 
     results = connection.run(sql)
@@ -431,7 +456,7 @@ def get_user_or_stakeholder_by_phone(
             (MessageSentToUser.user_id.in_(select(user_subquery)))
             | (MessageSentToUser.stakeholder_id.in_(select(stakeholder_subquery)))
         )
-        .order_by(MessageSentToUser.updated_at.desc())
+        .order_by(MessageSentToUser.id.desc())
         .options(
             subqueryload(MessageSentToUser.user),
             subqueryload(MessageSentToUser.stakeholder),
@@ -521,12 +546,14 @@ async def webhook_handler(request: Request, db: Session = Depends(get_db)):
     )
     # project = user_message.project
 
+    print(user_message)
     message_sent: MessageSent | None = (
         db.query(MessageSent)
         .filter(MessageSent.id == user_message.msg_sent_id)
         .options(subqueryload(MessageSent.user))
         .first()
     )
+    print(message_sent)
     project: Project | None = (
         db.query(Project).filter(Project.id == message_sent.prj_id).first()
     )
@@ -589,7 +616,7 @@ def handler(request: Request, db: Session = Depends(get_db)):
         int(params["since_received_id"]) if "since_received_id" in params else 0
     )
     result = getMessages(
-        connection, prj_id, related_item, since_sent_id, since_received_id
+        connection, prj_id, related_item, since_sent_id, since_received_id, db
     )
 
     # elif request.method == "POST":
