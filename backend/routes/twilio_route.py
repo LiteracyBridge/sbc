@@ -153,28 +153,88 @@ def incomingMessage(connection, user_id, related_msg_id, message, channel):
     connection.run(insert_sql)
 
 
-def update_message(address_as, sender, project_name, message, phone, channel):
-    WHATSAPP_MAX_LENGTH = int(1600 * 0.95)
-    sendTwilio = setupTwilio()
+def get_channel(receiver: User | Stakeholder) -> str:
+    return "w" if receiver.whatsapp is not None else "s"
 
-    intro_message = (
-        "Hello "
-        + address_as
-        + ",\n"
-        + sender
-        + " wanted to share the latest update to the "
-        + project_name
-        + " program.\n\n"
-    )
-    intro_message += "Please reply to this text to post your comments.\n------------\n"
+
+def record_message_sent(
+    message_sent: MessageSent,
+    receiver: User | Stakeholder,
+    to_stakeholder: bool,
+    success: bool,
+    waiting: bool,
+    declined: bool,
+    message_sid,
+    db: Session,
+):
+    # Save to message sent to users table
+    msg_sent = MessageSentToUser()
+    msg_sent.msg_sent_id = message_sent.id
+    msg_sent.user_id = receiver.id if not to_stakeholder else None
+    msg_sent.success = success
+    msg_sent.channel = get_channel(receiver)
+    msg_sent.waiting = waiting
+    msg_sent.declined = declined
+    msg_sent.message_sid = message_sid
+    msg_sent.stakeholder_id = receiver.id if to_stakeholder else None
+
+    db.add(msg_sent)
+    db.commit()
+
+    return msg_sent
+
+
+def update_message(
+    receiver: User | Stakeholder,
+    sender: User,
+    project_name: str,
+    message_sent: MessageSent,
+    to_stakeholder: bool,
+    waiting: bool,
+    db: Session,
+):
+    WHATSAPP_MAX_LENGTH = int(1600 * 0.95)
+    channel = get_channel(receiver)
+    phone = f"whatsapp:{receiver.whatsapp}" if channel == "w" else f"sms:{receiver.sms}"
+
+    intro_message = f"Hello {receiver.address_as},\n\n{sender.address_as} wanted to share the latest update to the {project_name} program.\n\nPlease reply to this text to post your comments.\n------------\n"
+
+    success = False
+    message = str(message_sent.message)
     if len(intro_message) + len(message) < WHATSAPP_MAX_LENGTH:
         full_message = intro_message + message
-        success = sendTwilio(phone, full_message, channel)
+        resp = send_twilio(phone, full_message, channel)
+
+        success = resp.get("success", False)
+        message_sid = resp["response"].sid if success else None
+        record_message_sent(
+            message_sent=message_sent,
+            receiver=receiver,
+            to_stakeholder=to_stakeholder,
+            success=success,
+            waiting=waiting,
+            declined=False,
+            message_sid=message_sid,
+            db=db,
+        )
     else:
-        success = sendTwilio(phone, intro_message, channel)
+        success = send_twilio(phone, intro_message, channel)
         for chunk in chunk_string(message, WHATSAPP_MAX_LENGTH):
             time.sleep(1)
-            success = success and sendTwilio(phone, chunk, channel)
+
+            resp = send_twilio(phone, chunk, channel)
+            success = not resp.get("success", False)
+            message_sid = resp["response"].sid if success else None
+            record_message_sent(
+                message_sent=message_sent,
+                receiver=receiver,
+                to_stakeholder=to_stakeholder,
+                success=success,
+                waiting=waiting,
+                declined=False,
+                message_sid=message_sid,
+                db=db,
+            )
     return success
 
 
@@ -259,62 +319,52 @@ def send_message(
     receivers: List[User | Stakeholder],
     message_sent: MessageSent,
     project: Project,
-    sender: str,
+    sender: User,
     db: Session,
     to_stakeholders: bool = False,
 ):
-    sendTwilio = setupTwilio()
-
     for receiver in receivers:
         in_window = False
-        message_sid = None
 
         # Check if last message was sent within the last 24 hours
         if receiver.whatsapp_last_received is not None:
             duration_in_s = time.time() - receiver.whatsapp_last_received.timestamp()
             in_window = divmod(duration_in_s, 3600)[0] < 24
 
-        channel = "w" if receiver.whatsapp is not None else "s"
-        phone = (
-            f"whatsapp:{receiver.whatsapp}" if channel == "w" else f"sms:{receiver.sms}"
-        )
         if in_window:
-            success = update_message(
-                receiver.address_as
-                if receiver.address_as is not None
-                else receiver.name,
-                sender,
-                project.name,
-                message_sent.message,
-                phone,
-                channel,
+            update_message(
+                receiver=receiver,
+                sender=sender,
+                project_name=project.name,
+                message_sent=message_sent,
+                db=db,
+                waiting=False,
+                to_stakeholder=to_stakeholders,
             )
-            waiting = False
-            declined = False
         else:
             full_message = notify_message(
                 sender, project.name, message_sent.related_item
             )
+            channel = "w" if receiver.whatsapp is not None else "s"
+            phone = (
+                f"whatsapp:{receiver.whatsapp}"
+                if channel == "w"
+                else f"sms:{receiver.sms}"
+            )
             resp = send_twilio(phone, full_message, channel)
+            success = bool(resp.get("success", False))
 
-            success = resp.get("success", False)
-            waiting = True
-            declined = None
-            message_sid = resp["response"].sid if success else None
-
-        # Save to message sent to users table
-        msg_sent = MessageSentToUser()
-        msg_sent.msg_sent_id = message_sent.id
-        msg_sent.user_id = receiver.id if not to_stakeholders else None
-        msg_sent.success = success
-        msg_sent.channel = channel
-        msg_sent.waiting = waiting
-        msg_sent.declined = declined
-        msg_sent.message_sid = message_sid
-        msg_sent.stakeholder_id = receiver.id if to_stakeholders else None
-
-        db.add(msg_sent)
-        db.commit()
+            # Save to message sent to users table
+            record_message_sent(
+                message_sent=message_sent,
+                receiver=receiver,
+                to_stakeholder=to_stakeholders,
+                success=bool(success),
+                waiting=True,
+                declined=False,
+                message_sid=resp["response"].sid if success else None,
+                db=db,
+            )
 
 
 @router.post("/broadcast")
@@ -356,7 +406,7 @@ def broadcast_message(
             receivers=users,
             message_sent=record,
             project=project,
-            sender=sender.name,
+            sender=sender,
             db=db,
             to_stakeholders=False,
         )
@@ -374,7 +424,7 @@ def broadcast_message(
             receivers=stakeholders,
             message_sent=record,
             project=project,
-            sender=sender.name,
+            sender=sender,
             db=db,
             to_stakeholders=True,
         )
@@ -467,16 +517,15 @@ def get_user_or_stakeholder_by_phone(
         )
     )
 
-    # if original_message_sid is not None:
-    #     query = query.filter(MessageSentToUser.message_sid == original_message_sid)
+    if original_message_sid is not None:
+        query = query.filter(MessageSentToUser.message_sid == original_message_sid)
 
-    msg = query.all()
+    msg = query.first()
 
-    if len(msg) > 0:
-        return msg[0]
-
+    if msg is None:
+        return None
     # TODO: send error to sentry
-    return None
+    return msg
 
 
 @router.post("/webhook")
@@ -578,13 +627,17 @@ async def webhook_handler(request: Request, db: Session = Depends(get_db)):
             )
         if waiting:  # (and first_word != 'no', which is implied)
             success = update_message(
-                address_as,
-                sender,
-                project.name,
-                message_sent.message,
-                phone_number,
-                channel,
+                receiver=user_message.user
+                if user_message.user_id is not None
+                else user_message.stakeholder,
+                sender=message_sent.user,
+                project_name=project.name,
+                message_sent=message_sent,
+                db=db,
+                waiting=False,
+                to_stakeholder=user_message.stakeholder_id is not None,
             )
+
             waiting = not success
             update_log_msg_sent_user(
                 connection,
