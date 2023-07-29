@@ -117,17 +117,39 @@ function changeProject(prjId: number) {
       <div>
         <Space style="padding-right: 52px">
           <span>Resources</span>
-          <span>Help</span>
+
+          <!-- <span>Help</span> -->
           <span>About</span>
 
           <Divider type="vertical" style="background-color: white" />
-          <Button
-            type="link"
-            size="small"
-            class="text-white"
-            @click.prevent="feedbackModalVisible = true"
-            >Contact Us</Button
-          >
+
+          <Dropdown>
+            <span>
+              Need Help?
+              <DownOutlined />
+            </span>
+
+            <template #overlay>
+              <Menu>
+                <MenuItem>
+                  <a href="#" @click.prevent="feedbackModalVisible = true"
+                    >Sends Us Feedback</a
+                  >
+                </MenuItem>
+
+                <MenuItem>
+                  <Tooltip
+                    title="You will be taken to a Discourse, a discussion forum for the Impact Designer"
+                  >
+                    <a href="https://sbcimpact.discourse.group" target="_blank" rel="noopener"
+                      >Join Discussion</a
+                    >
+                  </Tooltip>
+                </MenuItem>
+              </Menu>
+            </template>
+          </Dropdown>
+
         </Space>
 
         <Dropdown trigger="hover">
@@ -163,9 +185,6 @@ function changeProject(prjId: number) {
       </div>
     </div>
 
-    <!-- Place a dropdown at the end of the header -->
-
-    <!-- <Header></Header> -->
   </LayoutHeader>
 </template>
 

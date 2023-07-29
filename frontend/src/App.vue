@@ -17,16 +17,23 @@ import {
   LayoutContent,
   LayoutFooter,
   LayoutHeader,
-  LayoutSider,
+  Button,
   Space,
   FloatButton,
   Popconfirm,
   ConfigProvider,
+  FloatButtonGroup,
 } from "ant-design-vue";
 
 import Header from "./components/Layout/Header.vue";
 import Sidebar from "./components/Layout/Sidebar.vue";
-import { MenuUnfoldOutlined, WechatOutlined } from "@ant-design/icons-vue";
+import {
+  BugOutlined,
+  CommentOutlined,
+  CustomerServiceOutlined,
+  QuestionOutlined,
+  WechatOutlined,
+} from "@ant-design/icons-vue";
 import FeedbackModal from "@/components/FeedbackModal.vue";
 
 const userStore = useUserStore();
@@ -63,6 +70,10 @@ onMounted(async () => {
   //   appStore.setLoading(false)
   // }
 });
+
+function openDiscourse() {
+  window.open("https://sbcimpact.discourse.group", "_blank", 'rel="noopener"').focus();
+}
 </script>
 
 <template>
@@ -87,7 +98,10 @@ onMounted(async () => {
       }"
     >
       <Layout>
-        <FeedbackModal :visible="feedbackModalVisible" @close="feedbackModalVisible = false">
+        <FeedbackModal
+          :visible="feedbackModalVisible"
+          @close="feedbackModalVisible = false"
+        >
         </FeedbackModal>
 
         <Sidebar></Sidebar>
@@ -116,14 +130,35 @@ onMounted(async () => {
           >
             <router-view :key="$route.fullPath"></router-view>
 
-            <FloatButton
-              tooltip="Send us Feedback"
-              @click.prevent="feedbackModalVisible = true"
+            <FloatButtonGroup
+              trigger="hover"
+              type="primary"
+              tooltip="Report an issue or join the discussion forum"
+              :style="{ right: '24px' }"
             >
               <template #icon>
-                <WechatOutlined />
+                <QuestionOutlined />
               </template>
-            </FloatButton>
+
+              <FloatButton
+                tooltip="Report an issue or send us feedback"
+                shape="square"
+                @click.prevent="feedbackModalVisible = true"
+              >
+                <template #icon>
+                  <BugOutlined />
+                </template>
+              </FloatButton>
+
+              <FloatButton
+                tooltip="Join the discussion forum"
+                @click.prevent="openDiscourse()"
+              >
+                <template #icon>
+                  <CommentOutlined />
+                </template>
+              </FloatButton>
+            </FloatButtonGroup>
           </LayoutContent>
 
           <LayoutFooter class="text-center">
