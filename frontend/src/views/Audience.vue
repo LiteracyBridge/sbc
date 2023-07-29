@@ -266,7 +266,7 @@ onMounted(() => {
       <Row>
         <Col :span="16" v-for="(item, index) in primaryAudienceForm.audiences">
           <FormItem
-            :key="item.id"
+            :key="index"
             v-bind="index === 0 ? formItemLayout : {}"
             :name="['audiences', index, 'value']"
             :rules="{
@@ -333,7 +333,7 @@ onMounted(() => {
       <Row>
         <Col :span="16" v-for="(item, index) in secondaryAudienceForm.audiences">
           <FormItem
-            :key="item.id"
+            :key="index"
             v-bind="index === 0 ? formItemLayout : {}"
             :name="['audiences', index, 'value']"
             :rules="{

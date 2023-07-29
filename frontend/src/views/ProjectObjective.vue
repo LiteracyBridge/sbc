@@ -179,7 +179,7 @@ onMounted(() => {
     >
       <FormItem
         v-for="(objective, index) in dynamicValidateForm.objectives"
-        :key="objective.id"
+        :key="index"
         v-bind="index === 0 ? formItemLayout : {}"
         :name="['objectives', index, 'value']"
         :rules="{
