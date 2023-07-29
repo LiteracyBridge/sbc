@@ -1,25 +1,18 @@
 from datetime import datetime
 import string
 import time
-import json
-from json import JSONDecodeError
 from typing import Annotated, Optional, Dict, Any, List
 from pydantic import BaseModel
 import boto3 as boto3
 import pg8000.native
-from pg8000.native import identifier, literal
-from botocore.exceptions import ClientError
-from pg8000.native import Connection
-from requests import options
+from pg8000.native import literal
 from sqlalchemy import select, or_
-from twilio.http import response
 from twilio.rest import Client
 from twilio.base.exceptions import TwilioRestException
-from sqlalchemy.orm import Session, joinedload, subqueryload
+from sqlalchemy.orm import Session, subqueryload
 from schema import ApiResponse
 from models import (
     MessageSentToUser,
-    ProjectUser,
     Stakeholder,
     User,
     get_db,
@@ -27,7 +20,6 @@ from models import (
     MessageSent,
     Project,
 )
-from functools import reduce
 from fastapi import APIRouter, Depends, Form, HTTPException, Request
 from config import settings
 
@@ -494,7 +486,7 @@ async def webhook_handler(request: Request, db: Session = Depends(get_db)):
 
 
 @router.get("")
-def handler(request: Request, db: Session = Depends(get_db)):
+def get_messages(request: Request, db: Session = Depends(get_db)):
     # request from SBC web app for list of broadcast and received messages
     params = request.query_params
     prj_id = int(params["prj_id"])
