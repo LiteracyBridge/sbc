@@ -88,35 +88,10 @@ def create_feedback(
         msg.attach(part)
 
     ses_client = boto3.client("ses")
-    response = ses_client.send_raw_email(
+    ses_client.send_raw_email(
         Source="support@amplio.org",
         Destinations=[user.email],
         RawMessage={"Data": msg.as_string()}
     )
-
-    # response = ses_client.send_email(
-    #     Destination={"ToAddresses": [user.email]},
-    #     Message={
-    #         "Body": {
-    #             "Text": {
-    #                 "Charset": CHARSET,
-    #                 "Data": "New feedback has been submitted",
-    #             }
-    #         },
-    #         "Subject": {
-    #             "Charset": CHARSET,
-    #             "Data": f"""
-    #             New feedback has been submitted
-
-    #             Title: {title}
-    #             Issue Type: {feedback.type}
-    #             Description: {description}
-
-    #             Attached are the files submitted
-    #             """,
-    #         },
-    #     },
-    #     Source="support@amplio.org",
-    # )
 
     return ApiResponse(data=[feedback])
