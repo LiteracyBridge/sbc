@@ -58,6 +58,7 @@ function saveForm(){
       form.editing_user_id = userStore.id;
 
       const formData = new FormData();
+
       fileList.value.forEach((file: UploadProps['fileList'][number]) => {
         formData.append('files', file.originFileObj as any);
       });
