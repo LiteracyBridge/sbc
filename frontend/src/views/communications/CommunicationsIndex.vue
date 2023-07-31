@@ -22,7 +22,6 @@ const BULB_ICON = "/images/lightbulb.png"
 
 
 const projectDataStore = useProjectDataStore(),
-  tocStore = useTheoryOfChangeStore(),
   store = useCommunicationStore();
 
 const config = ref({
@@ -104,10 +103,10 @@ onMounted(() => {
 })
 
 const generateAIPrompt = computed(() => {
-  const prompt = "Suggest suitable message contents for the project";
-  let context = "";
-
   const { form } = config.value.modal;
+
+  let context = "Message Title: " + config.value.modal.form.title + "\n";
+
   if (form.project_objectives?.length > 0) {
     context += "The project has the following objectives: " + projectDataStore.specificObjectives
       .filter(p => form.project_objectives?.includes(p.id)
@@ -120,6 +119,7 @@ const generateAIPrompt = computed(() => {
       )
       ?.map((p, i) => `(${i + 1}). ${p.name}`).join(', ') + '.';
   }
+  // TODO: add drivers
   if (form.target_audiences?.length > 0) {
     context += "The messages to be delivered has the following target audiences: " + projectDataStore.audiences
       .filter(p => form.target_audiences?.includes(p.id)
@@ -127,20 +127,40 @@ const generateAIPrompt = computed(() => {
       ?.map((p, i) => `(${i + 1}). ${p.data}`).join(', ') + '.';
   }
 
-  return { prompt, context, format: "paragraph" };
+  return context
 })
 
-function messageContentSuggestion() {
-  config.value.suggestions = { ai: {
-    ...generateAIPrompt.value, defaultValue: config.value.modal.form.contents
-  },visible: true, type: "content" };
+function messageKeyPointsSuggestion() {
+  config.value.suggestions = {
+    ai: {
+      prompt: "List key points suitable for the message to be delivered.",
+      context: generateAIPrompt.value,
+      format: "list",
+      defaultValue: config.value.modal.form.key_points
+      },
+      visible: true,
+      type: "key_points"
+  };
+}
 
-  console.log(config.value.suggestions)
+function messageContentSuggestion() {
+  config.value.suggestions = {
+    ai: {
+      prompt: "Suggest suitable message content for the project.",
+      context: generateAIPrompt.value,
+      format: "paragraph",
+      defaultValue: config.value.modal.form.contents
+    },
+    visible: true,
+    type: "content"
+  };
 }
 
 const onSuggestionClosed = (val: string) => {
   if(config.value.suggestions.type == "content"){
     config.value.modal.form.contents = val;
+  } else {
+    config.value.modal.form.key_points = val;
   }
   config.value.suggestions.visible = false;
 }
@@ -445,6 +465,11 @@ const onSuggestionClosed = (val: string) => {
           has-feedback
           :rules="[{ required: true, message: 'Please enter message key points!' }]"
         >
+          <img
+            :src="BULB_ICON"
+            @click="messageKeyPointsSuggestion()"
+            class="image is-32x32"
+          />
           <Textarea
             v-model:value="config.modal.form.key_points"
             name="key_points"
@@ -460,7 +485,6 @@ const onSuggestionClosed = (val: string) => {
         >
           <img
             :src="BULB_ICON"
-            ref="iconRefs"
             @click="messageContentSuggestion()"
             class="image is-32x32"
           />
