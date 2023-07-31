@@ -13,8 +13,8 @@ import {
   Textarea,
   Row,
   Col,
-Divider,
-message,
+  Divider,
+  message,
 } from "ant-design-vue";
 import { CheckOutlined } from "@ant-design/icons-vue";
 
@@ -102,23 +102,26 @@ watch(
   props,
   (newProps) => {
     config.value.visible = newProps.isVisible;
-    gptResponse.value.answer = null;
 
-    if (newProps.ai == null) {
-      formInput.value = projectStore.getData(newProps.questionId);
-    } else {
-      formInput.value = newProps.ai.defaultValue;
+    if (newProps.isVisible) {
+      gptResponse.value.answer = null;
+
+      if (newProps.ai == null) {
+        formInput.value = projectStore.getData(newProps.questionId);
+      } else {
+        formInput.value = newProps.ai.defaultValue;
+      }
+
+      submitContextAndPrompt();
     }
-
-    submitContextAndPrompt();
   },
   { deep: true }
 );
 
 function acceptSuggestion() {
-  formInput.value = formInput.value + '\n\n' + gptResponse.value?.answer;
+  formInput.value = formInput.value + "\n\n" + gptResponse.value?.answer;
 
-  message.info("Suggestion has been added to the text box")
+  message.info("Suggestion has been added to the text box");
 }
 </script>
 
@@ -192,7 +195,7 @@ function acceptSuggestion() {
     </Row>
 
     <Row>
-      <Col :span="24" style="margin-top: 50px;">
+      <Col :span="24" style="margin-top: 50px">
         <Form layout="vertical">
           <FormItem :label="moduleQuestion?.q2u">
             <Textarea v-model:value="formInput" :rows="23" :cols="10"></Textarea>

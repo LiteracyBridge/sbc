@@ -208,11 +208,10 @@ export async function gptCompletion(
     payload.context = context;
   }
 
-  let response;
+  // set to false when testing other features to avoid unnecessary calls to openai
   if (true) {
-    // set to false when testing other features to avoid unnecessary calls to openai
     try {
-      response = await axios.post(
+      return axios.post(
         `${import.meta.env.VITE_SBC_API_URL}/open-ai`,
         payload,
         {
@@ -220,16 +219,11 @@ export async function gptCompletion(
             "Content-Type": "application/json",
           },
         }
-      );
+      ).then((resp) => resp.data.result);
     } catch (error) {
       console.error("Error:", error);
     }
-    console.log("ghtp response");
-    console.warn(response.data);
-    const request_id = response.data.requestId;
-    // const gptResponse = await getBucket(request_id);
-    const gptResponse = response.data.result;
-    return gptResponse;
+
   } else {
     return null;
   }
