@@ -29,7 +29,7 @@ export const useProjectDataStore = defineStore({
         id: 1,
         topic: "basic",
         topic_id: 1,
-        bulb: true,
+        bulb: false,
         q2u: "What sector is this project working in?",
         q2ai: "Propose a sector for this project.",
         f4ai: "item",
