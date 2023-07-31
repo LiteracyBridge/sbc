@@ -115,9 +115,7 @@ onMounted(() => {
           <!-- <template #actions>
         <span key="comment-nested-reply-to">Reply to</span>
       </template> -->
-          <template #author>
-            {{ message.user?.address_as }},
-          </template>
+          <template #author> {{ message.user?.address_as }}, </template>
 
           <template #avatar>
             <Avatar>
@@ -134,7 +132,12 @@ onMounted(() => {
           </template>
 
           <!-- Message replies -->
-          <Comment v-for="reply in message.replies || []" :key="reply.id">
+          <Comment
+            v-for="reply in (message.replies || []).filter(
+              (r) => r.message.toLowerCase() != 'yes - send update'
+            )"
+            :key="reply.id"
+          >
             <template #datetime>
               <Tooltip :title="dayjs().format('YYYY-MM-DD HH:mm:ss')">
                 <span>{{ dayjs(reply.created_at) }}</span>

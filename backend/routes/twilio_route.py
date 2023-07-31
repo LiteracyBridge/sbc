@@ -157,10 +157,13 @@ def notify_message(sender, project_name, related_item):
     # Thank you for subscribing to updates about "{{1}}".\n\n
     # {{2}} has just updated the {{3}}.\n\n
     # Would you like details about the update?
+
+    address_as = sender.address_as if sender.address_as is not None else sender.name
+
     if related_item is None:
         related_item = "program plan"
     message = f'Thank you for subscribing to updates about "{project_name}".\n\n'
-    message += f"{sender} has just updated the {related_item} module.\n\n"
+    message += f"{address_as} has just updated the {related_item} module.\n\n"
     message += "Would you like details about the update?"
     print(message)
     return message
@@ -351,7 +354,7 @@ def broadcast_message(
 # ============= START: Twilio Webhook Handler =============#
 
 
-def get_user_or_stakeholder_by_phone(
+def get_message_sent_to_user_by_phone(
     from_number, db: Session, original_message_sid: str | None = None
 ) -> MessageSentToUser | None:
     """Get user by phone number"""
@@ -386,7 +389,11 @@ def get_user_or_stakeholder_by_phone(
         )
     )
 
-    if original_message_sid is not None:
+    # The original message sid is included in the response if the user replied to the message (using whatsapp reply feature).
+    # We can use this to find the original message sent to the user.
+    #
+    # Otherwise, we have to guess which message was sent to the user (see the first query).
+    if original_message_sid is not None and original_message_sid != "None":
         query = query.filter(MessageSentToUser.message_sid == original_message_sid)
 
     msg = query.first()
@@ -412,7 +419,7 @@ async def webhook_handler(request: Request, db: Session = Depends(get_db)):
     message = str(params["Body"])
     original_message_sid = params.get("OriginalRepliedMessageSid")
 
-    user_message: MessageSentToUser | None = get_user_or_stakeholder_by_phone(
+    user_message: MessageSentToUser | None = get_message_sent_to_user_by_phone(
         phone_number, db, str(original_message_sid)
     )
 
@@ -423,17 +430,16 @@ async def webhook_handler(request: Request, db: Session = Depends(get_db)):
     channel = user_message.channel
 
     # Save received message
-    if message.lower() != "yes - send update":
-        record = MessageReceived()
-        record.message = message
-        record.user_id = user_message.user_id
-        record.stakeholder_id = user_message.stakeholder_id
-        record.related_msg_id = user_message.msg_sent_id
-        record.channel = channel
+    record = MessageReceived()
+    record.message = message
+    record.user_id = user_message.user_id
+    record.stakeholder_id = user_message.stakeholder_id
+    record.related_msg_id = user_message.msg_sent_id
+    record.channel = channel
 
-        db.add(record)
-        db.commit()
-        db.refresh(record)
+    db.add(record)
+    db.commit()
+    db.refresh(record)
 
     # Send replies
     message_sent: MessageSent = user_message.msg_sent

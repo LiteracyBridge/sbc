@@ -70,20 +70,20 @@ const columns = [
   <section class="section">
     <Space
       direction="horizontal"
-      style="width: 100%; justify-content: center; padding-bottom: 15px"
+      style="width: 100%; justify-content: center; padding-bottom: 0px"
     >
       <TypographyTitle :level="3"
-        >Welcome, {{ userStore.address_as || userStore.name }}!</TypographyTitle
+        >{{ projectStore.current_project?.name }}</TypographyTitle
       >
     </Space>
 
-    <Divider></Divider>
-    <Space direction="horizontal" style="width: 100%; justify-content: space-between">
+    <!-- <Divider></Divider> -->
+    <!-- <Space direction="horizontal" style="width: 100%; justify-content: space-between">
       <span>
         Current Project: <strong>{{ projectStore.current_project?.name }}</strong>
       </span>
 
-      <span
+       <span
         >Last modified by
         {{ projectStore.userName(projectStore.current_project?.editing_user_id) }} @
         {{
@@ -92,7 +92,7 @@ const columns = [
           ).format("dddd MMMM M, YYYY")
         }}</span
       >
-    </Space>
+    </Space> -->
 
     <Divider></Divider>
     <Row :gutter="8" style="padding: 10px">
