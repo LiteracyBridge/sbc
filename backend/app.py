@@ -62,42 +62,24 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+cognito_auth = CognitoAuthenticator()
 
 @app.middleware("http")
 async def verify_jwt(request: Request, call_next):
-    # start_time = time.time()
-    # process_time = time.time() - start_time
-    # response.headers["X-Process-Time"] = str(process_time)
-
     # Get the access token from the request headers
     if request.method == "OPTIONS":
         return await call_next(request)
 
     token = request.headers.get("Authorization")
-
     if not token:
         raise HTTPException(status_code=401, detail="No access token provided")
-        # return jsonify({"message": "No access token provided"}), 401
 
-    auth = CognitoAuthenticator(
-        #     pool_region=os.environ["AWS_COGNITO_REGION"],
-        #     pool_id=os.environ["AWS_USER_POOL_ID"],
-        #     client_id=os.environ["AWS_USER_POOL_CLIENT_ID"],
-    )
-    # print(f"Token verified: {auth.verify_token(token.replace('Bearer ', ''))}")
+    cognito_auth.verify_token(token.replace("Bearer ", ""))
 
     response = await call_next(request)
 
     return response
 
-
-# # Dependency
-# def get_db():
-#     db = SessionLocal()
-#     try:
-#         yield db
-#     finally:
-#         db.close()
 
 if not settings.is_local:
     ###############################################################################

@@ -37,6 +37,8 @@ class CognitoAuthenticator:
         self.client_id = settings.user_pool_client_id
         self.issuer = f"https://cognito-idp.{self.pool_region}.amazonaws.com/{settings.user_pool_id}/.well-known/jwks.json"
 
+        self.jwks = self.__get_jwks()
+
 
     def __get_jwks(self) -> List[JWK]:
         """Returns a list of JSON Web Keys (JWKs) from the issuer. A JWK is a
@@ -78,8 +80,6 @@ class CognitoAuthenticator:
         """
 
         try:
-            self.jwks = self.__get_jwks()
-
             self._is_jwt(token)
             self._get_verified_header(token)
             self._get_verified_claims(token)
