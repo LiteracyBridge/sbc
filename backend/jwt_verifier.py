@@ -83,7 +83,7 @@ class CognitoAuthenticator:
             self._is_jwt(token)
             self._get_verified_header(token)
             self._get_verified_claims(token)
-        except CognitoError as e:
+        except Exception as e:
             print(e)
             return False
         return True
@@ -168,7 +168,7 @@ class CognitoAuthenticator:
             raise TokenExpiredError
 
         # verify issuer
-        if claims["iss"] != self.issuer:
+        if claims["iss"] != self.issuer.replace("/.well-known/jwks.json", ""):
             logging.info("Invalid issuer claim")
             raise InvalidIssuerError
 
@@ -178,7 +178,7 @@ class CognitoAuthenticator:
             logging.info("Invalid audience claim")
             raise InvalidAudienceError
 
-        # verify token use
+        # # verify token use
         if claims["token_use"] != "access":
             logging.info("Invalid token use claim")
             raise InvalidTokenUseError
