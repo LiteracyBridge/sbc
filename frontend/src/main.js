@@ -21,16 +21,16 @@ import "./theme.less";
 // Configure AWS Amplify with the provided configuration
 Amplify.configure({
   ...awsconfig,
-  API: {
-    endpoints: [
-      {
-        name: "sbc-api",
-        endpoint: import.meta.env.VITE_SBC_API_URL,
-        // service: "lambda",
-        // region: "us-west-2",
-      },
-    ],
-  },
+  // API: {
+  //   endpoints: [
+  //     {
+  //       name: "sbc-api",
+  //       endpoint: import.meta.env.VITE_SBC_API_URL,
+  //       // service: "lambda",
+  //       // region: "us-west-2",
+  //     },
+  //   ],
+  // },
 });
 
 // Create a new Vue app with the App component

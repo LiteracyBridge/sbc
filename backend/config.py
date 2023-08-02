@@ -29,6 +29,8 @@ class Settings:
     db_user: str
     db_port: Optional[str] = "5432"
     open_ai_key: Optional[str] = None
+    user_pool_id: Optional[str] = None
+    user_pool_client_id: Optional[str] = None
 
     twilio_account_sid: Optional[str] = None
     twilio_auth_token: Optional[str] = None
@@ -51,6 +53,9 @@ class Settings:
             self.db_port = getenv("DB_PORT", "5432")
             self.sentry_dsn = getenv("SENTRY_DSN", None)
             self.open_ai_key = getenv("OPEN_AI_KEY", None)
+
+            self.user_pool_id = getenv("AWS_USER_POOL_ID", None)
+            self.user_pool_client_id = getenv("AWS_USER_POOL_CLIENT_ID", None)
 
             self.twilio_account_sid = getenv("TWILIO_ACCOUNT_SID", None)
             self.twilio_auth_token = getenv("TWILIO_AUTH_TOKEN", None)
@@ -80,6 +85,9 @@ class Settings:
             self.db_host = secrets["host"]
             self.db_port = secrets["port"]
             self.sentry_dsn = secrets["sbc_sentry_dsn"]
+
+            self.user_pool_id = secrets["aws_user_pool_id"]
+            self.user_pool_client_id = secrets["aws_user_pool_client_id"]
 
             # Load OpenAI secrets
             secret_string = client.get_secret_value(SecretId="openai")["SecretString"]

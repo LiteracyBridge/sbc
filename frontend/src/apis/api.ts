@@ -1,3 +1,4 @@
+import { useUserStore } from "@/stores/user";
 import { API } from "aws-amplify";
 import axios from "axios";
 
@@ -22,7 +23,12 @@ export class ApiRequest {
     }
 
     return axios
-      .get(`${import.meta.env.VITE_SBC_API_URL}/${path}`, { params })
+      .get(`${import.meta.env.VITE_SBC_API_URL}/${path}`, {
+        ...params,
+        headers: {
+          Authorization: `Bearer ${useUserStore().token}`,
+        },
+      })
       .then((response) => {
         return response.data.data as T[];
         // Add your code here
@@ -71,7 +77,12 @@ export class ApiRequest {
     //   })
 
     return axios
-      .delete(`${import.meta.env.VITE_SBC_API_URL}/${path}`, { params })
+      .delete(`${import.meta.env.VITE_SBC_API_URL}/${path}`, {
+        ...params,
+        headers: {
+          Authorization: `Bearer ${useUserStore().token}`,
+        },
+      })
       .then((response) => {
         return response.data.data as T[];
         // Add your code here
@@ -106,7 +117,12 @@ export class ApiRequest {
 
     // API.post(apiName, `/${path}`, myInit)
     return axios
-      .post(`${import.meta.env.VITE_SBC_API_URL}/${path}`, body, { params })
+      .post(`${import.meta.env.VITE_SBC_API_URL}/${path}`, body, {
+        ...params,
+        headers: {
+          Authorization: `Bearer ${useUserStore().token}`,
+        },
+      })
       .then((response) => {
         return response.data.data as T[];
         // Add your code here
@@ -139,7 +155,12 @@ export class ApiRequest {
       myInit.queryStringParameters = params;
     }
 
-    return API.put(apiName, `/${path}`, myInit).then((response) => {
+    return API.put(apiName, `/${path}`, {
+      ...params,
+      headers: {
+        Authorization: `Bearer ${useUserStore().token}`,
+      },
+    }).then((response) => {
       return response.data as T[];
       // Add your code here
     });

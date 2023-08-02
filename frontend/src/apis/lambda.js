@@ -5,11 +5,11 @@ const LOG = true;
 
 // const SBC_DS_URL = 'http://localhost:9000/2015-03-31/functions/function/invocations';
 const SBC_DS_URL = `${import.meta.env.VITE_SBC_API_URL}/data-service`;
-export const  SBC_TW_URL = `${import.meta.env.VITE_SBC_API_URL}/twilio`;
+export const SBC_TW_URL = `${import.meta.env.VITE_SBC_API_URL}/twilio`;
 // 'https://w75w7350kh.execute-api.us-west-2.amazonaws.com/production/sbcDataService';
 
 // export const SBC_TW_URL =
-  // "https://w75w7350kh.execute-api.us-west-2.amazonaws.com/production/sbcTwilio";
+// "https://w75w7350kh.execute-api.us-west-2.amazonaws.com/production/sbcTwilio";
 const SBC_GET_BUCKET =
   "https://w75w7350kh.execute-api.us-west-2.amazonaws.com/production/sbcGetBucket";
 const SBC_AI_URL =
@@ -54,7 +54,9 @@ async function downloadSetup(tableName, attributes, filterClause = "") {
     objectClause +
     attributesClause +
     (filterClause == "" ? "" : "&" + filterClause);
-  const response = await axios.get(SBC_DS_URL + request);
+  const response = await axios.get(SBC_DS_URL + request, {
+    headers: { Authorization: `Bearer ${useUserStore().token}` },
+  });
   return response.data;
 }
 
@@ -117,7 +119,9 @@ export async function insert(tableName, attributes, LOG = false) {
   attributes["editing_user_id"] = useUserStore().id;
   payload["attributes"] = attributes;
   if (LOG) console.log(payload);
-  const response = await axios.post(SBC_DS_URL, payload);
+  const response = await axios.post(SBC_DS_URL, payload, {
+    headers: { Authorization: `Bearer ${useUserStore().token}` },
+  });
   const new_id = response.data[0][0];
   if (LOG) console.log(new_id);
   return new_id;
@@ -130,7 +134,9 @@ export async function update(tableName, id, attributes, LOG = false) {
   attributes["editing_user_id"] = useUserStore().id;
   payload["attributes"] = attributes;
   if (LOG) console.log(payload);
-  const response = await axios.put(SBC_DS_URL, payload);
+  const response = await axios.put(SBC_DS_URL, payload, {
+    headers: { Authorization: `Bearer ${useUserStore().token}` },
+  });
 }
 
 export async function remove(tableName, ids, LOG = false) {
@@ -138,7 +144,10 @@ export async function remove(tableName, ids, LOG = false) {
   payload["object"] = tableName;
   payload["ids"] = ids;
   if (LOG) console.log(payload);
-  const response = await axios.delete(SBC_DS_URL, { data: payload });
+  const response = await axios.delete(SBC_DS_URL, {
+    data: payload,
+    headers: { Authorization: `Bearer ${useUserStore().token}` },
+  });
 }
 
 function countWords(str) {
@@ -211,19 +220,17 @@ export async function gptCompletion(
   // set to false when testing other features to avoid unnecessary calls to openai
   if (true) {
     try {
-      return axios.post(
-        `${import.meta.env.VITE_SBC_API_URL}/open-ai`,
-        payload,
-        {
+      return axios
+        .post(`${import.meta.env.VITE_SBC_API_URL}/open-ai`, payload, {
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${useUserStore().token}`,
           },
-        }
-      ).then((resp) => resp.data.result);
+        })
+        .then((resp) => resp.data.result);
     } catch (error) {
       console.error("Error:", error);
     }
-
   } else {
     return null;
   }

@@ -22,6 +22,7 @@ import CommunicationsIndex from "@/views/communications/CommunicationsIndex.vue"
 import ProjectInfo from "@/views/ProjectInfo.vue";
 import Partners from "@/views/Partners.vue";
 import ProjectDocsIndex from "@/views/project-docs/ProjectDocsIndex.vue";
+import { User } from "@/types";
 
 let user;
 
@@ -29,20 +30,23 @@ async function getUser() {
   return Auth.currentAuthenticatedUser()
     .then(async (data) => {
       if (data && data.signInUserSession) {
+        useUserStore().token = data.signInUserSession.accessToken.jwtToken;
+        console.log("here")
+
         // Verify user from server
-        return await ApiRequest.get(`users/${data.attributes.email}`).then(
-          async (resp) => {
-            if (resp.length == 0) {
-              await Auth.signOut();
-              return { authorized: false };
-            }
-            useUserStore().setUser({
-              ...resp[0],
-              token: data.signInUserSession.accessToken.jwtToken,
-            });
-            return { ...data, authorized: true };
+        return await ApiRequest.get<User>(
+          `users/${data.attributes.email}`
+        ).then(async (resp) => {
+          if (resp.length == 0) {
+            await Auth.signOut();
+            return { authorized: false };
           }
-        );
+          useUserStore().setUser({
+            ...resp[0],
+            token: data.signInUserSession.accessToken.jwtToken,
+          });
+          return { ...data, authorized: true };
+        });
       }
 
       AppStore().is_loading = false;
@@ -93,6 +97,7 @@ Hub.listen("auth", async (data) => {
       console.log("user sign in failed");
       break;
     case "configured":
+      console.log(data.payload.event);
       getUser().then(async (user) => {
         console.log("Existing user: ", user);
         console.log(user);
