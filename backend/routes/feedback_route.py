@@ -89,8 +89,7 @@ def create_feedback(
 
     ses_client = boto3.client("ses")
     ses_client.send_raw_email(
-        Source="support@amplio.org",
-        Destinations=[user.email],
+        Destinations=["sbc@amplio.org"],
         RawMessage={"Data": msg.as_string()}
     )
 
