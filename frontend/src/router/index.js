@@ -34,7 +34,7 @@ async function getUser() {
         console.log("here")
 
         // Verify user from server
-        return await ApiRequest.get<User>(
+        return await ApiRequest.get(
           `users/${data.attributes.email}`
         ).then(async (resp) => {
           if (resp.length == 0) {

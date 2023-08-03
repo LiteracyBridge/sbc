@@ -25,6 +25,7 @@ export class ApiRequest {
     return axios
       .get(`${import.meta.env.VITE_SBC_API_URL}/${path}`, {
         ...params,
+        withCredentials: true,
         headers: {
           Authorization: `Bearer ${useUserStore().token}`,
         },
