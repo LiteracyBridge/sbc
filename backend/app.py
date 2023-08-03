@@ -62,7 +62,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-cognito_auth = CognitoAuthenticator()
+# cognito_auth = CognitoAuthenticator()
 
 @app.middleware("http")
 async def verify_jwt(request: Request, call_next):
@@ -74,7 +74,7 @@ async def verify_jwt(request: Request, call_next):
     if not token:
         raise HTTPException(status_code=401, detail="No access token provided")
 
-    cognito_auth.verify_token(token.replace("Bearer ", ""))
+    # cognito_auth.verify_token(token.replace("Bearer ", ""))
 
     response = await call_next(request)
 
