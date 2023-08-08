@@ -62,12 +62,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# cognito_auth = CognitoAuthenticator()
+cognito_auth = CognitoAuthenticator()
 
 
 @app.middleware("http")
 async def verify_jwt(request: Request, call_next):
-    return await call_next(request)
+    # return await call_next(request)
 
     # Get the access token from the request headers
     if request.method == "OPTIONS":
