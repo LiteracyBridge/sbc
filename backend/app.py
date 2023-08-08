@@ -52,7 +52,7 @@ if settings.sentry_dsn is not None:
 
 app = FastAPI()
 
-origins = ["*"]
+origins = ["http://localhost:5173", "https://sbcimpact.amplio.org"]
 
 app.add_middleware(
     CORSMiddleware,
