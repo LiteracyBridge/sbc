@@ -9,6 +9,7 @@ import {
   Row,
   Col,
   Button,
+  Modal,
 } from "ant-design-vue";
 import { onMounted, ref, watch } from "vue";
 import { ProjectDataUpdateDto, useProjectDataStore } from "@/stores/projectData";
@@ -16,7 +17,8 @@ import GPTSuggestionPanel from "@/components/GPTSuggestionPanel.vue";
 import { useTheoryOfChangeStore } from "@/stores/theory_of_change";
 import { ProjectDataModule } from "@/types";
 import BroadcastComponent from "@/components/BroadcastComponent.vue";
-
+import { onBeforeRouteLeave } from "vue-router";
+import type { FormInstance } from "ant-design-vue";
 const BULB_ICON = "/images/lightbulb.png";
 
 const projectDataStore = useProjectDataStore();
@@ -48,13 +50,18 @@ function showPanel(id: string | number) {
   config.value.suggestions.isOpened = true;
 }
 
-function updateData(event: any, id: number) {
-  projectDataStore.setData(id, event.target.value);
-}
+// function updateData(event: any, id: number) {
+//   projectDataStore.setData(id, event.target.value);
+// }
 
-const updateSector = (value: any, id: number) => {
-  projectDataStore.setData(id, value);
-};
+// const updateSector = (value: any, id: number) => {
+//   projectDataStore.setData(id, value);
+// };
+function saveChanges() {
+  projectDataStore
+    .addOrUpdate(form.value as ProjectDataUpdateDto[])
+    .then((resp) => (config.value.pendingSave = false));
+}
 
 onMounted(() => {
   form.value = projectDataStore
@@ -72,9 +79,22 @@ onMounted(() => {
     });
 });
 
-function saveChanges() {
-  projectDataStore.addOrUpdate(form.value as ProjectDataUpdateDto[]);
-}
+onBeforeRouteLeave((to, from, next) => {
+  if (config.value.pendingSave) {
+    // window.confirm("You have unsaved changes. Are you sure you want to leave?");
+    Modal.confirm({
+      title: "You have unsaved changes. Are you sure you want to leave?",
+      onOk: () => {
+        next();
+      },
+      onCancel: () => {
+        next(false);
+      },
+    });
+  } else {
+    next();
+  }
+});
 </script>
 
 <template>
@@ -93,7 +113,7 @@ function saveChanges() {
 
     <BroadcastComponent :module="config.suggestions.module"></BroadcastComponent>
 
-    <Form layout="vertical" @values-change="config.pendingSave = true">
+    <Form layout="vertical" ref="infoForm">
       <Row>
         <Col :span="14">
           <FormItem
@@ -109,6 +129,7 @@ function saveChanges() {
               v-model:value="item.data"
               style="padding-bottom: 15px"
               class="font-weight-bold"
+              @change="config.pendingSave = true"
             >
               <SelectOption
                 v-for="(sector, index) in useTheoryOfChangeStore().getIndiKitSectors"
@@ -133,6 +154,7 @@ function saveChanges() {
               v-model:value="item.data"
               :rows="7"
               :cols="40"
+              @change="config.pendingSave = true"
             ></Textarea>
           </FormItem>
         </Col>
