@@ -201,7 +201,7 @@ onBeforeRouteLeave((to, from, next) => {
 
 const handleSuggestionSave = (value: string) => {
   form.value = form.value.map((i) => {
-    if (i.showBuild) {
+    if (i.q_id == config.value.suggestions.questionId) {
       i.data = value;
     }
     return i;

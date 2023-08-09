@@ -384,6 +384,8 @@ export const useProjectDataStore = defineStore({
 
           // return resp[0];
           this.$state.new_project_data = resp;
+          message.success("Changes saved successfully!");
+          return resp;
         })
         .finally(() => (this.loading = false));
     },

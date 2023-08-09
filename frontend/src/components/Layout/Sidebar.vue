@@ -42,7 +42,7 @@ const projectStore = useProjectStore();
 const menuItems = [
   { label: "Dashboard", path: "/" },
   { label: "Project Info", path: "/project-info" },
-  { label: "Background and context", name: "forms", params: { module: "background" } },
+  { label: "Background and context", path: "/background-and-context" },
   {
     label: "Project Objectives",
     path: "/project-objectives",
@@ -119,8 +119,7 @@ watch(projectSelected, (newVal) => {
     width="260px"
   >
     <div class="logo">
-      <Image :src="LogoLarge">
-      </Image>
+      <Image :src="LogoLarge"> </Image>
     </div>
 
     <Divider></Divider>

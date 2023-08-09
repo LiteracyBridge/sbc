@@ -21,6 +21,7 @@ import Audience from "@/views/Audience.vue";
 import CommunicationsIndex from "@/views/communications/CommunicationsIndex.vue";
 import ProjectInfo from "@/views/ProjectInfo.vue";
 import Partners from "@/views/Partners.vue";
+import BackgroundAndContext from "@/views/BackgroundAndContext.vue";
 import ProjectDocsIndex from "@/views/project-docs/ProjectDocsIndex.vue";
 import { User } from "@/types";
 
@@ -125,6 +126,11 @@ const router = createRouter({
       path: "/login",
       name: "login",
       component: Login,
+    },
+    {
+      path: "/background-and-context",
+      name: "background-and-context",
+      component: BackgroundAndContext,
     },
     {
       path: "/drivers",
