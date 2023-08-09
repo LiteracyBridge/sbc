@@ -1,18 +1,26 @@
 <script setup lang="ts">
+import {
+  Card,
+  Form,
+  FormItem,
+  Image,
+  Textarea,
+  Input,
+  Button,
+  Divider,
+  Spin,
+  Popconfirm,
+  Modal,
+} from "ant-design-vue";
+import { computed, onMounted, reactive, ref, watch } from "vue";
+import type { FormInstance } from "ant-design-vue";
+import { ProjectDataForm, useProjectDataStore } from "@/stores/projectData";
+import GPTSuggestionPanel from "@/components/GPTSuggestionPanel.vue";
+import BroadcastComponent from "@/components/BroadcastComponent.vue";
 
-import { Card, Form, FormItem, Image, Textarea, type FormInstance, Input, Button, Divider, message, Popconfirm } from 'ant-design-vue';
-import { computed, onMounted, reactive, ref, watch } from 'vue';
-
-import { useProjectDataStore } from '@/stores/projectData';
-import GPTSuggestionPanel from '@/components/GPTSuggestionPanel.vue';
-import MessageModal from '@/components/MessageModal.vue';
-import BroadcastComponent from '@/components/BroadcastComponent.vue';
-
-import { DeleteOutlined, MinusCircleOutlined, PlusOutlined } from '@ant-design/icons-vue';
-import { useUserStore } from '@/stores/user';
-import { ApiRequest } from '@/apis/api';
-import { useProjectStore } from '@/stores/projects';
-import type { ProjectData } from '@/types';
+import { DeleteOutlined, MinusCircleOutlined, PlusOutlined } from "@ant-design/icons-vue";
+import { ProjectDataModule, ProjectData, ProjectDataName } from "@/types";
+import { onBeforeRouteLeave } from "vue-router";
 
 interface Objective {
   value: string;
@@ -20,24 +28,29 @@ interface Objective {
   is_new?: boolean;
 }
 
-const BULB_ICON = "/images/lightbulb.png"
+const BULB_ICON = "/images/lightbulb.png";
 
 const store = useProjectDataStore();
 
+const form = ref<ProjectDataForm[]>([]);
 const config = ref({
   messages: false,
+  pendingSave: false,
   suggestions: {
     questionId: null,
     isOpened: false,
-    module: "objectives"
+    module: ProjectDataModule.objectives,
   },
 });
 
 // Dynamic objectives forms
 const objectivesFormRef = ref<FormInstance>();
-const dynamicValidateForm = reactive<{ objectives: Objective[], deleted: number[] }>({
+const dynamicValidateForm = reactive<{
+  objectives: Partial<ProjectDataForm[]>;
+  deleted: number[];
+}>({
   objectives: [],
-  deleted: []
+  deleted: [],
 });
 
 const formItemLayout = {
@@ -67,59 +80,124 @@ function updateData(event: any, id: number) {
   store.setData(id, event.target.value);
 }
 
-
 function addObjective() {
   dynamicValidateForm.objectives.push({
-    value: '',
+    data: "",
     id: Date.now(),
-    is_new: true
+  } as ProjectDataForm);
+}
+
+// const objectivesModel = computed(() => {
+//   return dynamicValidateForm.objectives.map((i) => i.value);
+// });
+
+// function fetchData() {
+//   store.download().then((resp) => {
+//     dynamicValidateForm.objectives = store.new_project_data
+//       .filter((p) => p.module == "objectives")
+//       .map((i) => {
+//         return {
+//           value: i.data,
+//           id: i.id,
+//           is_new: false,
+//         };
+//       });
+
+//     if (dynamicValidateForm.objectives.length == 0) {
+//       addObjective();
+//     }
+//   });
+// }
+
+function deleteObj(id: number | string) {
+  dynamicValidateForm.objectives = dynamicValidateForm.objectives.map((i) => {
+    if (i.id == id) i.deleted = true;
+    return i;
   });
-};
+  config.value.pendingSave = true;
+}
 
+function handleOnMounted() {
+  dynamicValidateForm.objectives = store.new_project_data
+    .filter((p) => p.module == ProjectDataModule.objectives)
+    .map((i) => {
+      return {
+        data: i.data,
+        id: i.id,
+        deleted: false,
+      } as ProjectDataForm;
+    });
 
-function fetchData() {
-  store.download().then((resp) => {
-    dynamicValidateForm.objectives = store.new_project_data
-      .filter(p => p.module == "objectives")
-      .map(i => {
-        return {
-          value: i.data,
-          id: i.id,
-          is_new: false
-        }
-      });
+  if (dynamicValidateForm.objectives.length == 0) {
+    addObjective();
+  }
 
-    if (dynamicValidateForm.objectives.length == 0) {
-      addObjective();
-    }
+  form.value = store
+    .questionsForTopic(config.value.suggestions.module)
+    .map((question) => {
+      const item = store.findByQuestionId(question.id);
+      return {
+        id: item?.id,
+        q_id: question.id,
+        label: question.q2u,
+        showBuild: question.bulb,
+        data: item?.data || "",
+        module: ProjectDataModule.objectives,
+        deleted: false,
+        name: item.name || "objective",
+      };
+    });
+}
+
+function saveChanges() {
+  const temp = dynamicValidateForm.objectives.map((i) => ({
+    id: i?.id,
+    q_id: 10,
+    label: "",
+    showBuild: false,
+    data: i.data || "",
+    module: ProjectDataModule.objectives,
+    deleted: i.deleted || false,
+    name: ProjectDataName.specific_objective,
+  }));
+
+  store.addOrUpdate([...temp, ...form.value]).then((resp) => {
+    config.value.pendingSave = false;
+    handleOnMounted();
+    // if (resp != null) {
+    //   const index = dynamicValidateForm.objectives.findIndex((i) => i.id == id);
+
+    //   dynamicValidateForm.objectives[index] = {
+    //     value: resp.data,
+    //     id: resp.id,
+    //     is_new: false,
+    //   };
+    // }
   });
 }
 
-function deleteObj(id: number | string, name: string,  q_id: number, event: InputEvent){
-  store.deleteData(id).then((resp) => {
-    if(resp != null){
-      const temp = dynamicValidateForm.objectives;
-      const index = temp.findIndex(i => i.id == id);
-      temp.splice(index, 1);
-
-      dynamicValidateForm.objectives = temp;
-    }
-  });
-}
-
-function saveChanges(id: number|string, name: string,  q_id: number, event: InputEvent){
-  store.addOrUpdate({id, name, module: "objectives", q_id, value: (event.target as HTMLInputElement).value})
-  .then((resp) => {
-    if(resp != null){
-      const index = dynamicValidateForm.objectives.findIndex(i => i.id == id);
-
-      dynamicValidateForm.objectives[index] = {value: resp.data, id: resp.id, is_new: false};
-    }
-  });
-}
+// function saveChanges2() {
+//   store.addOrUpdate(form.value).then((resp) => (config.value.pendingSave = false));
+// }
 
 onMounted(() => {
-  fetchData();
+  handleOnMounted();
+});
+
+onBeforeRouteLeave((to, from, next) => {
+  if (config.value.pendingSave) {
+    Modal.confirm({
+      title: "You have unsaved changes. Are you sure you want to leave?",
+      onOk: () => {
+        next();
+      },
+      onCancel: () => {
+        next(false);
+      },
+    });
+  } else {
+    next();
+  }
 });
 </script>
 
@@ -132,110 +210,109 @@ onMounted(() => {
   >
   </GPTSuggestionPanel>
 
-  <Card title="Project Objectives" :bordered="false" :loading="store.loading">
+  <Card title="Project Objectives" :bordered="false">
     <template #extra>
-      <BroadcastComponent
-        direction="horizontal"
-        :module="config.suggestions.module"
-      ></BroadcastComponent>
+      <Button type="primary" @click="saveChanges()">Save Changes</Button>
     </template>
 
-    <Form layout="vertical">
-      <FormItem
-        :name="`input-${count + 1}`"
-        v-for="(q, count) in store.questionsForTopic(config.suggestions.module)"
-        :key="q.id"
+    <BroadcastComponent :module="config.suggestions.module"></BroadcastComponent>
+
+    <Spin :spinning="store.loading">
+      <Form layout="vertical">
+        <FormItem :name="`input-${count + 1}`" v-for="(q, count) in form" :key="q.q_id">
+          <template #label>
+            <span class="font-weight-bold"> {{ count + 1 }}. {{ q.label }}</span>
+          </template>
+
+          <img
+            v-if="q.showBuild"
+            :src="BULB_ICON"
+            ref="iconRefs"
+            @click="showPanel(q.q_id)"
+            class="image is-32x32"
+          />
+
+          <Textarea
+            @change="config.pendingSave = true"
+            v-model:value="q.data"
+            :rows="7"
+            :cols="40"
+            style="width: 70%"
+          ></Textarea>
+        </FormItem>
+      </Form>
+
+      <!-- <Divider>What specific objective(s) will your project achieve? What changes will your project make happen?</Divider> -->
+
+      <Form
+        ref="objectivesFormRef"
+        name="dynamic_form_item"
+        :model="dynamicValidateForm"
+        v-bind="formItemLayoutWithOutLabel"
+        layout="vertical"
       >
-        <template #label>
-          <span class="font-weight-bold"> {{ count + 1 }}. {{ q.q2u }}</span>
-        </template>
-
-        <img
-          v-if="q.bulb"
-          :src="BULB_ICON"
-          ref="iconRefs"
-          @click="showPanel(q.id)"
-          class="image is-32x32"
-        />
-
-        <Textarea
-          @change="updateData($event, q.id)"
-          :value="store.getData(q.id)"
-          :rows="7"
-          :cols="40"
-          style="width: 70%"
-        ></Textarea>
-      </FormItem>
-    </Form>
-
-    <!-- <Divider>What specific objective(s) will your project achieve? What changes will your project make happen?</Divider> -->
-
-    <Form
-      ref="objectivesFormRef"
-      name="dynamic_form_item"
-      :model="dynamicValidateForm"
-      v-bind="formItemLayoutWithOutLabel"
-      layout="vertical"
-    >
-      <FormItem
-        v-for="(objective, index) in dynamicValidateForm.objectives"
-        :key="index"
-        v-bind="index === 0 ? formItemLayout : {}"
-        :name="['objectives', index, 'value']"
-        :rules="{
-          required: false,
-          message: 'Objective can not be empty',
-          trigger: 'change',
-        }"
-      >
-        <template #label v-if="index == 0">
-          <span class="font-weight-bold"
-            >{{
-              index != 0
-                ? ""
-                : "3. What specific objective(s) will your project achieve? What changes will your project make happen?"
-            }}
-          </span>
-        </template>
-        <Input
-          v-model:value="objective.value"
-          placeholder="Enter objective"
-          style="width: 60%"
-          @change="saveChanges(objective.id, 'specific_objective', 10, $event)"
-        />
-
-        <Popconfirm
-          title="All associated theory of change, communications and indictors will be deleted. Are you sure?"
-          @confirm="deleteObj(objective.id, 'specific_objective', 10, $event)"
+        <FormItem
+          v-for="(objective, index) in dynamicValidateForm.objectives.filter(
+            (i) => !(i.deleted ?? false)
+          )"
+          :key="index"
+          v-bind="index === 0 ? formItemLayout : {}"
+          :name="['objectives', index, 'value']"
+          :rules="{
+            required: false,
+            message: 'Objective can not be empty',
+            trigger: 'change',
+          }"
         >
-          <Button
-            type="primary"
-            :ghost="true"
-            :danger="true"
-            size="small"
-            v-if="dynamicValidateForm.objectives.length > 1"
-            class="ml-2"
-            :disabled="dynamicValidateForm.objectives.length === 1"
+          <template #label v-if="index == 0">
+            <span class="font-weight-bold"
+              >{{
+                index != 0
+                  ? ""
+                  : "3. What specific objective(s) will your project achieve? What changes will your project make happen?"
+              }}
+            </span>
+          </template>
+          <Input
+            v-model:value="objective.data"
+            placeholder="Enter objective"
+            style="width: 60%"
+            @change="config.pendingSave = true"
+          />
+
+          <Popconfirm
+            title="All associated theory of change, communications and indictors will be deleted. Are you sure?"
+            @change="deleteObj(objective.id)"
           >
-            <template #icon>
-              <DeleteOutlined />
-            </template>
-            Delete
+            <Button
+              type="primary"
+              :ghost="true"
+              :danger="true"
+              size="small"
+              v-if="dynamicValidateForm.objectives.length > 1"
+              class="ml-2"
+              :disabled="dynamicValidateForm.objectives.length === 1"
+            >
+              <template #icon>
+                <DeleteOutlined />
+              </template>
+              Delete
+            </Button>
+          </Popconfirm>
+        </FormItem>
+
+        <FormItem v-bind="formItemLayoutWithOutLabel">
+          <Button type="primary" :ghost="true" style="width: 60%" @click="addObjective">
+            <PlusOutlined />
+            Add Objective
           </Button>
-        </Popconfirm>
-      </FormItem>
+        </FormItem>
 
-      <FormItem v-bind="formItemLayoutWithOutLabel">
-        <Button type="primary" :ghost="true" style="width: 60%" @click="addObjective">
-          <PlusOutlined />
-          Add Objective
-        </Button>
-      </FormItem>
-
-      <!-- <FormItem v-bind="formItemLayoutWithOutLabel">
+        <!-- <FormItem v-bind="formItemLayoutWithOutLabel">
               <Button type="primary" html-type="submit" @click="submitForm">Submit</Button>
               <Button style="margin-left: 10px" @click="resetForm">Reset</Button>
             </FormItem> -->
-    </Form>
+      </Form>
+    </Spin>
   </Card>
 </template>

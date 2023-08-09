@@ -13,7 +13,7 @@ import {
   Spin,
 } from "ant-design-vue";
 import { onMounted, ref, watch } from "vue";
-import { ProjectDataUpdateDto, useProjectDataStore } from "@/stores/projectData";
+import { ProjectDataForm, useProjectDataStore } from "@/stores/projectData";
 import GPTSuggestionPanel from "@/components/GPTSuggestionPanel.vue";
 import { useTheoryOfChangeStore } from "@/stores/theory_of_change";
 import { ProjectDataModule } from "@/types";
@@ -24,16 +24,7 @@ const BULB_ICON = "/images/lightbulb.png";
 
 const projectDataStore = useProjectDataStore();
 
-const form = ref<
-  {
-    label: string;
-    data: string;
-    module: ProjectDataModule;
-    id?: number;
-    q_id: number;
-    showBuild: boolean;
-  }[]
->([]);
+const form = ref<ProjectDataForm[]>([]);
 const config = ref({
   messages: false,
   loading: false,
@@ -61,7 +52,7 @@ function showPanel(id: string | number) {
 
 function saveChanges() {
   projectDataStore
-    .addOrUpdate(form.value as ProjectDataUpdateDto[])
+    .addOrUpdate(form.value)
     .then((resp) => (config.value.pendingSave = false));
 }
 
@@ -77,13 +68,13 @@ onMounted(() => {
         showBuild: question.bulb,
         data: item?.data || "",
         module: ProjectDataModule.basics,
+        deleted: false,
       };
     });
 });
 
 onBeforeRouteLeave((to, from, next) => {
   if (config.value.pendingSave) {
-    // window.confirm("You have unsaved changes. Are you sure you want to leave?");
     Modal.confirm({
       title: "You have unsaved changes. Are you sure you want to leave?",
       onOk: () => {

@@ -7,11 +7,14 @@ import { ProjectData, ProjectDataModule, ProjectDataName } from "@/types";
 import { message } from "ant-design-vue";
 import { twilioBroadcast } from "../apis/lambda";
 
-export class ProjectDataUpdateDto {
-  id: number | string;
+export class ProjectDataForm {
+  id?: number | string;
   name?: string;
   q_id: number;
   data: string;
+  label: string;
+  showBuild: boolean = false;
+  deleted: boolean = false;
   module: ProjectDataModule;
 }
 
@@ -347,7 +350,7 @@ export const useProjectDataStore = defineStore({
         });
     },
 
-    async addOrUpdate(form: ProjectDataUpdateDto[]) {
+    async addOrUpdate(form: ProjectDataForm[]) {
       this.loading = true;
       return ApiRequest.post<ProjectData>(
         `project/${useProjectStore().prj_id}/data`,
