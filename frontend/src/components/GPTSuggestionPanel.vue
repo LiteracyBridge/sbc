@@ -91,9 +91,9 @@ const closeDrawer = () => {
 };
 
 const saveAndClose = () => {
-  if (props.ai == null) {
-    projectStore.setData(props.questionId, formInput.value);
-  }
+  // if (props.ai == null) {
+  //   projectStore.setData(props.questionId, formInput.value);
+  // }
   emit("saved", formInput.value);
   closeDrawer();
 };
