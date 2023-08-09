@@ -47,7 +47,6 @@ const config = ref({
 const objectivesFormRef = ref<FormInstance>();
 const dynamicValidateForm = reactive<{
   items: Partial<ProjectDataForm[]>;
-  deleted: Partial<ProjectDataForm[]>;
 }>({
   items: [],
 });
@@ -119,7 +118,7 @@ function deleteObj(id: number | string) {
 
 function handleOnMounted() {
   dynamicValidateForm.items = store.new_project_data
-    .filter((p) => p.module == ProjectDataModule.objectives)
+    .filter((p) => p.name == ProjectDataName.specific_objective)
     .map((i) => {
       return {
         data: i.data,
@@ -199,6 +198,15 @@ onBeforeRouteLeave((to, from, next) => {
     next();
   }
 });
+
+const handleSuggestionSave = (value: string) => {
+  form.value = form.value.map((i) => {
+    if (i.showBuild) {
+      i.data = value;
+    }
+    return i;
+  });
+};
 </script>
 
 <template>
@@ -207,6 +215,7 @@ onBeforeRouteLeave((to, from, next) => {
     @is-closed="config.suggestions.isOpened = false"
     :question-id="config.suggestions.questionId"
     :module="config.suggestions.module"
+    @saved="handleSuggestionSave"
   >
   </GPTSuggestionPanel>
 
@@ -273,6 +282,7 @@ onBeforeRouteLeave((to, from, next) => {
               }}
             </span>
           </template>
+
           <Input
             v-model:value="objective.data"
             placeholder="Enter objective"
