@@ -22,12 +22,6 @@ import { DeleteOutlined, MinusCircleOutlined, PlusOutlined } from "@ant-design/i
 import { ProjectDataModule, ProjectData, ProjectDataName } from "@/types";
 import { onBeforeRouteLeave } from "vue-router";
 
-interface Objective {
-  value: string;
-  id: number;
-  is_new?: boolean;
-}
-
 const BULB_ICON = "/images/lightbulb.png";
 
 const store = useProjectDataStore();
@@ -51,31 +45,10 @@ const dynamicValidateForm = reactive<{
   items: [],
 });
 
-const formItemLayout = {
-  // labelCol: {
-  //   xs: { span: 24 },
-  //   sm: { span: 4 },
-  // },
-  // wrapperCol: {
-  //   xs: { span: 24 },
-  //   sm: { span: 20 },
-  // },
-};
-const formItemLayoutWithOutLabel = {
-  // wrapperCol: {
-  //   xs: { span: 24, offset: 0 },
-  //   sm: { span: 20, offset: 4 },
-  // },
-};
-
 function showPanel(id: string | number) {
   config.value.suggestions.questionId = id;
   config.value.suggestions.module = config.value.suggestions.module;
   config.value.suggestions.isOpened = true;
-}
-
-function updateData(event: any, id: number) {
-  store.setData(id, event.target.value);
 }
 
 function addObjective() {
@@ -85,28 +58,6 @@ function addObjective() {
     deleted: false,
   } as ProjectDataForm);
 }
-
-// const objectivesModel = computed(() => {
-//   return dynamicValidateForm.objectives.map((i) => i.value);
-// });
-
-// function fetchData() {
-//   store.download().then((resp) => {
-//     dynamicValidateForm.objectives = store.new_project_data
-//       .filter((p) => p.module == "objectives")
-//       .map((i) => {
-//         return {
-//           value: i.data,
-//           id: i.id,
-//           is_new: false,
-//         };
-//       });
-
-//     if (dynamicValidateForm.objectives.length == 0) {
-//       addObjective();
-//     }
-//   });
-// }
 
 function deleteObj(id: number | string) {
   dynamicValidateForm.items = dynamicValidateForm.items.map((i) => {
@@ -163,21 +114,8 @@ function saveChanges() {
   store.addOrUpdate([...temp, ...form.value]).then((resp) => {
     config.value.pendingSave = false;
     handleOnMounted();
-    // if (resp != null) {
-    //   const index = dynamicValidateForm.objectives.findIndex((i) => i.id == id);
-
-    //   dynamicValidateForm.objectives[index] = {
-    //     value: resp.data,
-    //     id: resp.id,
-    //     is_new: false,
-    //   };
-    // }
   });
 }
-
-// function saveChanges2() {
-//   store.addOrUpdate(form.value).then((resp) => (config.value.pendingSave = false));
-// }
 
 onMounted(() => {
   handleOnMounted();
@@ -257,7 +195,6 @@ const handleSuggestionSave = (value: string) => {
         ref="objectivesFormRef"
         name="dynamic_form_item"
         :model="dynamicValidateForm"
-        v-bind="formItemLayoutWithOutLabel"
         layout="vertical"
       >
         <FormItem
@@ -265,7 +202,6 @@ const handleSuggestionSave = (value: string) => {
             (i) => !i.deleted
           )"
           :key="objective.id"
-          v-bind="index === 0 ? formItemLayout : {}"
           :name="['items', index, 'value']"
           :rules="{
             required: false,
@@ -311,7 +247,7 @@ const handleSuggestionSave = (value: string) => {
           </Popconfirm>
         </FormItem>
 
-        <FormItem v-bind="formItemLayoutWithOutLabel">
+        <FormItem>
           <Button type="primary" :ghost="true" style="width: 60%" @click="addObjective">
             <PlusOutlined />
             Add Objective

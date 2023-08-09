@@ -7,10 +7,8 @@ import {
   Textarea,
   Input,
   Button,
-  Divider,
   Row,
   Col,
-  message,
   Tooltip,
   Modal,
   Spin,
@@ -21,17 +19,8 @@ import { ProjectDataForm, useProjectDataStore } from "@/stores/projectData";
 import GPTSuggestionPanel from "@/components/GPTSuggestionPanel.vue";
 import BroadcastComponent from "@/components/BroadcastComponent.vue";
 import { DeleteOutlined, PlusOutlined, InfoCircleOutlined } from "@ant-design/icons-vue";
-import { ApiRequest } from "@/apis/api";
-import { useProjectStore } from "@/stores/projects";
 import { ProjectData, ProjectDataModule, ProjectDataName } from "@/types";
-import { useUserStore } from "@/stores/user";
 import { onBeforeRouteLeave } from "vue-router";
-
-interface Objective {
-  value: string;
-  id: number;
-  is_new?: boolean;
-}
 
 const BULB_ICON = "/images/lightbulb.png";
 
@@ -45,7 +34,7 @@ const config = ref({
   suggestions: {
     questionId: null,
     isOpened: false,
-    module: "audiences",
+    module: ProjectDataModule.audiences,
   },
 });
 
@@ -54,36 +43,15 @@ const audienceFormRef = ref<FormInstance>();
 const primaryFormRef = ref<FormInstance>();
 const secondaryAudienceForm = reactive<{
   audiences: ProjectDataForm[];
-  deleted: number[];
 }>({
   audiences: [],
-  deleted: [],
 });
 
 const primaryAudienceForm = reactive<{
   audiences: ProjectDataForm[];
-  deleted: number[];
 }>({
   audiences: [],
-  deleted: [],
 });
-
-const formItemLayout = {
-  // labelCol: {
-  //   xs: { span: 24 },
-  //   sm: { span: 4 },
-  // },
-  // wrapperCol: {
-  //   xs: { span: 24 },
-  //   sm: { span: 20 },
-  // },
-};
-const formItemLayoutWithOutLabel = {
-  // wrapperCol: {
-  //   xs: { span: 24, offset: 0 },
-  //   sm: { span: 20, offset: 4 },
-  // },
-};
 
 function showPanel(id: string | number) {
   config.value.suggestions.questionId = id;
@@ -121,13 +89,6 @@ function saveChanges() {
   store.addOrUpdate([...temp1, ...temp2, ...form.value]).then((resp) => {
     config.value.pendingSave = false;
     handleOnMounted();
-    // store.addOrUpdate({id, name, module: "audiences", q_id, value: (event.target as HTMLInputElement).value})
-    // .then((resp) => {
-    //   if(resp != null){
-    //     const index = (primary? primaryAudienceForm: secondaryAudienceForm).audiences.findIndex(i => i.id == id);
-
-    //     (primary? primaryAudienceForm: secondaryAudienceForm).audiences[index] = {value: resp.data, id: resp.id, is_new: false};
-    //   }
   });
 }
 
@@ -143,39 +104,7 @@ function deleteAudience(id: number | string, primary: boolean) {
       return i;
     });
   }
-
-  // config.value.pendingSave = true;
-  // store.deleteData(id).then((resp) => {
-  //   if (resp != null) {
-  //     const temp = (primary ? primaryAudienceForm : secondaryAudienceForm).audiences;
-  //     const index = temp.findIndex((i) => i.id == id);
-  //     temp.splice(index, 1);
-
-  //     (primary ? primaryAudienceForm : secondaryAudienceForm).audiences = temp;
-  //   }
-  // });
 }
-
-// function removeAudience(item: Objective, primary: boolean) {
-//   if (primary) {
-//     let index = primaryAudienceForm.audiences.indexOf(item);
-//     if (index !== -1) {
-//       const [el] = primaryAudienceForm.audiences.splice(index, 1);
-//       if (!el.is_new) {
-//         primaryAudienceForm.deleted.push(el.id);
-//       }
-//     }
-//     return;
-//   }
-
-//   let index = secondaryAudienceForm.audiences.indexOf(item);
-//   if (index !== -1) {
-//     const [el] = secondaryAudienceForm.audiences.splice(index, 1);
-//     if (!el.is_new) {
-//       secondaryAudienceForm.deleted.push(el.id);
-//     }
-//   }
-// }
 
 function addAudience(primary: boolean) {
   if (primary) {
@@ -193,71 +122,6 @@ function addAudience(primary: boolean) {
     deleted: false,
   } as ProjectDataForm);
 }
-
-// function saveForms() {
-//   // Save secondary audience
-//   audienceFormRef.value.validateFields().then((values) => {
-//     // config.value.loading = true;
-
-//     store.updateData({
-//       name: "secondary_audience",
-//       editing_user_id: useUserStore().id,
-//       added: secondaryAudienceForm.audiences
-//         .filter(i => i.is_new).map(i => i.value),
-//       updated: secondaryAudienceForm.audiences.filter(i => !i.is_new)
-//         .map(i => {
-//           const _item: Record<string, any> = {};
-//           _item[i.id] = i.value;
-//           return _item;
-//         }),
-//       removed: secondaryAudienceForm.deleted,
-//       module: "audiences"
-//     })
-//   });
-
-//   // Save primary audience
-//   primaryFormRef.value.validateFields().then((values) => {
-//     // config.value.loading = true;
-
-//     store.updateData({
-//       name: "primary_audience",
-//       editing_user_id: useUserStore().id,
-//       added: primaryAudienceForm.audiences
-//         .filter(i => i.is_new).map(i => i.value),
-//       updated: primaryAudienceForm.audiences.filter(i => !i.is_new)
-//         .map(i => {
-//           const _item: Record<string, any> = {};
-//           _item[i.id] = i.value;
-//           return _item;
-//         }),
-//       removed: primaryAudienceForm.deleted,
-//       module: "audiences"
-//     })
-//   });
-
-// }
-
-// function fetchData() {
-//   config.value.loading = true;
-//   ApiRequest.get<ProjectData>(`project/${useProjectStore().prj_id}/data`).then((resp) => {
-//     config.value.projectData = resp;
-//     secondaryAudienceForm.audiences = resp
-//       .filter(p => p.module == config.value.suggestions.module)
-//       .map(i => {
-//         return {
-//           value: i.data,
-//           id: i.id,
-//           is_new: false
-//         }
-//       });
-
-//     if (secondaryAudienceForm.audiences.length == 0) {
-//       addAudience(false);
-//     }
-//   })
-//     .catch(err => message.error(err.message))
-//     .finally(() => config.value.loading = false);
-// }
 
 function handleOnMounted() {
   secondaryAudienceForm.audiences = store.new_project_data
@@ -307,37 +171,6 @@ function handleOnMounted() {
 
 onMounted(() => {
   handleOnMounted();
-
-  // store.download()
-  //   .then((_resp) => {
-  //     secondaryAudienceForm.audiences = store.new_project_data
-  //       .filter(p => p.name == "secondary_audience")
-  //       .map(i => {
-  //         return {
-  //           value: i.data,
-  //           id: i.id,
-  //           is_new: false
-  //         }
-  //       });
-
-  //     if (secondaryAudienceForm.audiences.length == 0) {
-  //       addAudience(false);
-  //     }
-
-  //     primaryAudienceForm.audiences = store.new_project_data
-  //       .filter(p => p.name == "primary_audience")
-  //       .map(i => {
-  //         return {
-  //           value: i.data,
-  //           id: i.id,
-  //           is_new: false
-  //         }
-  //       });
-
-  //     if (primaryAudienceForm.audiences.length == 0) {
-  //       addAudience(true);
-  //     }
-  //   })
 });
 
 onBeforeRouteLeave((to, from, next) => {
@@ -385,12 +218,7 @@ const handleSuggestionSave = (value: string) => {
     <BroadcastComponent :module="config.suggestions.module"></BroadcastComponent>
 
     <Spin :spinning="store.loading" size="large">
-      <Form
-        ref="primaryFormRef"
-        :model="primaryAudienceForm"
-        layout="vertical"
-        v-bind="formItemLayoutWithOutLabel"
-      >
+      <Form ref="primaryFormRef" :model="primaryAudienceForm" layout="vertical">
         <Row>
           <Col
             :span="16"
@@ -400,7 +228,6 @@ const handleSuggestionSave = (value: string) => {
           >
             <FormItem
               :key="index"
-              v-bind="index === 0 ? formItemLayout : {}"
               :name="['audiences', index, 'value']"
               :rules="{
                 required: false,
@@ -443,7 +270,7 @@ const handleSuggestionSave = (value: string) => {
           </Col>
         </Row>
 
-        <FormItem v-bind="formItemLayoutWithOutLabel">
+        <FormItem>
           <Button
             type="primary"
             :ghost="true"
@@ -461,7 +288,6 @@ const handleSuggestionSave = (value: string) => {
         name="audience-form-item"
         :model="secondaryAudienceForm"
         layout="vertical"
-        v-bind="formItemLayoutWithOutLabel"
       >
         <Row>
           <Col
@@ -472,7 +298,6 @@ const handleSuggestionSave = (value: string) => {
           >
             <FormItem
               :key="index"
-              v-bind="index === 0 ? formItemLayout : {}"
               :name="['audiences', index, 'value']"
               :rules="{
                 required: false,
@@ -524,7 +349,7 @@ const handleSuggestionSave = (value: string) => {
           </Col>
         </Row>
 
-        <FormItem v-bind="formItemLayoutWithOutLabel">
+        <FormItem>
           <Button
             type="primary"
             :ghost="true"
