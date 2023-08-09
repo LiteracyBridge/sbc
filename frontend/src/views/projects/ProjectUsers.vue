@@ -84,7 +84,7 @@ function saveNewUser() {
 }
 
 function fetchUsers() {
-  ApiRequest.get<User>(`users/`, { email: userStore.email }).then((resp) => {
+  ApiRequest.get<User>(`users/organisation/${userStore.email}`).then((resp) => {
     console.log(resp);
     allUsers.value = resp;
   });
