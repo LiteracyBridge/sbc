@@ -10,6 +10,7 @@ import {
   Col,
   Button,
   Modal,
+  Spin,
 } from "ant-design-vue";
 import { onMounted, ref, watch } from "vue";
 import { ProjectDataUpdateDto, useProjectDataStore } from "@/stores/projectData";
@@ -57,6 +58,7 @@ function showPanel(id: string | number) {
 // const updateSector = (value: any, id: number) => {
 //   projectDataStore.setData(id, value);
 // };
+
 function saveChanges() {
   projectDataStore
     .addOrUpdate(form.value as ProjectDataUpdateDto[])
@@ -67,7 +69,7 @@ onMounted(() => {
   form.value = projectDataStore
     .questionsForTopic(config.value.suggestions.module)
     .map((question) => {
-      const item = projectDataStore.getData(question.id);
+      const item = projectDataStore.findByQuestionId(question.id);
       return {
         id: item?.id,
         q_id: question.id,
@@ -113,52 +115,54 @@ onBeforeRouteLeave((to, from, next) => {
 
     <BroadcastComponent :module="config.suggestions.module"></BroadcastComponent>
 
-    <Form layout="vertical" ref="infoForm">
-      <Row>
-        <Col :span="14">
-          <FormItem
-            :name="`input-${index + 1}`"
-            v-for="(item, index) in form"
-            :key="index"
-          >
-            <template #label>
-              <span class="font-weight-bold"> {{ index + 1 }}. {{ item.label }} </span>
-            </template>
-            <Select
-              v-if="item.q_id == 1"
-              v-model:value="item.data"
-              style="padding-bottom: 15px"
-              class="font-weight-bold"
-              @change="config.pendingSave = true"
+    <Spin :spinning="projectDataStore.loading">
+      <Form layout="vertical" ref="infoForm">
+        <Row>
+          <Col :span="14">
+            <FormItem
+              :name="`input-${index + 1}`"
+              v-for="(item, index) in form"
+              :key="index"
             >
-              <SelectOption
-                v-for="(sector, index) in useTheoryOfChangeStore().getIndiKitSectors"
-                :key="index"
-                :value="sector"
+              <template #label>
+                <span class="font-weight-bold"> {{ index + 1 }}. {{ item.label }} </span>
+              </template>
+              <Select
+                v-if="item.q_id == 1"
+                v-model:value="item.data"
+                style="padding-bottom: 15px"
+                class="font-weight-bold"
+                @change="config.pendingSave = true"
               >
-                {{ sector }}
-              </SelectOption>
-            </Select>
+                <SelectOption
+                  v-for="(sector, index) in useTheoryOfChangeStore().getIndiKitSectors"
+                  :key="index"
+                  :value="sector"
+                >
+                  {{ sector }}
+                </SelectOption>
+              </Select>
 
-            <!-- <div class="control"> -->
-            <img
-              v-if="item.showBuild"
-              :src="BULB_ICON"
-              ref="iconRefs"
-              @click="showPanel(item.q_id)"
-              class="image is-32x32"
-            />
+              <!-- <div class="control"> -->
+              <img
+                v-if="item.showBuild"
+                :src="BULB_ICON"
+                ref="iconRefs"
+                @click="showPanel(item.q_id)"
+                class="image is-32x32"
+              />
 
-            <Textarea
-              v-if="item.q_id != 1"
-              v-model:value="item.data"
-              :rows="7"
-              :cols="40"
-              @change="config.pendingSave = true"
-            ></Textarea>
-          </FormItem>
-        </Col>
-      </Row>
-    </Form>
+              <Textarea
+                v-if="item.q_id != 1"
+                v-model:value="item.data"
+                :rows="7"
+                :cols="40"
+                @change="config.pendingSave = true"
+              ></Textarea>
+            </FormItem>
+          </Col>
+        </Row>
+      </Form>
+    </Spin>
   </Card>
 </template>

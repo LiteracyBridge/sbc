@@ -218,6 +218,10 @@ export const useProjectDataStore = defineStore({
     answerForQuestionId: (state) => (questionId: number) =>
       state.project_data.filter((d) => d.q_id == questionId)[0],
     getData: (state) => {
+      return (questionId: number): string =>
+        state.new_project_data.find((d) => d.q_id == questionId)?.data;
+    },
+    findByQuestionId: (state) => {
       return (questionId: number): ProjectData | null =>
         state.new_project_data.find((d) => d.q_id == questionId);
     },
@@ -361,21 +365,22 @@ export const useProjectDataStore = defineStore({
         // }
       )
         .then((resp) => {
-          if (resp.length > 0) {
-            const temp = this.$state.new_project_data;
+          // if (resp.length > 0) {
+          //   const temp = this.$state.new_project_data;
 
-            const index = temp.findIndex((i) => i.id == resp[0].id);
+          //   const index = temp.findIndex((i) => i.id == resp[0].id);
 
-            if (index < 0) {
-              temp.push(resp[0]);
-            } else {
-              temp[index] = resp[0];
-            }
+          //   if (index < 0) {
+          //     temp.push(resp[0]);
+          //   } else {
+          //     temp[index] = resp[0];
+          //   }
 
-            this.$state.new_project_data = temp;
-          }
+          //   this.$state.new_project_data = resp;
+          // }
 
-          return resp[0];
+          // return resp[0];
+          this.$state.new_project_data = resp;
         })
         .finally(() => (this.loading = false));
     },
@@ -384,7 +389,7 @@ export const useProjectDataStore = defineStore({
       let summary =
         "\n----\nHere's a summary of the SBC project I want you to analyze:\n";
       for (var q of this.questions) {
-        const a = this.getData(q.id)?.data;
+        const a = this.getData(q.id);
         if (!(a === null || a == "")) {
           summary += q.label + ": " + a + "\n\n";
         }
@@ -440,7 +445,7 @@ export const useProjectDataStore = defineStore({
     buildBroadcastMessage(module: string): string {
       let msg = "";
       for (var q of this.questionsForTopic(module)) {
-        const a = this.getData(q.id)?.data;
+        const a = this.getData(q.id);
         if (a != "") {
           msg += `${q.label} \n${a} \n\n`;
         }
