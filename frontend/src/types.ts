@@ -322,6 +322,7 @@ export enum ProjectDataModule {
   audiences = "audiences",
   project_info = "project_info",
   basics = "basics",
+  background = "background",
 }
 
 export class ProjectData {

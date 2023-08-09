@@ -32,13 +32,13 @@ const config = ref({
   suggestions: {
     questionId: null,
     isOpened: false,
-    module: "basic",
+    module: ProjectDataModule.background,
   },
 });
 
 function showPanel(id: string | number) {
   config.value.suggestions.questionId = id;
-  config.value.suggestions.module = config.value.suggestions.module;
+  // config.value.suggestions.module = config.value.suggestions.module;
   config.value.suggestions.isOpened = true;
 }
 
@@ -67,7 +67,7 @@ onMounted(() => {
         label: question.q2u,
         showBuild: question.bulb,
         data: item?.data || "",
-        module: ProjectDataModule.basics,
+        module: ProjectDataModule.background,
         deleted: false,
       };
     });
@@ -109,7 +109,7 @@ const handleSuggestionSave = (value: string) => {
   >
   </GPTSuggestionPanel>
 
-  <Card title="Project Info" :loading="config.loading" :bordered="false">
+  <Card title="Background and Context" :loading="config.loading" :bordered="false">
     <template #extra>
       <Button type="primary" @click="saveChanges()">Save Changes</Button>
     </template>
