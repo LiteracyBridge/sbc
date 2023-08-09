@@ -3,9 +3,17 @@ import { useUserStore } from "./user";
 import * as api from "../apis/lambda";
 import { useProjectStore } from "./projects";
 import { ApiRequest } from "@/apis/api";
-import { ProjectData } from "@/types";
+import { ProjectData, ProjectDataModule, ProjectDataName } from "@/types";
 import { message } from "ant-design-vue";
 import { twilioBroadcast } from "../apis/lambda";
+
+export class ProjectDataUpdateDto {
+  id: number | string;
+  name?: string;
+  q_id: number;
+  data: string;
+  module: ProjectDataModule;
+}
 
 export const useProjectDataStore = defineStore({
   id: "project_data",
@@ -209,8 +217,10 @@ export const useProjectDataStore = defineStore({
       ).length,
     answerForQuestionId: (state) => (questionId: number) =>
       state.project_data.filter((d) => d.q_id == questionId)[0],
-    getData: (state) => (questionId: number) =>
-      state.project_data[questionId] ? state.project_data[questionId].data : "",
+    getData: (state) => {
+      return (questionId: number): ProjectData | null =>
+        state.new_project_data.find((d) => d.q_id == questionId);
+    },
     // specificObjectives: (state) => {
     //   return state.project_data.filter((d) => d.name == "specific_objectives");
     // },
@@ -280,9 +290,10 @@ export const useProjectDataStore = defineStore({
 
           // Update sector
           this.$state.sector =
-            resp.find((i) => i.name == "sector") ?? new ProjectData();
-          this.$state.sector.name ??= "sector";
-          this.$state.sector.module ??= "project_info";
+            resp.find((i) => i.name == ProjectDataName.sector) ??
+            new ProjectData();
+          this.$state.sector.name ??= ProjectDataName.sector;
+          this.$state.sector.module ??= ProjectDataModule.project_info;
           this.$state.sector.data ??= "";
           this.$state.sector.q_id ??= 1;
 
@@ -332,47 +343,48 @@ export const useProjectDataStore = defineStore({
         });
     },
 
-    async addOrUpdate(form: {
-      id: number | string;
-      name: string;
-      q_id: number;
-      value: string;
-      module: "objectives" | "audiences";
-    }) {
+    async addOrUpdate(form: ProjectDataUpdateDto[]) {
+      this.loading = true;
       return ApiRequest.post<ProjectData>(
         `project/${useProjectStore().prj_id}/data`,
-        {
-          name: form.name,
-          q_id: form.q_id,
-          id: form.id,
-          data: form.value,
-          module: form.module,
+        form.map((i) => ({
+          ...i,
           editing_user_id: useUserStore().id,
-        }
-      ).then((resp) => {
-        if (resp.length > 0) {
-          const temp = this.$state.new_project_data;
+        }))
+        // {
+        //   name: form.name,
+        //   q_id: form.q_id,
+        //   id: form.id,
+        //   data: form.value,
+        //   module: form.module,
+        //   editing_user_id: useUserStore().id,
+        // }
+      )
+        .then((resp) => {
+          if (resp.length > 0) {
+            const temp = this.$state.new_project_data;
 
-          const index = temp.findIndex((i) => i.id == resp[0].id);
+            const index = temp.findIndex((i) => i.id == resp[0].id);
 
-          if (index < 0) {
-            temp.push(resp[0]);
-          } else {
-            temp[index] = resp[0];
+            if (index < 0) {
+              temp.push(resp[0]);
+            } else {
+              temp[index] = resp[0];
+            }
+
+            this.$state.new_project_data = temp;
           }
 
-          this.$state.new_project_data = temp;
-        }
-
-        return resp[0];
-      });
+          return resp[0];
+        })
+        .finally(() => (this.loading = false));
     },
 
     summarizeProject() {
       let summary =
         "\n----\nHere's a summary of the SBC project I want you to analyze:\n";
       for (var q of this.questions) {
-        const a = this.getData(q.id);
+        const a = this.getData(q.id)?.data;
         if (!(a === null || a == "")) {
           summary += q.label + ": " + a + "\n\n";
         }
@@ -428,7 +440,7 @@ export const useProjectDataStore = defineStore({
     buildBroadcastMessage(module: string): string {
       let msg = "";
       for (var q of this.questionsForTopic(module)) {
-        const a = this.getData(q.id);
+        const a = this.getData(q.id)?.data;
         if (a != "") {
           msg += `${q.label} \n${a} \n\n`;
         }

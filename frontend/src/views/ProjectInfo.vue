@@ -1,24 +1,44 @@
 <script setup lang="ts">
+import {
+  Card,
+  Form,
+  FormItem,
+  Select,
+  SelectOption,
+  Textarea,
+  Row,
+  Col,
+  Button,
+} from "ant-design-vue";
+import { onMounted, ref, watch } from "vue";
+import { ProjectDataUpdateDto, useProjectDataStore } from "@/stores/projectData";
+import GPTSuggestionPanel from "@/components/GPTSuggestionPanel.vue";
+import { useTheoryOfChangeStore } from "@/stores/theory_of_change";
+import { ProjectDataModule } from "@/types";
+import BroadcastComponent from "@/components/BroadcastComponent.vue";
 
-import { Card, Form, FormItem, Select, SelectOption, Textarea, type FormInstance, Row, Col } from 'ant-design-vue';
-import { ref, watch } from 'vue';
-import { useProjectDataStore } from '@/stores/projectData';
-import GPTSuggestionPanel from '@/components/GPTSuggestionPanel.vue';
-import { useTheoryOfChangeStore } from '@/stores/theory_of_change'
-import BroadcastComponent from '@/components/BroadcastComponent.vue';
-
-
-const BULB_ICON = "/images/lightbulb.png"
+const BULB_ICON = "/images/lightbulb.png";
 
 const projectDataStore = useProjectDataStore();
 
+const form = ref<
+  {
+    label: string;
+    data: string;
+    module: ProjectDataModule;
+    id?: number;
+    q_id: number;
+    showBuild: boolean;
+  }[]
+>([]);
 const config = ref({
   messages: false,
   loading: false,
+  pendingSave: false,
   suggestions: {
     questionId: null,
     isOpened: false,
-    module: "basic"
+    module: "basic",
   },
 });
 
@@ -34,6 +54,26 @@ function updateData(event: any, id: number) {
 
 const updateSector = (value: any, id: number) => {
   projectDataStore.setData(id, value);
+};
+
+onMounted(() => {
+  form.value = projectDataStore
+    .questionsForTopic(config.value.suggestions.module)
+    .map((question) => {
+      const item = projectDataStore.getData(question.id);
+      return {
+        id: item?.id,
+        q_id: question.id,
+        label: question.q2u,
+        showBuild: question.bulb,
+        data: item?.data || "",
+        module: ProjectDataModule.basics,
+      };
+    });
+});
+
+function saveChanges() {
+  projectDataStore.addOrUpdate(form.value as ProjectDataUpdateDto[]);
 }
 </script>
 
@@ -47,27 +87,26 @@ const updateSector = (value: any, id: number) => {
   </GPTSuggestionPanel>
 
   <Card title="Project Info" :loading="config.loading" :bordered="false">
-  <template #extra >
-    <BroadcastComponent direction="horizontal" :module="config.suggestions.module"></BroadcastComponent>
-  </template>
+    <template #extra>
+      <Button type="primary" @click="saveChanges()">Save Changes</Button>
+    </template>
 
-    <Form layout="vertical">
+    <BroadcastComponent :module="config.suggestions.module"></BroadcastComponent>
+
+    <Form layout="vertical" @values-change="config.pendingSave = true">
       <Row>
         <Col :span="14">
           <FormItem
-            :name="`input-${count + 1}`"
-            v-for="(q, count) in projectDataStore.questionsForTopic(
-              config.suggestions.module
-            )"
-            :key="q.id"
+            :name="`input-${index + 1}`"
+            v-for="(item, index) in form"
+            :key="index"
           >
             <template #label>
-              <span class="font-weight-bold"> {{ count + 1 }}. {{ q.q2u }} </span>
+              <span class="font-weight-bold"> {{ index + 1 }}. {{ item.label }} </span>
             </template>
             <Select
-              v-if="q.id == 1"
-              :value="projectDataStore.getData(q.id)"
-              @change="updateSector($event, q.id)"
+              v-if="item.q_id == 1"
+              v-model:value="item.data"
               style="padding-bottom: 15px"
               class="font-weight-bold"
             >
@@ -82,17 +121,16 @@ const updateSector = (value: any, id: number) => {
 
             <!-- <div class="control"> -->
             <img
-              v-if="q.bulb"
+              v-if="item.showBuild"
               :src="BULB_ICON"
               ref="iconRefs"
-              @click="showPanel(q.id)"
+              @click="showPanel(item.q_id)"
               class="image is-32x32"
             />
 
             <Textarea
-              v-if="q.id != 1"
-              @change="updateData($event, q.id)"
-              :value="projectDataStore.getData(q.id)"
+              v-if="item.q_id != 1"
+              v-model:value="item.data"
               :rows="7"
               :cols="40"
             ></Textarea>

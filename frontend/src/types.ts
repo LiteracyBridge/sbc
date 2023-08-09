@@ -310,6 +310,20 @@ export class Monitoring {
   toc_indicator: TheoryOfChangeIndicator;
 }
 
+export enum ProjectDataName {
+  specific_objective = "specific_objective",
+  secondary_audience = "secondary_audience",
+  primary_audience = "primary_audience",
+  sector = "sector",
+}
+
+export enum ProjectDataModule {
+  objectives = "objectives",
+  audiences = "audiences",
+  project_info = "project_info",
+  basics = "basics",
+}
+
 export class ProjectData {
   id: number;
   q_id: number;
@@ -317,12 +331,8 @@ export class ProjectData {
   editing_user_id: number;
   theory_of_change_id: number;
   data: string;
-  module?: "objectives" | "audiences" | "project_info";
-  name?:
-    | "specific_objective"
-    | "secondary_audience"
-    | "primary_audience"
-    | "sector";
+  module?: ProjectDataModule;
+  name?: ProjectDataName;
 }
 
 export class Communication {

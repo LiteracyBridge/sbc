@@ -11,7 +11,7 @@ from routes import (
     theory_of_change,
     activity_route,
     monitoring,
-    project,
+    project_route,
     lookups,
     organisation_route,
     communication_route,
@@ -138,7 +138,7 @@ app.include_router(
     dependencies=[Depends(models.get_db)],
 )
 app.include_router(
-    project.router,
+    project_route.router,
     prefix="/project",
     tags=["project"],
     dependencies=[Depends(models.get_db)],
