@@ -1,14 +1,23 @@
 <script setup lang="ts">
-import { useUserStore } from '@/stores/user';
-import { InboxOutlined } from '@ant-design/icons-vue';
+import { useUserStore } from "@/stores/user";
+import { InboxOutlined } from "@ant-design/icons-vue";
 import {
-  Modal, type FormInstance, Select, SelectOption,
-  Space, Button, Form, FormItem, Input, Textarea,
-  UploadDragger, type UploadProps, message,
+  Modal,
+  Select,
+  SelectOption,
+  Space,
+  Button,
+  Form,
+  FormItem,
+  Input,
+  Textarea,
+  UploadDragger,
+  message,
   Spin,
- } from 'ant-design-vue';
-import axios from 'axios';
-import { ref, watch } from 'vue';
+} from "ant-design-vue";
+import type { FormInstance, UploadProps } from "ant-design-vue";
+import axios from "axios";
+import { ref, watch } from "vue";
 
 class Feedback {
   type: string;
@@ -22,7 +31,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'close'): void;
+  (e: "close"): void;
 }>();
 
 const userStore = useUserStore();
@@ -38,7 +47,7 @@ watch(props, (newProps) => {
 });
 
 const feedbackFormRef = ref<FormInstance>();
-  const fileList = ref<UploadProps['fileList']>([]);
+const fileList = ref<UploadProps["fileList"]>([]);
 
 function closeModal() {
   feedbackFormRef.value.resetFields();
@@ -46,42 +55,49 @@ function closeModal() {
   config.value.visible = false;
   fileList.value = [];
 
-  emit('close');
+  emit("close");
 }
 
-function saveForm(){
-  feedbackFormRef.value.validateFields()
-    .then((_: any) => {
-      config.value.loading = true;
+function saveForm() {
+  feedbackFormRef.value.validateFields().then((_: any) => {
+    config.value.loading = true;
 
-      const form = config.value.form;
-      form.editing_user_id = userStore.id;
+    const form = config.value.form;
+    form.editing_user_id = userStore.id;
 
-      const formData = new FormData();
+    const formData = new FormData();
 
-      fileList.value.forEach((file: UploadProps['fileList'][number]) => {
-        formData.append('files', file.originFileObj as any);
-      });
-      Object.keys(form).forEach((key) => {
-        // @ts-ignore
-        formData.append(key, form[key]);
-      });
-
-      axios.post(`${import.meta.env.VITE_SBC_API_URL}/feedback`, formData)
-        .then((resp) => {
-          message.success('Your feedback has been submitted successfully!');
-          closeModal();
-        })
-        .catch((err) => {
-          message.error('There was an error submitting your feedback. Please try again:' + err.message);
-        })
-        .finally(() => {
-          config.value.loading = false;
-        });
+    fileList.value.forEach((file: UploadProps["fileList"][number]) => {
+      formData.append("files", file.originFileObj as any);
     });
+    Object.keys(form).forEach((key) => {
+      // @ts-ignore
+      formData.append(key, form[key]);
+    });
+
+    axios
+      .post(`${import.meta.env.VITE_SBC_API_URL}/feedback`, formData, {
+        headers: {
+          Accept: "application/json",
+          Authorization: `Bearer ${userStore.token}`,
+        },
+      })
+      .then((_) => {
+        message.success("Your feedback has been submitted successfully!");
+        closeModal();
+      })
+      .catch((err) => {
+        message.error(
+          "There was an error submitting your feedback. Please try again:" + err.message
+        );
+      })
+      .finally(() => {
+        config.value.loading = false;
+      });
+  });
 }
 
-const beforeUpload: UploadProps['beforeUpload'] = file => {
+const beforeUpload: UploadProps["beforeUpload"] = (file) => {
   fileList.value = [...(fileList.value || []), file];
   return false;
 };
