@@ -46,11 +46,10 @@ const config = ref({
 // Dynamic objectives forms
 const objectivesFormRef = ref<FormInstance>();
 const dynamicValidateForm = reactive<{
-  objectives: Partial<ProjectDataForm[]>;
-  deleted: number[];
+  items: Partial<ProjectDataForm[]>;
+  deleted: Partial<ProjectDataForm[]>;
 }>({
-  objectives: [],
-  deleted: [],
+  items: [],
 });
 
 const formItemLayout = {
@@ -81,9 +80,10 @@ function updateData(event: any, id: number) {
 }
 
 function addObjective() {
-  dynamicValidateForm.objectives.push({
+  dynamicValidateForm.items.push({
     data: "",
     id: Date.now(),
+    deleted: false,
   } as ProjectDataForm);
 }
 
@@ -110,7 +110,7 @@ function addObjective() {
 // }
 
 function deleteObj(id: number | string) {
-  dynamicValidateForm.objectives = dynamicValidateForm.objectives.map((i) => {
+  dynamicValidateForm.items = dynamicValidateForm.items.map((i) => {
     if (i.id == id) i.deleted = true;
     return i;
   });
@@ -118,7 +118,7 @@ function deleteObj(id: number | string) {
 }
 
 function handleOnMounted() {
-  dynamicValidateForm.objectives = store.new_project_data
+  dynamicValidateForm.items = store.new_project_data
     .filter((p) => p.module == ProjectDataModule.objectives)
     .map((i) => {
       return {
@@ -128,7 +128,7 @@ function handleOnMounted() {
       } as ProjectDataForm;
     });
 
-  if (dynamicValidateForm.objectives.length == 0) {
+  if (dynamicValidateForm.items.length == 0) {
     addObjective();
   }
 
@@ -144,13 +144,13 @@ function handleOnMounted() {
         data: item?.data || "",
         module: ProjectDataModule.objectives,
         deleted: false,
-        name: item.name || "objective",
+        name: item?.name || "objective",
       };
     });
 }
 
 function saveChanges() {
-  const temp = dynamicValidateForm.objectives.map((i) => ({
+  const temp = dynamicValidateForm.items.map((i) => ({
     id: i?.id,
     q_id: 10,
     label: "",
@@ -252,12 +252,12 @@ onBeforeRouteLeave((to, from, next) => {
         layout="vertical"
       >
         <FormItem
-          v-for="(objective, index) in dynamicValidateForm.objectives.filter(
-            (i) => !(i.deleted ?? false)
+          v-for="(objective, index) in dynamicValidateForm.items.filter(
+            (i) => !i.deleted
           )"
-          :key="index"
+          :key="objective.id"
           v-bind="index === 0 ? formItemLayout : {}"
-          :name="['objectives', index, 'value']"
+          :name="['items', index, 'value']"
           :rules="{
             required: false,
             message: 'Objective can not be empty',
@@ -282,16 +282,16 @@ onBeforeRouteLeave((to, from, next) => {
 
           <Popconfirm
             title="All associated theory of change, communications and indictors will be deleted. Are you sure?"
-            @change="deleteObj(objective.id)"
+            @confirm="deleteObj(objective.id)"
           >
             <Button
               type="primary"
               :ghost="true"
               :danger="true"
               size="small"
-              v-if="dynamicValidateForm.objectives.length > 1"
+              v-if="dynamicValidateForm.items.length > 1"
               class="ml-2"
-              :disabled="dynamicValidateForm.objectives.length === 1"
+              :disabled="dynamicValidateForm.items.length === 1"
             >
               <template #icon>
                 <DeleteOutlined />

@@ -252,12 +252,12 @@ def update_or_create_data(
 ):
     """Add or update project data"""
 
-    record = ProjectData()
-    is_new = True
-
     for dto in body:
+        record = ProjectData()
+        is_new = True
+
         if dto.dict().get("deleted", False):
-            delete_project_data_item(project_id=project_id, id=record.id, db=db)
+            delete_project_data_item(project_id=project_id, id=dto.id, db=db)
             continue
 
         if dto.id is not None:
@@ -315,6 +315,7 @@ def update_or_create_data(
                 else:
                     toc.name = str(dto.data)
                 db.commit()
+
 
     return get_project_data(project_id=project_id, db=db)
 
