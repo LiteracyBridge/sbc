@@ -51,7 +51,7 @@ function showPanel(id: string | number) {
 // };
 
 function saveChanges() {
-  projectDataStore
+  return projectDataStore
     .addOrUpdate(form.value)
     .then((resp) => (config.value.pendingSave = false));
 }
@@ -76,13 +76,13 @@ onMounted(() => {
 onBeforeRouteLeave((to, from, next) => {
   if (config.value.pendingSave) {
     Modal.confirm({
-      title: "You have unsaved changes. Are you sure you want to leave?",
+      title: "You have unsaved changes. Do you want to save them?",
+      okText: "Yes. Save Changes",
+      cancelText: "Discard Changes",
       onOk: () => {
-        next();
+        saveChanges().then(() => next());
       },
-      onCancel: () => {
-        next(false);
-      },
+      onCancel: () => next(),
     });
   } else {
     next();
