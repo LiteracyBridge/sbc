@@ -182,7 +182,7 @@ function nodesToSubgraph(nodes: Object, category: string) {
   if (Object.keys(arrayInCategory).length) {
     result += "subgraph " + (category == "" ? "no category" : category) + "\n";
     for (const key in arrayInCategory) {
-      result += `${nodes[key].id}[${nodes[key].label}]\n`;
+      result += `${nodes[key].id}["${nodes[key].label}"]\n`;
     }
     result += "end\n";
   }
@@ -334,7 +334,7 @@ const diagram = reactive({
       result += nodesToSubgraph(this.nodes, "");
     } else {
       for (const key in this.nodes) {
-        result += `${this.nodes[key].id}[${this.nodes[key].label}]\n`;
+        result += `${this.nodes[key].id}["${this.nodes[key].label}"]\n`;
       }
     }
     for (const edge of this.edges) {
