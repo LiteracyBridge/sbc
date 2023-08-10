@@ -78,10 +78,12 @@ function openDiscourse() {
 
 <template>
   <div v-if="appStore.isLoading" id="app-loader" style="margin-top: auto">
-    <figure class="image is-128x128">
+    <figure class="image" style="width: 300px;">
       <img src="@/assets/logo-color.png" />
     </figure>
-    <!-- <GridLoader :loading="appStore.isLoading"></GridLoader> -->
+
+    <h2 class="mt-3 text-center" style="font-weight: 630; font-size: 20px;">Loading app, please wait...</h2>
+    <!-- <GridLoader :loading="true" :use-logo="true"></GridLoader> -->
   </div>
 
   <div v-else>
