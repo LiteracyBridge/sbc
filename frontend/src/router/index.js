@@ -25,6 +25,14 @@ import BackgroundAndContext from "@/views/BackgroundAndContext.vue";
 import ProjectDocsIndex from "@/views/project-docs/ProjectDocsIndex.vue";
 import { User } from "@/types";
 
+function disabledConsole() {
+  if (import.meta.env.PROD) {
+    console.log = function () {};
+    // console.error = function () {};
+    // console.warn = function () {};
+  }
+}
+
 let user;
 
 async function getUser() {
@@ -32,22 +40,22 @@ async function getUser() {
     .then(async (data) => {
       if (data && data.signInUserSession) {
         useUserStore().token = data.signInUserSession.accessToken.jwtToken;
-        console.log("here")
+        console.log("here");
 
         // Verify user from server
-        return await ApiRequest.get(
-          `users/${data.attributes.email}`
-        ).then(async (resp) => {
-          if (resp.length == 0) {
-            await Auth.signOut();
-            return { authorized: false };
+        return await ApiRequest.get(`users/${data.attributes.email}`).then(
+          async (resp) => {
+            if (resp.length == 0) {
+              await Auth.signOut();
+              return { authorized: false };
+            }
+            useUserStore().setUser({
+              ...resp[0],
+              token: data.signInUserSession.accessToken.jwtToken,
+            });
+            return { ...data, authorized: true };
           }
-          useUserStore().setUser({
-            ...resp[0],
-            token: data.signInUserSession.accessToken.jwtToken,
-          });
-          return { ...data, authorized: true };
-        });
+        );
       }
 
       AppStore().is_loading = false;
@@ -61,6 +69,8 @@ async function getUser() {
 }
 
 Hub.listen("auth", async (data) => {
+  disabledConsole();
+
   console.log(data.payload.event);
   switch (data.payload.event) {
     case "signIn":
