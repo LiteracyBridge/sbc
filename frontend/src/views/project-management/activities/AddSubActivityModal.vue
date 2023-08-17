@@ -92,18 +92,14 @@ const saveForm = () => {
   });
 };
 
-watch(
-  props,
-  (newProps) => {
-    config.value.visible = newProps.visible;
+watch(props, (newProps) => {
+  config.value.visible = newProps.visible;
 
-    config.value.duration = [
-      dayjs(newProps.draftActivity.start_date),
-      dayjs(newProps.draftActivity.end_date),
-    ];
-  },
-  { deep: true }
-);
+  config.value.duration = [
+    dayjs(newProps.draftActivity.start_date),
+    dayjs(newProps.draftActivity.end_date),
+  ];
+});
 </script>
 
 <template>

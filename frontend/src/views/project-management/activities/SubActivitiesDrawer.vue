@@ -1,9 +1,6 @@
 <script lang="ts" setup>
-// TODO: implement adding activity schedules
 import { ref, watch } from "vue";
 import { useActivityStore } from "@/stores/activities";
-import { useInterventionStore } from "@/stores/interventions";
-import { useDriverStore } from "@/stores/drivers";
 import { useLookupStore } from "@/stores/lookups";
 import { useProjectStore } from "@/stores/projects";
 import { Button, Tag, Drawer, Table, Popconfirm } from "ant-design-vue";
@@ -62,13 +59,9 @@ function editActivity(activity: Activity) {
   // showEditModal.value = true;
 }
 
-watch(
-  props,
-  (newProps) => {
-    config.value.visible = newProps.visible;
-  },
-  { deep: true }
-);
+watch(props, (newProps) => {
+  config.value.visible = newProps.visible;
+});
 
 function closeModal() {
   config.value.visible = false;
@@ -106,12 +99,11 @@ const columns = [
 
   <Drawer
     :title="props.activity?.name"
-    v-model:visible="config.visible"
+    v-model:open="config.visible"
     :mask-closable="false"
     width="70vw"
     @close="closeModal()"
   >
-
     <template #extra>
       <Button @click="closeModal()"> Close </Button>
     </template>
@@ -127,8 +119,8 @@ const columns = [
           <Button
             type="primary"
             @click="
-              config.modal.visible = true;
               config.modal.task = new Activity();
+              config.modal.visible = true;
             "
           >
             <PlusCircleOutlined /> Add Task
