@@ -75,7 +75,7 @@ function recordProgress() {
 
 <template>
   <Modal
-    v-model:visible="config.visible"
+    v-model:open="config.visible"
     title="Record Progress"
     ok-text="Update"
     cancel-text="Cancel"

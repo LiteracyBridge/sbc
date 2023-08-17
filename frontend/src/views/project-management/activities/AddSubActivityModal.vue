@@ -9,7 +9,6 @@ import { useProjectStore } from "@/stores/projects";
 import { useInterventionStore } from "@/stores/interventions";
 import { useDriverStore } from "@/stores/drivers"
 import { useUserStore } from "@/stores/user";
-import { useParticipantStore } from "@/stores/participants";
 import { Button, Col, Form, FormItem, Input, Modal, Row, Select, SelectOption, type FormInstance, Textarea, Spin, DatePicker, RangePicker } from "ant-design-vue";
 import { Activity } from "@/types";
 
@@ -90,7 +89,7 @@ watch(props, (newProps) => {
 
 <template>
   <Modal
-    v-model:visible="config.visible"
+    v-model:open="config.visible"
     @cancel="closeModal()"
     width="750px"
     ok-text="Save"

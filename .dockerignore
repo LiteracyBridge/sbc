@@ -6,3 +6,6 @@ frontend/
 **/__pycache__/**
 **__pycache__**
 **/__pycache__
+lambda/
+sql/
+.github/

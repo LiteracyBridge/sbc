@@ -178,7 +178,7 @@ function filterCountry(input: string, option: any) {
   </Table>
 
   <Modal
-    v-model:visible="config.projectModal.visible"
+    v-model:open="config.projectModal.visible"
     @cancel="closeProjectModal()"
     ok-text="Create Project"
     cancel-text="Cancel"

@@ -28,8 +28,6 @@ const config = ref({
     form: {
       role_id: null,
       email: null,
-      sms: null,
-      whatsapp: null,
     }
 });
 const projectUserFormRef = ref<FormInstance>();
@@ -72,13 +70,6 @@ function saveNewUser() {
 
     message.success(`Added ${user.name} to project ${projectStore.projectName}`);
 
-    if(form.whatsapp != null || form.sms != null) {
-      userStore.updateProfile({
-        email: form.email,
-        sms: form.sms,
-        whatsapp: form.whatsapp,
-      })
-    }
     closeModal();
   });
 }
@@ -179,7 +170,7 @@ function filterUser(input: string, option: any) {
   </Table>
 
   <Modal
-    v-model:visible="config.visible"
+    v-model:open="config.visible"
     @cancel="closeModal()"
     title="New Project User"
     ok-text="Add User"
@@ -193,10 +184,6 @@ function filterUser(input: string, option: any) {
       :model="config.form"
       layout="vertical"
     >
-      <!-- <FormItem label="Full Name" name="name" :rules="[{ required: true, message: 'Please enter full name!' }]">
-          <Input v-model:value="config.form.name" />
-        </FormItem> -->
-
       <FormItem
         name="email"
         label="Email"
@@ -226,36 +213,6 @@ function filterUser(input: string, option: any) {
           </SelectOption>
         </Select>
       </FormItem>
-
-      <div v-if="config.form.email != null">
-        <FormItem label="SMS Phone Number" name="sms">
-          <Input
-            v-model:value="config.form.sms"
-            type="tel"
-          >
-            <template #suffix>
-              <Tooltip title="This number will be used to send you SMS notifications">
-                <InfoCircleOutlined />
-              </Tooltip>
-            </template>
-          </Input>
-        </FormItem>
-
-        <FormItem label="WhatsApp Number" name="whatsapp">
-          <Input
-            v-model:value="config.form.whatsapp"
-            type="tel"
-          >
-            <template #suffix>
-              <Tooltip
-                title="This number will be used to send you Whatsapp notifications"
-              >
-                <InfoCircleOutlined />
-              </Tooltip>
-            </template>
-          </Input>
-        </FormItem>
-      </div>
     </Form>
   </Modal>
 </template>

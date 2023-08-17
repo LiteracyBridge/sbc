@@ -277,7 +277,7 @@ function getTypeColor(type?: string): string {
   </Spin>
 
   <Modal
-    v-model:visible="config.evaluationModal.visible"
+    v-model:open="config.evaluationModal.visible"
     title="Evaluation Periods"
     width="800px"
     @ok="
