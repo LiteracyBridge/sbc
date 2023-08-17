@@ -1,21 +1,35 @@
 <script lang="ts" setup>
-
 import { computed, ref, watch } from "vue";
-import  dayjs from "dayjs";
-import  type {Dayjs} from "dayjs";
+import dayjs from "dayjs";
+import type { Dayjs } from "dayjs";
 import { useActivityStore } from "@/stores/activities";
 import { useLookupStore } from "@/stores/lookups";
 import { useProjectStore } from "@/stores/projects";
 import { useInterventionStore } from "@/stores/interventions";
-import { useDriverStore } from "@/stores/drivers"
+import { useDriverStore } from "@/stores/drivers";
 import { useUserStore } from "@/stores/user";
-import { Button, Col, Form, FormItem, Input, Modal, Row, Select, SelectOption, type FormInstance, Textarea, Spin, DatePicker, RangePicker } from "ant-design-vue";
+import {
+  Button,
+  Col,
+  Form,
+  FormItem,
+  Input,
+  Modal,
+  Row,
+  Select,
+  SelectOption,
+  Textarea,
+  Spin,
+  DatePicker,
+  RangePicker,
+} from "ant-design-vue";
+import type { FormInstance } from "ant-design-vue";
 import { Activity } from "@/types";
 
 const props = defineProps<{
-  draftActivity: Activity,
-  visible: boolean,
-  parentActivity: Activity
+  draftActivity: Activity;
+  visible: boolean;
+  parentActivity: Activity;
 }>();
 
 const emit = defineEmits(["closed", "save"]);
@@ -27,7 +41,10 @@ const projectStore = useProjectStore();
 
 const config = ref({
   visible: props.visible,
-  duration: [dayjs(props.draftActivity?.start_date), dayjs(props.draftActivity.end_date)] as [Dayjs | null, Dayjs | null],
+  duration: [
+    dayjs(props.draftActivity?.start_date),
+    dayjs(props.draftActivity.end_date),
+  ] as [Dayjs | null, Dayjs | null],
 });
 
 const taskFormRef = ref<FormInstance>();
@@ -38,7 +55,9 @@ const isEditing = computed(() => props.draftActivity?.id != null);
  * 'Activity' here means the item is a top-level activity
  * 'Task/sub activity' here means the item is a sub-activity
  */
-const isActivity  = computed(() => props.draftActivity.parent_id == null && props.draftActivity.id != null);
+const isActivity = computed(
+  () => props.draftActivity.parent_id == null && props.draftActivity.id != null
+);
 
 const closeModal = () => {
   taskFormRef.value.resetFields();
@@ -47,44 +66,44 @@ const closeModal = () => {
 };
 
 const saveForm = () => {
-  taskFormRef.value
-    .validateFields()
-    .then(values => {
-      // Update duration
-      if(isActivity.value) {
-        props.draftActivity.start_date = config.value.duration[0];
-        props.draftActivity.end_date = config.value.duration[1];
-      } else {
-        props.draftActivity.parent_id ??= props.parentActivity.id;
-      }
+  taskFormRef.value.validateFields().then((values) => {
+    // Update duration
+    if (isActivity.value) {
+      props.draftActivity.start_date = config.value.duration[0];
+      props.draftActivity.end_date = config.value.duration[1];
+    } else {
+      props.draftActivity.parent_id ??= props.parentActivity.id;
+    }
 
-      // props.draftActivity.driver_ids = [...driverValues.value];
+    // props.draftActivity.driver_ids = [...driverValues.value];
 
-      // Update editing user
-      props.draftActivity.editing_user_id = userStore.user.id;
+    // Update editing user
+    props.draftActivity.editing_user_id = userStore.user.id;
 
-      // Set project id
-      if (props.draftActivity.prj_id == null) {
-        props.draftActivity.prj_id = projectStore.prj_id;
-      }
+    // Set project id
+    if (props.draftActivity.prj_id == null) {
+      props.draftActivity.prj_id = projectStore.prj_id;
+    }
 
-      activityStore.updateOrCreate(props.draftActivity)
-        .then((resp) => {
-          console.log(resp)
-          if (resp != null) closeModal();
-        });
-
+    activityStore.updateOrCreate(props.draftActivity).then((resp) => {
+      console.log(resp);
+      if (resp != null) closeModal();
     });
+  });
 };
 
-watch(props, (newProps) => {
-  config.value.visible = newProps.visible;
+watch(
+  props,
+  (newProps) => {
+    config.value.visible = newProps.visible;
 
-  config.value.duration = [
-    dayjs(newProps.draftActivity.start_date),
-    dayjs(newProps.draftActivity.end_date)
-  ];
-}, {deep: true});
+    config.value.duration = [
+      dayjs(newProps.draftActivity.start_date),
+      dayjs(newProps.draftActivity.end_date),
+    ];
+  },
+  { deep: true }
+);
 </script>
 
 <template>
@@ -98,7 +117,9 @@ watch(props, (newProps) => {
     @ok="saveForm()"
   >
     <template #title>
-      <span>{{ isEditing ? "Update" : "Add" }} {{ isActivity ? 'Activity' : 'Task' }}</span>
+      <span
+        >{{ isEditing ? "Update" : "Add" }} {{ isActivity ? "Activity" : "Task" }}</span
+      >
     </template>
 
     <template #footer>

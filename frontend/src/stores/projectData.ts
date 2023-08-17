@@ -111,7 +111,7 @@ export const useProjectDataStore = defineStore({
         topic: "objectives",
         topic_id: 0,
         bulb: false,
-        q2u: "What is your project's vision? What would you like to see at the end of your project?",
+        q2u: "What is your project's long term goal or vision?",
         q2ai: "",
         f4ai: "item",
         label: "Project Vision",
