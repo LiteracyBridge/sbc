@@ -15,18 +15,28 @@ const lookupStore = useLookupStore();
 const projectStore = useProjectStore();
 const activityStore = useActivityStore();
 
+const tasksDrawer = ref({ visible: false, activity: null as Activity });
 const config = ref({
-  selectedActivity: null,
-  subActivityDrawer: { visible: false },
   modal: {
     activity: null as Activity,
     visible: false,
   },
 });
 
-function editActivity(activity: Activity) {
-  config.value.modal.activity = activity;
+function editActivity(id: number) {
+  const activity = activityStore.topLevelActivities.find((a) => a.id == id);
+
   config.value.modal.visible = true;
+  config.value.modal.activity = activity;
+}
+
+function showDrawer(id: number) {
+  const activity = activityStore.topLevelActivities.find((a) => a.id == id);
+
+  console.log(activity);
+  tasksDrawer.value.activity = activity;
+  tasksDrawer.value.visible = true;
+  console.log("here");
 }
 
 onMounted(() => {
@@ -63,25 +73,24 @@ const columns = [
 
 <template>
   <SubActivitiesDrawer
-    :visible="config.subActivityDrawer.visible"
-    @is-closed="
-      config.selectedActivity = null;
-      config.subActivityDrawer.visible = false;
-    "
-    :activity="config.selectedActivity"
+    :visible="tasksDrawer.visible"
+    @is-closed="tasksDrawer = { visible: false, activity: null }"
+    :activity="tasksDrawer.activity"
   ></SubActivitiesDrawer>
 
-  <AddSubActivityModal
-    v-if="config.modal.visible"
-    :parent-activity="config.modal.activity"
-    :draft-activity="config.modal.activity"
-    :visible="config.modal.visible"
-    @closed="
-      config.modal.visible = false;
-      config.modal.activity = null;
-    "
-  >
-  </AddSubActivityModal>
+  <div v-if="config.modal.activity != null">
+    <AddSubActivityModal
+      v-if="config.modal.visible"
+      :parent-activity="config.modal.activity"
+      :draft-activity="config.modal.activity"
+      :visible="config.modal.visible"
+      @closed="
+        config.modal.visible = false;
+        config.modal.activity = null;
+      "
+    >
+    </AddSubActivityModal>
+  </div>
 
   <Table
     :columns="columns"
@@ -95,7 +104,9 @@ const columns = [
       <template v-if="column.key === 'name'">
         <Space>
           <!-- TODO: IMPLEMENT ACTIVITY -->
-          <Button type="link" @click="editActivity(activity)">{{ activity.name }}</Button>
+          <Button type="link" @click="editActivity(activity.id)">{{
+            activity.name
+          }}</Button>
         </Space>
       </template>
 
@@ -113,13 +124,7 @@ const columns = [
       </template>
 
       <template v-if="column.key === 'tasks'">
-        <Button
-          type="link"
-          @click="
-            config.selectedActivity = activity;
-            config.subActivityDrawer.visible = true;
-          "
-        >
+        <Button type="link" @click.prevent="showDrawer(activity.id)">
           View Tasks ({{ activityStore.subActivitiesByActivityId(activity.id).length }})
         </Button>
       </template>
@@ -130,7 +135,7 @@ const columns = [
             :ghost="true"
             type="primary"
             size="small"
-            @click="editActivity(activity)"
+            @click="editActivity(activity.id)"
             >Edit</Button
           >
           <!-- <Button type="link" @click="editActivity(activity)">Delete</Button> -->

@@ -16,7 +16,7 @@ const projectStore = useProjectStore();
 const emit = defineEmits<{
   (e: "isClosed", status: boolean): boolean;
 }>();
-const props = defineProps<{ activity: Activity; visible: boolean }>();
+const props = defineProps<{ activity?: Activity; visible: boolean }>();
 
 const config = ref({
   visible: false,
@@ -59,9 +59,14 @@ function editActivity(activity: Activity) {
   // showEditModal.value = true;
 }
 
-watch(props, (newProps) => {
-  config.value.visible = newProps.visible;
-});
+watch(
+  props,
+  (newProps) => {
+    console.log("new props", newProps);
+    config.value.visible = newProps.activity == null ? false : newProps.visible;
+  },
+  { deep: true }
+);
 
 function closeModal() {
   config.value.visible = false;
