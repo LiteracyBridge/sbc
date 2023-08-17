@@ -55,6 +55,7 @@ async function downloadSetup(
     (filterClause == "" ? "" : "&" + filterClause);
   const response = await axios.get(SBC_DS_URL + request, {
     headers: { Authorization: `Bearer ${useUserStore().token}` },
+    withCredentials: true,
   });
   return response.data;
 }
@@ -104,7 +105,10 @@ export async function getId(
   const attributesClause = "&attributes=id&";
   const request = objectClause + attributesClause + filterClause;
   if (LOG) console.log(request);
-  const response = await axios.get(SBC_DS_URL + request);
+  const response = await axios.get(SBC_DS_URL + request, {
+    headers: { Authorization: `Bearer ${useUserStore().token}` },
+    withCredentials: true,
+  });
   let id = null;
   if (response.data.length > 0) {
     id = response.data[0][0];
@@ -124,6 +128,7 @@ export async function insert(tableName: any, attributes: any, LOG = false) {
   if (LOG) console.log(payload);
   const response = await axios.post(SBC_DS_URL, payload, {
     headers: { Authorization: `Bearer ${useUserStore().token}` },
+    withCredentials: true,
   });
   const new_id = response.data[0][0];
   if (LOG) console.log(new_id);
@@ -155,6 +160,7 @@ export async function remove(tableName: any, ids: any, LOG = false) {
   const response = await axios.delete(SBC_DS_URL, {
     data: payload,
     headers: { Authorization: `Bearer ${useUserStore().token}` },
+    withCredentials: true,
   });
 }
 
@@ -174,7 +180,10 @@ export async function getBucket(request_id: string) {
   const fetchBucket = async (): Promise<any> => {
     console.log("attempts=" + attempts);
     try {
-      const response = await axios.get(SBC_GET_BUCKET + queryString);
+      const response = await axios.get(SBC_GET_BUCKET + queryString, {
+        headers: { Authorization: `Bearer ${useUserStore().token}` },
+        withCredentials: true,
+      });
 
       if (response.status === 200) {
         return response.data;
@@ -256,6 +265,8 @@ export async function twilioBroadcast(message: string, topic: string) {
     console.log("characters in message:", message.length);
     console.log(payload);
   }
-  const response = await axios.post(`${SBC_TW_URL}`, payload);
+  const response = await axios.post(`${SBC_TW_URL}`, payload, {
+    headers: { Authorization: `Bearer ${useUserStore().token}` },
+  });
   if (LOG) console.log(response);
 }

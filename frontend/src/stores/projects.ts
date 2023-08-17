@@ -155,6 +155,7 @@ export const useProjectStore = defineStore({
         console.log("user already exists in project");
         return;
       }
+
       const prj_id = this.prj_id;
       const last_project_id = prj_id;
       let user_id = await api.getId("users", "email=" + email, true); // get from db if exists

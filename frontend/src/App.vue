@@ -35,6 +35,12 @@ import {
   WechatOutlined,
 } from "@ant-design/icons-vue";
 import FeedbackModal from "@/components/FeedbackModal.vue";
+import axios from "axios";
+
+// Set default axios headers
+axios.defaults.headers.common["Content-Type"] = "application/json";
+axios.defaults.headers.common["Accept"] = "application/json";
+axios.defaults.headers.common["Authorization"] = `Bearer ${useUserStore().token}`;
 
 const userStore = useUserStore();
 const appStore = AppStore();
@@ -78,11 +84,13 @@ function openDiscourse() {
 
 <template>
   <div v-if="appStore.isLoading" id="app-loader" style="margin-top: auto">
-    <figure class="image" style="width: 300px;">
+    <figure class="image" style="width: 300px">
       <img src="@/assets/logo-color.png" />
     </figure>
 
-    <h2 class="mt-3 text-center" style="font-weight: 630; font-size: 20px;">Loading app, please wait...</h2>
+    <h2 class="mt-3 text-center" style="font-weight: 630; font-size: 20px">
+      Loading app, please wait...
+    </h2>
     <!-- <GridLoader :loading="true" :use-logo="true"></GridLoader> -->
   </div>
 

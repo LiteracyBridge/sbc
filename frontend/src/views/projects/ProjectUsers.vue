@@ -66,9 +66,10 @@ function saveNewUser() {
     const form = config.value.form;
     const user = allUsers.value.find(user => user.email == form.email)
 
-    projectStore.addUser(user.name ?? 'N/A', form.email, form.role_id, user.address_as);
+    projectStore.addUser(user.name ?? 'N/A', form.email, form.role_id, user.address_as).then((_) => {
+      message.success(`Added ${user.name} to project ${projectStore.projectName}`);
+    })
 
-    message.success(`Added ${user.name} to project ${projectStore.projectName}`);
 
     closeModal();
   });

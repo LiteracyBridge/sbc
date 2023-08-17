@@ -83,6 +83,7 @@ export class ApiRequest {
         headers: {
           Authorization: `Bearer ${useUserStore().token}`,
         },
+        withCredentials: true,
       })
       .then((response) => {
         return response.data.data as T[];
