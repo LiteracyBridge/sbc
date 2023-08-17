@@ -3,21 +3,16 @@ import { useProjectStore } from "../stores/projects";
 import { useUserStore } from "../stores/user";
 const LOG = true;
 
-// const SBC_DS_URL = 'http://localhost:9000/2015-03-31/functions/function/invocations';
 const SBC_DS_URL = `${import.meta.env.VITE_SBC_API_URL}/data-service`;
 export const SBC_TW_URL = `${import.meta.env.VITE_SBC_API_URL}/twilio`;
-// 'https://w75w7350kh.execute-api.us-west-2.amazonaws.com/production/sbcDataService';
-
-// export const SBC_TW_URL =
-// "https://w75w7350kh.execute-api.us-west-2.amazonaws.com/production/sbcTwilio";
 const SBC_GET_BUCKET =
   "https://w75w7350kh.execute-api.us-west-2.amazonaws.com/production/sbcGetBucket";
 const SBC_AI_URL =
   "https://w75w7350kh.execute-api.us-west-2.amazonaws.com/production/sbcOpenAI";
 
 export async function downloadObjects(
-  objects,
-  context,
+  objects: any,
+  context: any,
   tablePrefix = "",
   LOG = false
 ) {
@@ -45,7 +40,11 @@ export async function downloadObjects(
   }
 }
 
-async function downloadSetup(tableName, attributes, filterClause = "") {
+async function downloadSetup(
+  tableName: any,
+  attributes: any,
+  filterClause: string = ""
+) {
   const objectClause = "?object=" + tableName;
   // objName must match an object array; only the first element is used to get its attributes
   const attributesClause = "&attributes=" + attributes.join(",");
@@ -61,15 +60,15 @@ async function downloadSetup(tableName, attributes, filterClause = "") {
 }
 
 export async function downloadObject(
-  tableName,
-  attributes,
-  filterClause = "",
-  LOG = false
+  tableName: any,
+  attributes: any,
+  filterClause: string = "",
+  LOG: boolean = false
 ) {
   const response = await downloadSetup(tableName, attributes, filterClause);
   const responseList = [];
   for (let i = 0; i < response.length; i++) {
-    var tempObj = {};
+    const tempObj: any = {};
     for (let j = 0; j < attributes.length; j++) {
       tempObj[attributes[j]] = response[i][j];
     }
@@ -79,15 +78,15 @@ export async function downloadObject(
 }
 
 export async function downloadDictionary(
-  tableName,
-  attributes,
-  filterClause = "",
-  keyIndex
+  tableName: any,
+  attributes: any,
+  filterClause: string = "",
+  keyIndex: number
 ) {
   const response = await downloadSetup(tableName, attributes, filterClause);
-  const responseDictionary = {};
+  const responseDictionary: any = {};
   for (let i = 0; i < response.length; i++) {
-    var tempObj = {};
+    const tempObj: any = {};
     for (let j = 0; j < attributes.length; j++) {
       tempObj[attributes[j]] = response[i][j];
     }
@@ -96,7 +95,11 @@ export async function downloadDictionary(
   return responseDictionary;
 }
 
-export async function getId(tableName, filterClause, LOG = false) {
+export async function getId(
+  tableName: any,
+  filterClause: any,
+  LOG: boolean = false
+) {
   const objectClause = "?object=" + tableName;
   const attributesClause = "&attributes=id&";
   const request = objectClause + attributesClause + filterClause;
@@ -110,8 +113,8 @@ export async function getId(tableName, filterClause, LOG = false) {
   return id;
 }
 
-export async function insert(tableName, attributes, LOG = false) {
-  const payload = {};
+export async function insert(tableName: any, attributes: any, LOG = false) {
+  const payload: any = {};
   payload["object"] = tableName;
   if (!["users", "projects", "project_users"].includes(tableName)) {
     attributes["prj_id"] = useProjectStore().prj_id;
@@ -127,8 +130,13 @@ export async function insert(tableName, attributes, LOG = false) {
   return new_id;
 }
 
-export async function update(tableName, id, attributes, LOG = false) {
-  const payload = {};
+export async function update(
+  tableName: any,
+  id: any,
+  attributes: any,
+  LOG = false
+) {
+  const payload: any = {};
   payload["object"] = tableName;
   payload["id"] = id;
   attributes["editing_user_id"] = useUserStore().id;
@@ -139,8 +147,8 @@ export async function update(tableName, id, attributes, LOG = false) {
   });
 }
 
-export async function remove(tableName, ids, LOG = false) {
-  const payload = {};
+export async function remove(tableName: any, ids: any, LOG = false) {
+  const payload: any = {};
   payload["object"] = tableName;
   payload["ids"] = ids;
   if (LOG) console.log(payload);
@@ -150,7 +158,7 @@ export async function remove(tableName, ids, LOG = false) {
   });
 }
 
-function countWords(str) {
+function countWords(str: string) {
   // Use a regular expression to match words, including words with apostrophes and hyphens
   const words = str.match(/\b[\w'-]+\b/g);
 
@@ -158,12 +166,12 @@ function countWords(str) {
   return words ? words.length : 0;
 }
 
-export async function getBucket(request_id) {
+export async function getBucket(request_id: string) {
   const queryString = "?request_id=" + request_id;
   const maxAttempts = 30;
   let attempts = 0;
 
-  const fetchBucket = async () => {
+  const fetchBucket = async (): Promise<any> => {
     console.log("attempts=" + attempts);
     try {
       const response = await axios.get(SBC_GET_BUCKET + queryString);
@@ -196,15 +204,15 @@ export async function getBucket(request_id) {
 }
 
 export async function gptCompletion(
-  prompt,
-  context = null,
-  format = null,
-  start = null,
-  stop = null
+  prompt: string,
+  context: string = null,
+  format: string = null,
+  start: string = null,
+  stop: string = null
 ) {
   // format can be "item","list","sentence", or "paragraph"
   const { prj_id } = useProjectStore();
-  const payload = { prj_id, prompt };
+  const payload = { prj_id, prompt, format, stop, start, context };
 
   if (format) payload.format = format;
   if (start) payload.start = start;
@@ -236,8 +244,8 @@ export async function gptCompletion(
   }
 }
 
-export async function twilioBroadcast(message, topic) {
-  const payload = {};
+export async function twilioBroadcast(message: string, topic: string) {
+  const payload: any = {};
   payload["message"] = message;
   payload["prj_id"] = useProjectStore().prj_id;
   payload["user_id"] = useUserStore().id;
@@ -250,14 +258,4 @@ export async function twilioBroadcast(message, topic) {
   }
   const response = await axios.post(`${SBC_TW_URL}`, payload);
   if (LOG) console.log(response);
-}
-
-const API_URL = import.meta.env.VITE_SBC_API_URL;
-export class UsersApi {
-  static async getAll() {
-    return axios.get(`${API_URL}/users`).then((resp) => {
-      console.log(resp.data);
-      return resp.data;
-    });
-  }
 }

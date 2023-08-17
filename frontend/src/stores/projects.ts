@@ -4,7 +4,6 @@ import { useUserStore } from "./user";
 import { useDriverStore } from "./drivers";
 import { useActivityStore } from "./activities";
 import { useInterventionStore } from "./interventions";
-import { useParticipantStore } from "./participants";
 import router from "@/router";
 import { useLookupStore } from "./lookups";
 import { useProjectDataStore } from "./projectData";
@@ -19,7 +18,6 @@ const projectStores = () => [
   useProjectDataStore,
   useInterventionStore,
   useDriverStore,
-  useParticipantStore,
 ];
 
 // Clears all project-specific data from stores
