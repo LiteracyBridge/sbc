@@ -73,6 +73,11 @@ function closeModal() {
   emit("isClosed", false);
 }
 
+function showModal() {
+  config.value.modal.task = new Activity();
+  config.value.modal.visible = true;
+}
+
 const columns = [
   {
     title: "Name",
@@ -121,13 +126,7 @@ const columns = [
         :loading="activityStore.isLoading"
       >
         <template #title>
-          <Button
-            type="primary"
-            @click="
-              config.modal.task = new Activity();
-              config.modal.visible = true;
-            "
-          >
+          <Button type="primary" @click="showModal()">
             <PlusCircleOutlined /> Add Task
           </Button>
         </template>
