@@ -15,7 +15,7 @@ def get_indicator_types(db: Session = Depends(models.get_db)):
     return ApiResponse(data=data)
 
 
-@router.get("/")
+@router.get("")
 def get_data(db: Session = Depends(models.get_db)):
     access_types = db.query(LuAccessType).all()
     countries = db.query(LuCountry).all()
