@@ -198,6 +198,8 @@ export const useProjectStore = defineStore({
       start_date: string,
       end_date: string
     ) {
+      this.$state.loading = true;
+
       // create entry in db projects table and get id
       const private_prj = true;
       const newProject = {
@@ -241,6 +243,7 @@ export const useProjectStore = defineStore({
       this.users_in_project = [userCopy];
 
       // No need to download all tables for new project, so call setPrj with download=false.
+      this.$state.loading = false;
       return prj_id;
     },
 

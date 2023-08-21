@@ -207,61 +207,63 @@ function filterCountry(input: string, option: any) {
       <span>Create New Project</span>
     </template>
 
-    <Form
-      name="new-project-form"
-      ref="projectFormRef"
-      :model="config.projectModal.form"
-      layout="vertical"
-    >
-      <FormItem
-        label="Project Name"
-        name="name"
-        :rules="[{ required: true, message: 'Please enter project name!' }]"
+    <Spin :spinning="config.loading">
+      <Form
+        name="new-project-form"
+        ref="projectFormRef"
+        :model="config.projectModal.form"
+        layout="vertical"
       >
-        <Input v-model:value="config.projectModal.form.name" />
-      </FormItem>
-
-      <FormItem
-        name="country_id"
-        label="Country"
-        has-feedback
-        :rules="[{ required: true, message: 'Please select a country!' }]"
-      >
-        <Select
-          v-model:value="config.projectModal.form.country_id"
-          placeholder="Select country"
-          :allow-clear="true"
-          :options="lookupStore.countries"
-          :field-names="{ label: 'name', value: 'id' }"
-          :show-search="true"
-          :filter-option="filterCountry"
+        <FormItem
+          label="Project Name"
+          name="name"
+          :rules="[{ required: true, message: 'Please enter project name!' }]"
         >
-        </Select>
-      </FormItem>
+          <Input v-model:value="config.projectModal.form.name" />
+        </FormItem>
 
-      <Row :gutter="6">
-        <Col :span="12">
-          <FormItem
-            name="start_date"
-            label="Start Date"
-            has-feedback
-            :rules="[{ required: true, message: 'Please choose project start date!' }]"
+        <FormItem
+          name="country_id"
+          label="Country"
+          has-feedback
+          :rules="[{ required: true, message: 'Please select a country!' }]"
+        >
+          <Select
+            v-model:value="config.projectModal.form.country_id"
+            placeholder="Select country"
+            :allow-clear="true"
+            :options="lookupStore.countries"
+            :field-names="{ label: 'name', value: 'id' }"
+            :show-search="true"
+            :filter-option="filterCountry"
           >
-            <DatePicker v-model:value="config.projectModal.form.start_date" />
-          </FormItem>
-        </Col>
+          </Select>
+        </FormItem>
 
-        <Col :span="12">
-          <FormItem
-            name="end_date"
-            label="End Date"
-            has-feedback
-            :rules="[{ required: true, message: 'Please choose project end date!' }]"
-          >
-            <DatePicker v-model:value="config.projectModal.form.end_date" />
-          </FormItem>
-        </Col>
-      </Row>
-    </Form>
+        <Row :gutter="6">
+          <Col :span="12">
+            <FormItem
+              name="start_date"
+              label="Start Date"
+              has-feedback
+              :rules="[{ required: true, message: 'Please choose project start date!' }]"
+            >
+              <DatePicker v-model:value="config.projectModal.form.start_date" />
+            </FormItem>
+          </Col>
+
+          <Col :span="12">
+            <FormItem
+              name="end_date"
+              label="End Date"
+              has-feedback
+              :rules="[{ required: true, message: 'Please choose project end date!' }]"
+            >
+              <DatePicker v-model:value="config.projectModal.form.end_date" />
+            </FormItem>
+          </Col>
+        </Row>
+      </Form>
+    </Spin>
   </Modal>
 </template>
