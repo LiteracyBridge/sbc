@@ -94,6 +94,8 @@ export class User {
 
   constructor(init?: Partial<User>) {
     Object.assign(this, init);
+
+    this.projects ??= [];
   }
 }
 
@@ -115,13 +117,20 @@ export class Project extends Timestamps {
   end_date: Dayjs;
   country_id?: number;
   archived: boolean = false;
+  private_prj: boolean = true;
   evaluation_strategy?: string;
   feedback_strategy?: string;
   sustainability_strategy?: string;
   editing_user_id?: number;
+  organisation_id?: number;
 
   organisation: Organisation;
   stakeholders: Stakeholder[] = [];
+
+  constructor(init?: Partial<Project>) {
+    super();
+    Object.assign(this, init);
+  }
 }
 
 export class ProjectUser extends User {
@@ -130,6 +139,11 @@ export class ProjectUser extends User {
   user_id: number;
 
   project?: Project;
+
+  constructor(init?: Partial<ProjectUser>) {
+    super(init);
+    Object.assign(this, init);
+  }
 }
 
 export class LuIndiKit {

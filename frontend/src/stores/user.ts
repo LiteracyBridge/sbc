@@ -18,6 +18,7 @@ export const useUserStore = defineStore({
       last_project_id: null,
       organisation_id: null,
       token: null,
+      projects: [],
     } as User;
   },
   getters: {

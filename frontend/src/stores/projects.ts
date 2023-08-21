@@ -69,14 +69,17 @@ export const useProjectStore = defineStore({
     loading: false,
     prj_id: null,
     users_in_project: [] as ProjectUser[],
-    user_projects: [],
+    // user_projects: [] as ProjectUser[],
     current_project: {} as Project,
   }),
   getters: {
-    projects:
-      (state) =>
-      (archived = false) =>
-        state.user_projects.filter((p) => p.archived == archived),
+    user_projects: (state): ProjectUser[] => useUserStore().projects,
+    projects: (_state) => {
+      return (archived = false) =>
+        (useUserStore().projects || [])
+          .flatMap((p) => p.project)
+          .filter((p) => p?.archived == archived && p != null);
+    },
     userById: (state) => (userId: number) =>
       state.users_in_project.find((u) => u.user_id == userId),
     userName: (state) => (userId: number) => {
@@ -88,10 +91,9 @@ export const useProjectStore = defineStore({
       return name;
     },
     projectId: (state) => {
-      if (state.prj_id && state.user_projects.length) {
-        const foundProject = state.user_projects.find(
-          (p) => p.prj_id == state.prj_id
-        );
+      const projects = useUserStore().projects ?? [];
+      if (state.prj_id && projects.length) {
+        const foundProject = projects.find((p) => p.prj_id == state.prj_id);
         if (foundProject) {
           console.log("foundProject", foundProject);
           return foundProject.prj_id;
@@ -103,10 +105,9 @@ export const useProjectStore = defineStore({
       const name = state.current_project?.name;
       if (name) return name;
 
-      if (state.prj_id && state.user_projects.length) {
-        const foundProject = state.user_projects.find(
-          (p) => p.prj_id == state.prj_id
-        );
+      const projects = useUserStore().projects ?? [];
+      if (state.prj_id && projects.length) {
+        const foundProject = projects.find((p) => p.prj_id == state.prj_id);
         if (foundProject) {
           console.log("foundProject", foundProject);
           return foundProject.name;
@@ -115,8 +116,9 @@ export const useProjectStore = defineStore({
       return "";
     },
     grantableAccess: (state) => {
-      if (state.prj_id && state.user_projects.length) {
-        const user_access = state.user_projects.find(
+      const projects: ProjectUser[] = useProjectStore().user_projects;
+      if (state.prj_id && projects.length) {
+        const user_access = projects.find(
           (p) => p.prj_id == state.prj_id
         ).access_id;
         const grantable_access_types = useLookupStore().access_types.filter(
@@ -130,7 +132,8 @@ export const useProjectStore = defineStore({
   actions: {
     // Archives a project by updating its archived status
     async archive(prj_id: number) {
-      this.user_projects.find((p) => p.prj_id == prj_id).archived = true;
+      this.user_projects.find((p) => p.prj_id == prj_id).project.archived =
+        true;
       api.update("projects", prj_id, { archived: true });
       if (prj_id == this.prj_id) {
         this.setPrj(null); // if archiving the currently open project, must clear it
@@ -170,6 +173,7 @@ export const useProjectStore = defineStore({
         }); // otherwise insert and get it
       }
       // insert project-user role into db
+      // TODO: use api
       const id = await api.insert("project_users", {
         prj_id,
         user_id,
@@ -183,6 +187,7 @@ export const useProjectStore = defineStore({
         name,
         access_id,
         projects: [],
+        prj_id,
       });
     },
 
@@ -195,23 +200,39 @@ export const useProjectStore = defineStore({
     ) {
       // create entry in db projects table and get id
       const private_prj = true;
-      const prj_id = await api.insert("projects", {
+      const newProject = {
         name,
         country_id,
         private_prj,
-        start_date,
-        end_date,
+        start_date: start_date as any,
+        end_date: end_date as any,
         organisation_id: useUserStore().organisation_id,
-      });
+      };
+      const prj_id = await api.insert("projects", newProject);
 
       // create entry in db user_projects table, no id needed
       const user_id = useUserStore().id;
       const access_id = 0; // owner
-      await api.insert("project_users", { prj_id, user_id, access_id });
+      await api.insert("project_users", {
+        prj_id,
+        user_id,
+        access_id,
+      });
 
+      // !TODO: Refetch user projects
       // rather than re-downloading the user_projects view, just push the latest entry
-      const user_project = { prj_id, name, private_prj, country_id, access_id };
-      this.user_projects.push(user_project);
+      const user_project = {
+        prj_id,
+        name,
+        private_prj,
+        country_id,
+        access_id,
+        project: newProject,
+      };
+
+      const projects = useUserStore().projects ?? [];
+      projects.push(user_project as any);
+      useUserStore().$state.projects = projects;
 
       // update users_in_project with the same data for this user in previously active project
       const user = this.users_in_project.find((u) => u.user_id == user_id);
@@ -220,7 +241,7 @@ export const useProjectStore = defineStore({
       this.users_in_project = [userCopy];
 
       // No need to download all tables for new project, so call setPrj with download=false.
-      this.setPrj(prj_id, true);
+      return prj_id;
     },
 
     // Sets a project as active
@@ -268,7 +289,8 @@ export const useProjectStore = defineStore({
 
     // Downloads project data
     async download() {
-      if (this.prj_id) {
+      // !REFACTOR: fetch everything in one go
+      if (this.prj_id != null) {
         let response = await api.downloadObject(
           "users_in_project",
           ["id", "user_id", "email", "name", "access_id", "address_as"],
@@ -276,30 +298,31 @@ export const useProjectStore = defineStore({
           true
         );
         this.users_in_project = response as ProjectUser[];
-      }
-      if (useUserStore().id) {
-        let response = await api.downloadObject(
-          "user_projects",
-          [
-            "prj_id",
-            "name",
-            "private_prj",
-            "country_id",
-            "access_id",
-            "archived",
-            "start_date",
-            "end_date",
-          ],
-          "user_id=" + useUserStore().id,
-          true
-        );
-        this.user_projects = response;
-      }
 
-      // Download current project data
-      if (this.prj_id) {
+        if (useUserStore().id) {
+          // TODO: call user.get api
+          // let response = await api.downloadObject(
+          //   "user_projects",
+          //   [
+          //     "prj_id",
+          //     "name",
+          //     "private_prj",
+          //     "country_id",
+          //     "access_id",
+          //     "archived",
+          //     "start_date",
+          //     "end_date",
+          //   ],
+          //   "user_id=" + useUserStore().id,
+          //   true
+          // );
+          // this.user_projects = response;
+        }
+
+        // Download current project data
+        // !TODO: include project users in response
         this.$state.loading = true;
-        await ApiRequest.get<Project>(`project/${this.projectId}`)
+        await ApiRequest.get<Project>(`project/${this.prj_id}`)
           .then((response) => {
             if (response.length > 0) {
               this.$state.current_project = response[0] as Project;

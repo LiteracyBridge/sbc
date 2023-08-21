@@ -1,71 +1,81 @@
 <script lang="ts" setup>
-
 import { ref } from "vue";
 import { useLookupStore } from "@/stores/lookups";
 import { useProjectStore } from "@/stores/projects";
 import { useRouter } from "vue-router";
 import {
-  Table, Spin, Space, Col, Row,
-  Modal, Button, Tag,
-  Typography, Form, type FormInstance, FormItem, Input,
+  Table,
+  Spin,
+  Space,
+  Col,
+  Row,
+  Modal,
+  Button,
+  Tag,
+  Typography,
+  Form,
+  FormItem,
+  Input,
   Select,
   message,
-  DatePicker
+  DatePicker,
 } from "ant-design-vue";
-import { FolderOpenOutlined, FolderOutlined, PlusCircleOutlined } from "@ant-design/icons-vue";
+import type { FormInstance } from "ant-design-vue";
+import {
+  FolderOpenOutlined,
+  FolderOutlined,
+  PlusCircleOutlined,
+} from "@ant-design/icons-vue";
 import { Project } from "@/types";
-import dayjs from 'dayjs';
+import dayjs from "dayjs";
 
 const router = useRouter();
 const lookupStore = useLookupStore();
 const projectStore = useProjectStore();
 
-
 const config = ref({
   loading: false,
   projectModal: {
     visible: false,
-    form: new Project()
-  }
+    form: new Project(),
+  },
 });
 const projectFormRef = ref<FormInstance>();
 
-
 // Change the current project and navigate to the basic forms page
 async function changeProject(prjId: number) {
-
-  const project = projectStore.user_projects.find(prj => prj.prj_id == prjId);
+  const project = projectStore.user_projects.find((prj) => prj.prj_id == prjId);
 
   message.success(`Switching active project to ${project?.name}`);
 
   await projectStore.setPrj(prjId, true);
-  window.location.reload()
+  window.location.reload();
   // router.push('/forms/basic');
 }
 
 const columns = [
   {
-    title: 'Project',
-    key: 'name',
+    title: "Project",
+    key: "name",
   },
   {
-    title: 'Duration',
-    key: 'duration',
+    title: "Duration",
+    key: "duration",
   },
   {
-    title: 'Country',
-    key: 'country',
+    title: "Country",
+    key: "country",
   },
   {
-    title: 'Role',
-    dataIndex: 'role',
-    key: 'role',
+    title: "Role",
+    dataIndex: "role",
+    key: "role",
   },
   {
-    title: '',
-    key: 'actions',
+    title: "",
+    key: "actions",
   },
-]
+];
 
 function closeProjectModal() {
   projectFormRef.value.resetFields();
@@ -73,13 +83,21 @@ function closeProjectModal() {
 }
 
 function createProject() {
-  projectFormRef.value.validateFields().then((_) => {
+  projectFormRef.value.validateFields().then(async (_) => {
     const form = config.value.projectModal.form;
-    console.log(form)
+    console.log(form);
     // return
-    projectStore.add(form.name, form.country_id, form.start_date.toISOString(), form.end_date.toISOString());
+    const prj_id = await projectStore.add(
+      form.name,
+      form.country_id,
+      form.start_date.toISOString(),
+      form.end_date.toISOString()
+    );
 
-    closeProjectModal();
+    message.success(`${form.name} project created successfully!`);
+    await projectStore.setPrj(prj_id, true);
+    window.location.reload();
+    // closeProjectModal();
   });
 }
 

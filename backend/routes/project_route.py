@@ -201,12 +201,12 @@ def add_driver_to_project(
 
 # =============== START: PROJECT DATA ===================== #
 class ProjectDataDto(BaseModel):
-    id: Optional[int]
-    q_id: Optional[int]
-    data: Optional[str]
-    module: Optional[str]
-    name: Optional[str]
-    editing_user_id: Optional[int]
+    id: Optional[int] = None
+    q_id: Optional[int] = None
+    data: Optional[str] = None
+    module: Optional[str] = None
+    name: Optional[str] = None
+    editing_user_id: Optional[int] = None
     deleted: Optional[bool] = False
 
 
