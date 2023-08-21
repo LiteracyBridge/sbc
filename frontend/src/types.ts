@@ -16,6 +16,36 @@ export const THEORY_OF_CHANGE_TYPES: Record<string, string> = {
   "5": "Impact",
 };
 
+export enum ActivityStatus {
+  Proposed = 1,
+  Planned = 2,
+  InProgress = 3,
+  Completed = 4,
+  Cancelled = 5,
+}
+
+export enum Importance {
+  low = 1,
+  medium = 2,
+  high = 3,
+}
+
+export enum LibraryType {
+  article = 1,
+  "case_study" = 2,
+  template = 3,
+  evaluation = 4,
+  date_collection_tool = 5,
+}
+
+// export enum AccessType {
+//   Proposed = 1,
+//   Planned = 2,
+//   InProgress = 3,
+//   Completed = 4,
+//   Cancelled = 5,
+// }
+
 export const SEMS: Record<string, string> = {
   "1": "Individual",
   "2": "Interpersonal",
@@ -23,6 +53,12 @@ export const SEMS: Record<string, string> = {
   "4": "Organizational",
   "5": "Policy/Enabling environment",
 };
+
+export class GenericLookup {
+  id: number;
+  name: string;
+  sequence?: number;
+}
 
 class Timestamps {
   deleted_by_id?: number;
@@ -54,7 +90,7 @@ export class User {
   last_project_id?: number;
   organisation_id?: number;
 
-  projects: Array<{ prj_id: number; user_id: number }> = [];
+  projects: ProjectUser[] = [];
 
   constructor(init?: Partial<User>) {
     Object.assign(this, init);
@@ -78,6 +114,7 @@ export class Project extends Timestamps {
   start_date: Dayjs;
   end_date: Dayjs;
   country_id?: number;
+  archived: boolean = false;
   evaluation_strategy?: string;
   feedback_strategy?: string;
   sustainability_strategy?: string;
@@ -88,9 +125,11 @@ export class Project extends Timestamps {
 }
 
 export class ProjectUser extends User {
-  // prj_id: number;
+  prj_id: number;
   access_id: number;
   user_id: number;
+
+  project?: Project;
 }
 
 export class LuIndiKit {

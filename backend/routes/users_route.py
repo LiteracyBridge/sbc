@@ -6,7 +6,7 @@ from fastapi.encoders import jsonable_encoder
 
 from sqlalchemy.orm import Session, subqueryload
 from schema import ApiResponse
-from models import Invitation, Organisation, User, get_db
+from models import Invitation, Organisation, ProjectUser, User, get_db
 
 
 router = APIRouter()
@@ -66,7 +66,7 @@ def get_user_by_email(email: str, db: Session = Depends(get_db)):
     user = (
         db.query(User)
         .filter(User.email == email)
-        .options(subqueryload(User.projects))
+        .options(subqueryload(User.projects).options(subqueryload(ProjectUser.project)))
         .first()
     )
 

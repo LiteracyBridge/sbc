@@ -12,7 +12,7 @@ from routes import (
     activity_route,
     monitoring,
     project_route,
-    lookups,
+    lookups_route,
     organisation_route,
     communication_route,
     data_service_route,
@@ -144,7 +144,7 @@ app.include_router(
     dependencies=[Depends(models.get_db)],
 )
 app.include_router(
-    lookups.router,
+    lookups_route.router,
     prefix="/lu",
     tags=["lu"],
     dependencies=[Depends(models.get_db)],

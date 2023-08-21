@@ -25,6 +25,14 @@ class SoftDeleteMixin(generate_soft_delete_mixin_class()):
     deleted_at: datetime
 
 
+class LuAccessType(Base):
+    __tablename__ = "lu_access_types"
+
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    name: Mapped[str]
+    sequence: Mapped[int]
+
+
 class LuIndiKit(Base):
     __tablename__ = "lu_indi_kit"
 
@@ -58,7 +66,7 @@ class LuTheoryOfChangeType(Base):
     description: Mapped[Optional[str]]
 
 
-class LuCountries(Base):
+class LuCountry(Base):
     __tablename__ = "lu_countries"
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)

@@ -76,7 +76,6 @@ const columns = [
           <span>
             You do not have any projects yet. Click to
             <RouterLink to="/projects">
-              <AppstoreOutlined />
               <span> create a new project.</span>
             </RouterLink>
           </span>
