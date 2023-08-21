@@ -64,7 +64,7 @@ def get_project_activities(project_id: int, db: Session = Depends(models.get_db)
     return ApiResponse(data=record)
 
 
-@router.post("/", response_model=ApiResponse)
+@router.post("/")
 def update_or_create(dto: ActivityDto, db: Session = Depends(models.get_db)):
     new_activity: Activity = Activity()
 
@@ -103,12 +103,12 @@ def update_or_create(dto: ActivityDto, db: Session = Depends(models.get_db)):
     return get_project_activities(new_activity.prj_id, db)
 
 
-@router.get("/{projectId}", response_model=ApiResponse)
+@router.get("/{projectId}")
 def get_activities(projectId: int, db: Session = Depends(models.get_db)):
     return get_project_activities(project_id=projectId, db=db)
 
 
-@router.delete("/{project_id}/{id}", response_model=ApiResponse)
+@router.delete("/{project_id}/{id}")
 def delete(project_id: int, id: int, db: Session = Depends(models.get_db)):
     activity = (
         db.query(Activity)

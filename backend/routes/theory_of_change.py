@@ -79,12 +79,12 @@ def get_toc_by_project_id(projectId: int, db: Session = Depends(models.get_db)):
     return record
 
 
-@router.get("/{projectId}", response_model=ApiResponse)
+@router.get("/{projectId}")
 def get_by_project_id(projectId: int, db: Session = Depends(models.get_db)):
     return ApiResponse(data=get_toc_by_project_id(projectId, db))
 
 
-@router.post("/{project_id}/item", response_model=ApiResponse)
+@router.post("/{project_id}/item")
 def update_or_create_item(
     project_id: int, dto: TheoryOfChangeItemDto, db: Session = Depends(models.get_db)
 ):
@@ -130,7 +130,7 @@ def update_or_create_item(
     return ApiResponse(data=get_toc_by_project_id(project_id, db))
 
 
-@router.delete("/{project_id}/item/{item_id}", response_model=ApiResponse)
+@router.delete("/{project_id}/item/{item_id}")
 def delete_toc_item(
     project_id: int,
     item_id: int,
@@ -157,7 +157,7 @@ def delete_toc_item(
 
 
 # ======== INDICATORS ========= #
-@router.get("/{project_id}/indicators", response_model=ApiResponse)
+@router.get("/{project_id}/indicators")
 def get_project_indicators(project_id: int, db: Session = Depends(models.get_db)):
     return ApiResponse(
         data=db.query(ProjectIndicators)
@@ -166,7 +166,7 @@ def get_project_indicators(project_id: int, db: Session = Depends(models.get_db)
     )
 
 
-@router.post("/{item_id}/indicators", response_model=ApiResponse)
+@router.post("/{item_id}/indicators")
 def update_indicators(
     item_id: int, dto: IndicatorDto, db: Session = Depends(models.get_db)
 ):
@@ -245,7 +245,7 @@ def update_indicators(
     return ApiResponse(data=get_toc_by_project_id(theory_of_change.project_id, db))
 
 
-# @router.get("/", response_model=ApiResponse)
+# @router.get("/")
 # def get_indicator(db: Session = Depends(models.get_db)):
 #     data = db.query(models.Indicator).all()
 
@@ -253,7 +253,7 @@ def update_indicators(
 
 
 # ======== RISKS ========= #
-@router.get("/{project_id}/risks", response_model=ApiResponse)
+@router.get("/{project_id}/risks")
 def get_risks(project_id: int, db: Session = Depends(models.get_db)):
     return ApiResponse(
         data=db.query(Risk)
@@ -263,7 +263,7 @@ def get_risks(project_id: int, db: Session = Depends(models.get_db)):
     )
 
 
-@router.post("/{project_id}/risks", response_model=ApiResponse)
+@router.post("/{project_id}/risks")
 def update_or_create_risk(
     project_id: int, dto: RisksDto, db: Session = Depends(models.get_db)
 ):

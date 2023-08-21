@@ -18,7 +18,7 @@ class AccessRequestDto(BaseModel):
     email: Optional[str]
 
 
-@router.get("/{user_id}", response_model=ApiResponse)
+@router.get("/{user_id}")
 def get_org_details(user_id: int, db: Session = Depends(get_db)):
     org = (
         db.query(Organisation)
@@ -32,7 +32,7 @@ def get_org_details(user_id: int, db: Session = Depends(get_db)):
     return ApiResponse(data=[org])
 
 
-@router.post("/access-request", response_model=ApiResponse)
+@router.post("/access-request")
 def create(dto: AccessRequestDto, db: Session = Depends(get_db)):
     item: AccessRequest = AccessRequest()
     item.notes = dto.notes

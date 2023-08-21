@@ -31,7 +31,7 @@ class CommunicationDto(BaseModel):
     drivers: List[int]
 
 
-@router.get("/{project_id}", response_model=ApiResponse)
+@router.get("/{project_id}")
 def find_all(project_id: int, db: Session = Depends(models.get_db)):
     results = (
         db.query(Communication)
@@ -48,7 +48,7 @@ def find_all(project_id: int, db: Session = Depends(models.get_db)):
     return ApiResponse(data=results)
 
 
-@router.delete("/{project_id}/{id}", response_model=ApiResponse)
+@router.delete("/{project_id}/{id}")
 def delete(project_id: int, id: int, db: Session = Depends(models.get_db)):
     db.query(Communication).filter(
         Communication.id == id and Communication.project_id == project_id
@@ -58,7 +58,7 @@ def delete(project_id: int, id: int, db: Session = Depends(models.get_db)):
     return find_all(project_id, db)
 
 
-@router.post("/{project_id}", response_model=ApiResponse)
+@router.post("/{project_id}")
 def update_or_create(
     project_id: int, dto: CommunicationDto, db: Session = Depends(models.get_db)
 ):

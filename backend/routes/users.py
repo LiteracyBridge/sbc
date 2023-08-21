@@ -2,6 +2,7 @@ from typing import Optional
 from dataclass_wizard import asdict, fromdict
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
+from fastapi.encoders import jsonable_encoder
 
 from sqlalchemy.orm import Session
 from schema import ApiResponse
@@ -24,7 +25,7 @@ class UpdateUserDto(BaseModel):
     address_as: Optional[str]
 
 
-@router.post("/", response_model=ApiResponse)
+@router.post("/")
 def create(dto: UserDto, db: Session = Depends(get_db)):
     invite = db.query(Invitation).filter(Invitation.email == dto.email).first()
 
@@ -44,7 +45,7 @@ def create(dto: UserDto, db: Session = Depends(get_db)):
     return ApiResponse(data=[user])
 
 
-@router.get("/organisation/{email}", response_model=ApiResponse)
+@router.get("/organisation/{email}")
 def get_org_users(email: str, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == email).first()
     print(user)
@@ -57,7 +58,7 @@ def get_org_users(email: str, db: Session = Depends(get_db)):
     return ApiResponse(data=data)
 
 
-@router.get("/{email}", response_model=ApiResponse)
+@router.get("/{email}")
 def get_user_by_email(email: str, db: Session = Depends(get_db)):
     if email is None:
         raise HTTPException(status_code=400, detail="Email is required")
@@ -82,7 +83,7 @@ def get_user_by_email(email: str, db: Session = Depends(get_db)):
     return ApiResponse(data=[user])
 
 
-@router.put("/{id}", response_model=ApiResponse)
+@router.put("/{id}")
 def update_user(id: int, dto: UpdateUserDto, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.id == id).first()
 

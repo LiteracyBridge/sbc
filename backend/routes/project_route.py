@@ -32,7 +32,7 @@ class ProjectObjectiveDto(BaseModel):
     removed: Optional[List[int]] = []
 
 
-@router.get("/{id}", response_model=ApiResponse)
+@router.get("/{id}")
 def find_project(id: int, db: Session = Depends(models.get_db)):
     record = (
         db.query(Project)
@@ -47,7 +47,7 @@ def find_project(id: int, db: Session = Depends(models.get_db)):
     return ApiResponse(data=[record])
 
 
-@router.put("/{id}", response_model=ApiResponse)
+@router.put("/{id}")
 def update_strategy(
     id: int, dto: UpdateProjectDto, db: Session = Depends(models.get_db)
 ):
@@ -211,14 +211,14 @@ class ProjectDataDto(BaseModel):
 
 
 # Project objectives route
-@router.get("/{project_id}/data", response_model=ApiResponse)
+@router.get("/{project_id}/data")
 def get_project_data(project_id: int, db: Session = Depends(models.get_db)):
     return ApiResponse(
         data=db.query(ProjectData).filter(ProjectData.prj_id == project_id).all()
     )
 
 
-@router.delete("/{project_id}/data/{id}", response_model=ApiResponse)
+@router.delete("/{project_id}/data/{id}")
 def delete_project_data_item(
     project_id: int,
     id: int,
@@ -243,8 +243,8 @@ def delete_project_data_item(
     delete_project_data(item_id=item.id, db=db)
 
 
-@router.post("/{project_id}/data", response_model=ApiResponse)
-@router.put("/{project_id}/data", response_model=ApiResponse)
+@router.post("/{project_id}/data")
+@router.put("/{project_id}/data")
 def update_or_create_data(
     project_id: int,
     body: Annotated[List[ProjectDataDto], Body()],
@@ -336,7 +336,7 @@ class StakeholderDto(BaseModel):
 
 def get_stakeholders(
     project_id: int, db: Session = Depends(models.get_db)
-) -> ApiResponse:
+):
     return ApiResponse(
         data=db.query(Stakeholder).filter(Stakeholder.project_id == project_id).all()
     )
@@ -345,7 +345,7 @@ def get_stakeholders(
 @router.delete("/{project_id}/stakeholders/{stakeholder_id}")
 def delete_stakeholder(
     project_id: int, stakeholder_id: int, db: Session = Depends(models.get_db)
-) -> ApiResponse:
+):
     """Delete a stakeholder from the project"""
 
     record: Stakeholder | None = (
@@ -366,7 +366,7 @@ def delete_stakeholder(
 @router.post("/{project_id}/stakeholders")
 def update_or_add_stakeholder(
     project_id: int, dto: StakeholderDto, db: Session = Depends(models.get_db)
-) -> ApiResponse:
+):
     """Add a new stakeholder to the project"""
 
     record: Stakeholder = Stakeholder()
@@ -397,7 +397,7 @@ def update_or_add_stakeholder(
 
 # ================== END: PROJECT STAKEHOLDERS ==================== ##
 
-# @router.post("/{project_id}/audience", response_model=ApiResponse)
+# @router.post("/{project_id}/audience")
 # def update_audience(
 #     project_id: int, dto: ProjectObjectiveDto, db: Session = Depends(models.get_db)
 # ):

@@ -46,12 +46,12 @@ def get_monitoring_by_project_id(
     return record
 
 
-@router.get("/{projectId}", response_model=ApiResponse)
+@router.get("/{projectId}")
 def get_by_project_id(projectId: int, db: Session = Depends(models.get_db)):
     return ApiResponse(data=get_monitoring_by_project_id(projectId, db))
 
 
-@router.put("/{id}", response_model=ApiResponse)
+@router.put("/{id}")
 def update_item(
     id: int,
     dto: UpdateMonitoringDto,
@@ -73,7 +73,7 @@ def update_item(
     return ApiResponse(data=get_monitoring_by_project_id(record.project_id, db))
 
 
-@router.post("/{id}/evaluation", response_model=ApiResponse)
+@router.post("/{id}/evaluation")
 def record_progress(
     id: int,
     dto: RecordProgressDto,

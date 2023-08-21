@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 router = APIRouter()
 
 
-@router.get("/indi-kit", response_model=ApiResponse)
+@router.get("/indi-kit")
 def get_indicator_types(db: Session = Depends(models.get_db)):
     data = db.query(LuIndiKit).all()
 

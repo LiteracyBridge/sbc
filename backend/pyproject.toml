@@ -4,7 +4,7 @@ version = "0.1.0"
 description = ""
 authors = ["Lawrence Ephrim <ephrimlawrence0@gmail.com>"]
 readme = "README.md"
-packages = [{include = "sbc_backend"}]
+packages = [{ include = "sbc_backend" }]
 
 [tool.poetry.dependencies]
 python = "^3.11"
