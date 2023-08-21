@@ -98,34 +98,6 @@ class Invitation(Base):
     organisation: Mapped["Organisation"] = relationship("Organisation")
 
 
-class User(Base):
-    __tablename__ = "users"
-
-    id: Mapped[int] = mapped_column(primary_key=True, index=True)
-    name: Mapped[Optional[str]] = mapped_column(String)
-    email: Mapped[str] = mapped_column(String, unique=True, index=True)
-    notify_email: Mapped[Optional[bool]] = mapped_column(Boolean, nullable=True)
-    address_as: Mapped[Optional[str]] = mapped_column(String, nullable=True)
-    sms: Mapped[Optional[str]] = mapped_column(String, nullable=True)
-    notify_sms: Mapped[Optional[bool]] = mapped_column(Boolean, nullable=True)
-
-    notify_whatsapp: Mapped[Optional[bool]] = mapped_column(Boolean, nullable=True)
-    whatsapp: Mapped[Optional[str]] = mapped_column(String, nullable=True)
-    whatsapp_last_received: Mapped[Optional[datetime]] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
-
-    editing_user_id: Mapped[Optional[int]] = mapped_column(
-        ForeignKey("users.id"), nullable=True
-    )
-    organisation_id: Mapped[int] = mapped_column(ForeignKey("organisations.id"))
-    last_project_id: Mapped[Optional[int]] = mapped_column(ForeignKey("projects.id"))
-
-    organisation: Mapped["Organisation"] = relationship(
-        "Organisation", back_populates="users"
-    )
-
-
 class Project(Base):
     __tablename__ = "projects"
 
@@ -170,6 +142,38 @@ class ProjectUser(Base):
     editing_user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
 
     project: Mapped["Project"] = relationship("Project")
+    # user: Mapped["User"] = relationship("User")
+
+
+class User(Base):
+    __tablename__ = "users"
+
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    name: Mapped[Optional[str]] = mapped_column(String)
+    email: Mapped[str] = mapped_column(String, unique=True, index=True)
+    notify_email: Mapped[Optional[bool]] = mapped_column(Boolean, nullable=True)
+    address_as: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    sms: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    notify_sms: Mapped[Optional[bool]] = mapped_column(Boolean, nullable=True)
+
+    notify_whatsapp: Mapped[Optional[bool]] = mapped_column(Boolean, nullable=True)
+    whatsapp: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    whatsapp_last_received: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+
+    editing_user_id: Mapped[Optional[int]] = mapped_column(
+        ForeignKey("users.id"), nullable=True
+    )
+    organisation_id: Mapped[int] = mapped_column(ForeignKey("organisations.id"))
+    last_project_id: Mapped[Optional[int]] = mapped_column(ForeignKey("projects.id"))
+
+    organisation: Mapped["Organisation"] = relationship(
+        "Organisation", back_populates="users"
+    )
+    projects: Mapped[List["ProjectUser"]] = relationship(
+        "ProjectUser", foreign_keys=[ProjectUser.user_id]
+    )
 
 
 class LuIntervention(Base):

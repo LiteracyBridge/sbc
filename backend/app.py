@@ -7,7 +7,7 @@ from fastapi import Depends, FastAPI, HTTPException, Request
 from mangum import Mangum
 
 from routes import (
-    users,
+    users_route,
     theory_of_change,
     activity_route,
     monitoring,
@@ -117,7 +117,7 @@ if not settings.is_local:
 ###############################################################################
 
 app.include_router(
-    users.router, prefix="/users", tags=["users"], dependencies=[Depends(models.get_db)]
+    users_route.router, prefix="/users", tags=["users"], dependencies=[Depends(models.get_db)]
 )
 app.include_router(
     theory_of_change.router,

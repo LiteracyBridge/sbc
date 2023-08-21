@@ -24,6 +24,7 @@ export const useUserStore = defineStore({
     firstName: (state) => (state.name ? state.name.split(" ")[0] : ""),
     loggedIn: (state) => !(state.email == null),
     user: (state) => state,
+    hasProjects: (state) => (state.projects || []).length > 0,
   },
   actions: {
     // Update the last_project_id for the user and call API to update the database

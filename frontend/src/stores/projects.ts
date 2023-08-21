@@ -176,7 +176,14 @@ export const useProjectStore = defineStore({
         access_id,
       });
       // add to store, rather than download what we just inserted into the db
-      this.users_in_project.push({ id, user_id, email, name, access_id });
+      this.users_in_project.push({
+        id,
+        user_id,
+        email,
+        name,
+        access_id,
+        projects: [],
+      });
     },
 
     // Adds a new project

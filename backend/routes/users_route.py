@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from fastapi.encoders import jsonable_encoder
 
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, subqueryload
 from schema import ApiResponse
 from models import Invitation, Organisation, User, get_db
 
@@ -63,7 +63,12 @@ def get_user_by_email(email: str, db: Session = Depends(get_db)):
     if email is None:
         raise HTTPException(status_code=400, detail="Email is required")
 
-    user = db.query(User).filter(User.email == email).first()
+    user = (
+        db.query(User)
+        .filter(User.email == email)
+        .options(subqueryload(User.projects))
+        .first()
+    )
 
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")

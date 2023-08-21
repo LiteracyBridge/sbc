@@ -114,7 +114,7 @@ function openDiscourse() {
         >
         </FeedbackModal>
 
-        <Sidebar></Sidebar>
+        <Sidebar v-if="userStore.hasProjects"></Sidebar>
         <!-- <LayoutSider>
       <LeftSideNav v-if="showSideNav" v-model="showSideNav" />
     </LayoutSider> -->

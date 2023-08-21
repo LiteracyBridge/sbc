@@ -53,6 +53,12 @@ export class User {
   token?: string;
   last_project_id?: number;
   organisation_id?: number;
+
+  projects: Array<{ prj_id: number; user_id: number }> = [];
+
+  constructor(init?: Partial<User>) {
+    Object.assign(this, init);
+  }
 }
 
 export class Stakeholder extends Timestamps {
