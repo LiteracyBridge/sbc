@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { downloadObjects } from "@/apis/lambda";
-import { Country, LuIndiKit } from "@/types";
+import { GenericLookup, LuIndiKit } from "@/types";
 import { ApiRequest } from "@/apis/api";
 
 // Initial objects for lookup data structure
@@ -18,10 +18,10 @@ import { ApiRequest } from "@/apis/api";
 export const useLookupStore = defineStore({
   id: "lookup",
   state: () => ({
-    // access_types: [],
+    access_types: [] as GenericLookup[],
     // activity_status: [],
     indi_kits: [] as LuIndiKit[],
-    countries: [] as Country[],
+    countries: [] as GenericLookup[],
     // importance: [],
     // library_types: [],
     // participant_types: [],
@@ -53,6 +53,7 @@ export const useLookupStore = defineStore({
         const data = resp[0];
         this.$state.countries = data.countries;
         this.$state.indi_kits = data.indi_kit;
+        this.$state.access_types = data.access_types;
       });
       // return downloadObjects(init_objects, this, "lu_");
     },
