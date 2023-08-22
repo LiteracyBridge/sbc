@@ -43,7 +43,7 @@ def create_feedback(
 
     # Upload files to S3
     temp_files = deepcopy(files)
-    feedback.files = upload_to_s3(files, "sbc-upload", "feedbacks")
+    # feedback.files = upload_to_s3(files, "sbc-upload", "feedbacks")
     print(feedback.files)
 
     db.add(feedback)
