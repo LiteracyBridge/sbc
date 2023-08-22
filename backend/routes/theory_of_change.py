@@ -148,10 +148,11 @@ def delete_toc_item(
         db.query(Activity).filter(Activity.theory_of_change_id == record.id).first()
     )
     if activity is not None:
+        # Also deletes ToC item
         delete_activity(activity, db)
-
-    # Handle related items deletion in event
-    delete_theory_of_change(record.id, db)
+    else:
+        # Handle related items deletion in event
+        delete_theory_of_change(record.id, db)
 
     return get_by_project_id(project_id, db)
 
