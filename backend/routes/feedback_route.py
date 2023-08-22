@@ -60,7 +60,7 @@ def create_feedback(
 
     msg = MIMEMultipart()
     msg["Subject"] = f"New Feedback: {title}"
-    # msg["From"] = "support@amplio.org"
+    msg["From"] = user.email
     msg["To"] = "lawrence@amplio.org"
 
     # Set message body
