@@ -7,6 +7,7 @@ import { Button, Tag, Drawer, Table, Popconfirm } from "ant-design-vue";
 import { Activity } from "@/types";
 import { PlusCircleOutlined } from "@ant-design/icons-vue";
 import { formatDate } from "@/helpers";
+import dayjs from "dayjs";
 
 import AddSubActivityModal from "./AddSubActivityModal.vue";
 
@@ -53,10 +54,14 @@ function getStatusColor(status_id: number) {
   return { color, status };
 }
 
-function editActivity(activity: Activity) {
-  // TODO: implement activity editing
-  // draftActivity.value = JSON.parse(JSON.stringify(activity));
-  // showEditModal.value = true;
+function editActivity(id: number) {
+  const activity = activityStore.activityById(id);
+  activity.start_date = dayjs(activity.start_date);
+  activity.end_date = dayjs(activity.end_date);
+  // activity.end_date = activity.end_date?.toDate() as any;
+
+  config.value.modal.task = activity;
+  config.value.modal.visible = true;
 }
 
 watch(
@@ -133,9 +138,9 @@ const columns = [
 
         <template #bodyCell="{ column, record: activity }">
           <template v-if="column.key === 'name'">
-            <Button type="text" @click="editActivity(activity)">{{
+            <span>{{
               activity.name
-            }}</Button>
+            }}</span>
 
             <Tag class="is-rounded" :color="getStatusColor(activity.status_id).color">
               {{ getStatusColor(activity.status_id).status }}
@@ -159,6 +164,15 @@ const columns = [
             >
               <Button type="primary" :ghost="true" danger size="small"> Delete </Button>
             </Popconfirm>
+
+            <Button
+              @click="editActivity(activity.id)"
+              type="primary"
+              :ghost="true"
+              size="small"
+              class="ml-2"
+              >Edit</Button
+            >
           </template>
         </template>
       </Table>
