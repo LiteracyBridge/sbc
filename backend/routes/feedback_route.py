@@ -81,7 +81,11 @@ def create_feedback(
 
     # Attach files
     for f in files:
-        part = MIMEApplication(f.file.read())
+        file_location = f"/tmp/{f.filename}"
+        with open(file_location, "wb+") as file_object:
+            file_object.write(f.file.read())
+
+        part = MIMEApplication(open(file_location, "rb").read())
         part.add_header(
             "Content-Disposition", "attachment", filename=f.filename
         )
