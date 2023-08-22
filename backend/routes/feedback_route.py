@@ -61,7 +61,7 @@ def create_feedback(
     msg = MIMEMultipart()
     msg["Subject"] = f"New Feedback: {title}"
     # msg["From"] = "support@amplio.org"
-    msg["To"] = "sbc@amplio.org"
+    msg["To"] = "lawrence@amplio.org"
 
     # Set message body
     body = MIMEText(
@@ -89,7 +89,7 @@ def create_feedback(
 
     ses_client = boto3.client("ses")
     ses_client.send_raw_email(
-        Destinations=["sbc@amplio.org"],
+        Destinations=["lawrence@amplio.org"],
         RawMessage={"Data": msg.as_string()}
     )
 
