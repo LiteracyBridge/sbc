@@ -1,7 +1,7 @@
 import models
 from dataclass_wizard import asdict, fromdict
 from fastapi import APIRouter, Depends, HTTPException
-from models import LuAccessType, LuIndiKit, LuCountry
+from models import LuAccessType, LuIndiKit, LuCountry, LuImportance
 from schema import ApiResponse
 from sqlalchemy.orm import Session
 
@@ -20,9 +20,15 @@ def get_data(db: Session = Depends(models.get_db)):
     access_types = db.query(LuAccessType).all()
     countries = db.query(LuCountry).all()
     indikit = db.query(LuIndiKit).all()
+    importance = db.query(LuImportance).all()
 
     return ApiResponse(
         data=[
-            {"access_types": access_types, "countries": countries, "indi_kit": indikit}
+            {
+                "access_types": access_types,
+                "countries": countries,
+                "indi_kit": indikit,
+                "importance": importance,
+            }
         ]
     )

@@ -99,12 +99,12 @@ function changeProject(prjId: number) {
 
           <template #overlay>
             <Menu>
-              <MenuItem v-for="prj in projectStore.projects()" :key="prj.prj_id">
+              <MenuItem v-for="prj in projectStore.projects()" :key="prj.id">
                 <Popconfirm
                   title="Are you sure to switch project?"
                   ok-text="Yes"
                   cancel-text="No"
-                  @confirm="changeProject(prj.prj_id)"
+                  @confirm="changeProject(prj.id)"
                 >
                   <a href="javascript:;">{{ prj.name }}</a>
                 </Popconfirm>
