@@ -42,9 +42,9 @@ def create_feedback(
     feedback.user_id = editing_user_id
 
     # Upload files to S3
-    temp_files = deepcopy(files)
+    # temp_files = deepcopy(files)
     # feedback.files = upload_to_s3(files, "sbc-upload", "feedbacks")
-    print(feedback.files)
+    # print(feedback.files)
 
     db.add(feedback)
     db.commit()
@@ -65,22 +65,22 @@ def create_feedback(
 
     # Set message body
     body = MIMEText(
-        f"""Hello Team,
+    f"""Hello Team,
 
-        {user.address_as} has submitted new feedback. See below for details.
+    {user.address_as} has submitted new feedback. See below for details.
 
-        Title: {title}
-        Issue Type: {feedback.type}
-        Description: {description}
+    Title: {title}
+    Issue Type: {feedback.type}
+    Description: {description}
 
-        {'Attached are the files submitted' if len(temp_files) > 0 else ''}
-        """,
-        "plain",
+    {'Attached are the files submitted' if len(files) > 0 else ''}
+    """,
+    "plain",
     )
     msg.attach(body)
 
     # Attach files
-    for f in temp_files:
+    for f in files:
         part = MIMEApplication(f.file.read())
         part.add_header(
             "Content-Disposition", "attachment", filename=f.filename
