@@ -2,16 +2,10 @@
 // Importing required Vue and external libraries
 import { onMounted, computed, ref } from "vue";
 import { RouterView, useRoute, useRouter } from "vue-router";
-import { useLookupStore } from "./stores/lookups";
-import NavBar from "@/components/Layout/NavBar.vue";
-import LeftSideNav from "@/components/Layout/LeftSideNav.vue";
 import "@aws-amplify/ui-vue/styles.css";
-import { Amplify } from "aws-amplify";
-import awsconfig from "./aws-exports";
 import { useSideNavStore } from "@/stores/sideNav";
 import { useUserStore } from "@/stores/user";
 import { AppStore } from "./stores/app.store";
-import GridLoader from "./components/spinners/GridLoader.vue";
 import {
   Layout,
   LayoutContent,
@@ -30,7 +24,6 @@ import Sidebar from "./components/Layout/Sidebar.vue";
 import {
   BugOutlined,
   CommentOutlined,
-  CustomerServiceOutlined,
   QuestionOutlined,
   WechatOutlined,
 } from "@ant-design/icons-vue";
@@ -50,32 +43,11 @@ const route = useRoute(),
 
 const feedbackModalVisible = ref(false);
 
-// Initialize the lookup store and side navigation store
-// const lookupStore = useLookupStore();
-const sideNavStore = useSideNavStore();
-
-// Computed property for determining if the side navigation should be visible
-const showSideNav = computed(() => sideNavStore.visible);
-
 // Configure AWS Amplify with the provided configuration
 // Amplify.configure(awsconfig);
 
 // On component mount, download the lookup data if online
-onMounted(async () => {
-  // router.replace(route.name() || '/')
-  // appStore.downloadObjects()
-
-  console.warn(route.fullPath);
-  if (router.hasRoute(route.name)) {
-    await router.replace(router.currentRoute.value.fullPath);
-  }
-
-  // if (ONLINE) {
-  //   lookupStore.download().then(() => appStore.setLoading(false))
-  // } else {
-  //   appStore.setLoading(false)
-  // }
-});
+onMounted(async () => {});
 
 function openDiscourse() {
   window.open("https://sbcimpact.discourse.group", "_blank", 'rel="noopener"').focus();
@@ -115,20 +87,10 @@ function openDiscourse() {
         </FeedbackModal>
 
         <Sidebar v-if="userStore.hasProjects"></Sidebar>
-        <!-- <LayoutSider>
-      <LeftSideNav v-if="showSideNav" v-model="showSideNav" />
-    </LayoutSider> -->
 
         <Layout>
-          <!-- <LayoutHeader :has-sider="true" style="background: #ffffff; padding: 0px 16px 0px 0px;">
-        <MenuUnfoldOutlined v-if="sideNavStore.visible" class="trigger"
-          @click="() => (sideNavStore.visible = !sideNavStore.visible)" />
-        <MenuUnfoldOutlined v-else class="trigger" @click="() => (sideNavStore.visible = !sideNavStore.visible)" /> -->
-
-          <!-- Place a dropdown at the end of the header -->
 
           <Header></Header>
-          <!-- </LayoutHeader> -->
 
           <LayoutContent
             :style="{
@@ -185,7 +147,6 @@ function openDiscourse() {
 <style>
 /* Importing required CSS libraries */
 @import "bulma/css/bulma.min.css";
-@import "@creativebulma/bulma-tooltip";
 
 html {
   overflow-y: auto;
