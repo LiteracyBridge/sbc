@@ -13,6 +13,7 @@ from email.mime.base import MIMEBase
 from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+import shutil
 
 from helpers import upload_to_s3
 
@@ -82,8 +83,11 @@ def create_feedback(
     # Attach files
     for f in files:
         file_location = f"/tmp/{f.filename}"
+        f.file.seek(0)
+
         with open(file_location, "wb+") as file_object:
-            file_object.write(f.file.read())
+            shutil.copyfileobj(f.file, file_object)
+            # file_object.write(f.file.read())
 
         part = MIMEApplication(open(file_location, "rb").read())
         part.add_header(
