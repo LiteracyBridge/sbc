@@ -58,7 +58,7 @@ def create_feedback(
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
 
-    msg = MIMEMultipart()
+    msg = MIMEMultipart("mixed")
     msg["Subject"] = f"New Feedback: {title}"
     msg["From"] = user.email
     msg["To"] = "lawrence@amplio.org"
