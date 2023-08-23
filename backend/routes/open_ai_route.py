@@ -87,6 +87,7 @@ def call_openai_api(prompt, context, stop):
 def gptCompletion(prompt, context=None, format_type=None, start="", stop=""):
     BASE_CONTEXT = "Act as an expert consultant on social and behavior change for global development in low and middle income countries. Your strongest area of expertise is in the UNICEF Behavioural Drivers Model.\n"
     full_context = BASE_CONTEXT
+    start = "" if start is None else start
 
     if context is not None:
         full_context += "Context:\n" + context + "\n"

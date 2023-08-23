@@ -235,21 +235,17 @@ export async function gptCompletion(
   }
 
   // set to false when testing other features to avoid unnecessary calls to openai
-  if (true) {
-    try {
-      return axios
-        .post(`${import.meta.env.VITE_SBC_API_URL}/open-ai`, payload, {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${useUserStore().token}`,
-          },
-        })
-        .then((resp) => resp.data.result);
-    } catch (error) {
-      console.error("Error:", error);
-    }
-  } else {
-    return null;
+  try {
+    return axios
+      .post(`${import.meta.env.VITE_SBC_API_URL}/open-ai`, payload, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${useUserStore().token}`,
+        },
+      })
+      .then((resp) => resp.data.result);
+  } catch (error) {
+    console.error("Error:", error);
   }
 }
 
