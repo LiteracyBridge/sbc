@@ -506,7 +506,7 @@ const tocItemModalClosed = (redraw = true, data?: TheoryOfChange[]) => {
           />
         </div>
 
-        <Space>
+        <!-- <Space>
           <span>
             Need help?
             <Button
@@ -516,7 +516,7 @@ const tocItemModalClosed = (redraw = true, data?: TheoryOfChange[]) => {
               >Browse theory of change examples</Button
             >
           </span>
-        </Space>
+        </Space> -->
       </div>
 
       <Divider></Divider>
