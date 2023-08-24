@@ -126,6 +126,7 @@ export class Project extends Timestamps {
 
   organisation: Organisation;
   stakeholders: Stakeholder[] = [];
+  users: ProjectUser[] = [];
 
   constructor(init?: Partial<Project>) {
     super();
@@ -139,6 +140,7 @@ export class ProjectUser extends User {
   user_id: number;
 
   project?: Project;
+  user?: User;
 
   constructor(init?: Partial<ProjectUser>) {
     super(init);

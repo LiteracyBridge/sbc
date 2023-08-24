@@ -254,7 +254,7 @@ export const useProjectStore = defineStore({
       await useUserStore().setLastProject(id);
 
       // await AppStore().downloadObjects();
-      useProjectStore().download();
+      await useProjectStore().download();
       if (id && !newProject) {
         clearAllProjectStores();
         downloadAllProjectStores();

@@ -4,7 +4,19 @@ import { useProjectDataStore } from "@/stores/projectData";
 import { useProjectStore } from "@/stores/projects";
 import { useUserStore } from "@/stores/user";
 import { Stakeholder, ProjectUser } from "@/types";
-import { Button, Modal, message, Spin, Steps, Step, Table, type TableProps, Drawer, Space, Popconfirm } from "ant-design-vue";
+import {
+  Button,
+  Modal,
+  message,
+  Spin,
+  Steps,
+  Step,
+  Table,
+  Drawer,
+  Space,
+  Popconfirm,
+} from "ant-design-vue";
+import type { TableProps } from "ant-design-vue";
 import axios from "axios";
 import { computed, ref, watch } from "vue";
 
@@ -40,19 +52,18 @@ const steps = [
   },
 ];
 
-
 function closeModal() {
   config.value = {
     visible: false,
     currentStep: 0,
     stakeholders: [] as Stakeholder[],
-    users: [] as ProjectUser[]
+    users: [] as ProjectUser[],
   };
   emit("close");
 }
 
 function broadcast() {
-  if(config.value.stakeholders.length == 0 && config.value.users.length == 0) {
+  if (config.value.stakeholders.length == 0 && config.value.users.length == 0) {
     message.error("Please select at least one user or stakeholder to broadcast to.");
     return;
   }
@@ -60,18 +71,20 @@ function broadcast() {
   store.loading = true;
 
   message.info("Broadcasting message to all users in the project");
-  axios.post(`${SBC_TW_URL}/broadcast`, {
-    project_id: projectStore.prj_id,
-    message:  store.buildBroadcastMessage(props.module),
-    related_item: props.module,
-    stakeholder_ids: config.value.stakeholders.map((s) => s.id),
-    user_ids: config.value.users.map((s) => s.user_id),
-    user_id_sending: useUserStore().id,
-  }).then((resp) => {
-    console.log(resp)
-    closeModal()
-  }).finally(() => store.loading = false)
-
+  axios
+    .post(`${SBC_TW_URL}/broadcast`, {
+      project_id: projectStore.prj_id,
+      message: store.buildBroadcastMessage(props.module),
+      related_item: props.module,
+      stakeholder_ids: config.value.stakeholders.map((s) => s.id),
+      user_ids: config.value.users.map((s) => s.user_id),
+      user_id_sending: useUserStore().id,
+    })
+    .then((resp) => {
+      console.log(resp);
+      closeModal();
+    })
+    .finally(() => (store.loading = false));
 }
 
 watch(props, (newProps) => {
@@ -98,10 +111,10 @@ const columns = [
 ];
 
 const getStakeHolders = computed(() => {
-  return projectStore.stakeholders.map((s) => ({...s, key: s.id}));
+  return projectStore.stakeholders.map((s) => ({ ...s, key: s.id }));
 });
 
-const stakeholdersRowSelection: TableProps['rowSelection'] = {
+const stakeholdersRowSelection: TableProps["rowSelection"] = {
   onChange: (_selectedRowKeys: string[], selectedRows: Stakeholder[]) => {
     config.value.stakeholders = selectedRows;
   },
@@ -111,12 +124,17 @@ const stakeholdersRowSelection: TableProps['rowSelection'] = {
   }),
 };
 
-
 const getUsers = computed(() => {
-  return projectStore.users_in_project.map((s) => ({...s, key: s.user_id}));
+  return (projectStore.current_project?.users || []).map((s) => ({
+    ...s,
+    name: s.user?.name,
+    key: s.user_id,
+    whatsapp: s.user?.whatsapp,
+    sms: s.user?.sms,
+  }));
 });
 
-const usersRowSelection: TableProps['rowSelection'] = {
+const usersRowSelection: TableProps["rowSelection"] = {
   onChange: (_selectedRowKeys: string[], selectedRows: ProjectUser[]) => {
     config.value.users = selectedRows;
   },

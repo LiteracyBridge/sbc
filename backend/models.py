@@ -137,6 +137,9 @@ class Project(Base):
     organisation: Mapped["Organisation"] = relationship(
         "Organisation", back_populates="projects"
     )
+    users: Mapped[List["ProjectUser"]] = relationship(
+        "ProjectUser", back_populates="project"
+    )
 
 
 class ProjectUser(Base):
@@ -149,8 +152,10 @@ class ProjectUser(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     editing_user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
 
-    project: Mapped["Project"] = relationship("Project")
-    # user: Mapped["User"] = relationship("User")
+    project: Mapped["Project"] = relationship("Project", back_populates="users")
+    user: Mapped["User"] = relationship(
+        "User", foreign_keys=[user_id], back_populates="projects"
+    )
 
 
 class User(Base):
@@ -180,7 +185,7 @@ class User(Base):
         "Organisation", back_populates="users"
     )
     projects: Mapped[List["ProjectUser"]] = relationship(
-        "ProjectUser", foreign_keys=[ProjectUser.user_id]
+        "ProjectUser", foreign_keys=[ProjectUser.user_id], back_populates="user"
     )
 
 

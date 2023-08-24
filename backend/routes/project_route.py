@@ -1,7 +1,14 @@
 from typing import List, Optional, Dict, Annotated
 from datetime import datetime
 from sqlalchemy import text
-from models import LuDriver, ProjectDriver, Stakeholder, TheoryOfChange, get_db
+from models import (
+    LuDriver,
+    ProjectDriver,
+    ProjectUser,
+    Stakeholder,
+    TheoryOfChange,
+    get_db,
+)
 from helpers import ToCItemDto, create_toc_item
 
 import models
@@ -37,7 +44,11 @@ def find_project(id: int, db: Session = Depends(models.get_db)):
     record = (
         db.query(Project)
         .filter(Project.id == id)
-        .options(subqueryload(Project.stakeholders), subqueryload(Project.organisation))
+        .options(
+            subqueryload(Project.stakeholders),
+            subqueryload(Project.organisation),
+            subqueryload(Project.users).options(subqueryload(ProjectUser.user)),
+        )
         .first()
     )
 
@@ -316,7 +327,6 @@ def update_or_create_data(
                     toc.name = str(dto.data)
                 db.commit()
 
-
     return get_project_data(project_id=project_id, db=db)
 
 
@@ -334,9 +344,7 @@ class StakeholderDto(BaseModel):
     editing_user_id: int
 
 
-def get_stakeholders(
-    project_id: int, db: Session = Depends(models.get_db)
-):
+def get_stakeholders(project_id: int, db: Session = Depends(models.get_db)):
     return ApiResponse(
         data=db.query(Stakeholder).filter(Stakeholder.project_id == project_id).all()
     )
