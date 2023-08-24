@@ -413,7 +413,6 @@ const addIndiKitIndicator = (item: LuIndiKit) => {
                     <p>{{ item.wording_english }}</p>
                   </div>
                 </div>
-                <hr />
 
                 <div class="columns">
                   <div class="column is-2">

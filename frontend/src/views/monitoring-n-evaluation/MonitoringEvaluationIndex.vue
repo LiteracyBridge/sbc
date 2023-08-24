@@ -158,6 +158,7 @@ function getTypeColor(type?: string): string {
   </AddMonitoringIndicatorModal>
 
   <ProgressTrackingModal
+    v-if="config.selectedRow != null"
     :visible="config.progressTrackingModal.visible"
     @is-closed="config.progressTrackingModal.visible = true"
     :record="config.selectedRow"
