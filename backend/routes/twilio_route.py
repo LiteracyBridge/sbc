@@ -312,10 +312,7 @@ def broadcast_message(
     if len(body.user_ids) > 0:
         users = (
             db.query(User)
-            .filter(
-                ((User.notify_whatsapp == True) & (User.whatsapp != None))
-                | ((User.notify_sms == True) & (User.sms != None))
-            )
+            .filter((User.whatsapp != None) | (User.sms != None))
             .filter(User.id.in_(body.user_ids))
             .all()
         )

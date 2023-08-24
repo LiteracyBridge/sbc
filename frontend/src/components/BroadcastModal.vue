@@ -53,12 +53,10 @@ const steps = [
 ];
 
 function closeModal() {
-  config.value = {
-    visible: false,
-    currentStep: 0,
-    stakeholders: [] as Stakeholder[],
-    users: [] as ProjectUser[],
-  };
+  config.value.currentStep = 0;
+  config.value.stakeholders = [];
+  config.value.users = [];
+  config.value.visible = false;
   emit("close");
 }
 
@@ -150,6 +148,7 @@ const usersRowSelection: TableProps["rowSelection"] = {
     title="Are you sure to broadcast this message?"
     v-model:open="config.visible"
     @cancel="closeModal()"
+    @close="closeModal()"
     width="60vw"
   >
     <template #footer>

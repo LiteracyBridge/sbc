@@ -20,12 +20,12 @@ const layoutDirection = computed(() => props.direction || "vertical");
 </script>
 
 <template>
-  <BroadcastModal
-    :visible="config.broadcastModal"
-    :module="props.module"
-    @close="config.broadcastModal = false"
-  >
-  </BroadcastModal>
+    <BroadcastModal
+      :visible="config.broadcastModal"
+      :module="props.module"
+      @close="config.broadcastModal = false"
+    >
+    </BroadcastModal>
 
   <MessagesDrawer
     v-if="config.messagesModal"
@@ -38,7 +38,7 @@ const layoutDirection = computed(() => props.direction || "vertical");
     class="buttons-container is-fixed is-absolute is-flex is-flex-direction-column is-align-items-flex-end"
   >
     <Space :direction="layoutDirection">
-      <Button @click.prevent="config.broadcastModal = true">
+      <Button @click="config.broadcastModal = true">
         <ShareAltOutlined />
         Broadcast
       </Button>

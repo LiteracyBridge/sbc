@@ -21,11 +21,9 @@ export const AppStore = defineStore({
       this.setLoading(true);
 
       return await useProjectStore()
-        .download().then(() => {
-
-        })
+        .download()
         .then(() => useLookupStore().download())
-        .then(() => useTheoryOfChangeStore().download())
+        .then(async () => await useTheoryOfChangeStore().download())
         .finally(() => this.setLoading(false));
     },
   },
