@@ -52,9 +52,9 @@ def get_toc_by_project_id(projectId: int, db: Session = Depends(models.get_db)):
         .filter(TheoryOfChange.project_id == projectId)
         .options(
             # subqueryload(models.TheoryOfChangeOld.graph)
-            subqueryload(TheoryOfChange.indicators)
-            .subqueryload(TheoryOfChangeIndicator.indicator)
-            .options(subqueryload(TheoryOfChangeIndicator.indikit)),
+            subqueryload(TheoryOfChange.indicators).subqueryload(
+                TheoryOfChangeIndicator.indikit
+            )
             # .options(
             #     subqueryload(models.TheoryOfChangeItem.sem),
             #     subqueryload(models.TheoryOfChangeItem.type),
@@ -158,9 +158,9 @@ def get_project_indicators(project_id: int, db: Session = Depends(models.get_db)
 # =========== INDICATORS UPDATE =========== #
 class IndicatorDto(BaseModel):
     # TODO: remove these
-    removed: List[int]
-    added: Optional[List[Dict]]
-    removed_custom: Optional[List[int]]
+    # removed: List[int]
+    # added: Optional[List[Dict]]
+    # removed_custom: Optional[List[int]]
     data: List[Dict]
 
 
@@ -170,9 +170,9 @@ def update_indicators(
 ):
     print(dto)
     # Remove deleted indicators
-    if dto.removed is not None:
-        for id in dto.removed:
-            delete_indicator(id, db)
+    # if dto.removed is not None:
+    #     for id in dto.removed:
+    #         delete_indicator(id, db)
 
     theory_of_change: TheoryOfChange | None = (
         db.query(TheoryOfChange).filter(TheoryOfChange.id == item_id).first()
@@ -182,8 +182,16 @@ def update_indicators(
 
     # Add new Indikit indicators to project indicators
     # Save new Indikit indicators to theory of change indicators
-    # monitoring_indicators = []
     for item in dto.data:
+        # Delete indicator
+        if item.get("is_deleted", False):
+            # Indicator is already in DB
+            if item.get("id", None) is not None:
+                delete_indicator(item["id"], db)
+
+            # If not in DB, just skip it
+            continue
+
         toc_indicator = TheoryOfChangeIndicator()
         is_new = True
         if item.get("id", None) is not None:
@@ -197,7 +205,6 @@ def update_indicators(
                 is_new = False
 
         toc_indicator.theory_of_change_id = theory_of_change.id
-        toc_indicator: TheoryOfChangeIndicator = TheoryOfChangeIndicator()
         toc_indicator.indikit_id = item.get("indikit_id", None)
         toc_indicator.project_id = theory_of_change.project_id
         toc_indicator.name = item.get("name", None)
@@ -207,7 +214,7 @@ def update_indicators(
             db.add(toc_indicator)
 
         db.commit()
-        db.refresh(toc_indicator)
+        # db.refresh(toc_indicator)
 
         # Create monitoring item
         if is_new:

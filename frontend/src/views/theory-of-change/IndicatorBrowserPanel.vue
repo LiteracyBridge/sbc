@@ -45,21 +45,21 @@ const collapseKey = ref<string[]>([]),
     selectedIndiKit: {} as Record<string, boolean>,
     customIndicator: "",
     selectedIndicator: null,
-    reqBody: {
-      removed: [],
-      removed_custom: [],
-      added: [] as Array<{ id?: number; name: string; indi_kit_id?: number }>,
-    },
+    // reqBody: {
+    //   removed: [],
+    //   removed_custom: [],
+    //   added: [] as Array<{ id?: number; name: string; indi_kit_id?: number }>,
+    // },
   });
 
 const tracker = ref<
   {
-    id?: string | number;
+    id?: number;
     name: string;
     indikit_id?: number;
     is_new: boolean;
     is_deleted: boolean;
-    is_updated: boolean;
+    is_updated?: boolean;
   }[]
 >([]);
 
@@ -83,13 +83,13 @@ const closePanel = () => {
     selectedIndiKit: {},
     customIndicator: "",
     selectedIndicator: null,
-    reqBody: {
-      removed: [],
-      removed_custom: [],
-      added: [],
-    },
+    // reqBody: {
+    //   removed: [],
+    //   removed_custom: [],
+    //   added: [],
+    // },
   };
-
+  tracker.value = [];
   emit("isClosed", true);
 };
 
@@ -105,6 +105,17 @@ const buildIndicatorsTree = (indicators?: any[]) => {
 };
 
 onMounted(() => {
+  tracker.value = (config.value.tocItem.indicators ?? []).flatMap((i) => {
+    return {
+      id: i.id,
+      name: i?.name ?? i?.indikit?.name ?? "",
+      indi_kit_id: i?.indikit_id,
+      is_new: false,
+      is_deleted: false,
+      is_updated: false,
+    };
+  });
+
   buildIndicatorsTree(config.value.tocItem?.indicators ?? []);
 
   config.value.isLoading = true;
@@ -129,7 +140,7 @@ watch(
 
     if (_indicators.length > 0) {
       const indicator = theoryOfChangeStore.indicatorGroups.find(
-        (i) => i.id == _indicators[0].indicator_id
+        (i) => i.id == _indicators[0].id
       );
       const indicatorType = theoryOfChangeStore.indicatorTypes.find(
         (i) => i.id == indicator?.group_id
@@ -149,7 +160,10 @@ const saveIndicators = async () => {
   config.value.isLoading = true;
 
   theoryOfChangeStore
-    .saveIndicators({ tocId: config.value.tocItem.id, data: config.value.reqBody })
+    .saveIndicators({
+      tocId: config.value.tocItem.id,
+      data: tracker.value,
+    })
     .then((resp) => {
       config.value.tocItem = resp.find((i) => i.id == config.value.tocItem.id);
       emit("isSaved", theoryOfChangeStore.theory_of_change);
@@ -161,26 +175,30 @@ const saveIndicators = async () => {
 };
 
 const getTocIndicators = computed(() => {
-  const _temp = (config.value.tocItem.indicators ?? []).flatMap((i) => {
-    return {
-      id: i.id,
-      name: i.indicator?.name ?? i.indicator?.indi_kit?.name ?? "",
-      indi_kit_id: i.indicator?.indi_kit_id,
-    };
-  });
+  // const _temp = (config.value.tocItem.indicators ?? []).flatMap((i) => {
+  //   return {
+  //     id: i.id,
+  //     name: i?.name ?? i?.indikit?.name ?? "",
+  //     indi_kit_id: i?.indikit_id,
+  //     is_new: false,
+  //     is_deleted: false,
+  //     is_updated: false,
+  //   };
+  // });
 
-  const all = config.value.reqBody.added.concat(_temp);
+  // const all = (.concat(_temp);
 
+  return tracker.value.filter((i) => !(i.is_deleted ?? false)) ?? [];
   // Filter out removed indicators
-  return all.filter((i) => {
-    return config.value.reqBody.removed.find((r) => r == i.id) == null;
-  });
+  // return all.filter((i) => {
+  //   return config.value.reqBody.removed.find((r) => r == i.id) == null;
+  // });
 });
 
 // Custom indicator handlers
 const getProjectIndicators = computed(() => {
   return uniqBy(
-    theoryOfChangeStore.project_indicators.map((i) => {
+    theoryOfChangeStore.theoryOfChangeItemIndicators(props.tocItem.id).map((i) => {
       return { ...i, label: i.name, value: i.name };
     }),
     "name"
@@ -193,21 +211,49 @@ const makeIndicatorAsDeleted = (
   indi_kit_id?: number
 ) => {
   // If id is not provided, then it's a new custom indicator
-  if (customId == null) {
-    const _temp = config.value.reqBody.added;
-    const index = _temp.findIndex((i) => i.id == null && i.name == name);
+  if (customId != null) {
+    // const _temp = tracker.value;
+    // const index = _temp.findIndex((i) => i.id == null && i.name == name);
 
-    _temp.splice(index, 1);
-    config.value.reqBody.added = _temp;
+    // _temp.splice(index, 1);
+    // config.value.reqBody.added = _temp;
+    tracker.value = tracker.value.map((i) => {
+      if (i.name == name && i.id == customId) {
+        i.is_deleted = true;
+      }
+      return i;
+    });
     return;
   }
 
   if (indi_kit_id != null) {
-    config.value.reqBody.removed = [...config.value.reqBody.removed, indi_kit_id];
+    tracker.value = tracker.value.map((i) => {
+      if (i.name == name && i.indikit_id == indi_kit_id) {
+        i.is_deleted = true;
+      }
+      return i;
+    });
+    // config.value.reqBody.removed = [...config.value.reqBody.removed, indi_kit_id];
     return;
   }
 
-  config.value.reqBody.removed = [...config.value.reqBody.removed, customId];
+  // Fallback to project indicators using the name to find the indicator
+  if (name != null) {
+    // const _temp = tracker.value;
+    // const index = _temp.findIndex((i) => i.id == null && i.name == name);
+
+    // _temp.splice(index, 1);
+    // config.value.reqBody.added = _temp;
+    tracker.value = tracker.value.map((i) => {
+      if (i.name == name) {
+        i.is_deleted = true;
+      }
+      return i;
+    });
+    return;
+  }
+
+  // config.value.reqBody.removed = [...config.value.reqBody.removed, customId];
 };
 
 const onProjectIndicatorSelected = (label: string, option?: ProjectIndicator) => {
@@ -220,33 +266,39 @@ const onProjectIndicatorSelected = (label: string, option?: ProjectIndicator) =>
 
   // 1. Check if indicator already exists in project indicators
   // if true, add it to the toc indicators list
-  const exits = theoryOfChangeStore.project_indicators.find(
-    (i) => i.name.trim() == label
-  );
-  if (exits != null) {
-    config.value.reqBody.added = [
-      ...config.value.reqBody.added,
-      { id: exits.id, name: exits.name, indi_kit_id: null },
-    ];
-    return;
-  }
+  // const exits = theoryOfChangeStore.allTocIndicators.find((i) => i.name.trim() == label);
+  // if (exits != null) {
+  tracker.value = [
+    ...tracker.value,
+    { name: label, id: null, indikit_id: null, is_new: true, is_deleted: false },
+  ];
+  // config.value.reqBody.added = [
+  //   ...config.value.reqBody.added,
+  //   { id: exits.id, name: exits.name, indi_kit_id: null },
+  // ];
+  // return;
+  // }
 
   // 2. If not, add it to the project indicators list and then add it to the toc indicators list
-  config.value.reqBody.added = [
-    ...config.value.reqBody.added,
-    { name: label, id: null, indi_kit_id: null },
-  ];
+  // config.value.reqBody.added = [
+  //   ...config.value.reqBody.added,
+  //   { name: label, id: null, indi_kit_id: null },
+  // ];
 };
 
 const addIndiKitIndicator = (item: LuIndiKit) => {
-  console.log("adding");
-  const exists = config.value.reqBody.added.find((i) => i.indi_kit_id == item.id);
+  // console.log("adding");
+  // const exists = config.value.reqBody.added.find((i) => i.indi_kit_id == item.id);
 
-  if (exists != null) return;
+  // if (exists != null) return;
 
-  config.value.reqBody.added = [
-    ...config.value.reqBody.added,
-    { name: item.name, indi_kit_id: item.id, id: null },
+  // config.value.reqBody.added = [
+  //   ...config.value.reqBody.added,
+  //   { name: item.name, indi_kit_id: item.id, id: null },
+  // ];
+  tracker.value = [
+    ...tracker.value,
+    { name: item.name, indikit_id: item.id, id: null, is_new: true, is_deleted: false },
   ];
 };
 </script>
@@ -300,7 +352,7 @@ const addIndiKitIndicator = (item: LuIndiKit) => {
                   makeIndicatorAsDeleted(
                     indicator.name,
                     indicator.id,
-                    indicator.indi_kit_id
+                    indicator.indikit_id
                   )
                 "
               >

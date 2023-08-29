@@ -307,6 +307,7 @@ export class TheoryOfChangeIndicator {
   // indicator_id: number;
   // indicator?: ProjectIndicator;
 
+  indikit?: LuIndiKit;
   project?: Project;
   theories_of_change?: TheoryOfChange;
 }

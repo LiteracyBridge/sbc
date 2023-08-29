@@ -46,8 +46,8 @@ export const useTheoryOfChangeStore = defineStore({
         ).flatMap((i) => {
           return {
             id: i.id,
-            name: i.indicator?.name ?? i.indicator?.indi_kit?.name ?? "",
-            indi_kit_id: i.indicator?.indi_kit_id,
+            name: i?.name ?? i?.indikit?.name ?? "",
+            indi_kit_id: i?.indikit_id,
           };
         });
       };
@@ -58,8 +58,8 @@ export const useTheoryOfChangeStore = defineStore({
           return toc.indicators.flatMap((i) => {
             return {
               id: i.id,
-              name: i.indicator?.name ?? i.indicator?.indi_kit?.name ?? "",
-              indi_kit_id: i.indicator?.indi_kit_id,
+              name: i?.name ?? i?.indikit?.name ?? "",
+              indikit_id: i?.indikit_id,
             };
           });
         }) ?? []
@@ -114,17 +114,20 @@ export const useTheoryOfChangeStore = defineStore({
     },
     async saveIndicators(opts: {
       tocId: number;
-      data: {
-        removed: number[];
-        removed_custom: number[];
-        added: Array<{ id?: number; name: string; indi_kit_id?: number }>;
-      };
+      data: Array<{
+        id?: number;
+        name: string;
+        indikit_id?: number;
+        is_new: boolean;
+        is_deleted: boolean;
+        is_updated?: boolean;
+      }>;
     }) {
       this.$state.isLoading = true;
 
       return ApiRequest.post<TheoryOfChange>(
         `theory-of-change/${opts.tocId}/indicators`,
-        { ...opts.data }
+        { data: opts.data }
       )
         .then((resp) => {
           this.$state.theory_of_change = resp;

@@ -13,8 +13,8 @@ export const useMonitoringStore = defineStore({
   }),
   getters: {
     getIndicatorName: (state) => (monitoringId: number) => {
-      const indicator = state.data.find((i) => i.id === monitoringId);
-      return indicator ? indicator.toc_indicator?.indicator?.name : "";
+      const indicator = state.data?.find((i) => i.id === monitoringId);
+      return indicator ? indicator.toc_indicator?.name : "";
     },
     getTheoryOfChange: (state) => (monitoringId: number) => {
       const indicator = state.data.find((i) => i.id === monitoringId);
