@@ -111,9 +111,10 @@ function saveChanges() {
     name: ProjectDataName.specific_objective,
   }));
 
-  return store.addOrUpdate([...temp, ...form.value]).then((resp) => {
+  return store.addOrUpdate([...temp, ...form.value]).then((_) => {
     config.value.pendingSave = false;
     handleOnMounted();
+    return;
   });
 }
 
@@ -128,7 +129,7 @@ onBeforeRouteLeave((to, from, next) => {
       okText: "Yes. Save Changes",
       cancelText: "Discard Changes",
       onOk: () => {
-        saveChanges().then(() => next());
+        return saveChanges().then(() => next());
       },
       onCancel: () => next(),
     });

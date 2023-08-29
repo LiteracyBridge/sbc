@@ -80,7 +80,7 @@ onBeforeRouteLeave((to, from, next) => {
       okText: "Yes. Save Changes",
       cancelText: "Discard Changes",
       onOk: () => {
-        saveChanges().then(() => next());
+        return saveChanges().then(() => next());
       },
       onCancel: () => next(),
     });

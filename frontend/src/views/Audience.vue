@@ -59,39 +59,6 @@ function showPanel(id: string | number) {
   config.value.suggestions.isOpened = true;
 }
 
-function updateData(event: any, id: number) {
-  store.setData(id, event.target.value);
-}
-
-// Dynamic objectives forms
-function saveChanges() {
-  const temp1 = primaryAudienceForm.audiences.map((i) => ({
-    id: i?.id,
-    q_id: 11,
-    label: "",
-    showBuild: false,
-    data: i.data || "",
-    module: ProjectDataModule.audiences,
-    deleted: i.deleted || false,
-    name: ProjectDataName.primary_audience,
-  }));
-  const temp2 = secondaryAudienceForm.audiences.map((i) => ({
-    id: i?.id,
-    q_id: 11,
-    label: "",
-    showBuild: false,
-    data: i.data || "",
-    module: ProjectDataModule.audiences,
-    deleted: i.deleted || false,
-    name: ProjectDataName.secondary_audience,
-  }));
-
-  return store.addOrUpdate([...temp1, ...temp2, ...form.value]).then((resp) => {
-    config.value.pendingSave = false;
-    handleOnMounted();
-  });
-}
-
 function deleteAudience(id: number | string, primary: boolean) {
   if (primary) {
     primaryAudienceForm.audiences = primaryAudienceForm.audiences.map((i) => {
@@ -169,6 +136,34 @@ function handleOnMounted() {
     });
 }
 
+function saveChanges() {
+  const temp1 = primaryAudienceForm.audiences.map((i) => ({
+    id: i?.id,
+    q_id: 11,
+    label: "",
+    showBuild: false,
+    data: i.data || "",
+    module: ProjectDataModule.audiences,
+    deleted: i.deleted || false,
+    name: ProjectDataName.primary_audience,
+  }));
+  const temp2 = secondaryAudienceForm.audiences.map((i) => ({
+    id: i?.id,
+    q_id: 11,
+    label: "",
+    showBuild: false,
+    data: i.data || "",
+    module: ProjectDataModule.audiences,
+    deleted: i.deleted || false,
+    name: ProjectDataName.secondary_audience,
+  }));
+
+  return store.addOrUpdate([...temp1, ...temp2, ...form.value]).then((_) => {
+    config.value.pendingSave = false;
+    handleOnMounted();
+  });
+}
+
 onMounted(() => {
   handleOnMounted();
 });
@@ -180,7 +175,7 @@ onBeforeRouteLeave((to, from, next) => {
       okText: "Yes. Save Changes",
       cancelText: "Discard Changes",
       onOk: () => {
-        saveChanges().then(() => next());
+        return saveChanges().then(() => next());
       },
       onCancel: () => next(),
     });

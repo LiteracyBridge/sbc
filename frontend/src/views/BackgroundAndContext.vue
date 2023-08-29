@@ -19,7 +19,7 @@ import { useTheoryOfChangeStore } from "@/stores/theory_of_change";
 import { ProjectDataModule } from "@/types";
 import BroadcastComponent from "@/components/BroadcastComponent.vue";
 import { onBeforeRouteLeave } from "vue-router";
-import type { FormInstance } from "ant-design-vue";
+
 const BULB_ICON = "/images/lightbulb.png";
 
 const projectDataStore = useProjectDataStore();
@@ -42,18 +42,11 @@ function showPanel(id: string | number) {
   config.value.suggestions.isOpened = true;
 }
 
-// function updateData(event: any, id: number) {
-//   projectDataStore.setData(id, event.target.value);
-// }
-
-// const updateSector = (value: any, id: number) => {
-//   projectDataStore.setData(id, value);
-// };
-
 function saveChanges() {
-  return projectDataStore
-    .addOrUpdate(form.value)
-    .then((resp) => (config.value.pendingSave = false));
+  return projectDataStore.addOrUpdate(form.value).then(() => {
+    config.value.pendingSave = false;
+    return;
+  });
 }
 
 onMounted(() => {
@@ -74,13 +67,13 @@ onMounted(() => {
 });
 
 onBeforeRouteLeave((to, from, next) => {
-  if (config.value.pendingSave) {
+  if (config.value.pendingSave == true) {
     Modal.confirm({
       title: "You have unsaved changes. Do you want to save them?",
       okText: "Yes. Save Changes",
       cancelText: "Discard Changes",
-      onOk: () => {
-        saveChanges().then(() => next());
+      onOk: async () => {
+        return saveChanges().then(() => next());
       },
       onCancel: () => next(),
     });
