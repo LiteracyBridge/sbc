@@ -335,7 +335,7 @@ class TheoryOfChange(Base, SoftDeleteMixin):
     sem_id: Mapped[Optional[int]] = mapped_column(
         ForeignKey("lu_sem.id"), nullable=True
     )
-    project_id: Mapped[Optional[int]] = mapped_column(
+    project_id: Mapped[int] = mapped_column(
         ForeignKey("projects.id", ondelete="CASCADE"), nullable=False
     )
     created_at: Mapped[datetime] = mapped_column(
@@ -374,10 +374,10 @@ class TheoryOfChangeIndicator(Base, SoftDeleteMixin):
     __tablename__ = "theory_of_change_indicators"
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
-
-    indicator_id: Mapped[int] = mapped_column(
-        ForeignKey("project_indicators.id", ondelete="CASCADE")
-    )
+    name: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    # indicator_id: Mapped[int] = mapped_column(
+    #     ForeignKey("project_indicators.id", ondelete="CASCADE")
+    # )
     theory_of_change_id: Mapped[int] = mapped_column(
         ForeignKey("theory_of_change.id", ondelete="CASCADE")
     )
@@ -396,8 +396,12 @@ class TheoryOfChangeIndicator(Base, SoftDeleteMixin):
     deleted_at: Mapped[Optional[DateTime]] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
+    indikit_id: Mapped[Optional[int]] = mapped_column(
+        ForeignKey("lu_indi_kit.id"), nullable=True
+    )
+    # indicator: Mapped["ProjectIndicators"] = relationship("ProjectIndicators")
 
-    indicator: Mapped["ProjectIndicators"] = relationship("ProjectIndicators")
+    indikit: Mapped["LuIndiKit"] = relationship("LuIndiKit")
     theory_of_change: Mapped["TheoryOfChange"] = relationship(
         "TheoryOfChange", back_populates="indicators"
     )
@@ -471,10 +475,10 @@ class Activity(Base, SoftDeleteMixin):
         MutableList.as_mutable(ARRAY(Integer)), default=[], nullable=True
     )
     start_date: Mapped[Optional[DateTime]] = mapped_column(
-        DateTime(timezone=True), default=func.now()
+        DateTime(timezone=True), nullable=True, default=None
     )
     end_date: Mapped[Optional[DateTime]] = mapped_column(
-        DateTime(timezone=True), default=func.now()
+        DateTime(timezone=True), nullable=True, default=None
     )
     created_at: Mapped[DateTime] = mapped_column(
         DateTime(timezone=True), default=func.now()
@@ -497,7 +501,7 @@ class Monitoring(Base, SoftDeleteMixin):
     data_collection_method: Mapped[Optional[str]]
     reporting_period: Mapped[Optional[str]]
     type: Mapped[Optional[str]]
-    evaluation: Mapped[ARRAY] = mapped_column(
+    evaluation: Mapped[List] = mapped_column(
         MutableList.as_mutable(JSON), nullable=True, default=[]
     )
     created_at: Mapped[DateTime] = mapped_column(

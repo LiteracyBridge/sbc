@@ -9,6 +9,7 @@
 		"vue.inlayHints.missingProps": true,
 		"vue.server.petiteVue.supportHtmlFile": true,
 		"cSpell.words": [
+			"indikit",
 			"joinedload",
 			"organisation",
 			"sqlalchemy"

@@ -52,6 +52,17 @@ const collapseKey = ref<string[]>([]),
     },
   });
 
+const tracker = ref<
+  {
+    id?: string | number;
+    name: string;
+    indikit_id?: number;
+    is_new: boolean;
+    is_deleted: boolean;
+    is_updated: boolean;
+  }[]
+>([]);
+
 const groupIndicators = computed(() => {
   if (selectedGroupType.value?.id == null) {
     return [];
@@ -298,7 +309,6 @@ const addIndiKitIndicator = (item: LuIndiKit) => {
                 </Button>
               </Popconfirm>
             </template>
-
           </ListItem>
         </List>
       </Col>

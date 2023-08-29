@@ -297,13 +297,15 @@ export class Risk {
 }
 
 export class TheoryOfChangeIndicator {
+  name: string;
   id: number;
-  indicator_id: number;
+  indikit_id: number;
   theory_of_change_id: number;
   project_id: number;
   activity_id: number;
 
-  indicator?: ProjectIndicator;
+  // indicator_id: number;
+  // indicator?: ProjectIndicator;
 
   project?: Project;
   theories_of_change?: TheoryOfChange;
