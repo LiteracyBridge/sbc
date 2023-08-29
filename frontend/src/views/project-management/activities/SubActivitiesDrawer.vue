@@ -109,6 +109,7 @@ const columns = [
     :draft-activity="config.modal.task"
     :visible="config.modal.visible"
     @closed="config.modal.visible = false"
+    :is-activity="false"
   >
   </AddSubActivityModal>
 

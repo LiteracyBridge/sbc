@@ -26,10 +26,16 @@ import {
 import type { FormInstance } from "ant-design-vue";
 import { Activity } from "@/types";
 
+/**
+ * 'Activity' here means the item is a top-level activity
+ * 'Task/sub activity' here means the item is a sub-activity
+ */
+
 const props = defineProps<{
   draftActivity: Activity;
   visible: boolean;
   parentActivity: Activity;
+  isActivity: boolean;
 }>();
 
 const emit = defineEmits(["closed", "save"]);
@@ -51,14 +57,6 @@ const taskFormRef = ref<FormInstance>();
 
 const isEditing = computed(() => props.draftActivity?.id != null);
 
-/**
- * 'Activity' here means the item is a top-level activity
- * 'Task/sub activity' here means the item is a sub-activity
- */
-const isActivity = computed(
-  () => props.draftActivity.parent_id == null && props.draftActivity.id != null
-);
-
 const closeModal = () => {
   taskFormRef.value.resetFields();
   config.value.visible = false;
@@ -66,9 +64,9 @@ const closeModal = () => {
 };
 
 const saveForm = () => {
-  taskFormRef.value.validateFields().then((values) => {
+  taskFormRef.value.validateFields().then(() => {
     // Update duration
-    if (isActivity.value) {
+    if (props.isActivity) {
       props.draftActivity.start_date = config.value.duration[0];
       props.draftActivity.end_date = config.value.duration[1];
     } else {

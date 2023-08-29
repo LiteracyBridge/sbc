@@ -84,6 +84,7 @@ const columns = [
       :parent-activity="config.modal.activity"
       :draft-activity="config.modal.activity"
       :visible="config.modal.visible"
+      :is-activity="true"
       @closed="
         config.modal.visible = false;
         config.modal.activity = null;
