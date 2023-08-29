@@ -140,6 +140,8 @@ def add_driver_to_project(
     If the driver has a parent, add the parent driver to the project as well.
     """
 
+    # TODO: auto query for parent driver if not found
+
     # If driver already exists in project, return
     if driver_exists_in_project(project_id=project_id, driver_id=lu_driver_id, db=db):
         return ApiResponse(
