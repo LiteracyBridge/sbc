@@ -22,6 +22,9 @@ import {
   List,
   ListItem,
   Popconfirm,
+  Descriptions,
+  DescriptionsItem,
+  Card,
 } from "ant-design-vue";
 import { PlusOutlined, DeleteOutlined } from "@ant-design/icons-vue";
 import { uniqBy } from "lodash-es";
@@ -363,8 +366,8 @@ const getSectors = computed(() => {
                   )
                 "
               >
-                <Button size="small" type="primary" :ghost="true" :danger="true">
-                  <DeleteOutlined /> Remove
+                <Button size="small" type="primary" :ghost="true" :danger="true"
+                  >Remove
                 </Button>
               </Popconfirm>
             </template>
@@ -382,7 +385,7 @@ const getSectors = computed(() => {
               :options="getProjectIndicators"
               size="small"
               placeholder="Enter indicator name"
-              style="width: 100%"
+              style="width: 100%; height: 60px;"
               @select="onProjectIndicatorSelected"
             >
             </AutoComplete>
@@ -405,21 +408,19 @@ const getSectors = computed(() => {
       <Typography.Title :level="5">Browse Indicators Library</Typography.Title>
     </Divider>
 
-    <Row :gutter="7">
-      <Col :span="8">
-        <label>Select Indicator Sector</label>
+    <Row :gutter="0">
+      <Col :span="7">
+        <label>Select Indicator Sector:</label> <br />
         <Select
           v-model:value="selectedMainIndicatorType"
           show-search
           placeholder="Select an indicator sector"
-          style="width: 200px"
+          style="width: 330px"
+          class="mt-2"
           :allow-clear="true"
           :options="getSectors"
           :filter-option="filterIndicatorSectors"
         >
-          <!-- <SelectOption v-for="key in Object.keys(lookup.indikit)" :key="item.id" :value="item.id">
-            {{ item.sector }}
-          </SelectOption> -->
         </Select>
 
         <Divider></Divider>
@@ -450,12 +451,6 @@ const getSectors = computed(() => {
       </Col>
 
       <Col :span="16">
-        <!-- <TypographyTitle :level="4">
-          {{ selectedGroupType?.name || '' }}
-        </TypographyTitle> -->
-
-        <!-- <Divider></Divider> -->
-
         <div
           v-if="groupIndicators?.length == 0"
           style="margin-top: auto; position: fixed; top: 50%; left: 55%"
@@ -469,59 +464,54 @@ const getSectors = computed(() => {
             :key="item.id"
             :header="item.name"
           >
-            <div class="card is-shadowless is-small">
-              <div class="card-content">
-                <div class="columns">
-                  <div class="column is-2">
-                    <strong>Indicator Phrasing</strong>
-                  </div>
-                  <div class="column">
-                    <p>{{ item.wording_english }}</p>
-                  </div>
-                </div>
+            <template #extra>
+              <Button
+                :danger="config.selectedIndiKit[`${item.id}`]"
+                type="primary"
+                size="small"
+                @click="
+                  config.selectedIndiKit[`${item.id}`] = !config.selectedIndiKit[
+                    `${item.id}`
+                  ];
+                  addIndiKitIndicator(item);
+                "
+              >
+                <template #icon>
+                  <PlusOutlined v-if="!config.selectedIndiKit[`${item.id}`]" />
+                </template>
 
-                <div class="columns">
-                  <div class="column is-2">
-                    <strong>Guidance</strong>
-                  </div>
-                  <div class="column">
-                    <!-- <p>{{ item.guidance }}</p> -->
-                    <a :href="item.guidance" target="_blank"
-                      >Click to learn more about learn more the indicator on IndiKit</a
-                    >
-                  </div>
-                </div>
-              </div>
+                {{ config.selectedIndiKit[`${item.id}`] ? "Remove " : "Add " }}
+              </Button>
+            </template>
 
-              <footer class="card-footer">
-                <p class="card-footer-item">
-                  <!-- TODO: add function for adding indicators -->
-                  <Button
-                    :danger="config.selectedIndiKit[`${item.id}`]"
-                    type="primary"
-                    @click="
-                      config.selectedIndiKit[`${item.id}`] = !config.selectedIndiKit[
-                        `${item.id}`
-                      ];
-                      addIndiKitIndicator(item);
-                    "
-                  >
-                    <!-- <span class="icon mr-1">
-                    <i class="fas"
-                      :class="{ 'fa-trash': config.indicators[`${item.id}`], 'fa-plus': !config.indicators[`${item.id}`] }"></i>
-                  </span>
-                   -->
-                    <template #icon>
-                      <DeleteOutlined v-if="config.selectedIndiKit[`${item.id}`]" />
-                      <PlusOutlined v-else />
-                    </template>
+            <Row :gutter="2">
+              <Col :span="4">
+                <strong>Indicator Phrasing</strong>
+              </Col>
+              <Col :span="18">
+                <p>{{ item.wording_english }}</p>
+              </Col>
+            </Row>
 
-                    {{ config.selectedIndiKit[`${item.id}`] ? "Remove " : "Add " }}
-                    Indicator
-                  </Button>
-                </p>
-              </footer>
-            </div>
+            <Row :gutter="2" class="mt-3">
+              <Col :span="4">
+                <strong>Purpose</strong>
+              </Col>
+              <Col :span="18">
+                <p>{{ item.purpose }}</p>
+              </Col>
+            </Row>
+
+            <Row :gutter="2" class="mt-3">
+              <Col :span="4">
+                <strong>Guidance</strong>
+              </Col>
+              <Col :span="18">
+                <a :href="item.guidance" target="_blank"
+                  >Click to learn more about learn more the indicator on IndiKit</a
+                >
+              </Col>
+            </Row>
           </CollapsePanel>
         </Collapse>
       </Col>
