@@ -1,19 +1,8 @@
-# Write a script to import data from csv files to the database. The script should
-# be able to import data from the following csv files:
-
-import psycopg2
 import csv
 from models import LuIndiKit
 from models import get_db
 
 
-# Connect to the PostgreSQL database
-# conn = psycopg2.connect(
-#     host="localhost",
-#     database="mydatabase",
-#     user="myusername",
-#     password="mypassword"
-# )
 def import_indikit():
     db = next(get_db())
 
@@ -62,19 +51,8 @@ def import_indikit():
             else:
                 db.commit()
 
-            # print(row)
-            # break
-        # Insert the data into the appropriate table
-
     db.bulk_save_objects(pending_save)
     db.commit()
 
-#         cursor = conn.cursor()
-#         cursor.execute("INSERT INTO mytable (column1, column2, column3) VALUES (%s, %s, %s)", row)
-#         cursor.close()
-
-# # Commit the changes and close the connection
-# conn.commit()
-# conn.close()
 
 import_indikit()
