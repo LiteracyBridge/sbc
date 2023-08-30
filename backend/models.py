@@ -47,7 +47,8 @@ class LuIndiKit(Base):
     sector: Mapped[str]
     sub_sector: Mapped[Optional[str]]
     indicator_level: Mapped[ARRAY] = mapped_column(ARRAY(String))
-
+    import_id: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    purpose: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
 class LuImportance(Base):
     __tablename__ = "lu_importance"
