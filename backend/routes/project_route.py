@@ -9,8 +9,6 @@ from models import (
     TheoryOfChange,
     get_db,
 )
-from helpers import ToCItemDto, create_toc_item
-
 import models
 from fastapi import APIRouter, Depends, HTTPException, Body, Request, Response
 from models import ProjectData, Project
@@ -18,7 +16,7 @@ from pydantic import BaseModel
 from schema import ApiResponse
 from sqlalchemy.orm import Session, subqueryload
 from routes.theory_of_change import delete_toc_item
-from model_events import delete_project_data
+from helpers.model_events import delete_project_data
 
 router = APIRouter()
 

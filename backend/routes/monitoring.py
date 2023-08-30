@@ -80,7 +80,7 @@ def record_progress(
     db: Session = Depends(models.get_db),
 ):
     # TODO: rewrite progress tracking
-    record = db.query(Monitoring).filter(Monitoring.id == id).first()
+    record: Monitoring | None = db.query(Monitoring).filter(Monitoring.id == id).first()
 
     if record is None:
         raise HTTPException(status_code=404, detail="Item not found")

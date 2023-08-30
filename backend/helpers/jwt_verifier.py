@@ -12,7 +12,7 @@ from typing import Dict, List
 from jose import jwk, jwt
 from jose.utils import base64url_decode
 from pydantic import BaseModel
-from config import settings
+from helpers.config import settings
 
 
 class JWK(BaseModel):

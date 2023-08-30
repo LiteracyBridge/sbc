@@ -7,24 +7,11 @@ from functools import reduce
 from typing import Dict, List, Optional, Any
 
 import boto3 as boto3
-import models
 import pg8000.native
-from botocore.exceptions import ClientError
-from fastapi import APIRouter, Depends, HTTPException, Request
-from models import (
-    Activity,
-    Monitoring,
-    ProjectIndicators,
-    Risk,
-    TheoryOfChange,
-    TheoryOfChangeIndicator,
-)
-from config import settings
+from fastapi import APIRouter, Request
+from helpers.config import settings
 from pg8000 import Connection, Cursor
 from pg8000.native import identifier, literal
-from pydantic import BaseModel
-from schema import ApiResponse
-from sqlalchemy.orm import Session, joinedload, subqueryload
 
 router = APIRouter()
 

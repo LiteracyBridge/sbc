@@ -21,7 +21,7 @@ from models import (
     Project,
 )
 from fastapi import APIRouter, Depends, Form, HTTPException, Request
-from config import settings
+from helpers.config import settings
 
 router = APIRouter()
 

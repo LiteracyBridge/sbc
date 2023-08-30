@@ -26,10 +26,10 @@ from middlewares.logging_middleware import LoggingMiddleware
 from handlers.exception_handler import exception_handler
 from handlers.http_exception_handler import http_exception_handler
 from fastapi.middleware.cors import CORSMiddleware
-from jwt_verifier import CognitoAuthenticator
+from helpers.jwt_verifier import CognitoAuthenticator
 import models
-from config import settings
-import model_events
+from helpers.config import settings
+from helpers import model_events
 
 if settings.sentry_dsn is not None:
     sentry_sdk.init(
@@ -118,7 +118,10 @@ if not settings.is_local:
 ###############################################################################
 
 app.include_router(
-    users_route.router, prefix="/users", tags=["users"], dependencies=[Depends(models.get_db)]
+    users_route.router,
+    prefix="/users",
+    tags=["users"],
+    dependencies=[Depends(models.get_db)],
 )
 app.include_router(
     theory_of_change.router,

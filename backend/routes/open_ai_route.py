@@ -11,7 +11,7 @@ import openai
 from openai.error import RateLimitError
 
 from schema import ApiResponse
-from config import settings
+from helpers.config import settings
 
 
 router = APIRouter()

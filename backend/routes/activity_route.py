@@ -3,7 +3,7 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session, joinedload, subqueryload
-from model_events import delete_activity
+from helpers.model_events import delete_activity
 
 import models
 from models import Activity

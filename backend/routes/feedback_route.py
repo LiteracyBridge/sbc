@@ -15,7 +15,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import shutil
 
-from helpers import upload_to_s3
+# from helpers import upload_to_s3
 
 router = APIRouter()
 

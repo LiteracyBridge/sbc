@@ -102,9 +102,6 @@ const buildIndicatorsTree = (indicators?: any[]) => {
   }
 
   config.value.selectedIndiKit = tree;
-};
-
-onMounted(() => {
   tracker.value = (config.value.tocItem.indicators ?? []).flatMap((i) => {
     return {
       id: i.id,
@@ -115,7 +112,9 @@ onMounted(() => {
       is_updated: false,
     };
   });
+};
 
+onMounted(() => {
   buildIndicatorsTree(config.value.tocItem?.indicators ?? []);
 
   config.value.isLoading = true;

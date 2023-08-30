@@ -1,6 +1,6 @@
 from typing import Dict, List, Optional
 from datetime import datetime
-from model_events import delete_activity, delete_indicator, delete_theory_of_change
+from helpers.model_events import delete_activity, delete_indicator, delete_theory_of_change
 from models import ProjectIndicators, TheoryOfChange, TheoryOfChangeIndicator
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
