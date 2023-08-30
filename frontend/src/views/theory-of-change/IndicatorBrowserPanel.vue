@@ -25,6 +25,7 @@ import {
 } from "ant-design-vue";
 import { PlusOutlined, DeleteOutlined } from "@ant-design/icons-vue";
 import { uniqBy } from "lodash-es";
+import { useLookupStore } from "@/stores/lookups";
 
 const emit = defineEmits<{
   (e: "isClosed", status: boolean): boolean;
@@ -33,11 +34,12 @@ const emit = defineEmits<{
 
 const props = defineProps<{ tocItem: TheoryOfChange; isVisible: boolean }>();
 
-const theoryOfChangeStore = useTheoryOfChangeStore();
+const theoryOfChangeStore = useTheoryOfChangeStore(),
+  lookup = useLookupStore();
 
 const collapseKey = ref<string[]>([]),
-  selectedMainIndicatorType = ref<number>(null),
-  selectedGroupType = ref<IndicatorType>(),
+  selectedMainIndicatorType = ref<string>(null),
+  selectedGroupType = ref<string>(),
   config = ref({
     tocItem: props.tocItem,
     visible: props.isVisible,
@@ -64,11 +66,11 @@ const tracker = ref<
 >([]);
 
 const groupIndicators = computed(() => {
-  if (selectedGroupType.value?.id == null) {
+  if (selectedGroupType.value == null) {
     return [];
   }
 
-  return theoryOfChangeStore.indiKitSubSectorIndicators(selectedGroupType.value?.id);
+  return lookup.indikit[selectedMainIndicatorType.value][selectedGroupType.value];
 });
 
 const filterIndicatorSectors = (input: string, option: any) => {
@@ -137,20 +139,20 @@ watch(
     const _indicators = newProp.tocItem?.indicators ?? [];
     buildIndicatorsTree(_indicators);
 
-    if (_indicators.length > 0) {
-      const indicator = theoryOfChangeStore.indicatorGroups.find(
-        (i) => i.id == _indicators[0].id
-      );
-      const indicatorType = theoryOfChangeStore.indicatorTypes.find(
-        (i) => i.id == indicator?.group_id
-      );
+    // if (_indicators.length > 0) {
+    //   const indicator = theoryOfChangeStore.indicatorGroups.find(
+    //     (i) => i.id == _indicators[0].id
+    //   );
+    //   const indicatorType = theoryOfChangeStore.indicatorTypes.find(
+    //     (i) => i.id == indicator?.group_id
+    //   );
 
-      selectedGroupType.value = indicatorType;
-      const _find = theoryOfChangeStore.indicatorTypes.find(
-        (i) => i.id == indicatorType?.parent_id
-      );
-      selectedMainIndicatorType.value = _find?.id;
-    }
+    //   selectedGroupType.value = indicatorType;
+    //   const _find = theoryOfChangeStore.indicatorTypes.find(
+    //     (i) => i.id == indicatorType?.parent_id
+    //   );
+    //   selectedMainIndicatorType.value = _find?.id;
+    // }
   },
   { deep: true }
 );
@@ -300,6 +302,12 @@ const addIndiKitIndicator = (item: LuIndiKit) => {
     { name: item.name, indikit_id: item.id, id: null, is_new: true, is_deleted: false },
   ];
 };
+
+const getSectors = computed(() => {
+  return Object.keys(lookup.indikit).map((key) => {
+    return { label: key, value: key };
+  });
+});
 </script>
 
 <template>
@@ -399,28 +407,27 @@ const addIndiKitIndicator = (item: LuIndiKit) => {
 
     <Row :gutter="7">
       <Col :span="8">
-        <FormItem label="Select Indicator Sector" layout="vertical" :required="true">
-          <Select
-            v-model:value="selectedMainIndicatorType"
-            show-search
-            placeholder="Select an indicator sector"
-            style="width: 200px"
-            :allow-clear="true"
-            :options="theoryOfChangeStore.indi_kit_library"
-            :field-names="{ label: 'sector', value: 'id' }"
-            :filter-option="filterIndicatorSectors"
-          >
-          </Select>
-        </FormItem>
+        <label>Select Indicator Sector</label>
+        <Select
+          v-model:value="selectedMainIndicatorType"
+          show-search
+          placeholder="Select an indicator sector"
+          style="width: 200px"
+          :allow-clear="true"
+          :options="getSectors"
+          :filter-option="filterIndicatorSectors"
+        >
+          <!-- <SelectOption v-for="key in Object.keys(lookup.indikit)" :key="item.id" :value="item.id">
+            {{ item.sector }}
+          </SelectOption> -->
+        </Select>
 
         <Divider></Divider>
 
         <aside class="menu">
           <p class="menu-label">
             <span v-if="selectedMainIndicatorType != null">
-              {{
-                theoryOfChangeStore.getIndiKitItemById(selectedMainIndicatorType)?.name
-              }}
+              {{ selectedMainIndicatorType }}
             </span>
 
             <span v-else>
@@ -431,14 +438,12 @@ const addIndiKitIndicator = (item: LuIndiKit) => {
 
           <ul class="menu-list">
             <li
-              v-for="indicator in theoryOfChangeStore.indiKitSubSectors(
-                selectedMainIndicatorType
+              v-for="sub_sector in Object.keys(
+                lookup.getSubSectors(selectedMainIndicatorType)
               )"
-              :key="indicator.id"
+              :key="sub_sector"
             >
-              <a @click.prevent="selectedGroupType = indicator">{{
-                indicator.sub_sector
-              }}</a>
+              <a @click.prevent="selectedGroupType = sub_sector">{{ sub_sector }}</a>
             </li>
           </ul>
         </aside>

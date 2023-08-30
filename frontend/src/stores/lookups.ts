@@ -3,6 +3,7 @@ import { downloadObjects } from "@/apis/lambda";
 import { GenericLookup, LuIndiKit } from "@/types";
 import { ApiRequest } from "@/apis/api";
 
+type IndiKitData = Record<string, Record<string, LuIndiKit[]>>;
 // Initial objects for lookup data structure
 // const init_objects = {
 //   access_types: { id: 0, name: "" },
@@ -41,7 +42,7 @@ export const useLookupStore = defineStore({
         sequence: 4,
       },
     ],
-    indi_kits: [] as LuIndiKit[],
+    indikit: {} as IndiKitData,
     countries: [] as GenericLookup[],
     importance: [] as Array<{
       id: number;
@@ -69,6 +70,7 @@ export const useLookupStore = defineStore({
           return null;
         }
       },
+    getSubSectors: (state) => (sector: string) => state.indikit[sector] || {},
   },
   actions: {
     // Downloads lookup data and sets it to the store state
@@ -76,14 +78,29 @@ export const useLookupStore = defineStore({
       return ApiRequest.get<{
         access_types: [];
         countries: [];
-        indi_kit: [];
+        indi_kit: IndiKitData;
         importance: [];
       }>("lu").then((resp) => {
         const data = resp[0];
         this.$state.countries = data.countries;
-        this.$state.indi_kits = data.indi_kit;
         this.$state.access_types = data.access_types;
         this.$state.importance = data.importance;
+        this.$state.indikit = data.indi_kit;
+
+        // const indikit = {}
+        // for(const item of data.indi_kit){
+        //   const temp = indikit[item.sector]
+        // }
+        // const temp = data.indi_kit.map((i:any) => {
+        //   return {
+        //     sector: i.sector,
+        //     sub_sector: []
+        //   }
+        // });
+        // data.indi_kit.forEach((i:any) => {
+        //   temp[i]
+        // });
+        // for i in data.indi_kit
       });
       // return downloadObjects(init_objects, this, "lu_");
     },
