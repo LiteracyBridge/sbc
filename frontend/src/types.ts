@@ -371,6 +371,7 @@ export class Monitoring {
   toc_item_indicator_id?: number;
   project_id?: number;
   type: "Quantitative" | "Qualitative" | "Percentage";
+
   toc_indicator: TheoryOfChangeIndicator;
 }
 

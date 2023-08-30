@@ -28,7 +28,7 @@ export const useMonitoringStore = defineStore({
     getRecentProgress:
       (state) =>
       (
-        monitoring: Monitoring
+        monitoring: Monitoring | Record<string, any>
       ): {
         value: number;
         period: string;

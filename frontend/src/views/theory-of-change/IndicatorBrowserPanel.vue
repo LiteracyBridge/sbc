@@ -121,15 +121,6 @@ const buildIndicatorsTree = (indicators?: any[]) => {
 
 onMounted(() => {
   buildIndicatorsTree(config.value.tocItem?.indicators ?? []);
-
-  config.value.isLoading = true;
-
-  store
-    .fetchIndiKit()
-    .then((resp) => {
-      buildIndicatorsTree(config.value.tocItem?.indicators ?? []);
-    })
-    .finally(() => (config.value.isLoading = false));
 });
 
 watch(

@@ -114,7 +114,7 @@ function deleteIndicator(id: number) {
   store
     .saveIndicators({
       tocId: config.value.form.id,
-      data: { removed: [id], removed_custom: [], added: [] },
+      data: [{ id: id, is_deleted: true, name: "", is_new: false }],
     })
     .then((resp) => {
       indicatorSaved(resp);
@@ -269,7 +269,8 @@ const getTocList = computed(() => {
           :rules="[{ required: false }]"
           :show-count="false"
         >
-          <Textarea v-model:value="config.form.description" :show-count="false"> </Textarea>
+          <Textarea v-model:value="config.form.description" :show-count="false">
+          </Textarea>
         </FormItem>
 
         <!-- Indicators -->
@@ -283,11 +284,7 @@ const getTocList = computed(() => {
             v-if="getTocItemIndicators?.length == 0"
           ></Empty>
 
-          <template
-            v-else
-            v-for="(item, index) in getTocItemIndicators"
-            :key="item.id"
-          >
+          <template v-else v-for="(item, index) in getTocItemIndicators" :key="item.id">
             <!-- TODO: open indicator browser on click -->
             <Tag
               :closable="true"

@@ -115,12 +115,7 @@ const columns = [
 ];
 
 onMounted(() => {
-  store.loading = true;
-  useTheoryOfChangeStore()
-    .fetchIndicators()
-    .then(() => {
-      store.download();
-    });
+  store.download();
 });
 
 function getTypeColor(type?: string): string {
@@ -189,7 +184,11 @@ function getTypeColor(type?: string): string {
 
             <template v-if="column.key === 'indicator'">
               <span>
-                {{ store.getIndicatorName(record.id) }}
+                {{
+                  record.toc_indicator.name ||
+                  record.toc_indicator?.indikit?.name ||
+                  "N/A"
+                }}
               </span>
               <Tag :color="getTypeColor(record.type)">{{
                 record.type || "not defined"

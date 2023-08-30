@@ -1,20 +1,25 @@
 <script lang="ts" setup>
-
-import { ApiRequest } from '@/apis/api';
-import { useMonitoringStore } from '@/stores/monitoring.store';
-import type { Monitoring } from '@/types';
+import { useMonitoringStore } from "@/stores/monitoring.store";
+import type { Monitoring } from "@/types";
 import {
-  Modal, FormItem, Form, type FormInstance, Input,
-  InputNumber, Row,
-  Col, Select, Spin, SelectOption,
-  message
-} from 'ant-design-vue';
-import { ref, watch } from 'vue';
-
-const props = defineProps<{ visible: boolean, form: Monitoring }>();
+  Modal,
+  FormItem,
+  Form,
+  Input,
+  InputNumber,
+  Row,
+  Col,
+  Select,
+  Spin,
+  SelectOption,
+  message,
+} from "ant-design-vue";
+import { ref, watch } from "vue";
+import type { FormInstance } from "ant-design-vue";
+const props = defineProps<{ visible: boolean; form: Monitoring }>();
 const emit = defineEmits<{
-  (e: 'isClosed', status: boolean): boolean,
-}>()
+  (e: "isClosed", status: boolean): boolean;
+}>();
 
 const store = useMonitoringStore();
 
@@ -23,28 +28,29 @@ const monitorEditFormRef = ref<FormInstance>(),
     visible: props.visible,
   });
 
-
-watch((props), (newProps) => {
-  config.value.visible = newProps.visible;
-}, { deep: true })
+watch(
+  props,
+  (newProps) => {
+    config.value.visible = newProps.visible;
+  },
+  { deep: true }
+);
 
 function closeModal() {
   monitorEditFormRef.value.resetFields();
   config.value.visible = false;
 
-  emit('isClosed', true);
+  emit("isClosed", true);
 }
 
 function saveForm() {
-  monitorEditFormRef.value
-    .validateFields()
-    .then(values => {
-      store.update(props.form.id, values).then((response) => {
-        message.success('Monitoring record updated successfully!');
+  monitorEditFormRef.value.validateFields().then((_) => {
+    store.update(props.form.id, props.form).then((response) => {
+      message.success("Monitoring record updated successfully!");
 
-        closeModal();
-      })
+      closeModal();
     });
+  });
 }
 </script>
 

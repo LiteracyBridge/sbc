@@ -168,12 +168,6 @@ class IndicatorDto(BaseModel):
 def update_indicators(
     item_id: int, dto: IndicatorDto, db: Session = Depends(models.get_db)
 ):
-    print(dto)
-    # Remove deleted indicators
-    # if dto.removed is not None:
-    #     for id in dto.removed:
-    #         delete_indicator(id, db)
-
     theory_of_change: TheoryOfChange | None = (
         db.query(TheoryOfChange).filter(TheoryOfChange.id == item_id).first()
     )
@@ -208,13 +202,11 @@ def update_indicators(
         toc_indicator.indikit_id = item.get("indikit_id", None)
         toc_indicator.project_id = theory_of_change.project_id
         toc_indicator.name = item.get("name", None)
-        # toc_indicator.indicator_id = i
 
         if is_new:
             db.add(toc_indicator)
 
         db.commit()
-        # db.refresh(toc_indicator)
 
         # Create monitoring item
         if is_new:
@@ -224,127 +216,9 @@ def update_indicators(
 
             db.add(record)
             db.commit()
-            # monitoring_indicators.append(toc_indicator.id)
 
-        # new_toc_indicators = list(
-        #     map(
-        #         lambda x: x["id"],
-        #         list(filter(lambda x: x["id"] is not None, dto.added)),
-        #     )
-        # )
-
-        # existing_project_indicators = (
-        #     db.query(ProjectIndicators)
-        #     .filter(ProjectIndicators.project_id == theory_of_change.project_id)
-        #     .with_entities(ProjectIndicators.id)
-        #     .all()
-        # )
-
-        # # 1. Add to project indicators for new items
-        # new_project_indicators = list(
-        #     filter(lambda x: x["id"] is None or x["indi_kit_id"] is not None, dto.added)
-        # )
-
-        # for item in new_project_indicators:
-        #     if item["indi_kit_id"] is not None:
-        #         # Check if already exists
-        #         if item["indi_kit_id"] in existing_project_indicators:
-        #             continue
-
-        #     record = ProjectIndicators()
-        #     record.name = item["name"]
-        #     record.indi_kit_id = item["indi_kit_id"]
-        #     record.project_id = theory_of_change.project_id
-
-        #     db.add(record)
-        #     db.commit()
-        #     db.refresh(record)
-        #     new_toc_indicators.append(record.id)
-
-        # Update theory of change indicators
-        # for i in new_toc_indicators:
-        #     temp: TheoryOfChangeIndicator = TheoryOfChangeIndicator()
-        #     temp.indicator_id = i
-        #     temp.theory_of_change_id = item_id
-        #     temp.project_id = theory_of_change.project_id
-        #     temp.indicator_id = i
-
-        #     db.add(temp)
-        #     db.commit()
-        #     db.refresh(temp)
-        #     monitoring_indicators.append(temp.id)
-
-        # Create monitoring items
-    # for i in monitoring_indicators:
-    #     record: Monitoring = Monitoring()
-    #     record.toc_indicator_id = i
-    #     record.project_id = theory_of_change.project_id
-
-    #     db.add(record)
-    #     db.commit()
-
-    # if dto.added is not None:
-    #     new_toc_indicators = list(
-    #         map(
-    #             lambda x: x["id"],
-    #             list(filter(lambda x: x["id"] is not None, dto.added)),
-    #         )
-    #     )
-
-    #     existing_project_indicators = (
-    #         db.query(ProjectIndicators)
-    #         .filter(ProjectIndicators.project_id == theory_of_change.project_id)
-    #         .with_entities(ProjectIndicators.id)
-    #         .all()
-    #     )
-
-    #     # 1. Add to project indicators for new items
-    #     new_project_indicators = list(
-    #         filter(lambda x: x["id"] is None or x["indi_kit_id"] is not None, dto.added)
-    #     )
-
-    #     for item in new_project_indicators:
-    #         if item["indi_kit_id"] is not None:
-    #             # Check if already exists
-    #             if item["indi_kit_id"] in existing_project_indicators:
-    #                 continue
-
-    #         record = ProjectIndicators()
-    #         record.name = item["name"]
-    #         record.indi_kit_id = item["indi_kit_id"]
-    #         record.project_id = theory_of_change.project_id
-
-    #         db.add(record)
-    #         db.commit()
-    #         db.refresh(record)
-    #         new_toc_indicators.append(record.id)
-
-    #     # Update theory of change indicators
-    #     monitoring_indicators = []
-    #     for i in new_toc_indicators:
-    #         temp: TheoryOfChangeIndicator = TheoryOfChangeIndicator()
-    #         temp.indicator_id = i
-    #         temp.theory_of_change_id = item_id
-    #         temp.project_id = theory_of_change.project_id
-    #         temp.indicator_id = i
-
-    #         db.add(temp)
-    #         db.commit()
-    #         db.refresh(temp)
-    #         monitoring_indicators.append(temp.id)
-
-    #     # Create monitoring items
-    #     for i in monitoring_indicators:
-    #         record: Monitoring = Monitoring()
-    #         record.toc_indicator_id = i
-    #         record.project_id = theory_of_change.project_id
-
-    #         db.add(record)
-    #         db.commit()
 
     return ApiResponse(data=get_toc_by_project_id(theory_of_change.project_id, db))
-
-
 # =========== END: INDICATORS UPDATE =========== #
 
 

@@ -36,7 +36,7 @@ def get_monitoring_by_project_id(
         .filter(Monitoring.project_id == projectId)
         .options(
             subqueryload(Monitoring.toc_indicator).options(
-                subqueryload(TheoryOfChangeIndicator.indicator),
+                subqueryload(TheoryOfChangeIndicator.indikit),
                 # subqueryload(TheoryOfChangeIndicator.toc_item),
             )
         )

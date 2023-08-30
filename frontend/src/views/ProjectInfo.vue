@@ -20,9 +20,11 @@ import { ProjectDataModule } from "@/types";
 import BroadcastComponent from "@/components/BroadcastComponent.vue";
 import { onBeforeRouteLeave } from "vue-router";
 import type { FormInstance } from "ant-design-vue";
+import { useLookupStore } from "@/stores/lookups";
 const BULB_ICON = "/images/lightbulb.png";
 
-const projectDataStore = useProjectDataStore();
+const projectDataStore = useProjectDataStore(),
+lookup  = useLookupStore();
 
 const form = ref<ProjectDataForm[]>([]);
 const config = ref({
@@ -41,14 +43,6 @@ function showPanel(id: string | number) {
   config.value.suggestions.module = config.value.suggestions.module;
   config.value.suggestions.isOpened = true;
 }
-
-// function updateData(event: any, id: number) {
-//   projectDataStore.setData(id, event.target.value);
-// }
-
-// const updateSector = (value: any, id: number) => {
-//   projectDataStore.setData(id, value);
-// };
 
 function saveChanges() {
   return projectDataStore
@@ -128,15 +122,15 @@ const handleSuggestionSave = (value: string) => {
               <template #label>
                 <span class="font-weight-bold"> {{ index + 1 }}. {{ item.label }} </span>
               </template>
+
               <Select
                 v-if="item.q_id == 1"
                 v-model:value="item.data"
-                style="padding-bottom: 15px"
                 class="font-weight-bold"
                 @change="config.pendingSave = true"
               >
                 <SelectOption
-                  v-for="(sector, index) in useTheoryOfChangeStore().getIndiKitSectors"
+                  v-for="sector in Object.keys(lookup.indikit)"
                   :key="index"
                   :value="sector"
                 >
