@@ -50,10 +50,6 @@ export const useLookupStore = defineStore({
       sequence: number;
       color: string;
     }>,
-    // library_types: [],
-    // participant_types: [],
-    // sem: [],
-    // toc_types: [],
   }),
   getters: {
     lookupNameById: (state) =>
@@ -86,23 +82,7 @@ export const useLookupStore = defineStore({
         this.$state.access_types = data.access_types;
         this.$state.importance = data.importance;
         this.$state.indikit = data.indi_kit;
-
-        // const indikit = {}
-        // for(const item of data.indi_kit){
-        //   const temp = indikit[item.sector]
-        // }
-        // const temp = data.indi_kit.map((i:any) => {
-        //   return {
-        //     sector: i.sector,
-        //     sub_sector: []
-        //   }
-        // });
-        // data.indi_kit.forEach((i:any) => {
-        //   temp[i]
-        // });
-        // for i in data.indi_kit
       });
-      // return downloadObjects(init_objects, this, "lu_");
     },
   },
 });

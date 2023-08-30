@@ -62,7 +62,7 @@ const isNew = computed(() => config.value.form?.id == null);
 const getTocItemIndicators = computed(() => {
   if (isNew.value) return [];
 
-  return store.theoryOfChangeItemIndicators(config.value.form?.id) ?? [];
+  return store.getTocItemIndicators(config.value.form?.id) ?? [];
 });
 
 const closeModal = () => {
@@ -285,7 +285,7 @@ const getTocList = computed(() => {
 
           <template
             v-else
-            v-for="(item, index) in store.theoryOfChangeItemIndicators(config.form.id)"
+            v-for="(item, index) in getTocItemIndicators"
             :key="item.id"
           >
             <!-- TODO: open indicator browser on click -->

@@ -37,7 +37,7 @@ const emit = defineEmits<{
 
 const props = defineProps<{ tocItem: TheoryOfChange; isVisible: boolean }>();
 
-const theoryOfChangeStore = useTheoryOfChangeStore(),
+const store = useTheoryOfChangeStore(),
   lookup = useLookupStore();
 
 const collapseKey = ref<string[]>([]),
@@ -124,7 +124,7 @@ onMounted(() => {
 
   config.value.isLoading = true;
 
-  theoryOfChangeStore
+  store
     .fetchIndiKit()
     .then((resp) => {
       buildIndicatorsTree(config.value.tocItem?.indicators ?? []);
@@ -163,14 +163,14 @@ watch(
 const saveIndicators = async () => {
   config.value.isLoading = true;
 
-  theoryOfChangeStore
+  store
     .saveIndicators({
       tocId: config.value.tocItem.id,
       data: tracker.value,
     })
     .then((resp) => {
       config.value.tocItem = resp.find((i) => i.id == config.value.tocItem.id);
-      emit("isSaved", theoryOfChangeStore.theory_of_change);
+      emit("isSaved", store.theory_of_change);
       closePanel();
     })
     .finally(() => {
@@ -202,8 +202,8 @@ const getTocIndicators = computed(() => {
 // Custom indicator handlers
 const getProjectIndicators = computed(() => {
   return uniqBy(
-    theoryOfChangeStore.theoryOfChangeItemIndicators(props.tocItem.id).map((i) => {
-      return { ...i, label: i.name, value: i.name };
+    (store.theory_of_change ?? []).flatMap((toc) => {
+      return toc.indicators.flatMap((t) => ({ ...t, label: t.name, value: t.name }));
     }),
     "name"
   );
@@ -276,6 +276,8 @@ const onProjectIndicatorSelected = (label: string, option?: ProjectIndicator) =>
     ...tracker.value,
     { name: label, id: null, indikit_id: null, is_new: true, is_deleted: false },
   ];
+  config.value.customIndicator = "";
+
   // config.value.reqBody.added = [
   //   ...config.value.reqBody.added,
   //   { id: exits.id, name: exits.name, indi_kit_id: null },
@@ -348,8 +350,8 @@ const getSectors = computed(() => {
 
     <!-- Display list of project indicators -->
     <Row v-if="getTocIndicators.length > 0" style="margin-bottom: 20px">
-      <Col :span="14">
-        <List item-layout="horizontal">
+      <Col :span="24">
+        <List item-layout="horizontal" :bordered="true">
           <ListItem v-for="indicator in getTocIndicators" :key="indicator.id">
             {{ indicator.name }}
 
@@ -372,40 +374,37 @@ const getSectors = computed(() => {
               </Popconfirm>
             </template>
           </ListItem>
+
+          <template #footer>
+            <Divider :style="{ margin: 0, padding: 0 }"></Divider>
+            <ListItem>
+              <Form layout="vertical">
+                <FormItem label="Can't find indicator in library? Add your own">
+                  <AutoComplete
+                    v-model:value="config.customIndicator"
+                    :options="getProjectIndicators"
+                    placeholder="Enter indicator name"
+                    style="width: 100%"
+                    @select="onProjectIndicatorSelected"
+                  >
+                  </AutoComplete>
+                </FormItem>
+              </Form>
+              <template #actions>
+                <Button
+                  type="primary"
+                  @click="onProjectIndicatorSelected(config.customIndicator)"
+                  >Add
+                </Button>
+              </template>
+            </ListItem>
+          </template>
         </List>
       </Col>
     </Row>
 
-    <Form layout="vertical">
-      <Row>
-        <Col :span="12">
-          <FormItem label="Can't find indicator in library? Add your own">
-            <AutoComplete
-              v-model:value="config.customIndicator"
-              :options="getProjectIndicators"
-              size="small"
-              placeholder="Enter indicator name"
-              style="width: 100%; height: 60px;"
-              @select="onProjectIndicatorSelected"
-            >
-            </AutoComplete>
-          </FormItem>
-        </Col>
-
-        <Col :span="4">
-          <Button
-            type="primary"
-            style="margin-top: 28px; margin-left: 10px"
-            :ghost="true"
-            @click="onProjectIndicatorSelected(config.customIndicator)"
-            >Add</Button
-          >
-        </Col>
-      </Row>
-    </Form>
-
     <Divider>
-      <Typography.Title :level="5">Browse Indicators Library</Typography.Title>
+      <Typography.Title :level="5">Indicators Library</Typography.Title>
     </Divider>
 
     <Row :gutter="0">
