@@ -5,6 +5,7 @@ from sentry_sdk.integrations.aws_lambda import AwsLambdaIntegration
 import jwt
 from fastapi import Depends, FastAPI, HTTPException, Request
 from mangum import Mangum
+from schema import ApiResponse
 
 from routes import (
     users_route,
@@ -189,6 +190,29 @@ app.include_router(
     tags=["twilio"],
     dependencies=[Depends(models.get_db)],
 )
+
+
+@app.get("/bulk/{project_id}")
+def bulk(project_id: int):
+    toc = theory_of_change.get_by_project_id(
+        projectId=project_id, db=next(models.get_db())
+    )
+    risks = theory_of_change.get_risks(project_id=project_id, db=next(models.get_db()))
+    project = project_route.find_project(id=project_id, db=next(models.get_db()))
+    activities = activity_route.get_project_activities(
+        project_id=project_id, db=next(models.get_db())
+    )
+
+    return ApiResponse(
+        data=[
+            {
+                "theory_of_change": toc.data,
+                "project": project.data[0],
+                "activities": activities.data,
+                "risks": risks.data,
+            }
+        ]
+    )
 
 
 ###############################################################################
