@@ -251,6 +251,7 @@ function getTypeColor(type?: string): string {
                   @click.prevent="
                     config.selectedRow = record;
                     config.progressTrackingModal.visible = true;
+                    config.editModalVisible = false;
                   "
                   >Record Progress</Button
                 >
@@ -264,6 +265,7 @@ function getTypeColor(type?: string): string {
                   @click.prevent="
                     config.selectedRow = record;
                     config.editModalVisible = true;
+                    config.progressTrackingModal.visible = false;
                   "
                   >Edit</Button
                 >

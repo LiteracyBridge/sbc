@@ -80,7 +80,6 @@ export const useMonitoringStore = defineStore({
       return ApiRequest.put<Monitoring>(`monitoring/${id}`, form)
         .then((resp) => {
           this.$state.data = resp;
-          message.success("Monitoring record updated successfully!");
           return resp;
         })
         .catch((error) => {

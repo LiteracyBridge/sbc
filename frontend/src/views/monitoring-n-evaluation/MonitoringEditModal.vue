@@ -57,7 +57,7 @@ function saveForm() {
 <template>
   <Modal
     v-model:open="config.visible"
-    :title="props.form?.toc_indicator?.indicator?.name"
+    :title="props.form?.toc_indicator?.name"
     ok-text="Update"
     cancel-text="Cancel"
     @cancel="closeModal()"
