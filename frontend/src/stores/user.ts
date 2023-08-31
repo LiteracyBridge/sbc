@@ -89,7 +89,7 @@ export const useUserStore = defineStore({
       })
         .then((resp) => {
           message.success("Profile updated successfully!");
-          return resp;
+          return [resp];
         })
         .catch((err) => {
           message.error("Unable to update profile");

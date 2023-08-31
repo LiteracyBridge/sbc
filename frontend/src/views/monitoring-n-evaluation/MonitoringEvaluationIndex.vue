@@ -179,7 +179,7 @@ function getTypeColor(type?: string): string {
 
           <template #bodyCell="{ column, record }">
             <template v-if="column.key === 'tocItem'">
-              {{ store.getTheoryOfChange(record.id)?.name ?? "N/A" }}
+              {{ record.toc_indicator?.theory_of_change?.name ?? "N/A" }}
             </template>
 
             <template v-if="column.key === 'indicator'">
@@ -190,9 +190,12 @@ function getTypeColor(type?: string): string {
                   "N/A"
                 }}
               </span>
-              <Tag :color="getTypeColor(record.type)">{{
-                record.type || "not defined"
-              }}</Tag>
+              <Tag
+                :color="getTypeColor(record.type)"
+                class="ml-3"
+                v-if="record.type != null"
+                >{{ record.type }}</Tag
+              >
             </template>
 
             <!-- <template v-if="column.key === 'relatedResults'">

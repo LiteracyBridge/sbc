@@ -37,8 +37,9 @@ def get_monitoring_by_project_id(
         .options(
             subqueryload(Monitoring.toc_indicator).options(
                 subqueryload(TheoryOfChangeIndicator.indikit),
+                subqueryload(TheoryOfChangeIndicator.theory_of_change),
                 # subqueryload(TheoryOfChangeIndicator.toc_item),
-            )
+            ),
         )
         .order_by(Monitoring.id.desc())
         .all()

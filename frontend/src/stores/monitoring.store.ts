@@ -16,15 +16,17 @@ export const useMonitoringStore = defineStore({
       const indicator = state.data?.find((i) => i.id === monitoringId);
       return indicator ? indicator.toc_indicator?.name : "";
     },
-    getTheoryOfChange: (state) => (monitoringId: number) => {
-      const indicator = state.data.find((i) => i.id === monitoringId);
+    // getTheoryOfChange: (state) => (monitoringId: number) => {
+    //   console.log(state.data)
 
-      if (indicator == null) return null;
+    //   const indicator = (state.data ?? []).find((i) => i.id === monitoringId);
 
-      return useTheoryOfChangeStore().getByTocId(
-        indicator.toc_indicator?.theory_of_change_id
-      );
-    },
+    //   if (indicator == null) return null;
+
+    //   return useTheoryOfChangeStore().getByTocId(
+    //     indicator.toc_indicator?.theory_of_change_id
+    //   );
+    // },
     getRecentProgress:
       (state) =>
       (
@@ -77,8 +79,8 @@ export const useMonitoringStore = defineStore({
       this.$state.loading = true;
       return ApiRequest.put<Monitoring>(`monitoring/${id}`, form)
         .then((resp) => {
-          message.success("Monitoring record updated successfully!");
           this.$state.data = resp;
+          message.success("Monitoring record updated successfully!");
           return resp;
         })
         .catch((error) => {

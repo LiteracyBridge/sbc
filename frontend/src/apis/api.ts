@@ -62,7 +62,7 @@ export class ApiRequest {
         },
       })
       .then((response) => {
-        return response.data as T[];
+        return response.data.data as T[];
       });
   }
 }
