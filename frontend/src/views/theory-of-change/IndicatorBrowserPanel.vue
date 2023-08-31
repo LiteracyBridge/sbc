@@ -308,7 +308,7 @@ const getSectors = computed(() => {
 
 <template>
   <Drawer
-    width="70vw"
+    width="80vw"
     title="Indicators Browser"
     :visible="config.visible"
     :body-style="{ paddingBottom: '80px' }"
@@ -340,59 +340,51 @@ const getSectors = computed(() => {
     </template>
 
     <!-- Display list of project indicators -->
-    <Row v-if="getTocIndicators.length > 0" style="margin-bottom: 20px">
-      <Col :span="24">
-        <List item-layout="horizontal" :bordered="true">
-          <ListItem v-for="indicator in getTocIndicators" :key="indicator.id">
-            {{ indicator.name }}
+    <List item-layout="horizontal" :bordered="true" class="mb-5">
+      <ListItem v-for="indicator in getTocIndicators" :key="indicator.id">
+        {{ indicator.name }}
 
-            <template #actions>
-              <Popconfirm
-                title="Are you sure? Corresponding monitoring item(s) will be deleted!"
-                ok-text="Yes"
-                cancel-text="No"
-                @confirm="
-                  makeIndicatorAsDeleted(
-                    indicator.name,
-                    indicator.id,
-                    indicator.indikit_id
-                  )
-                "
+        <template #actions>
+          <Popconfirm
+            title="Are you sure? Corresponding monitoring item(s) will be deleted!"
+            ok-text="Yes"
+            cancel-text="No"
+            @confirm="
+              makeIndicatorAsDeleted(indicator.name, indicator.id, indicator.indikit_id)
+            "
+          >
+            <Button size="small" type="primary" :ghost="true" :danger="true"
+              >Remove
+            </Button>
+          </Popconfirm>
+        </template>
+      </ListItem>
+
+      <template #footer>
+        <Divider :style="{ margin: 0, padding: 0 }"></Divider>
+        <ListItem>
+          <Form layout="vertical">
+            <FormItem label="Can't find indicator in library? Add your own">
+              <AutoComplete
+                v-model:value="config.customIndicator"
+                :options="getProjectIndicators"
+                placeholder="Enter indicator name"
+                style="width: 100%"
+                @select="onProjectIndicatorSelected"
               >
-                <Button size="small" type="primary" :ghost="true" :danger="true"
-                  >Remove
-                </Button>
-              </Popconfirm>
-            </template>
-          </ListItem>
-
-          <template #footer>
-            <Divider :style="{ margin: 0, padding: 0 }"></Divider>
-            <ListItem>
-              <Form layout="vertical">
-                <FormItem label="Can't find indicator in library? Add your own">
-                  <AutoComplete
-                    v-model:value="config.customIndicator"
-                    :options="getProjectIndicators"
-                    placeholder="Enter indicator name"
-                    style="width: 100%"
-                    @select="onProjectIndicatorSelected"
-                  >
-                  </AutoComplete>
-                </FormItem>
-              </Form>
-              <template #actions>
-                <Button
-                  type="primary"
-                  @click="onProjectIndicatorSelected(config.customIndicator)"
-                  >Add
-                </Button>
-              </template>
-            </ListItem>
+              </AutoComplete>
+            </FormItem>
+          </Form>
+          <template #actions>
+            <Button
+              type="primary"
+              @click="onProjectIndicatorSelected(config.customIndicator)"
+              >Add
+            </Button>
           </template>
-        </List>
-      </Col>
-    </Row>
+        </ListItem>
+      </template>
+    </List>
 
     <Divider>
       <Typography.Title :level="5">Indicators Library</Typography.Title>

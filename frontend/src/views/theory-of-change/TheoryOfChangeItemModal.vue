@@ -297,8 +297,9 @@ const getTocList = computed(() => {
 
           <Button
             style="margin-top: 10px"
+            size="small"
             role="button"
-            @click.prevent="config.browserVisible = !config.browserVisible"
+            @click="config.browserVisible = !config.browserVisible"
           >
             <PlusCircleOutlined />
             Add or Edit Indicators
