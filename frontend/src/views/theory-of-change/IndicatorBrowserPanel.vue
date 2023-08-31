@@ -25,8 +25,10 @@ import {
   Descriptions,
   DescriptionsItem,
   Card,
+  TypographyParagraph,
+  ButtonGroup,
 } from "ant-design-vue";
-import { PlusOutlined, DeleteOutlined } from "@ant-design/icons-vue";
+import { PlusOutlined, DeleteOutlined, CheckOutlined } from "@ant-design/icons-vue";
 import { uniqBy } from "lodash-es";
 import { useLookupStore } from "@/stores/lookups";
 
@@ -65,6 +67,7 @@ const tracker = ref<
     is_new: boolean;
     is_deleted: boolean;
     is_updated?: boolean;
+    is_editing?: boolean;
   }[]
 >([]);
 
@@ -170,26 +173,23 @@ const saveIndicators = async () => {
 };
 
 const getTocIndicators = computed(() => {
-  // const _temp = (config.value.tocItem.indicators ?? []).flatMap((i) => {
-  //   return {
-  //     id: i.id,
-  //     name: i?.name ?? i?.indikit?.name ?? "",
-  //     indi_kit_id: i?.indikit_id,
-  //     is_new: false,
-  //     is_deleted: false,
-  //     is_updated: false,
-  //   };
-  // });
-
-  // const all = (.concat(_temp);
-
   return tracker.value.filter((i) => !(i.is_deleted ?? false)) ?? [];
-  // Filter out removed indicators
-  // return all.filter((i) => {
-  //   return config.value.reqBody.removed.find((r) => r == i.id) == null;
-  // });
 });
 
+const markAsEditing = (name: string) => {
+  tracker.value = tracker.value.map((i) => {
+    i.is_editing = i.name == name;
+    return i;
+  });
+};
+
+const saveEdit = (name: string) => {
+  console.log(name);
+  tracker.value = tracker.value.map((i) => {
+    i.is_editing = false;
+    return i;
+  });
+};
 // Custom indicator handlers
 const getProjectIndicators = computed(() => {
   return uniqBy(
@@ -342,24 +342,51 @@ const getSectors = computed(() => {
     <!-- Display list of project indicators -->
     <List item-layout="horizontal" :bordered="true" class="mb-5">
       <ListItem v-for="indicator in getTocIndicators" :key="indicator.id">
-        {{ indicator.name }}
+        <div style="width: 100%">
+          <TypographyParagraph
+            v-model:content="indicator.name"
+            :editable="{
+              editing: indicator.is_editing,
+              autoSize: true,
+              onEnd: () => saveEdit(indicator.name),
+            }"
+          >
+            <template #editableIcon></template>
+            <!-- <template #editableTooltip>click to edit text</template> -->
+            <template #editableEnterIcon="{ className }">
+              <CheckOutlined :class="className" />
+            </template>
+          </TypographyParagraph>
+        </div>
 
         <template #actions>
-          <Popconfirm
-            title="Are you sure? Corresponding monitoring item(s) will be deleted!"
-            ok-text="Yes"
-            cancel-text="No"
-            @confirm="
-              makeIndicatorAsDeleted(indicator.name, indicator.id, indicator.indikit_id)
-            "
-          >
-            <Button size="small" type="primary" :ghost="true" :danger="true"
-              >Remove
-            </Button>
-          </Popconfirm>
+          <div>
+            <Button
+              size="small"
+              :ghost="true"
+              type="primary"
+              class="mr-3"
+              @click="markAsEditing(indicator.name)"
+              >Edit</Button
+            >
+
+            <Popconfirm
+              title="Are you sure? Corresponding monitoring item(s) will be deleted!"
+              ok-text="Yes"
+              cancel-text="No"
+              @confirm="
+                makeIndicatorAsDeleted(indicator.name, indicator.id, indicator.indikit_id)
+              "
+            >
+              <Button size="small" type="primary" :ghost="true" :danger="true"
+                >Remove
+              </Button>
+            </Popconfirm>
+          </div>
         </template>
       </ListItem>
 
+      <!-- TODO: indicator editing -->
       <template #footer>
         <Divider :style="{ margin: 0, padding: 0 }"></Divider>
         <ListItem>
@@ -369,7 +396,7 @@ const getSectors = computed(() => {
                 v-model:value="config.customIndicator"
                 :options="getProjectIndicators"
                 placeholder="Enter indicator name"
-                style="width: 100%"
+                class="full-width"
                 @select="onProjectIndicatorSelected"
               >
               </AutoComplete>
@@ -390,15 +417,14 @@ const getSectors = computed(() => {
       <Typography.Title :level="5">Indicators Library</Typography.Title>
     </Divider>
 
-    <Row :gutter="0">
+    <Row :gutter="10">
       <Col :span="7">
         <label>Select Indicator Sector:</label> <br />
         <Select
           v-model:value="selectedMainIndicatorType"
           show-search
           placeholder="Select an indicator sector"
-          style="width: 330px"
-          class="mt-2"
+          class="mt-2 full-width"
           :allow-clear="true"
           :options="getSectors"
           :filter-option="filterIndicatorSectors"
