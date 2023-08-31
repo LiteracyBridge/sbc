@@ -23,7 +23,7 @@ class UpdateMonitoringDto(BaseModel):
 
 
 class RecordProgressDto(BaseModel):
-    value: Optional[int]
+    value: Optional[str]
     period: Optional[str]
     progress: Optional[str]
 
