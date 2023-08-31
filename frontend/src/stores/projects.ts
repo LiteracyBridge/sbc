@@ -294,7 +294,6 @@ export const useProjectStore = defineStore({
     async download() {
       // !REFACTOR: fetch everything in one go
       if (this.prj_id != null) {
-        // TODO: Remove this
         let response = await api.downloadObject(
           "users_in_project",
           ["id", "user_id", "email", "name", "access_id", "address_as"],
