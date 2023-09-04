@@ -1,6 +1,10 @@
 from typing import Dict, List, Optional
 from datetime import datetime
-from helpers.model_events import delete_activity, delete_indicator, delete_theory_of_change
+from helpers.model_events import (
+    delete_activity,
+    delete_indicator,
+    delete_theory_of_change,
+)
 from models import ProjectIndicators, TheoryOfChange, TheoryOfChangeIndicator
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
@@ -101,18 +105,28 @@ def update_or_create_item(
     db.refresh(toc)
 
     # Create activity item
-    if toc.type_id == 2 and dto.id is None:
+    if toc.type_id == 2:
         # TODO: update or create activity
-        new_activity = Activity()
-        new_activity.name = toc.name
-        new_activity.notes = toc.description
-        new_activity.prj_id = project_id
-        new_activity.status_id = 1
-        new_activity.editing_user_id = dto.editing_user_id
-        new_activity.theory_of_change_id = toc.id
-        new_activity.intervention_id = dto.intervention_id
+        activity = Activity()
+        is_new = True
+        if dto.id is not None:
+            resp = (
+                db.query(Activity)
+                .filter(Activity.theory_of_change_id == dto.id)
+                .first()
+            )
+            activity = resp if resp is not None else Activity()
 
-        db.add(new_activity)
+        activity.name = toc.name
+        activity.notes = toc.description
+        activity.prj_id = project_id
+        activity.status_id = 1
+        activity.editing_user_id = dto.editing_user_id
+        activity.theory_of_change_id = toc.id
+        activity.intervention_id = dto.intervention_id
+
+        if is_new:
+            db.add(activity)
         db.commit()
 
     return ApiResponse(data=get_toc_by_project_id(project_id, db))
@@ -217,8 +231,9 @@ def update_indicators(
             db.add(record)
             db.commit()
 
-
     return ApiResponse(data=get_toc_by_project_id(theory_of_change.project_id, db))
+
+
 # =========== END: INDICATORS UPDATE =========== #
 
 
