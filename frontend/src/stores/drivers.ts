@@ -60,6 +60,7 @@ export const useDriverStore = defineStore({
 
   // Define the state
   state: () => ({
+    loading: false as boolean,
     lu_driver_categories: [], //{id:0,name:'',color:'#000000'},
     lu_drivers: [] as Driver[],
     drivers_in_prj: [] as ProjectDriver[],
@@ -267,6 +268,7 @@ export const useDriverStore = defineStore({
       // use lambda.gptCompletion() to suggest drivers based on useProjectDataStore.project_data
       // first give ChatGPT a description of the factors (level 1 drivers)
 
+      this.$state.loading = true;
       let context_drivers =
         "Background:\nAs a refresher, here are the descriptions of Level 1 Drivers from the UNICEF Behavioral Drivers Model." +
         "The category for the driver is listed in parentheses, after the name:\n\n";
@@ -378,13 +380,22 @@ export const useDriverStore = defineStore({
         "Give your answer as an array of json objects according to this format:\n";
       question +=
         '[{"id":0,"name":"","explanation":"","example":""}]\n\n(In place of the 0 for id, use the number preceding each dimension name)\n\n';
-      context = context_drivers + context_project;
-      ai_answer = await api.gptCompletion(question, context); //, null,'[{"id":'
 
-      if (!/rate limit/i.test((ai_answer as string) ?? "")) {
-        json_answer = JSON.parse(ai_answer);
-        this.drivers_suggested = this.drivers_suggested.concat(json_answer);
+      try {
+        context = context_drivers + context_project;
+        ai_answer = await api.gptCompletion(question, context); //, null,'[{"id":'
+
+        if (!/rate limit/i.test((ai_answer as string) ?? "")) {
+          json_answer = JSON.parse(ai_answer);
+          this.drivers_suggested = this.drivers_suggested.concat(json_answer);
+          this.$state.loading = false;
+        }
+      } catch (error) {
+        // todo: show error message to the user
+      } finally {
+        this.$state.loading = false;
       }
+
       return;
     },
   },
