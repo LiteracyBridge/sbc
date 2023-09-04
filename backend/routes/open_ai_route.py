@@ -22,6 +22,7 @@ FORMATS = {
     "sentence": "Respond only with one sentence.",
     "paragraph": "Respond only with one paragraph.",
     "item": "Respond only with a single item, not a list or a sentence.",
+    "short_answer": "Respond with a list of short sentences, not a paragraph.",
 }
 
 
@@ -97,6 +98,9 @@ def gptCompletion(prompt, context=None, format_type=None, start="", stop=""):
         full_prompt = prompt
     else:
         full_prompt = prompt + "\n" + start
+
+    # Post-prompt to control ChatGPT response
+    full_prompt += "Don’t justify your answers"
 
     completion = call_openai_api(full_prompt, full_context, stop)
     response = start + completion

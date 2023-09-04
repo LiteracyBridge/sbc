@@ -102,8 +102,8 @@ export const useProjectDataStore = defineStore({
         topic_id: 2,
         bulb: true,
         q2u: "What other background information do you have on the context of your project? (social, economic, cultural, political, etc.)",
-        q2ai: "What other background information do you have on the context of your project?",
-        f4ai: "item",
+        q2ai: "What other background information do you have on the context of your project? DO NOT GIVE ISSUES ALREADY STATED IN THE PROJECT CHALLENGES!",
+        f4ai: "short_answer",
         label: "Other background",
       },
       {
