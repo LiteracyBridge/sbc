@@ -23,6 +23,7 @@ FORMATS = {
     "paragraph": "Respond only with one paragraph.",
     "item": "Respond only with a single item, not a list or a sentence.",
     "short_answer": "Respond with a list of short sentences, not a paragraph.",
+    "essay": "Respond in essay, content must be suited to the question.",
 }
 
 

@@ -114,17 +114,21 @@ const generateAIPrompt = computed(() => {
       ?.map((p, i) => `(${i + 1}). ${p.data}`).join(', ') + '.';
   }
   if (form.indicators?.length > 0) {
-    context += "The project has the following indicators: " + useTheoryOfChangeStore().allTocIndicators
+    context += "\nThe project has the following indicators: " + useTheoryOfChangeStore().allTocIndicators
       .filter(p => form.indicators?.includes(p.id)
       )
       ?.map((p, i) => `(${i + 1}). ${p.name}`).join(', ') + '.';
   }
   // TODO: add drivers
   if (form.target_audiences?.length > 0) {
-    context += "The messages to be delivered has the following target audiences: " + projectDataStore.audiences
+    context += "\nThe messages to be delivered has the following target audiences: " + projectDataStore.audiences
       .filter(p => form.target_audiences?.includes(p.id)
       )
       ?.map((p, i) => `(${i + 1}). ${p.data}`).join(', ') + '.';
+  }
+
+  if(form.delivery_platforms){
+    context += "\nThe message will be delivered through these platforms: " + form.delivery_platforms + ".";
   }
 
   return context
@@ -144,12 +148,13 @@ function messageKeyPointsSuggestion() {
 }
 
 function messageContentSuggestion() {
+  const form = config.value.modal.form
   config.value.suggestions = {
     ai: {
-      prompt: "Suggest suitable message content for the project.",
+      prompt: `Suggest suitable message content for the project. YOUR RESPONSE SHOULD BE IN '${form.format}' FORM!`,
       context: generateAIPrompt.value,
-      format: "paragraph",
-      defaultValue: config.value.modal.form.contents
+      format: "essay",
+      defaultValue: form.contents
     },
     visible: true,
     type: "content"
