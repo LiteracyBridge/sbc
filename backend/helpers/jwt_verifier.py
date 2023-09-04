@@ -12,6 +12,7 @@ from typing import Dict, List
 from jose import jwk, jwt
 from jose.utils import base64url_decode
 from pydantic import BaseModel
+from sentry_sdk import capture_exception
 from helpers.config import settings
 
 
@@ -83,10 +84,11 @@ class CognitoAuthenticator:
             self._is_jwt(token)
             self._get_verified_header(token)
             self._get_verified_claims(token)
+            return True
         except Exception as e:
+            capture_exception(e)
             print(e)
             return False
-        return True
 
     def _is_jwt(self, token: str) -> bool:
         """Validate a JSON Web Token (JWT).
