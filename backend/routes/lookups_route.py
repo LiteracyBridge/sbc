@@ -33,9 +33,11 @@ def get_data(db: Session = Depends(models.get_db)):
         sub_sectors = {}
 
         for result in indikit[key]:
-            items = sub_sectors.get(result.sub_sector, [])
+            sub_sector = result.sub_sector if result.sub_sector else result.sector
+
+            items = sub_sectors.get(sub_sector, [])
             items.append(result)
-            sub_sectors[result.sub_sector] = items
+            sub_sectors[sub_sector] = items
 
         indikit[key] = sub_sectors
         # indikit[result.sector] = asdict(result)

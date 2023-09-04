@@ -13,6 +13,7 @@ def import_indikit():
     # if a row already exists.
     for result in results:
         existing_data[result.import_id] = result
+        existing_data[result.name] = result
 
     # Open and read each CSV file
     pending_save = []
@@ -25,18 +26,22 @@ def import_indikit():
 
             record = LuIndiKit()
             import_id = int(row[14])
+            name = row[8].strip()
             is_new = True
 
             # check if import_id exists in the results
             if existing_data.get(import_id) is not None:
                 record = existing_data[import_id]
                 is_new = False
+            elif existing_data.get(name) is not None:
+                # If name exists, then it's a duplicate, so skip it
+                continue
 
             record.section = row[0]
             record.sector = row[1]
             record.sub_sector = row[2]
             record.indicator_level_1 = row[4]
-            record.name = row[8]
+            record.name = name
             record.wording_english = row[9]
             record.wording_french = row[10]
             record.wording_portuguese = row[11]
@@ -50,6 +55,9 @@ def import_indikit():
                 pending_save.append(record)
             else:
                 db.commit()
+
+            existing_data[name] = record
+            existing_data[import_id] = record
 
     db.bulk_save_objects(pending_save)
     db.commit()
