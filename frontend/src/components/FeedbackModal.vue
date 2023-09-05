@@ -61,7 +61,6 @@ function closeModal() {
 
 function saveForm() {
   feedbackFormRef.value.validateFields().then(async (_: any) => {
-    config.value.loading = true;
 
     const form = config.value.form;
     form.editing_user_id = userStore.id;
@@ -69,10 +68,12 @@ function saveForm() {
     // const formData = new FormData();
     const formData: any = { files: [] };
 
-    const index = 0;
+    let index = 0,
+      cancel = false;
     for (const file of fileList.value) {
       // Max file size 1MB
       if (file.size > 1000000) {
+        cancel = true;
         alert(`File ${index + 1} is too big! Maximum file size is 1MB.`);
         return;
       }
@@ -83,13 +84,16 @@ function saveForm() {
       // formData.append("files[]", data as any);
       formData.files.push((data as string).split(",")[1]);
 
-      index + 1;
+      index++;
     }
+
+    if (cancel) return;
 
     Object.keys(form).forEach((key) => {
       formData[key] = form[key];
     });
 
+    config.value.loading = true;
     axios
       .post(`${import.meta.env.VITE_SBC_API_URL}/feedback`, formData, {
         headers: {
