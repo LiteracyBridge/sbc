@@ -17,6 +17,79 @@ import models
 router = APIRouter()
 
 
+# ======== INDICATORS ========= #
+@router.get("/{project_id}/indicators")
+def get_project_indicators(project_id: int, db: Session = Depends(models.get_db)):
+    return ApiResponse(
+        data=db.query(ProjectIndicators)
+        .filter(ProjectIndicators.project_id == project_id)
+        .all()
+    )
+
+
+class IndicatorDto(BaseModel):
+    data: List[Dict]
+
+
+@router.post("/{item_id}/indicators")
+def update_or_create_indicators(
+    item_id: int, dto: IndicatorDto, db: Session = Depends(models.get_db)
+):
+    theory_of_change: TheoryOfChange | None = (
+        db.query(TheoryOfChange).filter(TheoryOfChange.id == item_id).first()
+    )
+    if theory_of_change is None:
+        raise HTTPException(status_code=404, detail="Item not found")
+
+    # Add new Indikit indicators to project indicators
+    # Save new Indikit indicators to theory of change indicators
+    for item in dto.data:
+        # Delete indicator
+        if item.get("is_deleted", False):
+            # Indicator is already in DB
+            if item.get("id", None) is not None:
+                delete_indicator(item["id"], db)
+
+            # If not in DB, just skip it
+            continue
+
+        toc_indicator = TheoryOfChangeIndicator()
+        is_new = True
+        if item.get("id", None) is not None:
+            result = (
+                db.query(TheoryOfChangeIndicator)
+                .filter(TheoryOfChangeIndicator.id == item["id"])
+                .first()
+            )
+            if result is not None:
+                toc_indicator = result
+                is_new = False
+
+        toc_indicator.theory_of_change_id = theory_of_change.id
+        toc_indicator.indikit_id = item.get("indikit_id", None)
+        toc_indicator.project_id = theory_of_change.project_id
+        toc_indicator.name = item.get("name", None)
+
+        if is_new:
+            db.add(toc_indicator)
+
+        db.commit()
+
+        # Create monitoring item
+        if is_new:
+            record: Monitoring = Monitoring()
+            record.toc_indicator_id = toc_indicator.id
+            record.project_id = theory_of_change.project_id
+
+            db.add(record)
+            db.commit()
+
+    return ApiResponse(data=get_toc_by_project_id(theory_of_change.project_id, db))
+
+
+# =========== END: INDICATORS UPDATE =========== #
+
+
 class TheoryOfChangeItemDto(BaseModel):
     id: Optional[int]
     type_id: int
@@ -28,6 +101,7 @@ class TheoryOfChangeItemDto(BaseModel):
     is_validated: Optional[bool] = False
     description: Optional[str]
     editing_user_id: Optional[int]
+    new_indicators: Optional[List[Dict]] = None
 
     # Activity related fields
     intervention_id: Optional[int]
@@ -129,6 +203,13 @@ def update_or_create_item(
             db.add(activity)
         db.commit()
 
+
+    # Create indicators
+    if dto.new_indicators is not None:
+        update_or_create_indicators(
+            item_id=toc.id, dto=IndicatorDto(data=dto.new_indicators), db=db
+        )
+
     return ApiResponse(data=get_toc_by_project_id(project_id, db))
 
 
@@ -157,84 +238,6 @@ def delete_toc_item(
         delete_theory_of_change(record.id, db)
 
     return get_by_project_id(project_id, db)
-
-
-# ======== INDICATORS ========= #
-@router.get("/{project_id}/indicators")
-def get_project_indicators(project_id: int, db: Session = Depends(models.get_db)):
-    return ApiResponse(
-        data=db.query(ProjectIndicators)
-        .filter(ProjectIndicators.project_id == project_id)
-        .all()
-    )
-
-
-# =========== INDICATORS UPDATE =========== #
-class IndicatorDto(BaseModel):
-    # TODO: remove these
-    # removed: List[int]
-    # added: Optional[List[Dict]]
-    # removed_custom: Optional[List[int]]
-    data: List[Dict]
-
-
-@router.post("/{item_id}/indicators")
-def update_indicators(
-    item_id: int, dto: IndicatorDto, db: Session = Depends(models.get_db)
-):
-    theory_of_change: TheoryOfChange | None = (
-        db.query(TheoryOfChange).filter(TheoryOfChange.id == item_id).first()
-    )
-    if theory_of_change is None:
-        raise HTTPException(status_code=404, detail="Item not found")
-
-    # Add new Indikit indicators to project indicators
-    # Save new Indikit indicators to theory of change indicators
-    for item in dto.data:
-        # Delete indicator
-        if item.get("is_deleted", False):
-            # Indicator is already in DB
-            if item.get("id", None) is not None:
-                delete_indicator(item["id"], db)
-
-            # If not in DB, just skip it
-            continue
-
-        toc_indicator = TheoryOfChangeIndicator()
-        is_new = True
-        if item.get("id", None) is not None:
-            result = (
-                db.query(TheoryOfChangeIndicator)
-                .filter(TheoryOfChangeIndicator.id == item["id"])
-                .first()
-            )
-            if result is not None:
-                toc_indicator = result
-                is_new = False
-
-        toc_indicator.theory_of_change_id = theory_of_change.id
-        toc_indicator.indikit_id = item.get("indikit_id", None)
-        toc_indicator.project_id = theory_of_change.project_id
-        toc_indicator.name = item.get("name", None)
-
-        if is_new:
-            db.add(toc_indicator)
-
-        db.commit()
-
-        # Create monitoring item
-        if is_new:
-            record: Monitoring = Monitoring()
-            record.toc_indicator_id = toc_indicator.id
-            record.project_id = theory_of_change.project_id
-
-            db.add(record)
-            db.commit()
-
-    return ApiResponse(data=get_toc_by_project_id(theory_of_change.project_id, db))
-
-
-# =========== END: INDICATORS UPDATE =========== #
 
 
 # ======== RISKS ========= #

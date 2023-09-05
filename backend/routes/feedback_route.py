@@ -34,10 +34,6 @@ def create_feedback(
     dto: FeedbackDto,
     db: Session = Depends(models.get_db),
 ):
-    # image_data = base64.b64decode(dto.files[0])
-    # with open("/tmp/image.jpg", "wb") as f:
-    #     f.write(image_data)
-
     feedback: Feedback = Feedback()
     feedback.type = dto.type
     feedback.title = dto.title
@@ -49,10 +45,7 @@ def create_feedback(
     db.commit()
     db.refresh(feedback)
 
-    # TODO: Send email to admin
     # Send email to support
-    #
-
     user = db.query(User).filter(User.id == dto.editing_user_id).first()
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")

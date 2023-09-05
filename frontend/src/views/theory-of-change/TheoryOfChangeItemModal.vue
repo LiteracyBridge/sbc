@@ -50,6 +50,7 @@ const config = ref({
   loading: false,
   form: props.toc || new TheoryOfChange(),
   browserVisible: false,
+  new_indicators: [],
 });
 
 watch(props, (newProps) => {
@@ -60,7 +61,7 @@ watch(props, (newProps) => {
 const isNew = computed(() => config.value.form?.id == null);
 
 const getTocItemIndicators = computed(() => {
-  if (isNew.value) return [];
+  if (isNew.value) return config.value.new_indicators || [];
 
   return store.getTocItemIndicators(config.value.form?.id) ?? [];
 });
@@ -68,6 +69,7 @@ const getTocItemIndicators = computed(() => {
 const closeModal = () => {
   config.value.visible = false;
   config.value.form = new TheoryOfChange();
+  config.value.new_indicators = [];
 
   emit("closed");
 };
@@ -78,6 +80,7 @@ function saveFormItem() {
     ...fields,
     is_validated: fields.is_validated || false,
     editing_user_id: useUserStore().id,
+    new_indicators: config.value.new_indicators,
   };
 
   config.value.loading = store.isLoading;
@@ -143,6 +146,7 @@ const getTocList = computed(() => {
       @is-closed="config.browserVisible = false"
       :toc-item="config.form"
       @is-saved="indicatorSaved($event)"
+      @save="config.new_indicators = $event"
     >
     </IndicatorBrowserPanel>
 
@@ -274,7 +278,7 @@ const getTocList = computed(() => {
         </FormItem>
 
         <!-- Indicators -->
-        <div v-if="props.toc?.id != null">
+        <!-- <div v-if="props.toc?.id != null"> -->
           <!-- <div class="field"> -->
           <Divider>Indicators</Divider>
 
@@ -282,7 +286,9 @@ const getTocList = computed(() => {
           <Empty
             description="No indicators added yet."
             v-if="getTocItemIndicators?.length == 0"
-          ></Empty>
+          >
+          <!-- <template ></template> -->
+          </Empty>
 
           <template v-else v-for="(item, index) in getTocItemIndicators" :key="item.id">
             <!-- TODO: open indicator browser on click -->
@@ -304,7 +310,7 @@ const getTocList = computed(() => {
             <PlusCircleOutlined />
             Add or Edit Indicators
           </Button>
-        </div>
+        <!-- </div> -->
         <!-- </div> -->
       </Form>
     </Spin>

@@ -135,6 +135,7 @@ export const useTheoryOfChangeStore = defineStore({
           intervention_id: number;
           editing_user_id: number;
           driver_ids: number[];
+          new_indicators: any[]
         }
       >
     ) {

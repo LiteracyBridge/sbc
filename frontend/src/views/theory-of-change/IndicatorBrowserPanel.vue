@@ -32,9 +32,20 @@ import { PlusOutlined, DeleteOutlined, CheckOutlined } from "@ant-design/icons-v
 import { uniqBy } from "lodash-es";
 import { useLookupStore } from "@/stores/lookups";
 
+type IndicatorItem = {
+  id?: number;
+  name: string;
+  indikit_id?: number;
+  is_new: boolean;
+  is_deleted: boolean;
+  is_updated?: boolean;
+  is_editing?: boolean;
+};
+
 const emit = defineEmits<{
   (e: "isClosed", status: boolean): boolean;
   (e: "isSaved", resp: TheoryOfChange[]): TheoryOfChange;
+  (e: "save", data: IndicatorItem[]): IndicatorItem[];
 }>();
 
 const props = defineProps<{ tocItem: TheoryOfChange; isVisible: boolean }>();
@@ -59,17 +70,7 @@ const collapseKey = ref<string[]>([]),
     // },
   });
 
-const tracker = ref<
-  {
-    id?: number;
-    name: string;
-    indikit_id?: number;
-    is_new: boolean;
-    is_deleted: boolean;
-    is_updated?: boolean;
-    is_editing?: boolean;
-  }[]
->([]);
+const tracker = ref<IndicatorItem[]>([]);
 
 const groupIndicators = computed(() => {
   if (selectedGroupType.value == null) {
@@ -155,8 +156,14 @@ watch(
 );
 
 const saveIndicators = async () => {
-  config.value.isLoading = true;
+  if (props.tocItem.id == null) {
+    emit("save", tracker.value);
+    closePanel();
 
+    return;
+  }
+
+  config.value.isLoading = true;
   store
     .saveIndicators({
       tocId: config.value.tocItem.id,
@@ -184,12 +191,12 @@ const markAsEditing = (name: string) => {
 };
 
 const saveEdit = (name: string) => {
-  console.log(name);
   tracker.value = tracker.value.map((i) => {
     i.is_editing = false;
     return i;
   });
 };
+
 // Custom indicator handlers
 const getProjectIndicators = computed(() => {
   return uniqBy(
@@ -476,6 +483,7 @@ const getSectors = computed(() => {
               <Button
                 :danger="config.selectedIndiKit[`${item.id}`]"
                 type="primary"
+                :ghost="true"
                 size="small"
                 @click="
                   config.selectedIndiKit[`${item.id}`] = !config.selectedIndiKit[
