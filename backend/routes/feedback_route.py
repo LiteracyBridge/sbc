@@ -14,6 +14,7 @@ from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import shutil
+import base64
 
 # from helpers import upload_to_s3
 
@@ -25,22 +26,23 @@ class FeedbackDto(BaseModel):
     title: str
     description: str
     editing_user_id: int
+    files: list[str] = []
 
 
 @router.post("")
 def create_feedback(
-    type: Annotated[str, Form()],
-    title: Annotated[str, Form()],
-    description: Annotated[str, Form()],
-    editing_user_id: Annotated[int, Form()],
-    files: list[UploadFile] = [],
+    dto: FeedbackDto,
     db: Session = Depends(models.get_db),
 ):
+    # image_data = base64.b64decode(dto.files[0])
+    # with open("/tmp/image.jpg", "wb") as f:
+    #     f.write(image_data)
+
     feedback: Feedback = Feedback()
-    feedback.type = type
-    feedback.title = title
-    feedback.description = description
-    feedback.user_id = editing_user_id
+    feedback.type = dto.type
+    feedback.title = dto.title
+    feedback.description = dto.description
+    feedback.user_id = dto.editing_user_id
 
     # Upload files to S3
     # temp_files = deepcopy(files)
@@ -55,50 +57,52 @@ def create_feedback(
     # Send email to support
     #
 
-    user = db.query(User).filter(User.id == editing_user_id).first()
+    user = db.query(User).filter(User.id == dto.editing_user_id).first()
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
 
     msg = MIMEMultipart("mixed")
-    msg["Subject"] = f"New Feedback: {title}"
+    msg["Subject"] = f"New Feedback: {dto.title}"
     msg["From"] = user.email
     msg["To"] = "lawrence@amplio.org"
 
     # Set message body
     body = MIMEText(
-    f"""Hello Team,
+        f"""Hello Team,
 
     {user.address_as} has submitted new feedback. See below for details.
 
-    Title: {title}
+    Title: {dto.title}
     Issue Type: {feedback.type}
-    Description: {description}
+    Description: {dto.description}
 
-    {'Attached are the files submitted' if len(files) > 0 else ''}
+    {'Attached are the files submitted' if len(dto.files) > 0 else ''}
     """,
-    "plain",
+        "plain",
     )
     msg.attach(body)
 
     # Attach files
-    for f in files:
-        file_location = f"/tmp/{f.filename}"
-        f.file.seek(0)
+    for (index, f) in enumerate(dto.files):
+        # print(f)
 
-        with open(file_location, "wb+") as file_object:
-            shutil.copyfileobj(f.file, file_object)
-            # file_object.write(f.file.read())
+        file_location = f"/tmp/uploaded_file_{index}.jpg"
+        image_data = base64.b64decode(f)
+        with open(file_location, "wb") as file:
+            file.write(image_data)
+        # f.file.seek(0)
+
+        # with open(file_location, "wb+") as file_object:
+        #     shutil.copyfileobj(f.file, file_object)
+        #     # file_object.write(f.file.read())
 
         part = MIMEApplication(open(file_location, "rb").read())
-        part.add_header(
-            "Content-Disposition", "attachment", filename=f.filename
-        )
+        part.add_header("Content-Disposition", "attachment", filename=f"file_{index}.jpg")
         msg.attach(part)
 
     ses_client = boto3.client("ses")
     ses_client.send_raw_email(
-        Destinations=["lawrence@amplio.org"],
-        RawMessage={"Data": msg.as_string()}
+        Destinations=["lawrence@amplio.org"], RawMessage={"Data": msg.as_string()}
     )
 
     return ApiResponse(data=[feedback])

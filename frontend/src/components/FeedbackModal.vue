@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { toBase64 } from "@/helpers";
 import { useUserStore } from "@/stores/user";
 import { InboxOutlined } from "@ant-design/icons-vue";
 import {
@@ -59,20 +60,27 @@ function closeModal() {
 }
 
 function saveForm() {
-  feedbackFormRef.value.validateFields().then((_: any) => {
+  feedbackFormRef.value.validateFields().then(async (_: any) => {
     config.value.loading = true;
 
     const form = config.value.form;
     form.editing_user_id = userStore.id;
 
-    const formData = new FormData();
+    // const formData = new FormData();
+    const formData: any = { files: [] };
 
-    fileList.value.forEach((file: UploadProps["fileList"][number]) => {
-      formData.append("files", file.originFileObj as any);
-    });
+    for (const file of fileList.value) {
+      // const reader = new FileReader();
+      // reader.readAsDataURL(file.originFileObj as any);
+      // reader.result;
+      const data = await toBase64(file.originFileObj as any);
+      // formData.append("files[]", data as any);
+      formData.files.push((data as string).split(",")[1]);
+    }
     Object.keys(form).forEach((key) => {
       // @ts-ignore
-      formData.append(key, form[key]);
+      // formData.append(key, form[key]);
+      formData[key] = form[key];
     });
 
     axios
