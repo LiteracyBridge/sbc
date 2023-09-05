@@ -87,8 +87,6 @@ function saveForm() {
     }
 
     Object.keys(form).forEach((key) => {
-      // @ts-ignore
-      // formData.append(key, form[key]);
       formData[key] = form[key];
     });
 

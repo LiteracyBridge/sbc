@@ -43,11 +43,7 @@ def create_feedback(
     feedback.title = dto.title
     feedback.description = dto.description
     feedback.user_id = dto.editing_user_id
-
-    # Upload files to S3
-    # temp_files = deepcopy(files)
-    # feedback.files = upload_to_s3(files, "sbc-upload", "feedbacks")
-    # print(feedback.files)
+    feedback.files = dto.files
 
     db.add(feedback)
     db.commit()
@@ -64,7 +60,7 @@ def create_feedback(
     msg = MIMEMultipart("mixed")
     msg["Subject"] = f"New Feedback: {dto.title}"
     msg["From"] = user.email
-    msg["To"] = "lawrence@amplio.org"
+    msg["To"] = "sbc@amplio.org"
 
     # Set message body
     body = MIMEText(
@@ -90,11 +86,6 @@ def create_feedback(
         image_data = base64.b64decode(f)
         with open(file_location, "wb") as file:
             file.write(image_data)
-        # f.file.seek(0)
-
-        # with open(file_location, "wb+") as file_object:
-        #     shutil.copyfileobj(f.file, file_object)
-        #     # file_object.write(f.file.read())
 
         part = MIMEApplication(open(file_location, "rb").read())
         part.add_header("Content-Disposition", "attachment", filename=f"file_{index}.jpg")
