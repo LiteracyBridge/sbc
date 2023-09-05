@@ -116,7 +116,17 @@ function changeProject(prjId: number) {
 
       <div>
         <Space style="padding-right: 52px">
-          <span>Resources</span>
+          <!-- <router-link to="/guidance">
+            <span>Guidance</span>
+          </router-link> -->
+          <span>
+            <a
+              href="https://docs.google.com/document/d/e/2PACX-1vT9HWBBvSDDN_tir68QaYGiF0AzUP7XAZRhAf9C98pB0j6XhD_LNpzXv2szsyTk0I2OmJg9CUjuAxM1/pub"
+              target="_blank"
+              >Guidance</a
+            ></span
+          >
+          <!-- <span>Resources</span> -->
 
           <!-- <span>Help</span> -->
           <span>About</span>
@@ -141,7 +151,10 @@ function changeProject(prjId: number) {
                   <Tooltip
                     title="You will be taken to a Discourse, a discussion forum for the Impact Designer"
                   >
-                    <a href="https://sbcimpact.discourse.group" target="_blank" rel="noopener"
+                    <a
+                      href="https://sbcimpact.discourse.group"
+                      target="_blank"
+                      rel="noopener"
                       >Join Discussion</a
                     >
                   </Tooltip>
@@ -149,7 +162,6 @@ function changeProject(prjId: number) {
               </Menu>
             </template>
           </Dropdown>
-
         </Space>
 
         <Dropdown trigger="hover">
@@ -184,7 +196,6 @@ function changeProject(prjId: number) {
         </Dropdown>
       </div>
     </div>
-
   </LayoutHeader>
 </template>
 
