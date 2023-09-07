@@ -77,11 +77,7 @@ function saveForm() {
         alert(`File ${index + 1} is too big! Maximum file size is 1MB.`);
         return;
       }
-      // const reader = new FileReader();
-      // reader.readAsDataURL(file.originFileObj as any);
-      // reader.result;
       const data = await toBase64(file.originFileObj as any);
-      // formData.append("files[]", data as any);
       formData.files.push((data as string).split(",")[1]);
 
       index++;
