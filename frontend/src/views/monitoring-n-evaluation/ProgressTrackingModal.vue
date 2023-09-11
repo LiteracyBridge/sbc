@@ -1,75 +1,92 @@
 <script lang="ts" setup>
+import { useMonitoringStore } from "@/stores/monitoring.store";
+import { useProjectStore } from "@/stores/projects";
+import { Monitoring } from "@/types";
+import {
+  Modal,
+  Form,
+  FormItem,
+  Input,
+  Select,
+  SelectOption,
+  Spin,
+  Tooltip,
+} from "ant-design-vue";
+import type { FormInstance } from "ant-design-vue";
+import { computed, h, ref, watch } from "vue";
+import { InfoCircleOutlined } from "@ant-design/icons-vue";
 
-import { useMonitoringStore } from '@/stores/monitoring.store';
-import { useProjectStore } from '@/stores/projects';
-import { Monitoring } from '@/types';
-import { Modal, Form, FormItem, Input, Select, SelectOption, Spin, type FormInstance, Tooltip } from 'ant-design-vue';
-import { computed, h, ref, watch } from 'vue';
-import dayjs from 'dayjs';
-import { InfoCircleOutlined } from '@ant-design/icons-vue';
-
-const props = defineProps<{ visible: boolean, record: Monitoring }>();
+const props = defineProps<{ visible: boolean; record: Monitoring }>();
 const emit = defineEmits<{
-  (e: 'isClosed', status: boolean): boolean,
-}>()
+  (e: "isClosed", status: boolean): boolean;
+}>();
 
-const store = useMonitoringStore(),
-  projectStore = useProjectStore();
+const store = useMonitoringStore();
 
 const progressTrackingFormRef = ref<FormInstance>(),
   config = ref({
     visible: props.visible,
     form: {
-      value: '',
-      period: '',
+      value: "",
+      period: "",
       progress: null,
-    }
+    },
   });
 
-
-watch((props), (newProps) => {
-  config.value.visible = newProps.visible;
-}, { deep: true })
+watch(
+  props,
+  (newProps) => {
+    config.value.visible = newProps.visible;
+  },
+  { deep: true }
+);
 
 function closeModal() {
   progressTrackingFormRef.value.resetFields();
   config.value.visible = false;
 
-  emit('isClosed', true);
+  emit("isClosed", true);
 }
 
 function recordProgress() {
-  if(props.record.type == "Quantitative") {
+  if (props.record.type == "Quantitative") {
     if (props.record?.target == null) {
       Modal.error({
-        title: 'Indicator target required',
-        content: h('div', {}, [
-          h('p', 'Please set a target first!'),
-        ])
+        title: "Indicator target required",
+        content: h("div", {}, [h("p", "Please set a target first!")]),
       });
       return;
     }
   }
 
-  progressTrackingFormRef.value
-    .validateFields()
-    .then(values => {
-
-      // Calculate progress
-      if(props.record.type == "Quantitative") {
-        let total = +props.record.progress ?? 0;
-        for(const i of (props.record.evaluation || [])) {
-            total += +i.value
-        }
-
-        config.value.form.progress = ((total / +props.record.target) * 100).toFixed(2);
+  progressTrackingFormRef.value.validateFields().then((values) => {
+    // Calculate progress
+    if (
+      props.record.type == "Quantitative"
+    ) {
+      let total = +config.value.form.value;
+      for (const i of props.record.evaluation || []) {
+        total += +i.value;
       }
 
-      store.recordProgress(props.record.id, config.value.form)
-        .then((resp) => {
-          closeModal();
+      if (props.record.target == null) {
+        Modal.error({
+          title: "Indicator target not set",
+          content: h("div", {}, [h("p", "Please set a target first!")]),
         });
+        return;
+      }
+
+      config.value.form.progress = ((total / (+props.record.target ?? 1)) * 100).toFixed(
+        2
+      );
+      console.log(config.value.form.value)
+    }
+
+    store.recordProgress(props.record.id, config.value.form).then((resp) => {
+      closeModal();
     });
+  });
 }
 </script>
 

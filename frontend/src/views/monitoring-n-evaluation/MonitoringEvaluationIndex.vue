@@ -23,6 +23,7 @@ import AddMonitoringIndicatorModal from "./AddMonitoringIndicatorModal.vue";
 import EvaluationStrategy from "./EvaluationStrategy.vue";
 import { useMonitoringStore } from "@/stores/monitoring.store";
 import { useTheoryOfChangeStore } from "@/stores/theory_of_change";
+import { Monitoring } from "@/types";
 
 const store = useMonitoringStore();
 
@@ -65,12 +66,6 @@ const columns = [
     dataIndex: "indicator",
     key: "indicator",
   },
-  // {
-  //   title: 'Related Results',
-  //   name: 'Related Results',
-  //   dataIndex: 'relatedResults',
-  //   key: 'relatedResults',
-  // },
   {
     title: "Data Collection Method",
     name: "Data Collection Method",
@@ -91,21 +86,12 @@ const columns = [
     title: "Baseline",
     key: "baseline",
   },
-
-  // {
-  //     title: 'Q1',
-  //     key: 'qa',
-  // },
-  // {
-  //     title: 'Q2',
-  //     key: 'q2',
-  // },
   {
     title: "Recent Progress",
     key: "recent",
   },
   {
-    title: "% Progress",
+    title: "Progress",
     key: "progress_rate",
   },
   {
@@ -119,7 +105,7 @@ onMounted(() => {
 });
 
 function getTypeColor(type?: string): string {
-  if (!type) return "brown";
+  if (!type) return null;
 
   switch (type.toLowerCase()) {
     case "qualitative":
@@ -131,6 +117,12 @@ function getTypeColor(type?: string): string {
     default:
       return "white";
   }
+}
+
+function showEditModal(record: Monitoring) {
+  config.value.selectedRow = record;
+  config.value.editModalVisible = true;
+  config.value.progressTrackingModal.visible = false;
 }
 </script>
 
@@ -223,27 +215,29 @@ function getTypeColor(type?: string): string {
 
               <span v-else>
                 {{ store.getRecentProgress(record).value }}
-                <!-- ({{
-                  store.getRecentProgress(record).value
-                }}) -->
               </span>
             </template>
 
             <template v-else-if="column.key === 'progress_rate'">
               <!-- TODO: Should only display modal -->
               <Tag
-                :color="'cyan'"
-                @click="
+                :color="getTypeColor(record.type)"
+                @click.prevent="
                   config.selectedRow = record;
                   config.evaluationModal.visible = true;
                 "
               >
-                {{ record.progress || 0 }}%
+                <span v-if="record.type == 'Quantitative' || record.type == 'Percentage'">
+                  {{ record.progress || 0 }}%
+                </span>
+                <span v-else>
+                  {{ store.getRecentProgress(record).value }}
+                </span>
               </Tag>
             </template>
 
             <template v-else-if="column.key === 'actions'">
-              <Space>
+              <Space v-if="record.type != null">
                 <Button
                   type="primary"
                   :ghost="true"
@@ -256,16 +250,9 @@ function getTypeColor(type?: string): string {
                   >Record Progress</Button
                 >
 
-                <!-- TODO: should open edit modal -->
                 <Button
-                  type="primary"
-                  :ghost="true"
                   size="small"
-                  @click.prevent="
-                    config.selectedRow = record;
-                    config.editModalVisible = true;
-                    config.progressTrackingModal.visible = false;
-                  "
+                  @click.prevent="showEditModal(record as Monitoring)"
                   >Edit</Button
                 >
 
@@ -279,6 +266,15 @@ function getTypeColor(type?: string): string {
                   >Delete
                 </Button>
               </Space>
+
+              <Button
+                v-else
+                type="primary"
+                :ghost="true"
+                size="small"
+                @click.prevent="showEditModal(record as Monitoring)"
+                >Setup</Button
+              >
             </template>
           </template>
         </Table>
