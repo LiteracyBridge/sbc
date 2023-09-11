@@ -50,6 +50,7 @@ class LuIndiKit(Base):
     import_id: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     purpose: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
+
 class LuImportance(Base):
     __tablename__ = "lu_importance"
 
@@ -127,7 +128,6 @@ class Project(Base):
     deleted_at: Mapped[Optional[DateTime]] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
-
     country_id: Mapped[int] = mapped_column(ForeignKey("lu_countries.id"))
     organisation_id: Mapped[int] = mapped_column(ForeignKey("organisations.id"))
 
@@ -152,7 +152,9 @@ class ProjectUser(Base):
     prj_id: Mapped[int] = mapped_column(ForeignKey("projects.id"))
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     editing_user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
-
+    access_id: Mapped[Optional[int]] = mapped_column(
+        Integer, ForeignKey("lu_access_types.id"), nullable=True
+    )
     project: Mapped["Project"] = relationship("Project", back_populates="users")
     user: Mapped["User"] = relationship(
         "User", foreign_keys=[user_id], back_populates="projects"

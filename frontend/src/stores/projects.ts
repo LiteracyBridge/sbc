@@ -109,7 +109,6 @@ export const useProjectStore = defineStore({
       if (state.prj_id && projects.length) {
         const foundProject = projects.find((p) => p.prj_id == state.prj_id);
         if (foundProject) {
-          console.log("foundProject", foundProject);
           return foundProject.name;
         }
       }
@@ -131,10 +130,17 @@ export const useProjectStore = defineStore({
   },
   actions: {
     // Archives a project by updating its archived status
-    async archive(prj_id: number) {
-      this.user_projects.find((p) => p.prj_id == prj_id).project.archived =
-        true;
-      api.update("projects", prj_id, { archived: true });
+    async archive(prj_id: number, unarchive: boolean = false) {
+      useUserStore().projects = useUserStore().projects.map((p) => {
+        if (p.prj_id == prj_id) {
+          p.project.archived = !unarchive;
+        }
+        return p;
+      });
+
+      // this.user_projects.find((p) => p.prj_id == prj_id).project.archived =
+      // true;
+      api.update("projects", prj_id, { archived: !unarchive });
       if (prj_id == this.prj_id) {
         this.setPrj(null); // if archiving the currently open project, must clear it
       }

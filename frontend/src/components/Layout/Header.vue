@@ -57,9 +57,11 @@ async function signOut() {
 }
 
 function changeProject(prjId: number) {
+  if(prjId == projectStore.prj_id) return;
+
   const project = projectStore.user_projects.find((prj) => prj.prj_id == prjId);
 
-  message.success(`Switching active project to ${project?.name}`);
+  message.success(`Switching to ${project?.project?.name}`);
 
   projectStore.setPrj(prjId, false).then(() => window.location.reload());
   // router.push('/forms/basic');

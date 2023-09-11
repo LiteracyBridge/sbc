@@ -12,7 +12,8 @@ import { useProjectStore } from "@/stores/projects";
 const userStore = useUserStore();
 const store = useProjectStore();
 
-const activeTab = ref("users");
+const activeTab = ref("users"),
+  projectTab = ref();
 
 onMounted(() => {
   // Redirect to login if user is not logged in
@@ -37,7 +38,14 @@ onMounted(() => {
         <ProjectUsers></ProjectUsers>
         <Divider></Divider>
 
-        <ProjectsTable></ProjectsTable>
+        <Tabs v-model:activeKey="projectTab" centered>
+          <TabPane key="active" tab="Active Projects">
+            <ProjectsTable></ProjectsTable>
+          </TabPane>
+          <TabPane key="archived" tab="Archived Projects">
+            <ProjectsTable :show-archived="true"></ProjectsTable>
+          </TabPane>
+        </Tabs>
       </TabPane>
 
       <TabPane key="stakeholders" tab="Project Stakeholders">

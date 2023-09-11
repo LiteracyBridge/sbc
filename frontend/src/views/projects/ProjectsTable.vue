@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import { useLookupStore } from "@/stores/lookups";
 import { useProjectStore } from "@/stores/projects";
 import { useRouter } from "vue-router";
@@ -28,8 +28,10 @@ import {
 } from "@ant-design/icons-vue";
 import { Project } from "@/types";
 import dayjs from "dayjs";
+import { useUserStore } from "@/stores/user";
 
-const router = useRouter();
+const props = defineProps<{ showArchived?: boolean }>();
+
 const lookupStore = useLookupStore();
 const projectStore = useProjectStore();
 
@@ -46,10 +48,12 @@ const projectFormRef = ref<FormInstance>();
 async function changeProject(prjId: number) {
   const project = projectStore.user_projects.find((prj) => prj.prj_id == prjId);
 
-  message.success(`Switching active project to ${project?.name}`);
+  message.success(`Switching to ${project?.project?.name}`);
 
-  await projectStore.setPrj(prjId, true);
-  window.location.reload();
+  projectStore.setPrj(prjId, true).then(() => window.location.reload());
+
+  // await projectStore.setPrj(prjId, true);
+  // window.location.reload();
   // router.push('/forms/basic');
 }
 
@@ -104,15 +108,16 @@ function createProject() {
 function filterCountry(input: string, option: any) {
   return option.name.toLowerCase().indexOf(input.toLowerCase()) >= 0;
 }
+
+const getProjects = computed(() => {
+  return (useUserStore().projects || []).filter((prj) =>
+    props.showArchived == true ? prj.project.archived : !prj.project.archived
+  );
+});
 </script>
 
 <template>
-  <Table
-    :columns="columns"
-    :data-source="projectStore.projects()"
-    bordered
-    :loading="config.loading"
-  >
+  <Table :columns="columns" :data-source="getProjects" bordered :loading="config.loading">
     <template #title>
       <div class="full-width">
         <Typography :level="2">My Projects</Typography>
@@ -128,7 +133,7 @@ function filterCountry(input: string, option: any) {
 
     <template #bodyCell="{ column, record: project }">
       <template v-if="column.key == 'name'">
-        {{ project.name }}
+        {{ project.project.name }}
         <Tag
           class="is-rounded"
           v-if="projectStore.prj_id == project.prj_id"
@@ -136,22 +141,18 @@ function filterCountry(input: string, option: any) {
         >
           Currently Opened
         </Tag>
-
-        <Tag class="is-rounded" :color="project.archived ? 'red' : 'green'">
-          {{ project.archived ? "Archived" : "Active" }}
-        </Tag>
       </template>
 
       <template v-if="column.key == 'duration'">
-        <span v-if="project.start_date == null">N/A</span>
+        <span v-if="project.project.start_date == null">N/A</span>
         <span v-else>
-          {{ dayjs(project.start_date).format("MMMM D, YYYY") }} -
-          {{ dayjs(project.end_date).format("MMMM D, YYYY") }}
+          {{ dayjs(project.project.start_date).format("MMMM D, YYYY") }} -
+          {{ dayjs(project.project.end_date).format("MMMM D, YYYY") }}
         </span>
       </template>
 
       <template v-if="column.key == 'country'">
-        {{ lookupStore.lookupNameById("countries", project.country_id) }}
+        {{ lookupStore.lookupNameById("countries", project.project.country_id) }}
       </template>
 
       <template v-if="column.key == 'role'">
@@ -159,14 +160,14 @@ function filterCountry(input: string, option: any) {
       </template>
 
       <template v-if="column.key === 'actions'">
-        <Space>
+        <Space v-if="props.showArchived == null || props.showArchived == false">
           <!-- TODO: open modal for creating project -->
           <Button
             type="primary"
             size="small"
             :ghost="true"
             v-if="!project.archived"
-            @click="changeProject(project.prj_id)"
+            @click.prevent="changeProject(project.prj_id)"
           >
             <template #icon>
               <FolderOpenOutlined />
@@ -181,15 +182,26 @@ function filterCountry(input: string, option: any) {
             :ghost="true"
             :danger="true"
             v-if="!project.archived"
-            @click="projectStore.archive(project.prj_id)"
+            @click.prevent="projectStore.archive(project.prj_id)"
           >
             <template #icon>
               <FolderOutlined />
             </template>
             Archive
           </Button>
+        </Space>
 
-          <!-- TODO: Add unarchive button -->
+        <Space v-else>
+          <Button
+            type="primary"
+            size="small"
+            :ghost="true"
+            :danger="true"
+            v-if="!project.archived"
+            @click.prevent="projectStore.archive(project.prj_id, true)"
+          >
+            Unarchive
+          </Button>
         </Space>
       </template>
     </template>
