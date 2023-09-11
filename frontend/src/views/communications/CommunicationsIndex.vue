@@ -416,7 +416,7 @@ const onSuggestionClosed = (val: string) => {
           name="indicators"
           label="Related Indicators"
           has-feedback
-          :rules="[{ required: false, message: 'Please select related indicators!' }]"
+          :rules="[{ required: true, message: 'Please select related indicators!' }]"
         >
           <Select
             v-model:value="config.modal.form.indicators"
