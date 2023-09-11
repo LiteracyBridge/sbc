@@ -163,7 +163,7 @@ function getTypeColor(type?: string): string {
   <Spin :spinning="config.isLoading || store.loading">
     <Tabs v-model:activeKey="config.activeTab" centered>
       <TabPane key="1" tab="Indicators Monitoring">
-        <Table :columns="columns" size="small" :data-source="store.data" bordered>
+        <Table :columns="columns" size="large" :data-source="store.data" bordered>
           <template #title>
             <div class="full-width">
               <div></div>
@@ -259,7 +259,6 @@ function getTypeColor(type?: string): string {
                 <!-- TODO: should open edit modal -->
                 <Button
                   type="primary"
-                  :danger="true"
                   :ghost="true"
                   size="small"
                   @click.prevent="
@@ -269,6 +268,16 @@ function getTypeColor(type?: string): string {
                   "
                   >Edit</Button
                 >
+
+                <!-- TODO: add popconfirm -->
+                <Button
+                  type="primary"
+                  :danger="true"
+                  :ghost="true"
+                  size="small"
+                  @click.prevent="store.deleteIndicator(record.toc_indicator_id)"
+                  >Delete
+                </Button>
               </Space>
             </template>
           </template>

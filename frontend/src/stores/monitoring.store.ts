@@ -88,6 +88,19 @@ export const useMonitoringStore = defineStore({
         })
         .finally(() => (this.$state.loading = false));
     },
+    async deleteIndicator(indicator_id: number|string) {
+      this.$state.loading = true;
+      return ApiRequest.delete<Monitoring>(`monitoring/${indicator_id}`)
+        .then((resp) => {
+          this.$state.data = resp;
+          return resp;
+        })
+        .catch((error) => {
+          message.error(error.message);
+          throw error;
+        })
+        .finally(() => (this.$state.loading = false));
+    },
     async recordProgress(id: number, form: any) {
       return ApiRequest.post<Monitoring>(`monitoring/${id}/evaluation`, form)
         .then((resp) => {

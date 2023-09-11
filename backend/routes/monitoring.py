@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
 from sqlalchemy.orm import Session, joinedload, subqueryload
+from helpers.model_events import delete_indicator
 from schema import ApiResponse
 from models import TheoryOfChangeIndicator, TheoryOfChange
 from models import Monitoring
@@ -16,8 +17,6 @@ class UpdateMonitoringDto(BaseModel):
     target: Optional[str]
     baseline: Optional[str]
     type: Optional[str]
-    # TODO: calculate progress on the frontend
-    # progress: Optional[int]
     data_collection_method: Optional[str]
     reporting_period: Optional[str]
 
@@ -29,11 +28,11 @@ class RecordProgressDto(BaseModel):
 
 
 def get_monitoring_by_project_id(
-    projectId: int, db: Session = Depends(models.get_db)
+    project_id: int, db: Session = Depends(models.get_db)
 ) -> List[Monitoring]:
     record = (
         db.query(Monitoring)
-        .filter(Monitoring.project_id == projectId)
+        .filter(Monitoring.project_id == project_id)
         .options(
             subqueryload(Monitoring.toc_indicator).options(
                 subqueryload(TheoryOfChangeIndicator.indikit),
@@ -97,3 +96,23 @@ def record_progress(
     db.commit()
 
     return ApiResponse(data=get_monitoring_by_project_id(record.project_id, db))
+
+
+@router.delete("/{indicator_id}")
+def delete_indicator_item(
+    indicator_id: int,
+    db: Session = Depends(models.get_db),
+):
+    indicator = (
+        db.query(TheoryOfChangeIndicator)
+        .filter(TheoryOfChangeIndicator.id == indicator_id)
+        .first()
+    )
+    if indicator is None:
+        raise HTTPException(status_code=404, detail="Item not found")
+
+    project_id = indicator.project_id
+
+    delete_indicator(toc_indicator_id=indicator_id, db=db)
+
+    return ApiResponse(data=get_monitoring_by_project_id(project_id=project_id, db=db))

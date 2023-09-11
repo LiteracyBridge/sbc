@@ -368,7 +368,7 @@ export class Monitoring {
     | "Quarterly"
     | "Annually"
     | "Semi-Annually";
-  toc_item_indicator_id?: number;
+  toc_indicator_id?: number;
   project_id?: number;
   type: "Quantitative" | "Qualitative" | "Percentage";
 
