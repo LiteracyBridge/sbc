@@ -5,14 +5,18 @@
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-QNKJ5M8FCK"></script>
   <script>
-    window.dataLayer = window.dataLayer || [];
+    // Disable google analytics if the server is running locally
+    if (window.location.hostname != 'localhost' || window.location.hostname != '127.0.0.1') {
+      // Google analytics
+      window.dataLayer = window.dataLayer || [];
 
-    function gtag() {
-      dataLayer.push(arguments);
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag('js', new Date());
+
+      gtag('config', 'G-QNKJ5M8FCK');
     }
-    gtag('js', new Date());
-
-    gtag('config', 'G-QNKJ5M8FCK');
   </script>
 
   <meta charset="UTF-8" />

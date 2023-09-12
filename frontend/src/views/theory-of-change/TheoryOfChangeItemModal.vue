@@ -257,15 +257,6 @@ const getTocList = computed(() => {
           </Col>
         </Row>
 
-        <!-- <div class="field">
-            <div class="control">
-              <label class="label">
-                Validated
-                <input type="checkbox" class="ml-3" v-model="tocItemModalConfig.form.is_validated" />
-              </label>
-            </div>
-          </div> -->
-
         <FormItem
           name="description"
           label="Description"
@@ -277,41 +268,33 @@ const getTocList = computed(() => {
           </Textarea>
         </FormItem>
 
-        <!-- Indicators -->
-        <!-- <div v-if="props.toc?.id != null"> -->
-          <!-- <div class="field"> -->
-          <Divider>Indicators</Divider>
+        <Divider>Indicators</Divider>
 
-          <!-- <Divider></Divider> -->
-          <Empty
-            description="No indicators added yet."
-            v-if="getTocItemIndicators?.length == 0"
+        <template v-for="item in getTocItemIndicators" :key="item.id">
+          <!-- TODO: open indicator browser on click -->
+          <!-- TODO: add pop confirm -->
+          <!-- TODO: delete indicators on 'update/save' click -->
+          <Tag
+            :closable="true"
+            @click="config.browserVisible = true"
+            @close="deleteIndicator(item.id)"
           >
-          <!-- <template ></template> -->
-          </Empty>
+            {{ item.name }}
+          </Tag>
+        </template>
 
-          <template v-else v-for="(item, index) in getTocItemIndicators" :key="item.id">
-            <!-- TODO: open indicator browser on click -->
-            <Tag
-              :closable="true"
-              @click="config.browserVisible = true"
-              @close="deleteIndicator(item.id)"
-            >
-              {{ item.name }}
-            </Tag>
-          </template>
-
-          <Button
-            style="margin-top: 10px"
-            size="small"
-            role="button"
-            @click="config.browserVisible = !config.browserVisible"
-          >
-            <PlusCircleOutlined />
-            Add or Edit Indicators
-          </Button>
-        <!-- </div> -->
-        <!-- </div> -->
+        <br />
+        <Button
+          class="my-5"
+          role="button"
+          :ghost="true"
+          type="primary"
+          size="small"
+          @click.prevent="config.browserVisible = !config.browserVisible"
+        >
+          <PlusCircleOutlined />
+          Add or Edit Indicators
+        </Button>
       </Form>
     </Spin>
   </Modal>
