@@ -131,46 +131,55 @@ const router = createRouter({
       path: "/",
       name: "home",
       component: Home,
+      meta: { title: "Dashboard" },
     },
     {
       path: "/login",
       name: "login",
       component: Login,
+      meta: { title: "Login" },
     },
     {
       path: "/background-and-context",
       name: "background-and-context",
       component: BackgroundAndContext,
+      meta: { title: "Background and Context" },
     },
     {
       path: "/drivers",
       name: "drivers",
       component: Drivers,
+      meta: { title: "Behaviour Drivers" },
     },
     {
       path: "/project-info",
       name: "project-info",
       component: ProjectInfo,
+      meta: { title: "Project Information" },
     },
     {
       path: "/interventions",
       name: "interventions",
       component: Interventions,
+      meta: { title: "Interventions" },
     },
     {
       path: "/projects",
       name: "projects",
       component: ProjectsIndex,
+      meta: { title: "Projects" },
     },
     {
       path: "/project-objectives",
       name: "project-objectives",
       component: ProjectObjective,
+      meta: { title: "Project Objectives" },
     },
     {
       path: "/audiences",
       name: "audiences",
       component: Audience,
+      meta: { title: "Audiences" },
     },
     {
       path: "/forms/:module",
@@ -181,30 +190,62 @@ const router = createRouter({
       path: "/toc",
       name: "toc",
       component: TheoryOfChangeIndex,
+      meta: { title: "Theory of Change" },
     },
     {
       path: "/communications-and-messaging",
       name: "communications-and-messaging",
       component: CommunicationsIndex,
+      meta: { title: "Communications and Messaging" },
     },
     {
       path: "/monitoring-and-evaluation",
       name: "monitoring-and-evaluation",
       component: MonitoringEvaluationIndex,
+      meta: { title: "Monitoring and Evaluation" },
     },
     {
       path: "/project-management",
       name: "project-management",
       component: ProjectManagementIndex,
+      meta: { title: "Project Management" },
     },
     {
       path: "/request-access",
       name: "request-access",
       component: AccessRequest,
+      meta: { title: "Request Access" },
     },
-    { path: "/partners", name: "partners", component: Partners },
-    { path: "/project-documents", name: "docs", component: ProjectDocsIndex },
+    {
+      path: "/partners",
+      name: "partners",
+      component: Partners,
+      meta: { title: "Partners" },
+    },
+    {
+      path: "/project-documents",
+      name: "docs",
+      component: ProjectDocsIndex,
+      meta: { title: "Project Documents" },
+    },
   ],
 });
 
+router.beforeEach((to, from, next) => {
+  const title = to.meta.title;
+  if (title) {
+    document.title = `SBC Impact Designer | ${title}`;
+  }
+  // Continue resolving the route
+  next();
+});
+
+router.afterEach((to, from) => {
+  if (window.gtag) {
+    gtag("event", "screen_view", {
+      page_location: to.fullPath,
+      page_title: to.meta?.title,
+    });
+  }
+});
 export default router;
