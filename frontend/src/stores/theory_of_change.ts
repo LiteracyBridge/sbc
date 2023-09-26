@@ -86,6 +86,8 @@ export const useTheoryOfChangeStore = defineStore({
         .finally(() => (this.$state.isLoading = false));
     },
     async fetchTheoryOfChange() {
+      if (useProjectStore().projectId == null) return;
+
       this.$state.isLoading = true;
       return await ApiRequest.get<TheoryOfChange>(
         `theory-of-change/${useProjectStore().projectId}`
@@ -98,6 +100,8 @@ export const useTheoryOfChangeStore = defineStore({
         .finally(() => (this.$state.isLoading = false));
     },
     async fetchRisks() {
+      if (useProjectStore().projectId == null) return [];
+
       this.$state.isLoading = true;
       return await ApiRequest.get<Risk>(
         `theory-of-change/${useProjectStore().projectId}/risks`
@@ -135,7 +139,7 @@ export const useTheoryOfChangeStore = defineStore({
           intervention_id: number;
           editing_user_id: number;
           driver_ids: number[];
-          new_indicators: any[]
+          new_indicators: any[];
         }
       >
     ) {

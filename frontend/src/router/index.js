@@ -86,13 +86,20 @@ Hub.listen("auth", async (data) => {
     case "signUp":
       console.log(data);
       // TODO: add a/c to sbc
-      const _user = data.payload.data.attributes;
+      const _user = data.payload.data.user;
       console.log(_user);
 
       ApiRequest.post("users/", {
-        email: _user.email,
+        email: _user.username,
         name: _user.name,
       }).then((resp) => {
+        // useUserStore().email = resp[0].email;
+        // useUserStore().name = resp[0].name;
+        // Auth.currentAuthenticatedUser().then((_data) => {
+        //   useUserStore().token = _data.signInUserSession.accessToken.jwtToken;
+        // });
+
+        // useUserStore().setUser(resp[0]);
         console.log("account created");
         console.warn(resp);
       });
@@ -108,7 +115,8 @@ Hub.listen("auth", async (data) => {
       console.log("user sign in failed");
       break;
     case "configured":
-      console.log(data.payload.event);
+    case "confirmSignUp":
+      console.log(data.payload);
       getUser().then(async (user) => {
         console.log("Existing user: ", user);
         console.log(user);

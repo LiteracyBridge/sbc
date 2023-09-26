@@ -25,39 +25,6 @@ class UpdateUserDto(BaseModel):
     address_as: Optional[str]
 
 
-@router.post("/")
-def create(dto: UserDto, db: Session = Depends(get_db)):
-    invite = db.query(Invitation).filter(Invitation.email == dto.email).first()
-
-    if invite is None:
-        return HTTPException(status_code=400, detail="Account cannot be created")
-
-    user: User = User()
-    user.email = dto.email
-    user.name = dto.name
-    user.organisation_id = invite.organisation_id
-    user.last_project_id = dto.last_project_id
-
-    db.add(user)
-    db.commit()
-    db.refresh(user)
-
-    return ApiResponse(data=[user])
-
-
-@router.get("/organisation/{email}")
-def get_org_users(email: str, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.email == email).first()
-    print(user)
-
-    if user is None:
-        raise HTTPException(status_code=404, detail="User not found")
-
-    data = db.query(User).filter(User.organisation_id == user.organisation_id).all()
-
-    return ApiResponse(data=data)
-
-
 @router.get("/{email}")
 def get_user_by_email(email: str, db: Session = Depends(get_db)):
     if email is None:
@@ -86,6 +53,39 @@ def get_user_by_email(email: str, db: Session = Depends(get_db)):
         db.refresh(user)
 
     return ApiResponse(data=[user])
+
+
+@router.post("/")
+def create(dto: UserDto, db: Session = Depends(get_db)):
+    invite = db.query(Invitation).filter(Invitation.email == dto.email).first()
+
+    if invite is None:
+        return HTTPException(status_code=400, detail="Account cannot be created")
+
+    user: User = User()
+    user.email = dto.email
+    user.name = invite.name
+    user.organisation_id = invite.organisation_id
+    user.last_project_id = dto.last_project_id
+
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+
+    return get_user_by_email(email=user.email, db=db)
+
+
+@router.get("/organisation/{email}")
+def get_org_users(email: str, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.email == email).first()
+    print(user)
+
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    data = db.query(User).filter(User.organisation_id == user.organisation_id).all()
+
+    return ApiResponse(data=data)
 
 
 @router.put("/{id}")
