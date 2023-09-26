@@ -116,7 +116,11 @@ function filterUser(input: string, option: any) {
         </span>
 
         <!-- TODO: implement creating new project in a modal -->
-        <Button type="primary" @click="config.visible = true">
+        <Button
+          type="primary"
+          @click="config.visible = true"
+          v-if="(projectStore.users_in_project || []).length > 0"
+        >
           <template #icon>
             <PlusCircleOutlined />
           </template>

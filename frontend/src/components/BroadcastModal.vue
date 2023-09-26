@@ -54,8 +54,8 @@ const steps = [
 
 function closeModal() {
   config.value.currentStep = 0;
-  config.value.stakeholders = [];
-  config.value.users = [];
+  // config.value.stakeholders = [];
+  // config.value.users = [];
   config.value.visible = false;
   emit("close");
 }
