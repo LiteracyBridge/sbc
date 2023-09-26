@@ -84,6 +84,9 @@ async def verify_jwt(request: Request, call_next):
     if "twilio/webhook" in request.url.path:
         return await call_next(request)
 
+    if "organisation/access-request" in request.url.path:
+        return await call_next(request)
+
     token = request.headers.get("Authorization")
     if not token:
         raise HTTPException(status_code=401, detail="No access token provided")
