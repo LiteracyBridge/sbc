@@ -52,7 +52,7 @@ def create_feedback(
 
     msg = MIMEMultipart("mixed")
     msg["Subject"] = f"New Feedback: {dto.title}"
-    msg["From"] = user.email
+    msg["From"] = 'sbc@amplio.org'
     msg["To"] = "sbc@amplio.org"
 
     # Set message body
