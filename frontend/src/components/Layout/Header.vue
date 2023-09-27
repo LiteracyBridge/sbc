@@ -57,7 +57,7 @@ async function signOut() {
 }
 
 function changeProject(prjId: number) {
-  if(prjId == projectStore.prj_id) return;
+  if (prjId == projectStore.prj_id) return;
 
   const project = projectStore.user_projects.find((prj) => prj.prj_id == prjId);
 
@@ -130,8 +130,9 @@ function changeProject(prjId: number) {
           >
           <!-- <span>Resources</span> -->
 
-          <!-- <span>Help</span> -->
-          <span>About</span>
+          <router-link to="/partners">
+            <span>About</span>
+          </router-link>
 
           <Divider type="vertical" style="background-color: white" />
 

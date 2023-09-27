@@ -35,6 +35,7 @@
 		"mypy.configFile": "backend/pyproject.toml",
 		"mypy.targets": [
 			"backend/"
-		]
+		],
+		"vue3snippets.enable-compile-vue-file-on-did-save-code": true
 	}
 }
