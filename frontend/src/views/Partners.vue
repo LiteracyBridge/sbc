@@ -1,73 +1,55 @@
 <script setup lang="ts">
-import { Card, Row, Col, Avatar, Typography, Space, Image, Divider } from 'ant-design-vue';
-
+import {
+  Card,
+  Row,
+  Col,
+  Avatar,
+  Typography,
+  Space,
+  Image,
+  Divider,
+} from "ant-design-vue";
 </script>
 
 <template>
-  <Card class="section" :bordered="false">
-    <Typography.Title :level="3">About SBC Impact Designer</Typography.Title>
+  <Card :bordered="false">
+    <!-- <Typography.Title :level="3">About SBC Impact Designer</Typography.Title>
     <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Id inventore officia optio cupiditate velit voluptas
       quidem mollitia exercitationem iste dignissimos laudantium animi quaerat eos et, expedita maxime vitae tenetur
       corporis.</p>
 
-    <Divider></Divider>
-    <Typography.Title :level="4">Our Partners</Typography.Title>
+    <Divider></Divider> -->
+    <Typography.Title :level="3">Funders &amp; Partners</Typography.Title>
 
-    <p style="font-style: italic; margin-bottom: 40px;">
-      <!-- Write a brief intro about the project partners -->
-      The project would not be possible without the help of our partners. They provided resources and the expertise to
-      make this project a reality.
+    <p style="margin-bottom: 40px">
+      <Typography.Paragraph>
+        Amplio acknowledges our funding partners who have graciously supported the
+        development of this software.</Typography.Paragraph
+      >
+
       <!-- <Divider  :dashed="true"></Divider> -->
     </p>
 
-
-    <Row :gutter="2">
-
-      <Col :span="4">
-      <div class="partner-image">
-        <Image src="https://fastly.picsum.photos/id/76/200/300.jpg?hmac=SWpe2KMM2qFiQ8C8WHIZilaJb7KVkgOVVJPTbasGyUU">
-        </Image>
-
-        <Typography.Title :level="5"> Partner 1</Typography.Title>
-      </div>
+    <Row>
+      <Col :span="12">
+        <Image src="/images/bmgf_logo.png"> </Image>
       </Col>
-
-      <Col :span="18">
-      <Typography.Paragraph>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Atque sapiente optio non ex beatae
-        nostrum quasi animi
-        maiores! Doloribus incidunt officia aliquid adipisci quaerat id porro corporis neque rerum quis. <br>
-
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Dignissimos commodi corrupti, tenetur assumenda vel
-        laborum quibusdam illo quod ratione inventore vero, pariatur eum non ea amet maiores consectetur. Voluptatibus,
-        voluptate!
-      </Typography.Paragraph>
+      <Col :span="12">
+        <Image src="/images/arm_logo.png"> </Image>
       </Col>
     </Row>
 
-
-    <Row :gutter="2" style="margin-top: 15px;">
-
-      <Col :span="4">
-      <div class="partner-image">
-        <Image src="https://fastly.picsum.photos/id/76/200/300.jpg?hmac=SWpe2KMM2qFiQ8C8WHIZilaJb7KVkgOVVJPTbasGyUU">
-        </Image>
-
-        <Typography.Title :level="5"> Partner 2</Typography.Title>
-      </div>
-      </Col>
-
-      <Col :span="18">
-      <Typography.Paragraph>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Atque sapiente optio non ex beatae
-        nostrum quasi animi
-        maiores! Doloribus incidunt officia aliquid adipisci quaerat id porro corporis neque rerum quis. <br>
-
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Dignissimos commodi corrupti, tenetur assumenda vel
-        laborum quibusdam illo quod ratione inventore vero, pariatur eum non ea amet maiores consectetur. Voluptatibus,
-        voluptate!
-      </Typography.Paragraph>
+    <p style="margin-bottom: 40px; margin-top: 60px">
+      <Typography.Paragraph
+        >Amplio also acknowledges our partners who have worked with us on the development
+        of this software.</Typography.Paragraph
+      >
+    </p>
+    <Row>
+      <Col :span="12">
+        <Image src="/images/people_in_need_logo.png"> </Image>
       </Col>
     </Row>
-
   </Card>
 </template>
 
@@ -79,7 +61,7 @@ import { Card, Row, Col, Avatar, Typography, Space, Image, Divider } from 'ant-d
   width: 40%;
 }
 
-.partner-image>.ant-typography {
+.partner-image > .ant-typography {
   margin-top: 10px;
 }
 </style>
