@@ -32,10 +32,10 @@ import {
 
     <Row>
       <Col :span="12">
-        <Image src="/images/bmgf_logo.png"> </Image>
+        <Image src="/images/bmgf_logo.png" width="375px" height="170px"> </Image>
       </Col>
       <Col :span="12">
-        <Image src="/images/arm_logo.png"> </Image>
+        <Image src="/images/arm_logo.png" class="mt-5 pt-5"> </Image>
       </Col>
     </Row>
 
@@ -47,7 +47,8 @@ import {
     </p>
     <Row>
       <Col :span="12">
-        <Image src="/images/people_in_need_logo.png"> </Image>
+        <Image src="/images/people_in_need_logo.png" width="375px" height="170px">
+        </Image>
       </Col>
     </Row>
   </Card>
