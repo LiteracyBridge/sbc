@@ -509,10 +509,11 @@ def get_messages(request: Request, db: Session = Depends(get_db)):
             MessageSent.related_item == related_item,
         )
         .options(
+            subqueryload(MessageSent.user),
             subqueryload(MessageSent.replies).options(
                 subqueryload(MessageReceived.user),
                 subqueryload(MessageReceived.stakeholder),
-            )
+            ),
         )
         .order_by(MessageSent.id.desc())
         .all()

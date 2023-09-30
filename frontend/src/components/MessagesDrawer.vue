@@ -115,7 +115,9 @@ onMounted(() => {
           <!-- <template #actions>
         <span key="comment-nested-reply-to">Reply to</span>
       </template> -->
-          <template #author> {{ message.user?.address_as }}, </template>
+          <template #author>
+            {{ message.user?.address_as || message.user?.name }},
+          </template>
 
           <template #avatar>
             <Avatar>
@@ -145,7 +147,7 @@ onMounted(() => {
             </template>
 
             <template #author>
-              {{ reply.user?.address_as || reply.stakeholder?.name }},
+              {{ reply.user?.address_as || reply.user?.name || reply.stakeholder?.name }},
             </template>
 
             <template #avatar>

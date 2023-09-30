@@ -707,7 +707,9 @@ class MessageSent(Base):
     )
 
     project: Mapped["Project"] = relationship("Project")
-    user: Mapped["User"] = relationship("User")
+    user: Mapped["User"] = relationship(
+        "User", foreign_keys=[user_id_sending]
+    )
     replies: Mapped[List["MessageReceived"]] = relationship(
         "MessageReceived", back_populates="related_msg"
     )
