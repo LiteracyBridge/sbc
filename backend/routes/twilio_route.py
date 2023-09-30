@@ -357,16 +357,20 @@ def get_message_sent_to_user_by_phone(
     """Get user by phone number"""
 
     phone = from_number[10:] if from_number.startswith("whatsapp:") else from_number
+    phone_numbers = [phone, f"+{phone}"]
 
     # Query for user/stakeholder
     user_subquery = (
         db.query(User.id)
-        .filter((User.whatsapp == phone) | (User.sms == phone))
+        .filter((User.whatsapp.in_(phone_numbers)) | (User.sms.in_(phone_numbers)))
         .subquery()
     )
     stakeholder_subquery = (
         db.query(Stakeholder.id)
-        .filter((Stakeholder.whatsapp == phone) | (Stakeholder.sms == phone))
+        .filter(
+            (Stakeholder.whatsapp.in_(phone_numbers))
+            | (Stakeholder.sms.in_(phone_numbers))
+        )
         .subquery()
     )
     query = (
@@ -421,8 +425,7 @@ async def webhook_handler(request: Request, db: Session = Depends(get_db)):
     )
 
     if user_message is None:
-        # TODO: send payload to sentry
-        return "Message not found", 404
+        raise HTTPException(status_code=404, detail="Message not found")
 
     channel = user_message.channel
 
