@@ -227,7 +227,7 @@ function showEditModal(record: Monitoring) {
                   config.evaluationModal.visible = true;
                 "
               >
-                <span v-if="record.type == 'Quantitative' || record.type == 'Percentage'">
+                <span v-if="record.type == 'Quantitative'">
                   {{ record.progress || 0 }}%
                 </span>
                 <span v-else>
@@ -250,9 +250,7 @@ function showEditModal(record: Monitoring) {
                   >Record Progress</Button
                 >
 
-                <Button
-                  size="small"
-                  @click.prevent="showEditModal(record as Monitoring)"
+                <Button size="small" @click.prevent="showEditModal(record as Monitoring)"
                   >Edit</Button
                 >
 

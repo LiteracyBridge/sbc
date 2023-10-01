@@ -193,7 +193,7 @@ const onSuggestionClosed = (val: string) => {
     <Spin :spinning="store.loading">
       <Empty v-if="store.data.length === 0"></Empty>
 
-      <Collapse v-model:activeKey="config.collapseKey">
+      <Collapse v-else v-model:activeKey="config.collapseKey">
         <CollapsePanel v-for="item in store.data" :key="item.id" :header="item.title">
           <template #extra>
             <Space>
