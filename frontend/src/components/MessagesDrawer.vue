@@ -31,7 +31,7 @@ const props = defineProps({
   },
 });
 
-const projectStore = useProjectStore();
+// const projectStore = useProjectStore();
 const config = ref({
   visible: props.visible,
   loading: false,
@@ -43,12 +43,12 @@ const closeButton = () => {
   emit("close", false);
 };
 
-function flattenMessage(message: any): any {
-  return {
-    ...message,
-    replies: Object.values(message.replies ?? {}).map((r) => flattenMessage(r)),
-  };
-}
+// function flattenMessage(message: any): any {
+//   return {
+//     ...message,
+//     replies: Object.values(message.replies ?? {}).map((r) => flattenMessage(r)),
+//   };
+// }
 
 function fetchMessages() {
   config.value.loading = true;

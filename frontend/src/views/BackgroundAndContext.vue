@@ -19,9 +19,9 @@ import { useTheoryOfChangeStore } from "@/stores/theory_of_change";
 import { ProjectDataModule } from "@/types";
 import BroadcastComponent from "@/components/BroadcastComponent.vue";
 import { onBeforeRouteLeave } from "vue-router";
+import { useLookupStore } from "@/stores/lookups";
 
 const BULB_ICON = "/images/lightbulb.png";
-
 const projectDataStore = useProjectDataStore();
 
 const form = ref<ProjectDataForm[]>([]);
@@ -129,7 +129,7 @@ const handleSuggestionSave = (value: string) => {
                 @change="config.pendingSave = true"
               >
                 <SelectOption
-                  v-for="(sector, index) in useTheoryOfChangeStore().getIndiKitSectors"
+                  v-for="(sector, index) in useLookupStore().indikitSectors"
                   :key="index"
                   :value="sector"
                 >

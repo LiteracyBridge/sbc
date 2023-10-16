@@ -66,6 +66,7 @@ export const useLookupStore = defineStore({
           return null;
         }
       },
+    indikitSectors: (state) => Object.keys(state.indikit),
     getSubSectors: (state) => (sector: string) => state.indikit[sector] || {},
   },
   actions: {

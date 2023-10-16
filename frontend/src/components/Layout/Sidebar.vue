@@ -20,26 +20,31 @@ const router = useRouter();
 const config = ref({
   activeMenu: null,
 });
-const isActive = (item) => {
-  if (item.name) {
-    return router.currentRoute.value.name === item.name;
-  } else if (item.path) {
-    return router.currentRoute.value.path === item.path;
-  }
-  return false;
-};
+// const isActive = (item: { name: string; path: string }) => {
+//   if (item.name) {
+//     return router.currentRoute.value.name === item.name;
+//   } else if (item.path) {
+//     return router.currentRoute.value.path === item.path;
+//   }
+//   return false;
+// };
 
-const isExactActive = (item) => {
-  if (item.params) {
-    return (
-      JSON.stringify(router.currentRoute.value.params) === JSON.stringify(item.params)
-    );
-  }
-  return true;
-};
+// const isExactActive = (item) => {
+//   if (item.params) {
+//     return (
+//       JSON.stringify(router.currentRoute.value.params) === JSON.stringify(item.params)
+//     );
+//   }
+//   return true;
+// };
 
 const projectStore = useProjectStore();
-const menuItems = [
+const menuItems: Array<{
+  label: string;
+  path?: string;
+  name?: string;
+  params?: Record<string, string>;
+}> = [
   { label: "Dashboard", path: "/" },
   { label: "Project Info", path: "/project-info" },
   { label: "Background and context", path: "/background-and-context" },

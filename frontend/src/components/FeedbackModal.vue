@@ -61,8 +61,7 @@ function closeModal() {
 
 function saveForm() {
   feedbackFormRef.value.validateFields().then(async (_: any) => {
-
-    const form = config.value.form;
+    const form: Feedback = config.value.form;
     form.editing_user_id = userStore.id;
 
     // const formData = new FormData();
@@ -85,7 +84,7 @@ function saveForm() {
 
     if (cancel) return;
 
-    Object.keys(form).forEach((key) => {
+    Object.keys(form).forEach((key: keyof Feedback) => {
       formData[key] = form[key];
     });
 
