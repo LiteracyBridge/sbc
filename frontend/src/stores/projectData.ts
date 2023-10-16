@@ -225,8 +225,31 @@ export const useProjectDataStore = defineStore({
         state.new_project_data.find((d) => d.q_id == questionId)?.data;
     },
     findByQuestionId: (state) => {
-      return (questionId: number): ProjectData | null =>
-        state.new_project_data.find((d) => d.q_id == questionId);
+      return (questionId: number): ProjectData | null => {
+        const result =
+          state.new_project_data.filter((d) => d.q_id == questionId) || [];
+
+        if (result.length == 0) {
+          return null;
+        }
+
+        if (result.length == 1) {
+          return result[0];
+        }
+
+        // There are situations where there are multiple records for a question, this could be
+        // slow network but haven't been able to reliably reproduce it. So, we'll just merge the data
+        const merged = result
+          .sort((a, b) => a.id - b.id) // sort by id, so that the latest is last
+          .reduce((acc, curr) => {
+            return {
+              ...acc,
+              data: acc.data + "\n\n" + curr.data,
+            };
+          });
+
+        return merged;
+      };
     },
     // specificObjectives: (state) => {
     //   return state.project_data.filter((d) => d.name == "specific_objectives");
@@ -268,21 +291,21 @@ export const useProjectDataStore = defineStore({
       // TODO: Remove this query
       const key_index = 1;
       const filter_clause = "prj_id=" + useProjectStore().prj_id;
-      const data = await api.downloadDictionary(
-        "project_data",
-        [
-          "id",
-          "q_id",
-          "editing_user_id",
-          "data",
-          "name",
-          "module",
-          "theory_of_change_id",
-        ],
-        filter_clause,
-        key_index
-      );
-      this.$state.project_data = data as any;
+      // const data = await api.downloadDictionary(
+      //   "project_data",
+      //   [
+      //     "id",
+      //     "q_id",
+      //     "editing_user_id",
+      //     "data",
+      //     "name",
+      //     "module",
+      //     "theory_of_change_id",
+      //   ],
+      //   filter_clause,
+      //   key_index
+      // );
+      // this.$state.project_data = data as any;
       // this.$state.objectives = Object.values(data).filter(
       //   (d) => d.name == "specific_objectives"
       // );

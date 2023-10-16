@@ -119,7 +119,9 @@ function saveChanges() {
 }
 
 onMounted(() => {
-  handleOnMounted();
+  store.download().then((resp) => {
+    handleOnMounted();
+  });
 });
 
 onBeforeRouteLeave((to, from, next) => {
