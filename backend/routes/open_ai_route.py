@@ -1,11 +1,12 @@
 from typing import Dict, Any
 
 from fastapi import APIRouter, Depends
+from fastapi.exceptions import HTTPException
 import openai
 from openai.error import RateLimitError
 from sqlalchemy.orm import Session
 from models import OpenAIUsage, get_db
-
+from pydantic import BaseModel
 from schema import ApiResponse
 from helpers.config import settings
 
@@ -82,7 +83,7 @@ def call_openai_api(prompt, context, stop):
 
 def gptCompletion(
     prompt, context=None, format_type=None, start="", stop=""
-) -> Dict[str, str]:
+) -> Dict[str, str | None]:
     BASE_CONTEXT = "Act as an expert consultant on social and behavior change for global development in low and middle income countries. Your strongest area of expertise is in the UNICEF Behavioural Drivers Model.\n"
     full_context = BASE_CONTEXT
     start = "" if start is None else start
@@ -102,7 +103,12 @@ def gptCompletion(
     completion = call_openai_api(full_prompt, full_context, stop)
     response = start + completion
 
-    return {"response": response, "prompt": full_prompt, "context": full_context}
+    return {
+        "response": response,
+        "prompt": full_prompt,
+        "context": full_context,
+        "error": completion if "Request failed after" in completion else None,
+    }
 
 
 def allowance_ok(prj_id):
@@ -121,10 +127,10 @@ def handler(body: Dict[Any, Any], db: Session = Depends(get_db)):
 
     if allowance_ok(prj_id):
         prompt = body["prompt"]
-        context = body["context"] if "context" in body else None
-        format_type = body["format"] if "format" in body else None
-        start = body["start"] if "start" in body else ""
-        stop = body["stop"] if "stop" in body else ""
+        context = body.get("context", None)
+        format_type = body.get("format", None)
+        start = body.get("start", "")
+        stop = body.get("stop", "")
 
         result = gptCompletion(prompt, context, format_type, start, stop)
 
@@ -135,13 +141,43 @@ def handler(body: Dict[Any, Any], db: Session = Depends(get_db)):
         usage.context = result["context"]
         usage.response = result["response"]
         usage.user_id = body["user_id"]
+
+        if result.get("error") is not None:
+            usage.status = "error"
+
         # TODO: track errors
 
         db.add(usage)
         db.commit()
 
-        return {"result": result["response"]}
-    else:
-        result = "LIMIT REACHED"
+        return ApiResponse(data=[{"result": result["response"], "id": usage.id}])
 
-    return {"result": result}
+    return ApiResponse(
+        data=[
+            {
+                "error": "AI service is not available at the moment. Please try again after some time",
+                "result": None,
+            }
+        ]
+    )
+
+
+class UsageDto(BaseModel):
+    id: int
+    status: str
+
+
+@router.post("/usage")
+def track_usage(dto: UsageDto, db: Session = Depends(get_db)):
+    usage = db.query(OpenAIUsage).filter(OpenAIUsage.id == dto.id).first()
+
+    if usage is None:
+        raise HTTPException(status_code=404, detail="Usage not found")
+
+    if usage.status != dto.status:
+        usage.status = dto.status
+
+    db.commit()
+    db.refresh(usage)
+
+    return ApiResponse(data=[usage])

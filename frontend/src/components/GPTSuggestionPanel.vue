@@ -15,8 +15,10 @@ import {
   Col,
   Divider,
   message,
+  notification,
 } from "ant-design-vue";
 import { CheckOutlined } from "@ant-design/icons-vue";
+import { useOpenAIStore } from "@/stores/open-ai.store";
 
 const emit = defineEmits<{
   (e: "isClosed"): void;
@@ -36,8 +38,14 @@ const props = defineProps<{
 }>();
 
 const projectStore = useProjectDataStore();
+const store = useOpenAIStore();
 
-const gptResponse = ref({ answer: null, isLoading: false });
+const gptResponse = ref({
+  answer: null,
+  isLoading: false,
+  error: null,
+  id: null as number,
+});
 const formInput = ref("");
 const config = ref({
   visible: props.isVisible,
@@ -49,13 +57,33 @@ const moduleQuestion = computed(() => {
     .find((i) => i.id == props.questionId);
 });
 
+function parseAIResponse(resp: { id: number; error?: string; result?: string }) {
+  if (resp == null) return null;
+
+  if (resp.error != null) {
+    return notification.error({
+      message: "Error",
+      description: resp.error,
+    });
+  }
+
+  const { id, result } = resp;
+  gptResponse.value = { id, answer: result, isLoading: false, error: null };
+}
+
 // FIXME: Rewrite submitContextAndPrompt function with more clarity
-async function submitContextAndPrompt() {
+async function submitContextAndPrompt(refresh: boolean = false) {
+  if (refresh && gptResponse.value.id != null) {
+    store.trackUsage(gptResponse.value.id, "rejected");
+  }
+
+  store.loading = true;
+
   const { questionId: id } = props;
 
-  const _gptResp = gptResponse.value || { id: id, answer: "", isLoading: true };
-  _gptResp.isLoading = true;
-  gptResponse.value = _gptResp;
+  // const _gptResp = gptResponse.value || { id: id, answer: "", isLoading: true };
+  // _gptResp.isLoading = true;
+  gptResponse.value = { answer: "", isLoading: true, id: null, error: null };
 
   let ai_answer = null;
   if (props.ai == null) {
@@ -70,17 +98,15 @@ async function submitContextAndPrompt() {
       }
     }
 
-    ai_answer = await lambda.gptCompletion(qToFill.q2ai, context, qToFill.f4ai);
+    parseAIResponse(await store.gptCompletion(qToFill.q2ai, context, qToFill.f4ai));
   } else {
-    ai_answer = await lambda.gptCompletion(
-      props.ai.prompt,
-      props.ai.context,
-      props.ai.format
+    parseAIResponse(
+      await store.gptCompletion(props.ai.prompt, props.ai.context, props.ai.format)
     );
   }
 
-  gptResponse.value.answer = ai_answer;
-  gptResponse.value.isLoading = false;
+  // gptResponse.value.answer = ai_answer;
+  // gptResponse.value.isLoading = false;
 }
 
 const closeDrawer = () => {
@@ -121,7 +147,8 @@ watch(
 function acceptSuggestion() {
   formInput.value = formInput.value + "\n\n" + gptResponse.value?.answer;
 
-  message.info("Suggestion has been added to the text box");
+  notification.info({ message: "Suggestion has been added to the text box" });
+  store.trackUsage(gptResponse.value.id, "accepted");
 }
 </script>
 
@@ -157,12 +184,17 @@ function acceptSuggestion() {
           <span>Getting AI suggestions, please wait...</span>
         </div>
 
-        <p v-else style="white-space: pre-wrap">
-          {{
-            gptResponse?.answer ||
-            "No suggestions available. Click on the light bulb to see suggestions"
-          }}
-        </p>
+        <div v-else>
+          <p v-if="gptResponse.error != null" style="color: red">
+            {{ gptResponse.error }}
+          </p>
+          <p v-else style="white-space: pre-wrap">
+            {{
+              gptResponse?.answer ||
+              "No suggestions available. Click on the light bulb to see suggestions"
+            }}
+          </p>
+        </div>
 
         <div class="field is-grouped mt-3">
           <div class="control">
@@ -183,7 +215,7 @@ function acceptSuggestion() {
 
           <div class="control">
             <Button
-              @click="submitContextAndPrompt()"
+              @click="submitContextAndPrompt(true)"
               :class="{ 'is-loading disabled': gptResponse.isLoading }"
               :disabled="gptResponse.isLoading"
             >

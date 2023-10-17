@@ -243,7 +243,7 @@ export async function gptCompletion(
           Authorization: `Bearer ${useUserStore().token}`,
         },
       })
-      .then((resp) => resp.data.result);
+      .then((resp) => resp.data.data[0].result);
   } catch (error) {
     console.error("Error:", error);
   }
