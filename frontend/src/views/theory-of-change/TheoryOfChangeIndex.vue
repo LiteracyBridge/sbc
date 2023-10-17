@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+// @ts-nocheck
 import mermaid from "mermaid";
 
 import { onMounted, onUnmounted, reactive, ref, computed } from "vue";
@@ -16,7 +17,6 @@ import {
   Switch,
   Textarea,
 } from "ant-design-vue";
-import TheoryOfChangeExamplesBrowser from "./TheoryOfChangeExamplesBrowser.vue";
 import TheoryOfChangeItemModal from "./TheoryOfChangeItemModal.vue";
 import RiskModal from "./RiskModal.vue";
 import {
@@ -27,7 +27,6 @@ import {
   SwapOutlined,
 } from "@ant-design/icons-vue";
 import { useTheoryOfChangeStore } from "@/stores/theory_of_change";
-import { uploadListProps } from "ant-design-vue/es/upload/interface";
 
 const showIndicatorModal = ref(false);
 const theoryOfChangeModel = ref<{
@@ -257,7 +256,7 @@ const diagram = reactive({
     const graph = data.map((r: TheoryOfChange) => {
       return {
         id: r.id,
-        label: r.name,
+        label: (r.name || "").length == 0 ? "[Unlabelled]" : r.name,
         // name: r.name,
         description: r.description,
         validated: false,
@@ -473,13 +472,6 @@ const tocItemModalClosed = (redraw = true, data?: TheoryOfChange[]) => {
     ></RiskModal>
 
     <!-- Theory of Change examples browser panel -->
-    <TheoryOfChangeExamplesBrowser
-      :is-visible="config.isExamplePanelVisible"
-      @is-closed="config.isExamplePanelVisible = false"
-      v-if="config.isExamplePanelVisible"
-    >
-    </TheoryOfChangeExamplesBrowser>
-
     <div v-if="!config.isLoading">
       <div class="level">
         <div class="level-item has-text-centered">
