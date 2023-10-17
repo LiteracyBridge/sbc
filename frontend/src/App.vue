@@ -3,7 +3,6 @@
 import { onMounted, computed, ref } from "vue";
 import { RouterView, useRoute, useRouter } from "vue-router";
 import "@aws-amplify/ui-vue/styles.css";
-import { useSideNavStore } from "@/stores/sideNav";
 import { useUserStore } from "@/stores/user";
 import { AppStore } from "./stores/app.store";
 import {
@@ -89,7 +88,6 @@ function openDiscourse() {
         <Sidebar v-if="userStore.hasProjects"></Sidebar>
 
         <Layout>
-
           <Header></Header>
 
           <LayoutContent

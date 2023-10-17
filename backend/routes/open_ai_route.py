@@ -1,16 +1,10 @@
-from functools import reduce
 from typing import Dict, Any
-import json
-import time
-from uuid import uuid4
 
-import boto3
-from botocore.exceptions import ClientError
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends
 import openai
 from openai.error import RateLimitError
 from sqlalchemy.orm import Session
-from backend.models import OpenAIUsage, get_db
+from models import OpenAIUsage, get_db
 
 from schema import ApiResponse
 from helpers.config import settings

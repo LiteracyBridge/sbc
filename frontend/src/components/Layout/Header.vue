@@ -2,7 +2,7 @@
 import { ref } from "vue";
 import { Auth } from "aws-amplify";
 import { useUserStore } from "@/stores/user";
-import { useSideNavStore } from "@/stores/sideNav";
+import { useSideNavStore } from "@/stores/side-nav.store";
 import { useRouter } from "vue-router";
 import {
   AppstoreFilled,

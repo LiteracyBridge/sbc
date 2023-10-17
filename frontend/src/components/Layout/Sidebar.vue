@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
 import { useProjectStore } from "@/stores/projects";
-import { useSideNavStore } from "@/stores/sideNav";
+import { useSideNavStore } from "@/stores/side-nav.store";
 import { useRouter } from "vue-router";
 import {
   MenuItem,
