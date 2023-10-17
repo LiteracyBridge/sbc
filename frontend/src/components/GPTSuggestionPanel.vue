@@ -42,7 +42,6 @@ const store = useOpenAIStore();
 
 const gptResponse = ref({
   answer: null,
-  isLoading: false,
   error: null,
   id: null as number,
 });
@@ -68,7 +67,7 @@ function parseAIResponse(resp: { id: number; error?: string; result?: string }) 
   }
 
   const { id, result } = resp;
-  gptResponse.value = { id, answer: result, isLoading: false, error: null };
+  gptResponse.value = { id, answer: result, error: null };
 }
 
 // FIXME: Rewrite submitContextAndPrompt function with more clarity
@@ -81,11 +80,8 @@ async function submitContextAndPrompt(refresh: boolean = false) {
 
   const { questionId: id } = props;
 
-  // const _gptResp = gptResponse.value || { id: id, answer: "", isLoading: true };
-  // _gptResp.isLoading = true;
-  gptResponse.value = { answer: "", isLoading: true, id: null, error: null };
+  gptResponse.value = { answer: "", id: null, error: null };
 
-  let ai_answer = null;
   if (props.ai == null) {
     let context = "";
     let qToFill = null;
@@ -145,7 +141,11 @@ watch(
 );
 
 function acceptSuggestion() {
-  formInput.value = formInput.value + "\n\n" + gptResponse.value?.answer;
+  const answer = gptResponse.value.answer;
+  if ((answer || "").length == 0) {
+    return;
+  }
+  formInput.value = formInput.value + "\n\n" + answer;
 
   notification.info({ message: "Suggestion has been added to the text box" });
   store.trackUsage(gptResponse.value.id, "accepted");
@@ -178,8 +178,8 @@ function acceptSuggestion() {
     <Row>
       <div class="mt-2">
         <!-- Display loading indicator -->
-        <div v-if="gptResponse?.isLoading == true">
-          <PulseLoaderVue :loading="gptResponse?.isLoading"></PulseLoaderVue>
+        <div v-if="store.loading == true">
+          <PulseLoaderVue :loading="store.loading"></PulseLoaderVue>
 
           <span>Getting AI suggestions, please wait...</span>
         </div>
@@ -191,7 +191,7 @@ function acceptSuggestion() {
           <p v-else style="white-space: pre-wrap">
             {{
               gptResponse?.answer ||
-              "No suggestions available. Click on the light bulb to see suggestions"
+              "No suggestions available. Click on the refresh button to get new suggestions"
             }}
           </p>
         </div>
@@ -203,9 +203,9 @@ function acceptSuggestion() {
               type="primary"
               @click="acceptSuggestion()"
               :class="{
-                disabled: gptResponse.isLoading || gptResponse?.answer == undefined,
+                disabled: store.loading || gptResponse?.answer == undefined,
               }"
-              :disabled="gptResponse.isLoading || gptResponse?.answer == undefined"
+              :disabled="store.loading || gptResponse?.answer == undefined"
             >
               <CheckOutlined />
 
@@ -216,8 +216,8 @@ function acceptSuggestion() {
           <div class="control">
             <Button
               @click="submitContextAndPrompt(true)"
-              :class="{ 'is-loading disabled': gptResponse.isLoading }"
-              :disabled="gptResponse.isLoading"
+              :class="{ 'is-loading disabled': store.loading }"
+              :disabled="store.loading"
             >
               Refresh
             </Button>
