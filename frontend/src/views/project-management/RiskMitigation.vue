@@ -18,7 +18,7 @@ import { truncate } from "lodash-es";
 const store = useTheoryOfChangeStore();
 const modal = ref({
   visible: false,
-  selectedRisk: null as Risk | null,
+  selectedRisk: null as Risk | Record<string, any> | null,
 });
 const editModal = ref({
   visible: false,
@@ -111,6 +111,7 @@ const columns = [
         <Button
           size="small"
           @click.prevent="
+            //@ts-ignore
             editModal.risk = record;
             editModal.visible = true;
           "

@@ -2,7 +2,7 @@
   "name": "sbc",
   "version": "0.0.0",
   "scripts": {
-    "dev": "tsc && vite",
+    "dev": "vue-tsc --noEmit && vite",
     "vite": "vite",
     "build": "yarn tsc && vite build",
     "preview": "vite preview --port 4173",

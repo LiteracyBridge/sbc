@@ -1,72 +1,75 @@
 <script lang="ts" setup>
-
 import { computed, ref } from "vue";
 import { useProjectStore } from "@/stores/projects";
 import {
-  Table, Spin, Space, Col, Row,
-  Modal, Button, Tag,
-  Typography, Form, type FormInstance, FormItem, Input,
+  Table,
+  Spin,
+  Space,
+  Col,
+  Row,
+  Modal,
+  Button,
+  Tag,
+  Typography,
+  Form,
+  FormItem,
+  Input,
   Popconfirm,
-  Textarea
+  Textarea,
 } from "ant-design-vue";
+import type { FormInstance } from "ant-design-vue";
 import { PlusCircleOutlined } from "@ant-design/icons-vue";
 import { Stakeholder } from "@/types";
 
 const store = useProjectStore();
-
-const config = ref({
-  loading: false,
-  modal: {
-    visible: false,
-    form: new Stakeholder()
-  }
+const modal = ref<{ visible: boolean; form: Stakeholder | Record<string, any> }>({
+  visible: false,
+  form: new Stakeholder(),
 });
 const stakeholderFormRef = ref<FormInstance>();
 
 const columns = [
   {
-    title: 'Name',
-    key: 'name',
+    title: "Name",
+    key: "name",
   },
   {
-    title: 'WhatsApp',
-    key: 'whatsapp',
+    title: "WhatsApp",
+    key: "whatsapp",
   },
   {
-    title: 'SMS',
-    key: 'sms',
+    title: "SMS",
+    key: "sms",
   },
   {
-    title: 'Email',
-    key: 'email',
+    title: "Email",
+    key: "email",
   },
   {
-    title: 'Description',
-    key: 'description',
+    title: "Description",
+    key: "description",
   },
   {
-    title: '',
-    key: 'actions',
-  }
-]
+    title: "",
+    key: "actions",
+  },
+];
 
 function closeModal() {
   stakeholderFormRef.value.resetFields();
-  config.value.modal.form = new Stakeholder();
-  config.value.modal.visible = false;
+  modal.value.form = new Stakeholder();
+  modal.value.visible = false;
 }
 
-function saveForm(){
-  stakeholderFormRef.value.validateFields()
-  .then((_values) => {
-
-    store.createOrUpdateStakeholder(config.value.modal.form).then(() => {
+function saveForm() {
+  stakeholderFormRef.value.validateFields().then((_values) => {
+    store.createOrUpdateStakeholder(modal.value.form as Stakeholder).then(() => {
       closeModal();
     });
   });
 }
 
-const isEditing = computed(() => config.value.modal.form?.id != null);
+const isEditing = computed(() => modal.value.form?.id != null);
 </script>
 
 <template>
@@ -84,7 +87,7 @@ const isEditing = computed(() => config.value.modal.form?.id != null);
 
         <Col :span="4">
           <!-- TODO: implement creating new project in a modal -->
-          <Button type="primary" @click="config.modal.visible = true">
+          <Button type="primary" @click="modal.visible = true">
             <template #icon>
               <PlusCircleOutlined />
             </template>
@@ -122,8 +125,8 @@ const isEditing = computed(() => config.value.modal.form?.id != null);
             size="small"
             :ghost="true"
             @click.prevent="
-              config.modal.form = record;
-              config.modal.visible = true;
+              modal.form = record;
+              modal.visible = true;
             "
           >
             Edit
@@ -147,11 +150,7 @@ const isEditing = computed(() => config.value.modal.form?.id != null);
     </template>
   </Table>
 
-  <Modal
-    v-model:open="config.modal.visible"
-    @cancel="closeModal()"
-    :mask-closable="false"
-  >
+  <Modal v-model:open="modal.visible" @cancel="closeModal()" :mask-closable="false">
     <template #title>
       <span>{{ isEditing ? "Update" : "Add" }} New Stakeholder</span>
     </template>
@@ -175,7 +174,7 @@ const isEditing = computed(() => config.value.modal.form?.id != null);
       <Form
         name="new-stakeholder-form"
         ref="stakeholderFormRef"
-        :model="config.modal.form"
+        :model="modal.form"
         layout="vertical"
       >
         <FormItem
@@ -183,19 +182,19 @@ const isEditing = computed(() => config.value.modal.form?.id != null);
           name="name"
           :rules="[{ required: true, message: 'Please enter stakeholder name!' }]"
         >
-          <Input v-model:value="config.modal.form.name" />
+          <Input v-model:value="modal.form.name" />
         </FormItem>
 
         <Row :gutter="8">
           <Col :span="12">
             <FormItem label="WhatsApp Number" name="whatsapp">
-              <Input v-model:value="config.modal.form.whatsapp" type="tel" />
+              <Input v-model:value="modal.form.whatsapp" type="tel" />
             </FormItem>
           </Col>
 
           <Col :span="12">
             <FormItem label="SMS Number" name="sms">
-              <Input v-model:value="config.modal.form.sms" type="tel" />
+              <Input v-model:value="modal.form.sms" type="tel" />
             </FormItem>
           </Col>
         </Row>
@@ -203,13 +202,13 @@ const isEditing = computed(() => config.value.modal.form?.id != null);
         <Row :gutter="8">
           <Col :span="12">
             <FormItem label="Email" name="email">
-              <Input v-model:value="config.modal.form.email" type="email" />
+              <Input v-model:value="modal.form.email" type="email" />
             </FormItem>
           </Col>
         </Row>
 
         <FormItem label="Additional Notes" name="description">
-          <Textarea v-model:value="config.modal.form.description"></Textarea>
+          <Textarea v-model:value="modal.form.description"></Textarea>
         </FormItem>
       </Form>
     </Spin>

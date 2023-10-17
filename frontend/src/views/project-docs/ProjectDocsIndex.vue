@@ -1,4 +1,5 @@
 <script setup lang="ts">
+// @ts-ignore
 import html2pdf from "html2pdf.js";
 
 import {
@@ -36,10 +37,10 @@ function exportToPDF() {
   html2pdf(document.getElementById("summary-doc"), {
     margin: 1,
     filename: `${useProjectStore().projectName}-summary.pdf`,
-  }).then((pdf) => {
+  }).then(() => {
     // pdf.save();
     config.value.showModal = false;
-  })
+  });
 
   message.success("Project summary exported to PDF");
 }

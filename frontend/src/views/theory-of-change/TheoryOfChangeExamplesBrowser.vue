@@ -1,6 +1,5 @@
 <script lang="ts" setup>
-
-//@ts-ignore
+// @ts-nocheck
 import mermaidAPI from "/node_modules/mermaid/dist/mermaid.esm.mjs";
 
 import { onMounted, onUnmounted, reactive, ref, computed } from "vue";
@@ -8,17 +7,16 @@ import { useSideNavStore } from "@/stores/sideNav";
 import { Drawer, Select } from "ant-design-vue";
 
 const emit = defineEmits<{
-  (e: 'isClosed', status: boolean): boolean
-}>()
+  (e: "isClosed", status: boolean): boolean;
+}>();
 
 const props = defineProps<{ isVisible: boolean }>();
 
-const isOpened = computed(() => props.isVisible)
+const isOpened = computed(() => props.isVisible);
 
 const closePanel = () => {
   emit("isClosed", true);
 };
-
 
 const exampleDiagramContainer = ref(null);
 const fromNodeId = ref(null);
@@ -27,7 +25,6 @@ const selectedEdge = ref(null);
 const selectedNode = ref(null);
 const logicModelView = ref(false);
 const selectedExampleToC = ref(null);
-
 
 const mermaidConfig = {
   startOnLoad: true,
@@ -50,7 +47,6 @@ const mermaidConfig = {
     curve: "linear",
   },
 };
-
 
 const drawDiagram = async function () {
   const { svg } = await mermaidAPI.render("example-graph-div", diagram.toMermaid());
@@ -105,7 +101,9 @@ const drawDiagram = async function () {
 
     // Add double-click event listeners to the edge labels
     const edgeLabels = exampleDiagramContainer.value.querySelectorAll("g.edgeLabel");
-    const edgePaths = exampleDiagramContainer.value.querySelectorAll("g.edgePaths > path");
+    const edgePaths = exampleDiagramContainer.value.querySelectorAll(
+      "g.edgePaths > path"
+    );
     edgeLabels.forEach((edgeLabel, index) => {
       edgeLabel.addEventListener("dblclick", (event) => {
         const edgePath = edgePaths[index];
@@ -168,7 +166,7 @@ const diagram = reactive({
     fromId: 0,
     toId: 0,
     assumptions: "",
-    risks: ""
+    risks: "",
   },
   diagramType: "flowchart",
   orientationIndex: 0,
@@ -179,10 +177,10 @@ const diagram = reactive({
   edgeSet: new Set(),
 
   edgeLabel(edge, fromOrTo) {
-    if (fromOrTo == 'from') {
+    if (fromOrTo == "from") {
       return this.nodes[edge.fromId].label;
     }
-    return this.nodes[edge.toId].label
+    return this.nodes[edge.toId].label;
   },
   orientation: function () {
     return this.orientationOptions[this.orientationIndex];
@@ -255,14 +253,15 @@ const diagram = reactive({
   },
 });
 
-
 onMounted(() => {
   mermaidAPI.initialize(mermaidConfig);
 
   window.addEventListener("keydown", escapeKeyHandler);
 
   window.edgeDoubleClick = function (fromNodeId, toNodeId) {
-    const edgeIndex = diagram.edges.findIndex((e) => e.fromId == fromNodeId && e.toId == toNodeId);
+    const edgeIndex = diagram.edges.findIndex(
+      (e) => e.fromId == fromNodeId && e.toId == toNodeId
+    );
     selectedEdge.value = diagram.edges[edgeIndex];
     if (useSideNavStore().visible) {
       useSideNavStore().hide();
@@ -286,7 +285,6 @@ onMounted(() => {
       fromNodeId.value = nodeId;
     }
   };
-
 });
 
 onUnmounted(() => {
@@ -298,7 +296,7 @@ function rotateDiagram() {
   drawDiagram();
 }
 
-const escapeKeyHandler = (event: { key: string; keyCode: number; }) => {
+const escapeKeyHandler = (event: { key: string; keyCode: number }) => {
   if (event.key === "Escape" || event.keyCode === 27) {
     closeModal();
   }
@@ -314,21 +312,29 @@ const loadExampleToc = async (filename: string) => {
     const jsonText = await response.text();
     diagram.parseJSON(jsonText);
   } catch (error) {
-    console.error('Failed to fetch JSON data:', error);
+    console.error("Failed to fetch JSON data:", error);
   }
-}
+};
 </script>
 
 <template>
-  <Drawer width="70vw" title="Theory of Change Examples" :visible="isOpened" :body-style="{ paddingBottom: '80px' }"
-    :footer-style="{ textAlign: 'right' }" @close="closePanel()">
-
+  <Drawer
+    width="70vw"
+    title="Theory of Change Examples"
+    :visible="isOpened"
+    :body-style="{ paddingBottom: '80px' }"
+    :footer-style="{ textAlign: 'right' }"
+    @close="closePanel()"
+  >
     <div class="field is-horizontal ml-3">
       <div class="field mr-6">
         <label class="label">Theory of Change Examples</label>
         <div class="control">
           <div class="select">
-            <select v-model="selectedExampleToC" @change="loadExampleToc(selectedExampleToC)">
+            <select
+              v-model="selectedExampleToC"
+              @change="loadExampleToc(selectedExampleToC)"
+            >
               <option value="family_planning">Family Planning</option>
               <option value="GBV">Gender-Based Violence</option>
               <option value="land_rights">Land Rights</option>
@@ -362,14 +368,15 @@ const loadExampleToc = async (filename: string) => {
       </div>
     </div>
 
-    <hr>
+    <hr />
     <div class="level">
-      <div class="level-item has-text-centered">
-
-      </div>
+      <div class="level-item has-text-centered"></div>
     </div>
 
-    <div class="diagram-container" ref="exampleDiagramContainer" style="display: flex; width: 100%;"></div>
-
+    <div
+      class="diagram-container"
+      ref="exampleDiagramContainer"
+      style="display: flex; width: 100%"
+    ></div>
   </Drawer>
 </template>
