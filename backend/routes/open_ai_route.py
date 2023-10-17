@@ -9,6 +9,8 @@ from botocore.exceptions import ClientError
 from fastapi import APIRouter, Depends, HTTPException, Request
 import openai
 from openai.error import RateLimitError
+from sqlalchemy.orm import Session
+from backend.models import OpenAIUsage, get_db
 
 from schema import ApiResponse
 from helpers.config import settings
@@ -28,12 +30,10 @@ FORMATS = {
 
 
 def call_openai_api(prompt, context, stop):
-    # secret = _get_secret("openai")
     openai.api_key = settings.open_ai_key
     retries = 5
     backoff = 1
 
-    # for i in range(retries):
     try:
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
@@ -86,7 +86,9 @@ def call_openai_api(prompt, context, stop):
 # {'error': {'message': 'That model is currently overloaded with other requests. You can retry your request, or contact us through our help center at help.openai.com if the error persists. (Please include the request ID 2645a3244006b290d746957562e683c1 in your message.)', 'type': 'server_error', 'param': None, 'code': None}}
 
 
-def gptCompletion(prompt, context=None, format_type=None, start="", stop=""):
+def gptCompletion(
+    prompt, context=None, format_type=None, start="", stop=""
+) -> Dict[str, str]:
     BASE_CONTEXT = "Act as an expert consultant on social and behavior change for global development in low and middle income countries. Your strongest area of expertise is in the UNICEF Behavioural Drivers Model.\n"
     full_context = BASE_CONTEXT
     start = "" if start is None else start
@@ -106,7 +108,7 @@ def gptCompletion(prompt, context=None, format_type=None, start="", stop=""):
     completion = call_openai_api(full_prompt, full_context, stop)
     response = start + completion
 
-    return response
+    return {"response": response, "prompt": full_prompt, "context": full_context}
 
 
 def allowance_ok(prj_id):
@@ -117,12 +119,9 @@ def allowance_ok(prj_id):
 @router.post("")
 @router.get("")
 @router.put("")
-def handler(body: Dict[Any, Any], request: Request):
+def handler(body: Dict[Any, Any], db: Session = Depends(get_db)):
     result = "BAD METHOD"
-    request_id = request.headers.get("x-amz-request-id", str(uuid4()))
 
-    # bodystring = event['body-json']
-    # params = request.body  # json.loads(event)
     prj_id = body["prj_id"]
     print(body)
 
@@ -133,9 +132,21 @@ def handler(body: Dict[Any, Any], request: Request):
         start = body["start"] if "start" in body else ""
         stop = body["stop"] if "stop" in body else ""
 
-        response = gptCompletion(prompt, context, format_type, start, stop)
+        result = gptCompletion(prompt, context, format_type, start, stop)
 
-        return {"result": response}
+        # Record usage
+        usage = OpenAIUsage()
+        usage.project_id = prj_id
+        usage.prompt = result["prompt"]
+        usage.context = result["context"]
+        usage.response = result["response"]
+        usage.user_id = body["user_id"]
+        # TODO: track errors
+
+        db.add(usage)
+        db.commit()
+
+        return {"result": result["response"]}
     else:
         result = "LIMIT REACHED"
 

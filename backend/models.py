@@ -775,6 +775,34 @@ class MessageSentToUser(Base):
     msg_sent: Mapped["MessageSent"] = relationship("MessageSent")
 
 
+class OpenAIUsage(Base, SoftDeleteMixin):
+    __tablename__ = "openai_usage"
+
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    prompt: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    context: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    response: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    status: Mapped[Optional[str]] = mapped_column(
+        String, nullable=True
+    )  # accepted, rejected, error
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=func.now()
+    )
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    project_id: Mapped[int] = mapped_column(
+        ForeignKey("projects.id", ondelete="CASCADE"), nullable=False
+    )
+
+    # Relations
+    user: Mapped["User"] = relationship("User")
+    project: Mapped["Project"] = relationship("Project")
+
+
 Base.metadata.create_all(bind=engine)
 
 
