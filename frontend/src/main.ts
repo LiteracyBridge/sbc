@@ -7,31 +7,27 @@ import VueAxios from "vue-axios";
 import router from "./router";
 import { Amplify } from "aws-amplify";
 import awsconfig from "./aws-exports";
+import { initializeApp } from "firebase/app";
+import { getAnalytics, initializeAnalytics } from "firebase/analytics";
+
 // import mermaidDirective from "./directives/mermaid";
 
 // Ant Design imports
 import { message } from "ant-design-vue";
-// FIXME: Use vite to customize the Ant Design theme
 import "./theme.less";
-// import 'antd-css-utilities/utility.min.css'
-
-// import "vue-multiselect/dist/vue-multiselect.css";
-// import "vue3-side-panel/dist/vue3-side-panel.css";
+import { config } from "./models/constants";
 
 // Configure AWS Amplify with the provided configuration
 Amplify.configure({
   ...awsconfig,
-  // API: {
-  //   endpoints: [
-  //     {
-  //       name: "sbc-api",
-  //       endpoint: import.meta.env.VITE_SBC_API_URL,
-  //       // service: "lambda",
-  //       // region: "us-west-2",
-  //     },
-  //   ],
-  // },
 });
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {};
+
+// Initialize Firebase
+initializeAnalytics(initializeApp(config.firebase));
 
 // Create a new Vue app with the App component
 const app = createApp(App);
@@ -39,11 +35,7 @@ const app = createApp(App);
 app
   .use(createPinia()) // Use the Pinia store management library
   .use(VueAxios, axios) // Use axios for handling HTTP requests
-  .use(router); // Use the defined Vue router
-// .use(VueSidePanel);
-
-// // Ant Design components
-// app.use(Button);
+  .use(router);
 
 // Register the mermaid directive
 // app.directive("mermaid", mermaidDirective);

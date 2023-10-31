@@ -75,6 +75,7 @@ export const useOpenAIStore = defineStore({
         })
         .catch((error) => {
           console.log(error);
+          this.$state.loading = false;
           return { error: error.message, id: null };
         })
         .finally(() => (this.$state.loading = false));

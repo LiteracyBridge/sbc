@@ -3,20 +3,20 @@
 
 <head>
   <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-NR9K55WVP9"></script>
+  <!-- <script async src="https://www.googletagmanager.com/gtag/js?id=G-NR9K55WVP9"></script> -->
   <script>
     // Disable google analytics if the server is running locally
-    if (window.location.hostname != 'localhost' || window.location.hostname != '127.0.0.1') {
-      // Google analytics
-      window.dataLayer = window.dataLayer || [];
+    // if (window.location.hostname != 'localhost' || window.location.hostname != '127.0.0.1') {
+    //   // Google analytics
+    //   window.dataLayer = window.dataLayer || [];
 
-      function gtag() {
-        dataLayer.push(arguments);
-      }
-      gtag('js', new Date());
+    //   function gtag() {
+    //     dataLayer.push(arguments);
+    //   }
+    //   gtag('js', new Date());
 
-      gtag('config', 'G-NR9K55WVP9');
-    }
+    //   gtag('config', 'G-NR9K55WVP9');
+    // }
   </script>
 
   <meta charset="UTF-8" />
@@ -26,8 +26,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <!-- Set the title for the application -->
   <title>SBC Impact Designer</title>
-  <!-- Import the Font Awesome library for icons -->
-  <script src="https://kit.fontawesome.com/e30ae2f7a5.js" crossorigin="anonymous"></script>
   <!-- Set global variables for compatibility -->
   <script>
     var global = global || window;
@@ -46,7 +44,7 @@
   <!-- Create a div to mount the Vue app -->
   <div id="app"></div>
   <!-- Import the main JavaScript file -->
-  <script type="module" src="/src/main.js"></script>
+  <script type="module" src="/src/main"></script>
 </body>
 
 </html>
