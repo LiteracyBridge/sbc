@@ -19,6 +19,8 @@ import {
 } from "ant-design-vue";
 import { CheckOutlined } from "@ant-design/icons-vue";
 import { useOpenAIStore } from "@/stores/open-ai.store";
+import { getAnalytics, logEvent } from "firebase/analytics";
+import { useProjectStore } from "@/stores/projects";
 
 const emit = defineEmits<{
   (e: "isClosed"): void;
@@ -135,6 +137,11 @@ watch(
       }
 
       submitContextAndPrompt();
+
+      logEvent(getAnalytics(), "activity_performed", {
+        project_name: useProjectStore().projectName,
+        activity_name: "ai_suggestion_panel_open",
+      });
     }
   },
   { deep: true }
@@ -148,6 +155,11 @@ function acceptSuggestion() {
   formInput.value = formInput.value + "\n\n" + answer;
 
   notification.info({ message: "Suggestion has been added to the text box" });
+
+  logEvent(getAnalytics(), "activity_performed", {
+    project_name: useProjectStore().projectName,
+    activity_name: "ai_suggestion_accepted",
+  });
   store.trackUsage(gptResponse.value.id, "accepted");
 }
 </script>

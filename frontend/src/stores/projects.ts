@@ -11,6 +11,7 @@ import { Project, ProjectUser, Stakeholder } from "@/types";
 import { ApiRequest } from "@/apis/api";
 import { message } from "ant-design-vue";
 import { AppStore } from "./app.store";
+import { getAnalytics, setUserProperties } from "firebase/analytics";
 
 // projectStores returns all the stores that have project-specific data
 const projectStores = () => [
@@ -335,6 +336,9 @@ export const useProjectStore = defineStore({
           .then((response) => {
             if (response.length > 0) {
               this.$state.current_project = response[0] as Project;
+              setUserProperties(getAnalytics(), {
+                current_project: response[0].name,
+              });
             }
             return response;
           })

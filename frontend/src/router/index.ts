@@ -23,7 +23,7 @@ import ProjectInfo from "@/views/ProjectInfo.vue";
 import Partners from "@/views/Partners.vue";
 import BackgroundAndContext from "@/views/BackgroundAndContext.vue";
 import ProjectDocsIndex from "@/views/project-docs/ProjectDocsIndex.vue";
-import { User } from "@/types";
+import { getAnalytics, logEvent } from "firebase/analytics";
 
 function disabledConsole() {
   if (import.meta.env.PROD) {
@@ -50,7 +50,7 @@ async function getUser() {
               return { authorized: false };
             }
             useUserStore().setUser({
-              ...resp[0],
+              ...(resp[0] as any),
               token: data.signInUserSession.accessToken.jwtToken,
             });
             return { ...data, authorized: true };
@@ -249,11 +249,10 @@ router.beforeEach((to, from, next) => {
 });
 
 router.afterEach((to, from) => {
-  if (window.gtag) {
-    gtag("event", "screen_view", {
-      page_location: to.fullPath,
-      page_title: to.meta?.title,
-    });
-  }
+  logEvent<string>(getAnalytics(), "screen_view", {
+    page_location: to.fullPath,
+    page_title: to.meta?.title,
+  });
 });
+
 export default router;

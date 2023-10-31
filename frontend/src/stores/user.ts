@@ -4,6 +4,7 @@ import { useProjectStore } from "./projects";
 import { User } from "@/types";
 import { ApiRequest } from "@/apis/api";
 import { message } from "ant-design-vue";
+import { getAnalytics, setUserId, setUserProperties } from "firebase/analytics";
 
 export const useUserStore = defineStore({
   id: "user",
@@ -46,6 +47,11 @@ export const useUserStore = defineStore({
       }
 
       this.$state = user;
+
+      if (user.id != null) {
+        const analytics = getAnalytics();
+        setUserId(analytics, user.id.toString());
+      }
 
       // FIXME: Rewrite to use users endpoint
       // Query user details from the database
