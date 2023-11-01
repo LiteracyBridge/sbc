@@ -33,6 +33,7 @@ from helpers import model_events
 
 if settings.sentry_dsn is not None:
     sentry_sdk.init(
+        environment=settings.sentry_environment,
         dsn=settings.sentry_dsn,
         integrations=[
             AwsLambdaIntegration(timeout_warning=True),

@@ -37,6 +37,7 @@ class Settings:
     twilio_sms_number: Optional[str] = None
 
     sentry_dsn: Optional[str] = None
+    sentry_environment: Optional[str] = None
 
     is_local: bool = False
 
@@ -50,8 +51,10 @@ class Settings:
             self.db_password = getenv("DB_PASSWORD", "")
             self.db_user = getenv("DB_USER", "postgres")
             self.db_port = getenv("DB_PORT", "5432")
-            self.sentry_dsn = getenv("SENTRY_DSN", None)
             self.open_ai_key = getenv("OPEN_AI_KEY", None)
+
+            self.sentry_dsn = getenv("SENTRY_DSN", None)
+            self.sentry_environment = getenv("SENTRY_ENVIRONMENT", None)
 
             self.user_pool_id = getenv("AWS_USER_POOL_ID", None)
             self.user_pool_client_id = getenv("AWS_USER_POOL_CLIENT_ID", None)
@@ -72,18 +75,20 @@ class Settings:
         )
         try:
             # Load postgres secrets
-            secret_string = client.get_secret_value(SecretId="lb_stats_test")[
+            secret_string = client.get_secret_value(SecretId=getenv('AWS_SECRET_ID'))[
                 "SecretString"
             ]
             secrets = json.loads(secret_string)
 
             # secrets = self._get_secret("lb_stats_test")
-            self.db_name = "impact"
+            self.db_name = secrets['sbc_db_name']
             self.db_user = secrets["username"]
             self.db_password = secrets["password"]
             self.db_host = secrets["host"]
             self.db_port = secrets["port"]
+
             self.sentry_dsn = secrets["sbc_sentry_dsn"]
+            self.sentry_environment = secrets["sentry_environment"]
 
             self.user_pool_id = secrets["aws_user_pool_id"]
             self.user_pool_client_id = secrets["aws_user_pool_client_id"]
